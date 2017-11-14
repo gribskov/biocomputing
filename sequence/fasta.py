@@ -77,3 +77,30 @@ class Fasta:
 				
 		self.id = id.lstrip( '>' )
 		self.doc = doc
+
+	def length(self):
+		'''
+		return the length of the  current sequence
+		return 0 if there is none
+		usage
+			seqlen = fasta.length()
+		'''
+		return len(self.seq)
+
+	def format(self):
+		''' 
+		return a formatted string with the current sequence
+		usage
+			seq = fasta.format()
+		'''
+		# hardwired lenght for sequence lines
+		# TODO change to argument
+		LINELEN = 50
+
+		string = '>{0} {1}\n'.format(self.id, self.doc)
+		pos = 0
+		while pos < len(self.seq):
+			string += '{0}\n'.format(self.seq[pos:pos+LINELEN])
+			pos += LINELEN
+
+		return string
