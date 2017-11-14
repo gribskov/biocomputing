@@ -4,22 +4,23 @@ Fasta sequence class.  Supports iteration over a multi-fasta file
     documentation
     sequence
 '''
-buffer = ''
+
 
 class Fasta:
-
+	
 	def __init__(self):
 		self.filename = ""
-		self.id = ''
-		self.doc = ''
-		self.seq = ''
+		self.id       = ''
+		self.doc      = ''
+		self.seq      = ''
+		self.buffer   = ''
 
 	def open(self,filename):
 		'''
 		open a file for reading
 		'''
 		self.fh = open(filename, 'r')
-		print("opening a file:",filename)
+		self.filename = filename
 
 	def next(self):
 		'''
@@ -33,62 +34,46 @@ class Fasta:
 
 	def read(self):
 		'''
-		read one seqeunce from the file, leave the following line in buffer
+		read one sequence from the file, leave the following line in buffer
 		usage:
 		fasta.read()
 		'''
-		if buffer:
-			# if buffer has something in it it could be an ID line
-			self.id, self.doc = getId(buffer)
+		
+		self.getID()
 
 		for line in self.fh:
 			line = line.rstrip('\n')
 
-			print( line )
 			if line[0] == '>':
-			    self.id = ""
-			    self.doc = ""
-			    self.seq = ""
-			    line = line.lstrip( '>' )
-			    self.id, self.doc = getID(line)
-			else:
+				self.buffer = line
+				return
+			else:	
 				self.seq += line
 
-print( 'fasta' )
-'''
-helper functions, not designed for external use
-'''
-def getID(line):
-	'''
-	break a line into ID and documentation and return both
-	id will be stripped of >
-	documentation will be and empty string if there is nothing following the ID
-	'''
-	try:
-		id, doc = line.split( " ", 1 )		        
-	except ValueError:
-		'documentation is missing'
-		id = line
-	return id, doc
 
-# import fileinput as inp
+	def getID(self):
+		'''
+		intended to be used internally for sequence reading
+		check the buffer, and if not empty read the ID and documentation
+		sore in id and doc attributes
+		id will be stripped of >
+		documentation will be and empty string if there is nothing following the ID
+		'''
+		# if buffer is empty read a line
+		if self.buffer:
+			line = self.buffer
+			self.buffer = ''
+		else:
+			line = self.fh.readline()
+			line = line.rstrip('\n')
 
-# fasta = []
-# for line in inp.input():
-#     line = line.rstrip('\n')
-
-#     print( line )
-#     if line[0] == '>':
-#         fasta.append( { 'id': '', 'documentation': '', 'sequence': '' } )
-#         thisfasta = fasta[-1]
-#         line = line.lstrip( '>' )
-#         try:
-#             thisfasta['id'], thisfasta['documentation'] = line.split( " ", 1 )
-#         except ValueError:
-#             'documentation is missing'
-#             thisfasta['id'] = line
-#     else:
-#         thisfasta['sequence'] += line
-
-# print( fasta )
-# print( all )
+		# get the ID and documentation from the doc line
+		try:
+			id, doc = line.split( " ", 1 )		        
+		except ValueError:
+			#documentation is missing
+			id = line
+			doc = ''
+				
+		self.id = id.lstrip( '>' )
+		self.doc = doc
