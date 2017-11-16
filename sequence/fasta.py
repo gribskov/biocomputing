@@ -39,9 +39,14 @@ class Fasta:
 		fasta.read()
 		'''
 		
+		self.id = ''
+		self.doc = ''
+		self.seq = ''
+
 		self.getID()
 
 		for line in self.fh:
+			if line.isspace(): continue
 			line = line.rstrip('\n')
 
 			if line[0] == '>':
