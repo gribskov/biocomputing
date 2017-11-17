@@ -3,16 +3,24 @@ split a sequence in fasta format into chunks
 '''
 from sequence.fasta import Fasta 
 import sys
+import argparse
+
+maxbases = 1000000		# maximum number of sequence characters per file
+commandline = argparse.ArgumentParser()
+commandline.add_argument( 'fasta_file',help='FastA file to split')
+commandline.add_argument( '--maxbases', help='maximum number of sequence character per segment', type=int, default=str(maxbases))
+commandline.parse_args()
 
 # hardwired parameters
 outbase = "segment"
 outsuffix = "fa"
-maxbases = 1000000		# maximum number of sequence characters per file
+
 
 # input fasta file
 datafile = "../../data/card/nucleotide_fasta_protein_homolog_model.fasta"
 #datafile = "data/3protein.fa"
 print( "fasta file:", datafile )
+print( "maximum base:", maxbases )
 
 fasta = Fasta()
 fasta.open(datafile)
