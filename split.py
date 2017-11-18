@@ -4,11 +4,13 @@ split a sequence in fasta format into chunks
 from sequence.fasta import Fasta 
 import sys
 import argparse
+import re
 
 # defaults
-maxbases = 1000000      # maximum number of sequence characters per file
-outbase = "segment"     # default name for output prefix
+maxbases  = 1000000     # maximum number of sequence characters per file
+outbase   = "segment"   # default name for output prefix
 outsuffix = "fa"        # default suffix (filetype) for output
+trim      = ''          # regex string for trimming documentation
 
 commandline = argparse.ArgumentParser( 
     description='Break a fasta file up into segments with no more than a certain'
@@ -28,6 +30,9 @@ commandline.add_argument( '--prefix',
 commandline.add_argument( '--suffix', 
                           help='suffix (filetype) for output files', 
                           default=outsuffix )
+commandline.add_argument( '--trim', 
+                          help='trim documentation after this regex',
+                          default=trim )
 
 # process command line arguments
 cl = commandline.parse_args()
@@ -35,16 +40,20 @@ maxbases  = cl.maxbases
 outbase   = cl.prefix
 outsuffix = cl.suffix
 outsuffix = outsuffix.lstrip('.')       # remove leading . if present
+trim      = cl.trim
 
 print( '\nsplit.py - split fasta file into chunks' )
 print( "    fasta file:", cl.fasta_file.name )
 print( "    maximum characters:", maxbases )
 print( "    output prefix:", outbase )
 print( "    output suffix:", outsuffix )
+print( "    doc trimmer:", trim )
 print( '' )
 
 fasta = Fasta()
 fasta.fh = cl.fasta_file
+
+trimre = re.compile( trim )
 
 # initialize counters
 base_total   = 0
@@ -55,6 +64,7 @@ n_current    = 0
 
 while fasta.next():
 
+	if trimre: fasta.trimDocByRegex( trimre )
 	if not n_seq or base_current+fasta.length() > maxbases:
         # if number of bases would be greater than cutoff after adding the new sequence
         # close current output file, open new 
