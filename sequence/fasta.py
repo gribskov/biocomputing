@@ -4,6 +4,7 @@ Fasta sequence class.  Supports iteration over a multi-fasta file
     documentation
     sequence
 '''
+#import re
 
 
 class Fasta:
@@ -98,7 +99,7 @@ class Fasta:
 		usage
 			seq = fasta.format()
 		'''
-		# hardwired lenght for sequence lines
+		# hardwired length for sequence lines
 		# TODO change to argument
 		LINELEN = 50
 
@@ -109,3 +110,16 @@ class Fasta:
 			pos += LINELEN
 
 		return string
+
+	def trimDocByRegex(self, target):
+		'''
+        Shorten documentation by substituting the target regex with nothing
+        target must be a compiled regex
+        The new documentation string is returned
+        usage
+        	trim = re.compile( 'len=\d+ ' )
+        	doc = fasta.trimDocAfterMatch( trim )
+        '''
+		self.doc = target.sub( '', self.doc )
+
+		return self.doc
