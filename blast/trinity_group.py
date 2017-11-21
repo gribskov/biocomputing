@@ -50,12 +50,17 @@ for line in cl.blast:
     isoform = trinity_list[qseqid]
     if not isoform in matches:
         matches[isoform] = []
+        print('new isoform:', isoform)
     matches[isoform].append({'sseqid':sseqid, 'pident':pident, 'qcov':qcov, 'score':score, 'evalue':evalue})
 
 print( n_blast, 'blast results read from', cl.blast.name )
 
 for qid in matches:
     print(qid)
+    nmatch = 0
     for hit in matches[qid]:
+        nmatch += 1
+        #print( qid, 'match:', nmatch)
         for key in hit:
             print('    ',key,':', hit[key],end='')
+        print()
