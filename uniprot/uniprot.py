@@ -51,16 +51,16 @@ def getUniprotByID(id, format):
     usage
         text = getUniprotByID(id,'xml')
     '''
-    for id in idlist:
-        query = '{0}{1}&format={2}'.format(uniprot, id, format)
-        #print(query)
-        fhand = urllib.request.urlopen(query)
 
-        text = ''
-        for line in fhand:
-            text += line.decode()
+    query = '{0}{1}&format={2}'.format(uniprot, id, format)
+    #print(query)
+    fhand = urllib.request.urlopen(query)
 
-        return text
+    text = ''
+    for line in fhand:
+        text += line.decode()
+
+    return text
 
 
 if __name__ == '__main__':
@@ -72,4 +72,4 @@ if __name__ == '__main__':
     print('idlist:', idlist)
 
     for id in idlist:
-        print(getUniprotByID(id,'tab'))
+        print(getUniprotByID(id,'txt'))
