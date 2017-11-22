@@ -2,10 +2,12 @@
 uniprot access using REST api
 '''
 import urllib.request, urllib.parse, urllib.error
+import requests
 
 
 uniprot = 'http://www.uniprot.org/uniprot/'
-uniref = 'http://www.uniprot.org/uniref/'
+uniref  = 'http://www.uniprot.org/uniref/'
+batch   = 'http://www.uniprot.org/uploadlists/'
 
 def getUnirefIDByMember(level, id):
     '''
@@ -62,6 +64,49 @@ def getUniprotByID(id, format):
 
     return text
 
+def getUniprotByIDList( idlist ):
+    idstr = ''
+    for id in idlist:
+        idstr += id+' '
+    print('idstr:', idstr)
+    params = {
+        'from':'ACC+ID',
+        'to':'ACC',
+        'format':'xt',
+        'url2':idstr
+    }
+
+    data = urllib.parse.urlencode(params)
+    data = data.encode('ascii')
+    headers = {'User-Agent':'Python'}
+    req = urllib.request.Request(batch, data,method='POST')
+    req.add_header('User-Agent','Python')
+    #contact = "gribskov@purdue.edu" # Please set your email address here to help us debug in case of problems.
+    with urllib.request.urlopen(req)as f:
+        print(f.read().decode('utf-8'))
+
+
+def _retrieveFromUniProt(idlist ):
+    """
+    Retrieves sequences from UniProt according to the parameters supplied. The
+    parameters should be in a dictionary of strings mapped to strings. Service
+    is the sub-url of the Uniprot database, e.g. "uniprot/" or "mapping/". See
+    conf.py and http://www.uniprot.org/faq/28 for building queries. Returns a
+    tuple of the raw data and the header.
+    """
+    idstr = ''
+    for id in idlist:
+        idstr += id+' '
+    print('idstr:', idstr)
+    params = {
+        'from':'ACC+ID',
+        'to':'ACC',
+        'format':'xt',
+        'url2':idstr
+    }
+    r = requests.post(batch,data=params)
+    print( r.text)
+
 
 if __name__ == '__main__':
     id = 'K4A607_SETIT'
@@ -73,3 +118,7 @@ if __name__ == '__main__':
 
     for id in idlist:
         print(getUniprotByID(id,'txt'))
+
+    getUniprotByIDList(idlist)
+    #resp = _retrieveFromUniProt(idlist)
+    #print(resp)
