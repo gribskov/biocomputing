@@ -63,9 +63,10 @@ def getUniprotByID(id, format):
     return text
 
 
-def getUniProtByIDList(idlist):
+def getUniProtByIDList(idlist, format):
     """
-    Retrieves a list sequences from UniProt. See http://www.uniprot.org/faq/28 for building queries.
+    Retrieves a list sequences from UniProt. See http://www.uniprot.org/faq/28 for building queriests:
+    available formats: txt, xml, rdf, fasta
     usage
         text = getUniProtByIDList(idlist)
     """
@@ -77,7 +78,7 @@ def getUniProtByIDList(idlist):
     params = {
         'from': 'ACC+ID',
         'to': 'ACC',
-        'format': 'txt',
+        'format': format,
         'uploadQuery': idstr
     }
     r = requests.post(batch, data=params)
@@ -95,5 +96,5 @@ if __name__ == '__main__':
     # for id in idlist:
     #     print(getUniprotByID(id,'txt'))
 
-    text = getUniProtByIDList(idlist)
+    text = getUniProtByIDList(idlist,'xml')
     print(text)
