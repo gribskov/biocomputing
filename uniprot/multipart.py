@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # This script performs a GET and a POST request through HTTP/HTTPS using
-# builtin python3 moudules. There is also a class to encode files for upload!
+# builtin python3 modules. There is also a class to encode files for upload!
 
 import urllib.request
 import http.client
@@ -12,10 +12,11 @@ import io
 import os
 import sys
 
-REMOTE_PROTOCOL = 'http' # or https
+REMOTE_PROTOCOL = 'http'  # or https
 REMOTE_HOST = 'httpbin.org'
-REMOTE_PORT = '80' # 443 for https
+REMOTE_PORT = '80'  # 443 for https
 USERAGENT = 'MySuperUserAgent'
+
 
 class MultipartFormdataEncoder(object):
     def __init__(self):
@@ -51,9 +52,10 @@ class MultipartFormdataEncoder(object):
             filename = self.u(filename)
             yield encoder('--{}\r\n'.format(self.boundary))
             yield encoder(self.u('Content-Disposition: form-data; name="{}"; filename="{}"\r\n').format(key, filename))
-            yield encoder('Content-Type: {}\r\n'.format(mimetypes.guess_type(filename)[0] or 'application/octet-stream'))
+            yield encoder(
+                'Content-Type: {}\r\n'.format(mimetypes.guess_type(filename)[0] or 'application/octet-stream'))
             yield encoder('\r\n')
-            with open(fpath,'rb') as fd:
+            with open(fpath, 'rb') as fd:
                 buff = fd.read()
                 yield (buff, len(buff))
             yield encoder('\r\n')
@@ -74,31 +76,31 @@ if not os.path.isfile(sys.argv[1]):
     sys.stderr.write('%s is not a valid file\n' % sys.argv[1])
     sys.exit(1)
 
-
 # SIMPLE HTTP GET
-req = urllib.request.Request(REMOTE_PROTOCOL+'://'+REMOTE_HOST+':'+REMOTE_PORT+'/get',headers={'User-Agent':USERAGENT})
-with urllib.request.urlopen(req,timeout=10) as f:
+req = urllib.request.Request(REMOTE_PROTOCOL + '://' + REMOTE_HOST + ':' + REMOTE_PORT + '/get',
+                             headers={'User-Agent': USERAGENT})
+with urllib.request.urlopen(req, timeout=10) as f:
     buf = f.read(300).decode('utf-8')
     print("GET RESPONSE")
     print(buf)
 
 # POST FIELDS AND FILES
-fields = [('param1','paramvalue1'),('param2','paramversion2'),('param3','paramvalue3')]
-files = [('fieldname',os.path.basename(sys.argv[1]),sys.argv[1])]
+fields = [('param1', 'paramvalue1'), ('param2', 'paramversion2'), ('param3', 'paramvalue3')]
+files = [('fieldname', os.path.basename(sys.argv[1]), sys.argv[1])]
 content_type, body = MultipartFormdataEncoder().encode(fields, files)
 h = None
 if REMOTE_PROTOCOL == 'http':
-    h = http.client.HTTPConnection(REMOTE_HOST,REMOTE_PORT)
+    h = http.client.HTTPConnection(REMOTE_HOST, REMOTE_PORT)
 else:
-    h = http.client.HTTPSConnection(REMOTE_URL,REMOTE_PORT)
+    h = http.client.HTTPSConnection(REMOTE_URL, REMOTE_PORT)
 headers = {
-  'User-Agent': USERAGENT,
-  'Content-Type': content_type
+    'User-Agent': USERAGENT,
+    'Content-Type': content_type
 }
 h.request('POST', '/post', body, headers)
 res = h.getresponse()
-if not res.status in (200,201):
-    sys.stderr.write(res.read().decode('utf-8')+'\n')
+if not res.status in (200, 201):
+    sys.stderr.write(res.read().decode('utf-8') + '\n')
     sys.exit(1)
 print("POST RESPONSE")
 print(res.read().decode('utf-8'))
