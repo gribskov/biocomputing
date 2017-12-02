@@ -1,6 +1,8 @@
+import re
 import sys
+from pprint import pprint
 
-class Blast:
+class Blast(object):
     '''--------------------------------------------------------------------------
     Blast class is intended to iterate over a file of blast results.Can also be 
     used for other programs with blast-like output such as diamond.
@@ -28,6 +30,24 @@ class Blast:
         self.setFormat('qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore')
 
 
+    def dump(self,indent=4):
+       '''
+       print the attributes of the object
+       usage
+           blast.dump()
+           blast.dump(5)
+           blast.dump(indent=5)
+       '''
+       myclass = re.search("__main__\.([^']+)'>", str(self.__class__))
+       print('dumping', myclass.group(1))
+       for attr in dir(self):
+           if hasattr( self, attr ):
+               if attr[0] == '_': continue
+               descr = str(getattr(self, attr))
+               if descr[0] == '<': continue
+               print( '{0}obj.{1} = {2}'.format(' '*indent, attr, descr))
+
+
     def next(self):
         self.read()
 
@@ -52,13 +72,14 @@ class Blast:
         '''
         '''
         line = self.fh.readline()
-        print('line:', line)
+        #print('line:', line)
         token = line.split()
         n = 0
         for key in self.fields:
-            self.key = token[n]
-            print('{0} => {1}'.format(key,token[n]))
+            self.__dict__[key] = token[n]
+            #print('{0} => {1}'.format(key,token[n]))
             n += 1
+        return(line)
 
 
     def setFormat(self,fmt):
@@ -80,17 +101,11 @@ if __name__ == '__main__':
     blast.open('data/diamond.blastx')
 
     print('read format:', blast.format)
-    for token in blast.fields:
-        print( '    token:', token)
 
     format='qid sid qcov pid len evalue'
     nfields = blast.setFormat(format)
     print('fields:',nfields, 'format:', format)
-    for token in blast.fields:
-        print( '    token:', token)
-    print('read:',blast.read)
-    blast.read()
-
-    for key in blast.__dict__:
-        print('key:', key, '=>', blast.key)
-
+    print('read:',blast.read())
+    blast.dump()
+    print('read:',blast.read())
+    blast.dump(5)
