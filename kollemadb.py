@@ -11,9 +11,9 @@ class Kollemadb(object):
     def __init__(self, dbfile=':memory:', new=False):
         '''
 
-        :param dbfile: database file, use :memory: for in memory only
-        :param new: initialize tables (be careful)
-        :return: always true for now
+        :dbfile: database file, use :memory: for in memory only, default = :memory:
+        :new: initialize tables (be careful), default = False
+        :return: None
         '''
         # isolation_level None is autocommit
         dbh = s3.connect(dbfile, isolation_level=None)
@@ -28,7 +28,7 @@ class Kollemadb(object):
     def initAllTables(self):
         '''
         master build called to initialize all tables
-        :return:
+        :return: True
         '''
         self.initProjectTable()
         self.initTaskTable()
