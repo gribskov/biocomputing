@@ -82,8 +82,8 @@ class Menu(object):
         Using the internal value of response and menuide, dispatch the sleected function
         '''
         func = self.dispatcher[self.menuid][self.response]
-        func()
-        return True
+        #func()
+        return func
 
     def testA(self):
         '''
