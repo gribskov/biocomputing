@@ -13,7 +13,9 @@ class Menu(object):
         '''
         self.all = {}
         self.query = {}
+        self.dispatcher = {}
         self.response = ''
+        self.menuid = ''
 
         return None
 
@@ -53,16 +55,40 @@ class Menu(object):
             except IndexError:
                 continue
 
-            try:
-                # is response defined?
-                if response in self.all[id]:
-                    break
-            except:
+            if response in self.all[id]:
+                self.menuid = id
+                self.response = response
+                return response
+            #                    break
+            else:
                 print('Menu:{0} unknown option {1}\n'.format(id, response))
                 continue
 
-        self.response = response
-        return response
+    def addDispatch(self, id, dispatch):
+        '''
+        Add a dictionary of dispatcher functions for the menu options.
+        Must be indexed the same as all and query attributes
+        :param dispatch: ditionbary of functions to dispatch whe4n menu item is selected
+        :return: True
+        '''
+        self.dispatcher[id] = dispatch
+        return True
+
+    def dispatch(self):
+        '''
+        call the dispatch function for the current response
+        '''
+        func = self.dispatcher[self.menuid][self.response]
+        func()
+        return True
+
+    def testA(self):
+        print('function testA')
+        return None
+
+    def testQ(self):
+        print('function testQ')
+        return None
 
 
 if __name__ == '__main__':
@@ -70,5 +96,12 @@ if __name__ == '__main__':
 
     menu = Menu()
     menu.add('top', {'A': 'Add', 'Q': 'Quit'})
-    response = menu.ask('top', 2)
-    print('response is', response)
+    menu.addDispatch('top', {'A': menu.testA, 'Q': menu.testQ})
+    while True:
+        response = menu.ask('top', 2)
+        print('response is', response)
+        menu.dispatch()
+        if menu.response == 'Q':
+            break
+
+    print('Thank you')
