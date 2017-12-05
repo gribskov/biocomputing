@@ -81,15 +81,15 @@ class Kollemadb(object):
         rspace = re.compile('\s+')
         s = ''
         self.db.execute("SELECT * FROM sqlite_master")
-        #self.db.execute("SELECT * FROM sqlite_master WHERE type='table'")
+        # self.db.execute("SELECT * FROM sqlite_master WHERE type='table'")
         for row in kdb.db:
             for r in row:
                 if isinstance(r, str):
                     r = r.strip()
-                    r = rspace.sub(' ',r)
+                    r = rspace.sub(' ', r)
                 s += '{0}\t'.format(r)
-            #s+= '\n'
-            s = rtab.sub('\n',s)
+            # s+= '\n'
+            s = rtab.sub('\n', s)
         return s.strip()
 
     def get(self, table, limits=''):
@@ -102,20 +102,21 @@ class Kollemadb(object):
         sql = '''
             SELECT * FROM {0}
             '''.format(table)
-        
+
         try:
             self.db.execute(sql)
         except s3.Error as e:
             print("Kollemadb::get - error:", e.args[0])
-            #sqlite3.OperationalError: no such table:
+            # sqlite3.OperationalError: no such table:
 
-        result = {}
+        result = []
         for row in self.db.fetchall():
+            r = {}
             for k in row.keys():
-                result[k] = row[k]
+                r[k] = row[k]
+            result.append(r)
 
         return result
-
 
     def set(self, table, data):
         '''
@@ -141,6 +142,17 @@ class Kollemadb(object):
         except s3.Error as e:
             print("Kollemadb::set - error:", e.args[0])
 
+    def fromTerm(self, id):
+        '''
+        interactively acquire information for a table row
+        :param id: table name
+        :return: True
+        '''
+        self.db.execute('SELECT * FROM {0} LIMIT 1'.format(id))
+        newdata = {}
+        for tup in self.db.description:
+            newdata[tup[0]] = input('{0} {1}:'.format(id, tup[0]))
+        self.set(id, newdata)
 
 
 '''--------------------------------------------------------------------------------
@@ -152,14 +164,19 @@ if __name__ == '__main__':
     kdb = Kollemadb(new=True)
     print(kdb.showTables())
 
-    data = { 'name':'test',
-             'owner':'gribskov',
-             'status':'old'
-           }
-    kdb.set('project', data)
-    result = kdb.get('project')
-    for k in result:
-        print(k, result[k])
+    # result = kdb.get('project')
 
-    #result = kdb.get('task')
-    #result = b.get('transcript')
+    data = {'name': 'test',
+            'owner': 'gribskov',
+            'status': 'old'
+            }
+    kdb.set('project', data)
+
+    kdb.fromTerm('project')
+
+    result = kdb.get('project')
+    for row in result:
+        for k in row:
+            print(k, row[k], end='\t')
+        print('')
+
