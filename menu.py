@@ -47,15 +47,18 @@ class Menu(object):
         '''
         while True:
             response = input('\n{0}{1}: '.format(' ' * indent, self.query[id]))
-            response = response.upper()[0]
             try:
+                # CR only, repeat query
+                response = response.upper()[0]
+            except IndexError:
+                continue
+
+            try:
+                # is response defined?
                 if response in self.all[id]:
                     break
-                else
-                    print('Menu:{0} unknown option{1}\n'.format(id, response))
-                    continue
             except:
-                print('Menu:{0} unknown option{1}\n'.format(id, response))
+                print('Menu:{0} unknown option {1}\n'.format(id, response))
                 continue
 
         self.response = response
