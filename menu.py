@@ -1,6 +1,6 @@
 class Menu(object):
     '''
-    combines a menu definition and action dispatcher
+    combines a menu definition and action dispatcher.  See test example at end of class.
     '''
     keyseparator = ')'
     optionseparator = '  '
@@ -22,7 +22,8 @@ class Menu(object):
     def add(self, id, fields):
         '''
         add a menu to the object
-        :fields: dictionary with the keys and strings for each option
+        :param id: name of menu
+        :param fields: dictionary with the keys and strings for each option
         :return: True
         '''
         newmenu = {}
@@ -68,7 +69,8 @@ class Menu(object):
         '''
         Add a dictionary of dispatcher functions for the menu options.
         Must be indexed the same as all and query attributes
-        :param dispatch: ditionbary of functions to dispatch whe4n menu item is selected
+        :param id: name of menu
+        :param dispatch: dictionary of functions to dispatch when menu item is selected
         :return: True
         '''
         self.dispatcher[id] = dispatch
@@ -77,16 +79,23 @@ class Menu(object):
     def dispatch(self):
         '''
         call the dispatch function for the current response
+        Using the internal value of response and menuide, dispatch the sleected function
         '''
         func = self.dispatcher[self.menuid][self.response]
         func()
         return True
 
     def testA(self):
+        '''
+        dummy function for testing
+       '''
         print('function testA')
         return None
 
     def testQ(self):
+        '''
+        dummy function for testing
+       '''
         print('function testQ')
         return None
 
