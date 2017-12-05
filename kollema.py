@@ -12,16 +12,22 @@ def status():
     pass
 
 
-dbfile = 'kollema.sql'
 version = '0.0.1'
 print('Welcome to Kollema, v{0}'.format(version))
 
+dbfile = 'kollema.sql'
+kdb = Kollemadb(new=True)
+
 menu = Menu()
-menu.add('top',{'S':'Status', 'T':'Tasks', 'L':'Load transcripts', 'Q':'Quit'})
+menu.add('top', {'S': 'Status', 'T': 'Tasks', 'L': 'Load transcripts', 'Q': 'Quit'})
+x = 1
+menu.addDispatch('top', {'S': kdb.get})
 
 kdb = Kollemadb()
 while True:
     select = menu.ask('top', 2)
+    response = menu.dispatch()('project')
+    print('response:', response)
     if select == 'Q': break
 
 print('\nThank you')
