@@ -96,8 +96,8 @@ class Kollemadb(object):
         '''
         retrieve contents of table as a dictionary
         usage
-            project = kollemadb.get(project)
-            task = kollemadb.get(task)
+            project = kollemadb.get('project')
+            task = kollemadb.get('task')
         '''
         sql = '''
             SELECT * FROM {0}
@@ -110,10 +110,9 @@ class Kollemadb(object):
             #sqlite3.OperationalError: no such table:
 
         result = {}
-        row = self.db.fetchone()
-
-        for k in row.keys():
-            result[k] = row[k]
+        for row in self.db.fetchall():
+            for k in row.keys():
+                result[k] = row[k]
 
         return result
 
