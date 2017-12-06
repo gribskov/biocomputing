@@ -95,6 +95,9 @@ class Kollemadb(object):
     def get(self, table, limits=''):
         '''
         retrieve contents of table as a dictionary
+        :param table: table name
+        :param limits: sql where clause
+        :return: number of rows returned by query
         usage
             project = kollemadb.get('project')
             task = kollemadb.get('task')
@@ -116,7 +119,62 @@ class Kollemadb(object):
                 r[k] = row[k]
             result.append(r)
 
-        return result
+        # store result in object
+        self.result = result
+
+        return len(result)
+
+    def asFormatted(self):
+        '''
+
+        :param table: table name
+        :param limits: SQL limits (where clause)
+        :return:
+        '''
+        str = ''
+        if len(self.result) == 0:
+            return str
+
+        # get the length of the longest entry in each column
+        pad = 2
+        fieldsize = {}
+        for row in self.result:
+            totallen = 0
+            for k in row.keys():
+                if not k in fieldsize:
+                    fieldsize[k] = len(k)
+                if row[k] == None:
+                    continue
+                if fieldsize[k] < len(row[k]):
+                    fieldsize[k] = len(row[k])
+                totallen += fieldsize[k] + pad + 1
+        totallen += 1
+
+        nrow = 0
+        print('{}'.format('-'*totallen))
+        for row in self.result:
+            nrow += 1
+            str = '|'
+            if nrow == 1:
+                # print column titles
+                for k in row.keys():
+                    f = '{:<' + '{}'.format(fieldsize[k] + pad) + '}|'
+                    # print('f=', f)
+                    str += f.format(k)
+                print(str)
+                print('{}'.format('-' * totallen))
+                str = '|'
+
+            for k in row.keys():
+                # print column values
+                f = '{:<' + '{}'.format(fieldsize[k] + pad) + '}|'
+                # print('f=', f)
+                if row[k] == None:
+                    str += f.format('')
+                else:
+                    str += f.format(row[k])
+            print(str)
+        print('{}'.format('-' * totallen))
 
     def set(self, table, data):
         '''
@@ -136,7 +194,7 @@ class Kollemadb(object):
             INSERT INTO {0} 
                 ({1}) VALUES ({2})'''.format(table, columns.strip(), values.strip())
 
-        print('sql:', sql)
+        # print('sql:', sql)
         try:
             self.db.execute(sql)
         except s3.Error as e:
@@ -160,7 +218,6 @@ kollemadb testing
 
 --------------------------------------------------------------------------------'''
 if __name__ == '__main__':
-
     kdb = Kollemadb(new=True)
     print(kdb.showTables())
 
@@ -173,10 +230,5 @@ if __name__ == '__main__':
     kdb.set('project', data)
 
     kdb.fromTerm('project')
-
-    result = kdb.get('project')
-    for row in result:
-        for k in row:
-            print(k, row[k], end='\t')
-        print('')
-
+    kdb.get('project')
+    kdb.asFormatted()
