@@ -19,9 +19,9 @@ dbfile = 'kollema.sql'
 kdb = Kollemadb(new=True)
 
 menu = Menu()
-menu.add('top', {'S': 'Status', 'T': 'Tasks', 'L': 'Load transcripts', 'Q': 'Quit'})
+menu.add('top', {'S': 'Status', 'N':'New project', 'T': 'Tasks', 'L': 'Load transcripts', 'Q': 'Quit'})
 x = 1
-menu.addDispatch('top', {'S': kdb.get})
+menu.addDispatch('top', {'S': kdb.get, 'N':kdb.fromTerm})
 
 kdb = Kollemadb()
 while True:
