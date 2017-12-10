@@ -1,3 +1,7 @@
+import os
+import subprocess
+
+
 class Menu(object):
     '''
     combines a menu definition and action dispatcher.  See test example at end of class.
@@ -13,11 +17,23 @@ class Menu(object):
         '''
         self.all = {}
         self.query = {}
+        self.title = {}
         self.dispatcher = {}
         self.response = ''
         self.menuid = ''
 
         return None
+
+    def clear(self):
+        '''
+        clear the windows screen
+        :return: True
+        '''
+        # print('\033[H\033[J')
+        # print('\f')
+        # os.system('cls')
+        print('\n' * 5)
+        return True
 
     def add(self, id, fields):
         '''
@@ -49,6 +65,7 @@ class Menu(object):
                 response = menu.ask('top', 2)
         '''
         while True:
+            self.clear()
             response = input('\n{0}{1}: '.format(' ' * indent, self.query[id]))
             try:
                 # CR only, repeat query
@@ -65,7 +82,18 @@ class Menu(object):
                 print('Menu:{0} unknown option {1}\n'.format(id, response))
                 continue
 
+    def addTitle(self, id, title):
+        '''
+        add a descriptinve title to the menu
+        :param id: name of menu
+        :param title: the printable title for this menu, to be printed above the table
+        :return: True
+        '''
+        self.title[id] = title
+        return True
+
     def addDispatch(self, id, dispatch):
+
         '''
         Add a dictionary of dispatcher functions for the menu options.
         Must be indexed the same as all and query attributes
@@ -76,14 +104,16 @@ class Menu(object):
         self.dispatcher[id] = dispatch
         return True
 
+
     def dispatch(self):
         '''
         call the dispatch function for the current response
         Using the internal value of response and menuide, dispatch the sleected function
         '''
         func = self.dispatcher[self.menuid][self.response]
-        #func()
+        # func()
         return func
+
 
     def testA(self):
         '''
@@ -91,6 +121,7 @@ class Menu(object):
        '''
         print('function testA')
         return None
+
 
     def testQ(self):
         '''
