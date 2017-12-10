@@ -19,16 +19,26 @@ dbfile = 'kollema.sql'
 kdb = Kollemadb(new=True)
 
 menu = Menu()
-menu.add('top', {'S': 'Status', 'N':'New project', 'T': 'Tasks', 'L': 'Load transcripts', 'Q': 'Quit'})
-x = 1
-menu.addDispatch('top', {'S': kdb.get, 'N':kdb.fromTerm})
+menu.add('main', {'S': 'Select project', 'N': 'New project', 'T': 'Tasks', 'L': 'Load transcripts', 'Q': 'Quit'})
+menu.addDispatch('main', {'S': kdb.get, 'N': kdb.fromTerm})
+menu.addTitle('main', 'Current Projects')
 
-kdb = Kollemadb()
+select = 'init'
 while True:
-    select = menu.ask('top', 2)
-    response = menu.dispatch()('project')
-    print('response:', response)
+
+    nprojects = kdb.get('project')
+    if nprojects:
+        menu.clear()
+        print(menu.title['main'])
+        print(kdb.asFormatted())
+    else:
+        print('No current projects')
+
+    select = menu.ask('main', 2)
     if select == 'Q': break
+
+    menu.clear()
+    response = menu.dispatch()('project')
 
 print('\nThank you')
 exit(0)
