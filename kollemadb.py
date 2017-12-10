@@ -124,16 +124,16 @@ class Kollemadb(object):
 
         return len(result)
 
-    def asFormatted(self):
+    def asFormatted(self, indent=2):
         '''
 
         :param table: table name
         :param limits: SQL limits (where clause)
         :return:
         '''
-        str = ''
+        out = ''
         if len(self.result) == 0:
-            return str
+            return out
 
         # get the length of the longest entry in each column
         pad = 2
@@ -151,30 +151,35 @@ class Kollemadb(object):
         totallen += 1
 
         nrow = 0
-        print('{}'.format('-'*totallen))
+        # print('{}'.format('-'*totallen))
+        out += '{}{}\n{}'.format(' ' * indent, '-' * totallen, ' ' * indent)
         for row in self.result:
             nrow += 1
-            str = '|'
+            out += '|'
             if nrow == 1:
                 # print column titles
                 for k in row.keys():
                     f = '{:<' + '{}'.format(fieldsize[k] + pad) + '}|'
                     # print('f=', f)
-                    str += f.format(k)
-                print(str)
-                print('{}'.format('-' * totallen))
-                str = '|'
+                    out += f.format(k)
+
+                # print(str)
+                out += '\n'
+                out += '{}{}\n{}'.format(' ' * indent, '-' * totallen, ' ' * indent)
+                out += '|'
 
             for k in row.keys():
                 # print column values
                 f = '{:<' + '{}'.format(fieldsize[k] + pad) + '}|'
                 # print('f=', f)
                 if row[k] == None:
-                    str += f.format('')
+                    out += f.format('')
                 else:
-                    str += f.format(row[k])
-            print(str)
-        print('{}'.format('-' * totallen))
+                    out += f.format(row[k])
+            out += '\n{}'.format(' ' * indent)
+        out += '{}\n'.format( '-' * totallen )
+
+        return out
 
     def set(self, table, data):
         '''
