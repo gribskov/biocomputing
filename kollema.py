@@ -2,6 +2,7 @@
 kollema
 Transcriptome annotation
 --------------------------------------------------------------------------------'''
+import os
 import sqlite3 as sql
 from kollemadb import Kollemadb
 from menu import Menu
@@ -15,8 +16,12 @@ def status():
 version = '0.0.1'
 print('Welcome to Kollema, v{0}'.format(version))
 
-dbfile = 'kollema.sql'
-kdb = Kollemadb(new=True)
+root = os.getcwd() + '/.kollema/'
+dbfile = root + 'kollema.sql'
+if not os.path.isdir(root):
+    os.makedirs(root)
+
+kdb = Kollemadb(dbfile=dbfile, new=True)
 
 menu = Menu()
 menu.add('main', {'S': 'Select project', 'N': 'New project', 'T': 'Tasks', 'L': 'Load transcripts', 'Q': 'Quit'})
