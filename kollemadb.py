@@ -115,18 +115,47 @@ class Kollemadb(object):
 
         return True
 
+    def clear(self, table):
+        '''-------------------------------------------------------------------------------------------------------------
+        delete all rows of the named table
+        :param table: table name
+        :return: True
+        -------------------------------------------------------------------------------------------------------------'''
+        sql = '''
+            DELETE FROM {table_id}
+            '''.format(table_id=table)
+        self.db.execute(sql)
+
+        return True
+
+    def clearAll(self):
+        '''-------------------------------------------------------------------------------------------------------------
+        delete all rows from all tables
+        :return: True
+        -------------------------------------------------------------------------------------------------------------'''
+
+        self.db.execute("SELECT * FROM sqlite_master WHERE type='table'")
+        for row in self.db:
+            self.clear(row[1])
+            # if row[0] == 'table':
+            #     self.clear(row[1])
+            # else:
+            #     continue
+
+        return True
+
     def showTables(self):
-        '''
+        '''-------------------------------------------------------------------------------------------------------------
         list the tables in the database and their column definition
         usage
             print( kollemadb.showTables() )
-        '''
+        -------------------------------------------------------------------------------------------------------------'''
         rtab = re.compile('\t$')
         rspace = re.compile('\s+')
         s = ''
         self.db.execute("SELECT * FROM sqlite_master")
         # self.db.execute("SELECT * FROM sqlite_master WHERE type='table'")
-        for row in kdb.db:
+        for row in self.db:
             for r in row:
                 if isinstance(r, str):
                     r = r.strip()
@@ -278,7 +307,11 @@ if __name__ == '__main__':
             'status': 'old'
             }
     kdb.set('project', data)
-
     kdb.fromTerm('project')
+
+    # test clearinng tables
     kdb.get('project')
-    kdb.asFormatted()
+    print(kdb.asFormatted())
+    kdb.clearAll()
+    kdb.get('project')
+    print(kdb.asFormatted())
