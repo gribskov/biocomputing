@@ -1,27 +1,36 @@
 from sequence.fasta import Fasta
 import re
 
+# regular expression for parsing documentation
+lenre  = re.compile('len=(\d+)')
+pathre = re.compile('.*path=\[([^\]]*)\]')
+idre   = re.compile(r'>*TRINITY_([^_]+)_c(\d+)_g(\d+)_i(\d+)')
 
 class Trinity(Fasta):
-    """
+    """-----------------------------------------------------------------------------------------------------------------
     Trinity
     Read multiple trinity transcript file in fasta format
-    """
-    lenre = re.compile('len=(\d+)')
-    pathre = re.compile('.*path=\[([^\]]*)\]')
+
+    usage
+        trinity = Trinity()
+        trinity.fh = open(file, 'r')
+        while trinity.next():
+            ...
+    -----------------------------------------------------------------------------------------------------------------"""
 
     def __init__(self):
         ''''
         class constructor.
         Trinity is a subclass of Fasta
         '''
-        Fasta.__init__(self)
+        super().__init__()
         self.len = 0
         self.path = []
         self.cluster = ''
         self.component = ''
         self.gene = ''
         self.isoform = ''
+        self.shortid = ''
 
         return None
 
@@ -30,26 +39,48 @@ class Trinity(Fasta):
         get the sequence length from the documentation
         :return: length fread from length field in documentation
         -----------------------------------------------------------------------------------------------------------------"""
-        return lenre.match(line).group(1)
+        self.len = lenre.match(self.doc).group(1)
+        return self.len
 
     def getPath(self):
         """-----------------------------------------------------------------------------------------------------------------
         The path describes how the predicted trasncript is built from segments
         :return: list of path components from documentation
         -----------------------------------------------------------------------------------------------------------------"""
-        path = pathre.match(line).group(1)
+        path = pathre.match(self.doc).group(1)
         plist = path.split(' ')
+        self.path = plist
 
         return plist
 
-    def ID(self):
+
+    def getIDParts(self):
         """-----------------------------------------------------------------------------------------------------------------
         Breakdown the trinity ID string to give the separate parts of the ID
         Cluster,  component, gene and isoform
         :return: cluster,  component, gene, isoform
          ----------------------------------------------------------------------------------------------------------------"""
-        cluster, component, gene, isoform = re.compile(r'>*TRINITY_([^_]+)_c(\d+)_g(\d+)_i(\d+)').match(self.id).groups()
-        return cluster, component, gene, isoform
+        cluster, component, gene, isoform = idre.match(self.id).groups()
+        self.cluster   = cluster
+        self.component = component
+        self.gene      = gene
+        self.isoform   = isoform
+        self.shortid   = '{cl}.{co}.{g}.{i}'.format(cl=cluster, co=component, g=gene, i=isoform)
+
+        return self.shortid
+
+    def next(self):
+        """
+
+        :return:
+        """
+        if super().next():
+            self.getLen()
+            self.getIDParts()
+            self.getPath()
+            return True
+        else:
+            return False
 
 
 if __name__ == '__main__':
@@ -63,9 +94,9 @@ if __name__ == '__main__':
     while trinity.next():
         nseq += 1
 
-        cluster, component, gene, isoform = trinity.ID()
-        nn = trinity.getPath
+        trinity.doc = 'len={}'.format(trinity.len)
+        trinity.id = trinity.shortid
         print( trinity.format())
 
         if nseq > 10: break
-        break
+
