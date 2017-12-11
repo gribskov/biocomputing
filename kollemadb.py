@@ -170,10 +170,11 @@ class Kollemadb(object):
 
     def asFormatted(self, indent=2):
         '''
-
-        :param table: table name
-        :param limits: SQL limits (where clause)
-        :return:
+        return string with a formatted tabular version of the current result
+        usage
+            print(kollemadb.asFormatted())
+        :param indent: number of spaces to indent at the left
+        :return: formatted string
         '''
         out = ''
         if len(self.result) == 0:
