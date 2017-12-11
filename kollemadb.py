@@ -32,22 +32,26 @@ class Kollemadb(object):
         '''
         self.initProjectTable()
         self.initTaskTable()
+        self.initTranscriptTable()
+        self.initPathTable()
 
         return True
 
     def initProjectTable(self):
         '''
         sql to build the project table
-        :return:
+        :return: True
         '''
         sql = '''
-            DROP TABLE IF EXISTS project;
-            CREATE TABLE project (
+            CREATE TABLE 
+            IF NOT EXISTS
+            project (
                 name TEXT,
                 owner TEXT,
                 created TEXT,
                 status TEXT,
-                updated TEXT );
+                updated TEXT 
+            );
         '''
         self.db.executescript(sql)
 
@@ -58,16 +62,56 @@ class Kollemadb(object):
         sql to build the task table
         '''
         sql = '''
-            DROP TABLE IF EXISTS task;
-            CREATE TABLE task (
+            CREATE TABLE 
+            IF NOT EXISTS
+            task (
                 projectid INTEGER,
                 name TEXT,
                 begin TEXT,
                 end TEXT,
                 filename TEXT
-                );
+            );
         '''
         self.db.executescript(sql)
+
+        return True
+
+    def initTranscriptTable(self):
+        '''
+        sql to build transcript table
+        :return: True
+        '''
+        sql = '''
+            CREATE TABLE 
+            IF NOT EXISTS
+            transcript (
+                id TEXT, 
+                component INTEGER, 
+                gene INTEGER, 
+                isoform INTEGER,
+                seq TEXT, 
+                doc TEXT
+            )
+            '''
+        self.db.execute(sql)
+
+        return True
+
+    def initPathTable(self):
+        '''
+        sql to build path table
+        :return: True
+        '''
+        sql = '''
+            CREATE TABLE 
+            IF NOT EXISTS
+            path (
+                transcriptid INTEGER,
+                step TEXT
+            )
+        
+            '''
+        self.db.execute(sql)
 
         return True
 
@@ -177,7 +221,7 @@ class Kollemadb(object):
                 else:
                     out += f.format(row[k])
             out += '\n{}'.format(' ' * indent)
-        out += '{}\n'.format( '-' * totallen )
+        out += '{}\n'.format('-' * totallen)
 
         return out
 
