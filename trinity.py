@@ -19,10 +19,10 @@ class Trinity(Fasta):
     -----------------------------------------------------------------------------------------------------------------"""
 
     def __init__(self):
-        ''''
+        """'
         class constructor.
         Trinity is a subclass of Fasta
-        '''
+        """
         super().__init__()
         self.len = 0
         self.path = []
@@ -70,10 +70,10 @@ class Trinity(Fasta):
         return self.shortid
 
     def next(self):
-        """
-
-        :return:
-        """
+        """-------------------------------------------------------------------------------------------------------------
+        Overrides fasta method to add aditional attributes of Trinity class.
+        :return: True/False
+        -------------------------------------------------------------------------------------------------------------"""
         if super().next():
             self.getLen()
             self.getIDParts()
