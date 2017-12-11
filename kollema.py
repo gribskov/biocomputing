@@ -1,7 +1,7 @@
-'''--------------------------------------------------------------------------------
+'''---------------------------------------------------------------------------------------------------------------------
 kollema
 Transcriptome annotation
---------------------------------------------------------------------------------'''
+---------------------------------------------------------------------------------------------------------------------'''
 import os
 import sqlite3 as sql
 from kollemadb import Kollemadb
@@ -12,7 +12,19 @@ def status():
     print('status activated')
     pass
 
+def transcriptLoad(filter='trinity'):
+    '''
+    load transcripts into current project from a multi fasta file.
+    :param filter: filter file names
+    :return: number of transcripts loaded
+    '''
+    pass
 
+'''--------------------------------------------------------------------------------------------------------
+Kollema
+
+Main program
+--------------------------------------------------------------------------------------------------------'''
 version = '0.0.1'
 print('Welcome to Kollema, v{0}'.format(version))
 
