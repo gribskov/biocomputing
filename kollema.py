@@ -57,9 +57,11 @@ menu.addDispatch('main', {'S': kdb.get, 'N': kdb.fromTerm, 'L': transcriptLoad, 
 menu.addTitle('main', 'Current Projects')
 
 select = 'init'
-project = ''
+project = 'Not selected'
 while True:
     # main event loop
+    menu.clear()
+    menu.status({'Database file': dbfile, 'Project': project })
 
     nprojects = kdb.get('project')
     if nprojects:
@@ -72,7 +74,7 @@ while True:
     select = menu.ask('main', 2)
     if select == 'Q': break
 
-    #menu.clear()
+    # menu.clear()
     if select == 'N':
         response = menu.dispatch()('project')
 
