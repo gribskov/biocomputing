@@ -32,7 +32,7 @@ class Menu(object):
         # print('\033[H\033[J')
         # print('\f')
         # os.system('cls')
-        print('\n' * 5)
+        print('\n' * 1)
         return True
 
     def add(self, id, fields):
@@ -65,7 +65,6 @@ class Menu(object):
                 response = menu.ask('top', 2)
         -------------------------------------------------------------------------------------------------------------"""
         while True:
-            self.clear()
             response = input('\n{0}{1}: '.format(' ' * indent, self.query[id]))
             try:
                 # CR only, repeat query
@@ -112,6 +111,19 @@ class Menu(object):
         # func()
         return func
 
+    def status(self, info, indent=2):
+        """-------------------------------------------------------------------------------------------------------------
+        Print the current proejct status
+        :param info: dictionary with status information
+        :return: True
+        -------------------------------------------------------------------------------------------------------------"""
+        spaces = ' '*indent
+        print('{}Current Status:'.format(spaces))
+        for k in info:
+            print('{sp}{key}: {value}'.format( sp = spaces, key = k, value = info[k]))
+
+        return True
+
     def testA(self):
         """-------------------------------------------------------------------------------------------------------------
         dummy function for testing
@@ -125,7 +137,6 @@ class Menu(object):
         -------------------------------------------------------------------------------------------------------------"""
         print('function testQ')
         return None
-
 
 """---------------------------------------------------------------------------------------------------------------------
 Menu testing
