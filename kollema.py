@@ -31,10 +31,31 @@ def projectSelect(kdb, indent=2):
     return ''
 
 
-def transcriptLoad():
+def transcriptLoad(kdb, indent=2):
     """-----------------------------------------------------------------------------------------------------------------
+                id TEXT,
+                component INTEGER,
+                gene INTEGER,
+                isoform INTEGER,
+                seq TEXT,
+                doc TEXT
+
     -----------------------------------------------------------------------------------------------------------------"""
-    pass
+    transcript_file = input('\n{0}{1}: '.format(' ' * indent, 'Transcript file to load'))
+    trinity = Trinity()
+    trinity.open(transcript_file)
+    ntranscript = 0
+    while trinity.next():
+        kdb.set('transcript',{'id':trinity.cluster,
+                              'component':trinity.component,
+                              'gene':trinity.gene,
+                              'isoform':trinity.isoform,
+                              'seq':trinity.seq,
+                              'doc':trinity.doc } )
+        ntranscript += 1
+
+    print( '{} transcripts loaded'.format(ntranscript))
+
     return
 
 
@@ -84,7 +105,7 @@ while True:
 
     elif select == 'L':
         if project:
-            response = menu.dispatch()()
+            response = menu.dispatch()(kdb)
         else:
             print('Project must be selected before loading')
 
