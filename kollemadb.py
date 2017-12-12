@@ -165,11 +165,12 @@ class Kollemadb(object):
             s = rtab.sub('\n', s)
         return s.strip()
 
-    def get(self, table, limits=''):
+    def get(self, table, limits='',showsql=False):
         """-------------------------------------------------------------------------------------------------------------
         retrieve contents of table as a dictionary
         :param table: table name
         :param limits: sql where clause
+        :param showsql: print out generated SQL if true
         :return: number of rows returned by query
         usage
             project = kollemadb.get('project')
@@ -177,7 +178,11 @@ class Kollemadb(object):
         -------------------------------------------------------------------------------------------------------------"""
         sql = '''
             SELECT * FROM {0}
-            '''.format(table)
+            {1}
+            '''.format(table,limits)
+
+        if showsql:
+            print('kollemadb.get:{}'.format(sql))
 
         try:
             self.db.execute(sql)
