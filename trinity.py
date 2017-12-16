@@ -1,104 +1,103 @@
-'''
-
-'''
 from sequence.fasta import Fasta
 import re
-import sqlite3 as sql
 
-lenre = re.compile('len=(\d+)')
+# regular expression for parsing documentation
+lenre  = re.compile('len=(\d+)')
 pathre = re.compile('.*path=\[([^\]]*)\]')
+idre   = re.compile(r'>*TRINITY_([^_]+)_c(\d+)_g(\d+)_i(\d+)')
+
+class Trinity(Fasta):
+    """-----------------------------------------------------------------------------------------------------------------
+    Trinity
+    Read multiple trinity transcript file in fasta format
+
+    usage
+        trinity = Trinity()
+        trinity.fh = open(file, 'r')
+        while trinity.next():
+            ...
+    -----------------------------------------------------------------------------------------------------------------"""
+
+    def __init__(self):
+        """'
+        class constructor.
+        Trinity is a subclass of Fasta
+        """
+        super().__init__()
+        self.len = 0
+        self.path = []
+        self.cluster = ''
+        self.component = ''
+        self.gene = ''
+        self.isoform = ''
+        self.shortid = ''
+
+        return None
+
+    def getLen(self):
+        """-----------------------------------------------------------------------------------------------------------------
+        get the sequence length from the documentation
+        :return: length fread from length field in documentation
+        -----------------------------------------------------------------------------------------------------------------"""
+        self.len = lenre.match(self.doc).group(1)
+        return self.len
+
+    def getPath(self):
+        """-----------------------------------------------------------------------------------------------------------------
+        The path describes how the predicted trasncript is built from segments
+        :return: list of path components from documentation
+        -----------------------------------------------------------------------------------------------------------------"""
+        path = pathre.match(self.doc).group(1)
+        plist = path.split(' ')
+        self.path = plist
+
+        return plist
 
 
-def getLen(line):
-    '''
-    get the sequence length from the documentation
-    '''
-    return lenre.match(line).group(1)
+    def getIDParts(self):
+        """-----------------------------------------------------------------------------------------------------------------
+        Breakdown the trinity ID string to give the separate parts of the ID
+        Cluster,  component, gene and isoform
+        :return: cluster,  component, gene, isoform
+         ----------------------------------------------------------------------------------------------------------------"""
+        cluster, component, gene, isoform = idre.match(self.id).groups()
+        self.cluster   = cluster
+        self.component = component
+        self.gene      = gene
+        self.isoform   = isoform
+        self.shortid   = '{cl}.{co}.{g}.{i}'.format(cl=cluster, co=component, g=gene, i=isoform)
+
+        return self.shortid
+
+    def next(self):
+        """-------------------------------------------------------------------------------------------------------------
+        Overrides fasta method to add aditional attributes of Trinity class.
+        :return: True/False
+        -------------------------------------------------------------------------------------------------------------"""
+        if super().next():
+            self.getLen()
+            self.getIDParts()
+            self.getPath()
+            return True
+        else:
+            return False
 
 
-def getPath(line):
-    '''
-    return a list of path components from documentation
-    '''
-    # path = pathre.match(line).group(1)
-    # print('doc:', line)
-    # print('pre:',pathre)
-    # print('path:', pathre.match(line).group(1))
-    path = pathre.match(line).group(1)
-    plist = path.split(' ')
-    return plist
+if __name__ == '__main__':
 
+    trinity = Trinity()
 
-def trinityID(id):
-    '''
-    Breakdown the trinity ID string to give the
-    Cluster,  component, gene and isoform
-     '''
-    cluster, component, gene, isoform = re.compile(r'>*TRINITY_([^_]+)_c(\d+)_g(\d+)_i(\d+)').match(id).groups()
-    return cluster, component, gene, isoform
+    #file = r'C:\Users\gribs\Dropbox\rice\Trinity.fasta'
+    file = r'A:\mrg\repos\biocomputing\data\Trinity.fasta'
+    trinity.fh = open(file, 'r')
 
+    nseq = 0
+    while trinity.next():
+        nseq += 1
 
-trinity = Fasta()
+        trinity.doc = 'len={}'.format(trinity.len)
+        trinity.id = trinity.shortid
+        print( trinity.format())
 
-file = r'C:\Users\gribs\Dropbox\rice\Trinity.fasta'
-trinity.fh = open(file, 'r')
+        if nseq > 10: break
 
-# dbh = sql.connect('trinity.db')
-dbh = sql.connect(":memory:")
-dbh.row_factory = sql.Row
-db = dbh.cursor()
-
-sql = '''
-DROP TABLE IF EXISTS transcript; DROP TABLE IF EXISTS path
-'''
-db.executescript(sql)
-
-sql = '''
-CREATE TABLE 
-    IF NOT EXISTS
-    transcript (
-        id TEXT, 
-        component INTEGER, 
-        gene INTEGER, 
-        isoform INTEGER,
-        seq TEXT, 
-        doc TEXT
-    )
-'''
-db.execute(sql)
-
-sql = '''
-CREATE TABLE path 
-    (
-        transcriptid INTEGER,
-        step TEXT
-    )
-
-'''
-db.execute(sql)
-
-nseq = 0
-
-while trinity.next():
-    nseq += 1
-
-    cluster, component, gene, isoform = trinityID(trinity.id)
-    nn = getPath(trinity.doc)
-
-    # print('cluster:', cluster, 'component:', component, 'gene:', gene, 'isoform:', isoform)
-    db.execute('INSERT INTO transcript VALUES (?,?,?,?,?,?)',
-               (cluster, component, gene, isoform, trinity.seq, trinity.doc))
-    transcriptid = db.lastrowid
-    for p in nn:
-        db.execute('INSERT INTO path VALUES (?,?)', (transcriptid, p))
-    if nseq > 10: break
-    break
-
-db.execute('SELECT id, component, gene, isoform FROM transcript LIMIT 5')
-n = 0
-for row in db:
-    n += 1
-    print(row['id'])
-    for k in row.keys():
-        print('    ', k, row[k])
-        # print( '    ', row['cluster'])

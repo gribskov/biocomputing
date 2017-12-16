@@ -24,7 +24,7 @@ class Fasta:
         try:
             self.fh = open(filename, 'r')
         except:
-            pass
+            print('Fasta::open - file open error')
 
         self.filename = filename
 
@@ -33,10 +33,7 @@ class Fasta:
         return the next entry from an open file into the object
         '''
         self.read();
-        if not self.id:
-            return 0
-        else:
-            return 1
+        return self.read()
 
     def read(self):
         '''
@@ -48,7 +45,6 @@ class Fasta:
         self.id = ''
         self.doc = ''
         self.seq = ''
-
         self.getID()
 
         for line in self.fh:
@@ -57,9 +53,10 @@ class Fasta:
 
             if line[0] == '>':
                 self.buffer = line
-                return
+                return True
             else:
                 self.seq += line
+        return False
 
     def getID(self):
         '''
