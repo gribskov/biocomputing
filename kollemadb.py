@@ -6,6 +6,7 @@ import sys
 import re
 import sqlite3 as s3
 
+
 class Kollemadb(object):
     """-----------------------------------------------------------------------------------------------------------------
     kollemadb
@@ -144,6 +145,31 @@ class Kollemadb(object):
 
         return True
 
+    def loadFromList(self, table, columns, data):
+        """
+        Construct an SQL insert statement for the listed columns using placeholders
+        use synchronize=False pragma and executemany to accelerate
+        :param table: name of table
+        :param columns: list of column names
+        :param data: list of rows of values.  Each row is a list of data
+        :return: number of rows
+        """
+        colnames = '('
+        for col in columns:
+            colnames += '{},'.format(col)
+        colnames = colnames.rstrip(',')
+        colnames += ')'
+
+        sql = '''
+                INSERT INTO table
+                COLUMNS {}
+                VALUES ({})
+                    '''.format(colnames, '?' * len(colnames))
+        res = self.db.executemany(sql, data)
+
+        return res
+
+
     def showTables(self):
         """-------------------------------------------------------------------------------------------------------------
         list the tables in the database and their column definition
@@ -165,7 +191,8 @@ class Kollemadb(object):
             s = rtab.sub('\n', s)
         return s.strip()
 
-    def get(self, table, limits='',showsql=False):
+
+    def get(self, table, limits='', showsql=False):
         """-------------------------------------------------------------------------------------------------------------
         retrieve contents of table as a dictionary
         :param table: table name
@@ -177,9 +204,9 @@ class Kollemadb(object):
             task = kollemadb.get('task')
         -------------------------------------------------------------------------------------------------------------"""
         sql = '''
-            SELECT * FROM {0}
-            {1}
-            '''.format(table,limits)
+                SELECT * FROM {0}
+                {1}
+                '''.format(table, limits)
 
         if showsql:
             print('kollemadb.get:{}'.format(sql))
@@ -201,6 +228,7 @@ class Kollemadb(object):
         self.result = result
 
         return len(result)
+
 
     def asFormatted(self, indent=2):
         """-------------------------------------------------------------------------------------------------------------
@@ -260,6 +288,7 @@ class Kollemadb(object):
 
         return out
 
+
     def set(self, table, data):
         """-------------------------------------------------------------------------------------------------------------
         add a new row to an existing table
@@ -275,14 +304,15 @@ class Kollemadb(object):
             comma = ','
 
         sql = '''
-            INSERT INTO {0} 
-                ({1}) VALUES ({2})'''.format(table, columns.strip(), values.strip())
+                INSERT INTO {0} 
+                    ({1}) VALUES ({2})'''.format(table, columns.strip(), values.strip())
 
         # print('sql:', sql)
         try:
             self.db.execute(sql)
         except s3.Error as e:
             print("Kollemadb::set - error:", e.args[0])
+
 
     def fromTerm(self, id):
         """-------------------------------------------------------------------------------------------------------------
@@ -320,3 +350,10 @@ if __name__ == '__main__':
     kdb.clearAll()
     kdb.get('project')
     print(kdb.asFormatted())
+
+    cols = ('id', 'component', 'gene')
+    data = (('a', 1, 0),
+            ('b', 1, 1),
+            ('c', 1, 0))
+
+    kdb.loadFromList(transcript, cols, data)
