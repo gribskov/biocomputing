@@ -46,15 +46,46 @@ def transcriptLoad(kdb, indent=2):
     trinity.open(transcript_file)
     ntranscript = 0
     while trinity.next():
-        kdb.set('transcript',{'id':trinity.cluster,
-                              'component':trinity.component,
-                              'gene':trinity.gene,
-                              'isoform':trinity.isoform,
-                              'seq':trinity.seq,
-                              'doc':trinity.doc } )
+        kdb.set('transcript', {'id': trinity.cluster,
+                               'component': trinity.component,
+                               'gene': trinity.gene,
+                               'isoform': trinity.isoform,
+                               'seq': trinity.seq,
+                               'doc': trinity.doc})
         ntranscript += 1
+        print('n:', ntranscript)
 
-    print( '{} transcripts loaded'.format(ntranscript))
+    print('{} transcripts loaded'.format(ntranscript))
+
+    return
+
+
+def transcriptLoad2(kdb, indent=2):
+    """-----------------------------------------------------------------------------------------------------------------
+                id TEXT,
+                component INTEGER,
+                gene INTEGER,
+                isoform INTEGER,
+                seq TEXT,
+                doc TEXT
+
+    -----------------------------------------------------------------------------------------------------------------"""
+    transcript_file = input('\n{0}{1}: '.format(' ' * indent, 'Transcript file to load'))
+    trinity = Trinity()
+    trinity.open(transcript_file)
+    ntranscript = 0
+    sql = '''
+        INSERT INTO transcript
+        VALUES ( :id, :component, :gene, :isoform, :seq, :doc )
+        '''
+    kdb.db.execute("PRAGMA synchronous = OFF")
+    while trinity.next():
+        kdb.db.execute(sql, {'id': trinity.id, 'component': trinity.component, 'gene': trinity.gene,
+                             'isoform': trinity.isoform, 'seq': trinity.seq, 'doc': trinity.doc})
+        ntranscript += 1
+        print('n:', ntranscript)
+
+    print('{} transcripts loaded'.format(ntranscript))
 
     return
 
@@ -74,7 +105,7 @@ kdb = Kollemadb(dbfile=dbfile, new=True)
 
 menu = Menu()
 menu.add('main', {'S': 'Select project', 'N': 'New project', 'T': 'Tasks', 'L': 'Load transcripts', 'Q': 'Quit'})
-menu.addDispatch('main', {'S': kdb.get, 'N': kdb.fromTerm, 'L': transcriptLoad, 'S': projectSelect})
+menu.addDispatch('main', {'S': kdb.get, 'N': kdb.fromTerm, 'L': transcriptLoad2, 'S': projectSelect})
 menu.addTitle('main', 'Current Projects')
 
 select = 'init'
@@ -82,7 +113,7 @@ project = 'Not selected'
 while True:
     # main event loop
     menu.clear()
-    menu.status({'Database file': dbfile, 'Project': project })
+    menu.status({'Database file': dbfile, 'Project': project})
 
     nprojects = kdb.get('project')
     if nprojects:
