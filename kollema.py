@@ -90,6 +90,33 @@ def transcriptLoad2(kdb, indent=2):
     return
 
 
+def transcriptLoadChunk(kdb, indent=2, chunk=1000):
+    """
+    Load transcripts from file in blocks using loadFromList()
+    :param kdb: kollemadb object
+    :param indent: number of spaces to indent in output
+    :param chunk: number of row to load at once
+    :return:
+    """
+    transcript_file = input('\n{0}{1}: '.format(' ' * indent, 'Transcript file to load'))
+    trinity = Trinity()
+    trinity.open(transcript_file)
+
+    columns = ['id', 'component', 'gene', 'isoform', 'seq', 'doc']
+    ntranscript = 0
+    while trinity.next():
+        data = []
+        ntranscript += 1
+        if ntranscript % chunk:
+            data.append((trinity.id, trinity.component, trinity.gene, trinity.isoform, trinity.seq, trinity.doc))
+        else:
+            kdb.loadFromList('transcript', columns, data)
+
+        print('n:', ntranscript)
+
+    print('{} transcripts loaded'.format(ntranscript))
+
+
 """---------------------------------------------------------------------------------------------------------------------
 kollema main program
 ---------------------------------------------------------------------------------------------------------------------"""
@@ -105,7 +132,7 @@ kdb = Kollemadb(dbfile=dbfile, new=True)
 
 menu = Menu()
 menu.add('main', {'S': 'Select project', 'N': 'New project', 'T': 'Tasks', 'L': 'Load transcripts', 'Q': 'Quit'})
-menu.addDispatch('main', {'S': kdb.get, 'N': kdb.fromTerm, 'L': transcriptLoad2, 'S': projectSelect})
+menu.addDispatch('main', {'S': kdb.get, 'N': kdb.fromTerm, 'L': transcriptLoadChunk, 'S': projectSelect})
 menu.addTitle('main', 'Current Projects')
 
 select = 'init'
