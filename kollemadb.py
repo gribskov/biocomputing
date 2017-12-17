@@ -165,7 +165,6 @@ class Kollemadb(object):
                 {c}
                 VALUES ({v})
                     '''.format(id=table, c=colnames, v=','.join('?' * len(columns)))
-        print('sql:', sql)
         res = self.db.executemany(sql, data)
 
         return res
