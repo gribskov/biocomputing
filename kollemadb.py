@@ -161,14 +161,14 @@ class Kollemadb(object):
         colnames += ')'
 
         sql = '''
-                INSERT INTO table
-                COLUMNS {}
-                VALUES ({})
-                    '''.format(colnames, '?' * len(colnames))
+                INSERT INTO {id}
+                {c}
+                VALUES ({v})
+                    '''.format(id=table, c=colnames, v=','.join('?' * len(columns)))
+        print('sql:', sql)
         res = self.db.executemany(sql, data)
 
         return res
-
 
     def showTables(self):
         """-------------------------------------------------------------------------------------------------------------
@@ -190,7 +190,6 @@ class Kollemadb(object):
             # s+= '\n'
             s = rtab.sub('\n', s)
         return s.strip()
-
 
     def get(self, table, limits='', showsql=False):
         """-------------------------------------------------------------------------------------------------------------
@@ -229,7 +228,6 @@ class Kollemadb(object):
 
         return len(result)
 
-
     def asFormatted(self, indent=2):
         """-------------------------------------------------------------------------------------------------------------
         return string with a formatted tabular version of the current result
@@ -249,11 +247,12 @@ class Kollemadb(object):
             totallen = 0
             for k in row.keys():
                 if not k in fieldsize:
+                    #initialize with column name
                     fieldsize[k] = len(k)
                 if row[k] == None:
-                    continue
-                if fieldsize[k] < len(row[k]):
-                    fieldsize[k] = len(row[k])
+                    pass
+                elif fieldsize[k] < len(str(row[k])):
+                    fieldsize[k] = len(str(row[k]))
                 totallen += fieldsize[k] + pad + 1
         totallen += 1
 
@@ -288,7 +287,6 @@ class Kollemadb(object):
 
         return out
 
-
     def set(self, table, data):
         """-------------------------------------------------------------------------------------------------------------
         add a new row to an existing table
@@ -312,7 +310,6 @@ class Kollemadb(object):
             self.db.execute(sql)
         except s3.Error as e:
             print("Kollemadb::set - error:", e.args[0])
-
 
     def fromTerm(self, id):
         """-------------------------------------------------------------------------------------------------------------
@@ -351,9 +348,13 @@ if __name__ == '__main__':
     kdb.get('project')
     print(kdb.asFormatted())
 
-    cols = ('id', 'component', 'gene')
-    data = (('a', 1, 0),
-            ('b', 1, 1),
-            ('c', 1, 0))
+    cols = ['id', 'component', 'gene']
+    data = [
+        ('a', 1, 0),
+        ('b', 1, 1),
+        ('c', 1, 0)
+    ]
 
-    kdb.loadFromList(transcript, cols, data)
+    kdb.loadFromList('transcript', cols, data)
+    kdb.get('transcript')
+    print(kdb.asFormatted())
