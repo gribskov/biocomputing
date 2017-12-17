@@ -28,8 +28,6 @@ class Kollemadb(object):
         if new:
             self.initAllTables()
 
-        return None
-
     def initAllTables(self):
         """-------------------------------------------------------------------------------------------------------------
         Constructs all tables, does not drop existing tables if present
@@ -154,11 +152,7 @@ class Kollemadb(object):
         :param data: list of rows of values.  Each row is a list of data
         :return: number of rows
         """
-        colnames = '('
-        for col in columns:
-            colnames += '{},'.format(col)
-        colnames = colnames.rstrip(',')
-        colnames += ')'
+        colnames = '({})'.format(','.join(columns))
 
         sql = '''
                 INSERT INTO {id}
@@ -242,13 +236,14 @@ class Kollemadb(object):
         # get the length of the longest entry in each column
         pad = 2
         fieldsize = {}
+        totallen = 0
         for row in self.result:
             totallen = 0
             for k in row.keys():
-                if not k in fieldsize:
-                    #initialize with column name
+                if k not in fieldsize:
+                    # initialize with column name
                     fieldsize[k] = len(k)
-                if row[k] == None:
+                if row[k] is None:
                     pass
                 elif fieldsize[k] < len(str(row[k])):
                     fieldsize[k] = len(str(row[k]))
