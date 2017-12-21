@@ -104,13 +104,15 @@ def transcriptLoadChunk(kdb, indent=2, chunk=1000):
 
     columns = ['id', 'component', 'gene', 'isoform', 'seq', 'doc']
     ntranscript = 0
+    data = []
+    kdb.db.execute("PRAGMA synchronous = OFF")
     while trinity.next():
-        data = []
         ntranscript += 1
         if ntranscript % chunk:
             data.append((trinity.id, trinity.component, trinity.gene, trinity.isoform, trinity.seq, trinity.doc))
         else:
             kdb.loadFromList('transcript', columns, data)
+            data = []
 
         print('n:', ntranscript)
 
