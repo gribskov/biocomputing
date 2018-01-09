@@ -4,6 +4,15 @@ Fasta sequence class.  Supports iteration over a multi-fasta file
     id
     documentation
     sequence
+
+    Synopsis
+    from sequence.fasta import Fasta
+
+    fasta = Fasta()
+    fasta.open('filename')
+    while fasta.next():
+        print(fasta.format(linelen=60))
+
 -------------------------------------------------------------------------------------------------'''
 
 
@@ -39,8 +48,10 @@ class Fasta:
     def next(self):
         '''-----------------------------------------------------------------------------------------
         return the next entry from an open file into the object
+        usage
+            while fasta.next():
+               ...
         -----------------------------------------------------------------------------------------'''
-        self.read();
         return self.read()
 
     def read(self):
@@ -53,17 +64,24 @@ class Fasta:
         self.id = ''
         self.doc = ''
         self.seq = ''
+
+        # get the ID and doc
         self.getID()
 
         for line in self.fh:
             if line.isspace(): continue
             line = line.rstrip('\n')
-
             if line[0] == '>':
                 self.buffer = line
-                return True
+                break
+
             else:
                 self.seq += line
+
+        if len(self.id) > 0 or len(self.doc) > 0 or len(self.seq) > 0:
+            return True
+
+        # fall through to false if nothing can be read
         return False
 
     def getID(self):
@@ -108,7 +126,6 @@ class Fasta:
         usage
             seq = fasta.format()
         -----------------------------------------------------------------------------------------'''
-
         string = '>{0} {1}\n'.format(self.id, self.doc)
         pos = 0
         while pos < len(self.seq):
