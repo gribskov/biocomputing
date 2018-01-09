@@ -27,5 +27,5 @@ for fastafile in glob.glob(target):
     fasta = Fasta()
     fasta.open(fastafile)
     while fasta.next():
-        fasta.doc += ' len={}'.format(fasta.length)
+        fasta.doc += ' len={}'.format(fasta.length())
         out.write(fasta.format(linelen=linelen))
