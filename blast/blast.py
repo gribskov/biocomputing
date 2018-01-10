@@ -1,8 +1,9 @@
 import re
 import sys
 
+
 class Blast(object):
-    '''--------------------------------------------------------------------------
+    '''=============================================================================================
     Blast class is intended to iterate over a file of blast results.Can also be 
     used for other programs with blast-like output such as diamond.
     
@@ -22,10 +23,10 @@ class Blast(object):
 
     or blast.read()     # read a line using the selected internal read function
 
-    --------------------------------------------------------------------------'''
+    ============================================================================================='''
 
     def __init__(self):
-        '''
+        '''-----------------------------------------------------------------------------------------
         initialize data structure.  The following fields should always be defined:
             file, fh    # filename, filehandle
             read        # read function for use in next
@@ -38,93 +39,90 @@ class Blast(object):
         in the fields list.
         usage
             blast = Blast()
-        '''
-        self.file   = ''
-        self.fh     = None
-        self.line   = ''
-        self.read   = self.readTabular
+        -----------------------------------------------------------------------------------------'''
+        self.file = ''
+        self.fh = None
+        self.line = ''
+        self.read = self.readTabular
         self.fields = []
-        self.setFormat('qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore')
+        self.setFormat(
+            'qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore')
 
-
-    def dump(self,indent=4):
-       '''
-       print the attributes of the object
-       usage
-           blast.dump()
-           blast.dump(5)
-           blast.dump(indent=5)
-       '''
-       classname = re.search("__main__\.([^']+)'>", str(self.__class__))
-       classname = classname.group(1)
-       print('{0}dumping{1}'.format(' '*indent, classname))
-       for attr in dir(self):
-           if hasattr( self, attr ):
-               if attr[0] == '_': continue
-               descr = str(getattr(self, attr))
-               if descr[0] == '<': continue
-               print( '{0}{1}.{2} = {3}'.format(' '*indent, classname, attr, descr))
-
+    def dump(self, indent=4):
+        '''------------------------------------------------------------------------------------------
+        print the attributes of the object
+        usage
+            blast.dump()
+            blast.dump(5)
+            blast.dump(indent=5)
+        ------------------------------------------------------------------------------------------'''
+        classname = re.search("__main__\.([^']+)'>", str(self.__class__))
+        classname = classname.group(1)
+        print('{0}dumping{1}'.format(' ' * indent, classname))
+        for attr in dir(self):
+            if hasattr(self, attr):
+                if attr[0] == '_': continue
+                descr = str(getattr(self, attr))
+                if descr[0] == '<': continue
+                print('{0}{1}.{2} = {3}'.format(' ' * indent, classname, attr, descr))
 
     def next(self):
-        '''
+        '''-----------------------------------------------------------------------------------------
         retrieve the next entry from the file, using the currently registered read method
         usage
             while blast.read:
                ... do something
-        '''
-        return( self.read() )
+        ------------------------------------------------------------------------------------------'''
+        return (self.read())
 
-
-    def new(self,file):
-        '''
+    def new(self, file):
+        '''-----------------------------------------------------------------------------------------
         open a result file for reading and store the filehandle
         usage
         blast.new('file.blastx')
-        '''
+        ------------------------------------------------------------------------------------------'''
         try:
-            fh = open(file,'r')
+            fh = open(file, 'r')
 
         except:
-           print('Blast: could not open file ({0})'.format(file), file=sys.stderr)
-           return False 
+            print('Blast: could not open file ({0})'.format(file), file=sys.stderr)
+            return False
 
         self.file = file
-        self.fh   = fh
-        return True 
+        self.fh = fh
+        return True
 
     def readTabular(self):
-        '''
+        '''-----------------------------------------------------------------------------------------
         Read one hit in tabular format.  Diamond does not provide any column ID information
         so it must be provided via blast.format(). Generally this function should be called
         via the blast.read method.
         Returns the line read from the file
         usage
             blast.readTabular()
-        '''
+        ------------------------------------------------------------------------------------------'''
         line = self.fh.readline()
         if line:
             line = line.rstrip()
-            #print('line:', line)
+            # print('line:', line)
             token = line.split()
             n = 0
             for key in self.fields:
                 self.__dict__[key] = token[n]
-                #print('{0} => {1}'.format(key,token[n]))
+                # print('{0} => {1}'.format(key,token[n]))
                 n += 1
             self.line = line
-            return(line)
+            return (line)
         else:
             # end of file
             return False
 
-
-    def setFormat(self,fmt):
-        '''
+    def setFormat(self, fmt):
+        '''-----------------------------------------------------------------------------------------
         change the fields in the read format
         usage
             nfields = blast.setFormat('qid sid qcov pid len evalue')
-        '''
+        -----------------------------------------------------------------------------------------'''
         # first delete all the existing fields
         for attribute in self.fields:
             del self.__dict__[attribute]
@@ -138,6 +136,9 @@ class Blast(object):
         return len(self.fields)
 
 
+# ===================================================================================================
+# Testing
+# ===================================================================================================
 if __name__ == '__main__':
     print('Blast object', end='\n\n')
     blast = Blast()
@@ -157,17 +158,17 @@ if __name__ == '__main__':
     print('    default read format:', blast.format)
     nfields = blast.setFormat('qid sid qcov pid len evalue')
     print('    modified read format:', blast.format)
-    print('    fields:',nfields, '\tformat:', blast.format)
+    print('    fields:', nfields, '\tformat:', blast.format)
     for f in blast.fields:
-        print('        ',f, '\t', getattr(blast,f))
+        print('        ', f, '\t', getattr(blast, f))
 
     print('')
     print('Blast - test reading')
-    print('    read with blast.read:',blast.read())
+    print('    read with blast.read:', blast.read())
     print('    dump with indent=default (4)')
     blast.dump()
     print('')
-    print('    read second line with read:',blast.read())
+    print('    read second line with read:', blast.read())
     print('    dump with indent=5')
     blast.dump(5)
 
@@ -178,5 +179,4 @@ if __name__ == '__main__':
         n += 1
         print('   ', n, blast.line)
 
-        #if n > 4: break
-
+        # if n > 4: break
