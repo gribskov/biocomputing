@@ -50,7 +50,7 @@ for line in cov:
     if end - pos_begin > minwindow:
         # write out an average value
         avecov = sum / span
-        avepos = (end - pos_begin) / 2
+        avepos = pos_begin + (end - pos_begin) / 2
         print('{}\t{}\t{:.2f}\t{:.2f}'.format(pos_begin, end, avepos, avecov))
 
         pos_begin = end + 1
@@ -59,7 +59,7 @@ for line in cov:
 
 # process whatever is left
 avecov = sum / span
-avepos = (end - pos_begin) / 2
+avepos = pos_begin + (end - pos_begin) / 2
 print('{}\t{}\t{:.2f}\t{:.2f}'.format(pos_begin, end, avepos, avecov))
 
 
