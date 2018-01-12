@@ -28,6 +28,29 @@ def getIDParts(idstring):
     # end of getIDParts
 
 
+def histogram(coverage):
+    """
+    print a list with a histogram of the values at 1% intervals
+    :param coverage: dictionary of coverage values
+    :return: None
+    """
+    hist = [0 for i in range(101)]
+    n = 0
+    for key in sorted(coverage.values()):
+        hist[int(key * 100)] += 1
+        n += 1
+
+    cum = 0
+    for i in range(101):
+        frac = hist[i] / n
+        cum += frac
+        print('\t{}\t{}\t{:.4f}\t{:.4f}\t{:.4f}'.format(i, hist[i], frac, cum, 1.0 - cum))
+
+    return None
+
+    # end of histogram
+
+
 # ==================================================================================================
 # main program
 # ==================================================================================================
@@ -100,14 +123,25 @@ while blast.next():
         isoform[key] = subj_cov
         nisoform += 1
 
-    # if nhits >= 1000:
+    # if nhits >= 100000:
     #     break
 
 print('{} blast hists processed'.format(nhits))
-print('  {} clusters'.format(ncluster))
-print('  {} components'.format(ncomponent))
-print('  {} genes'.format(ngene))
-print('  {} isoforms'.format(nisoform))
+print('\t{} clusters'.format(ncluster))
+print('\t{} components'.format(ncomponent))
+print('\t{} genes'.format(ngene))
+print('\t{} isoforms'.format(nisoform))
 
-for key in cluster.keys():
-    print('cluster:{}\t{:.3f}'.format(key, cluster[key]))
+print('\n{} clusters'.format(ncluster))
+histogram(cluster)
+
+print('\n{} components'.format(ncomponent))
+histogram(component)
+
+print('\n{} genes'.format(ngene))
+histogram(gene)
+
+print('\n{} isoforms'.format(nisoform))
+histogram(isoform)
+
+exit(0)
