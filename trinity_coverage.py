@@ -29,11 +29,11 @@ def getIDParts(idstring):
 
 
 def histogram(coverage):
-    """
+    """---------------------------------------------------------------------------------------------
     print a list with a histogram of the values at 1% intervals
     :param coverage: dictionary of coverage values
     :return: None
-    """
+    ---------------------------------------------------------------------------------------------"""
     hist = [0 for i in range(101)]
     n = 0
     for key in sorted(coverage.values()):
@@ -73,75 +73,38 @@ if not blast.new(blastfilename):
     print('Error opening blastX input file ({})'.format(blastfilename))
     exit(2)
 
-cluster = {}
-component = {}
-gene = {}
-isoform = {}
-id_old = dict(cluster='', component='', gene='', isoform='', shortid='')
 nhits = 0
-ncluster = 0
-ncomponent = 0
-ngene = 0
-nisoform = 0
+levels = ('cluster', 'component', 'gene', 'isoform')
+count = {k: {} for k in levels}
+n = {k: 0 for k in levels}
+
+# count the hits at each level
 while blast.next():
     nhits += 1
-    # print('query:', blast.qseqid, 'subject:', blast.sseqid)
     id = getIDParts(blast.qseqid)
     subj_cov = (int(blast.send) - int(blast.sstart) + 1) / int(blast.slen)
-    # print('  {:.3f}'.format(subj_cov))
-    # print('  {cluster}  {component}  {gene}  {isoform}  short_id:{shortid}'.format(**id))
-
-    key = id['cluster']
-    try:
-        if subj_cov > cluster[key]:
-            cluster[key] = subj_cov
-    except KeyError:
-        cluster[key] = subj_cov
-        ncluster += 1
-
-    key += '_{}'.format(id['component'])
-    try:
-        if subj_cov > component[key]:
-            component[key] = subj_cov
-    except KeyError:
-        component[key] = subj_cov
-        ncomponent += 1
-
-    key += '_{}'.format(id['gene'])
-    try:
-        if subj_cov > gene[key]:
-            gene[key] = subj_cov
-    except KeyError:
-        gene[key] = subj_cov
-        ngene += 1
-
-    key += '_{}'.format(id['isoform'])
-    try:
-        if subj_cov > isoform[key]:
-            isoform[key] = subj_cov
-    except KeyError:
-        isoform[key] = subj_cov
-        nisoform += 1
+    item = ''
+    for k in levels:
+        item += id[k]
+        try:
+            if subj_cov > count[k][item]:
+                count[k][item] = subj_cov
+        except KeyError:
+            count[k][item] = subj_cov
+            n[k] += 1
+        item += '_'
 
     # if nhits >= 100000:
     #     break
 
+# print summary
 print('{} blast hists processed'.format(nhits))
-print('\t{} clusters'.format(ncluster))
-print('\t{} components'.format(ncomponent))
-print('\t{} genes'.format(ngene))
-print('\t{} isoforms'.format(nisoform))
+for k in levels:
+    print('\t{} {}s'.format(n[k], k))
 
-print('\n{} clusters'.format(ncluster))
-histogram(cluster)
-
-print('\n{} components'.format(ncomponent))
-histogram(component)
-
-print('\n{} genes'.format(ngene))
-histogram(gene)
-
-print('\n{} isoforms'.format(nisoform))
-histogram(isoform)
+# generate and print histograms for each level
+for k in levels:
+    print('\n{} {}s'.format(n[k], k))
+    histogram(count[k])
 
 exit(0)
