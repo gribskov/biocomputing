@@ -49,8 +49,8 @@ for span in sorted(pos, key=lambda p:p['begin']):
 
     if span['begin'] > end:
         # new range - print out missing range, reset begin and end
-        print('present\t{}\t{}'.format(begin, end))
-        print('missing\t{}\t{}'.format(end+1, span['begin']))
+        print('present\t{}\t{}\t{}'.format(begin, end, end-begin+1))
+        print('missing\t{}\t{}\t{}'.format(end+1, span['begin'],span['begin'] - end))
         begin = span['begin']
         end = span['end']
 
