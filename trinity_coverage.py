@@ -76,6 +76,7 @@ if not blast.new(blastfilename):
 nhits = 0
 levels = ('cluster', 'component', 'gene', 'isoform')
 count = {k: {} for k in levels}
+best  = {k: {} for k in levels}
 n = {k: 0 for k in levels}
 
 # count the hits at each level
@@ -89,8 +90,10 @@ while blast.next():
         try:
             if subj_cov > count[k][item]:
                 count[k][item] = subj_cov
+                best[k][item] = '_'.join(['%s' % id[k] for k in levels])
         except KeyError:
             count[k][item] = subj_cov
+            best[k][item] = '_'.join(['%s' % id[k] for k in levels])
             n[k] += 1
         item += '_'
 
@@ -106,5 +109,9 @@ for k in levels:
 for k in levels:
     print('\n{} {}s'.format(n[k], k))
     histogram(count[k])
+[]
+for k in levels:
+    for i in count[k]:
+        print('{}\t{}\t{}'.format(i, best[k][i], count[k][i]))
 
 exit(0)
