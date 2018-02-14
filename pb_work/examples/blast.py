@@ -34,7 +34,11 @@ AMGNGGRSGCQYRCIECNQEAKELYRDYNHGVLKITICKSCQKPVDKYIEYDPVIILINAILCKAQAYRHILFNTQINIH
 # rid = response.text[info_begin:info_end]
 
 rid = '7Y4XKJJS015'
-command = 'CMD=Get&&FORMAT_OBJECT=Searchinfo&RID={}'.format(rid)
+# command = 'CMD=Get&&FORMAT_OBJECT=Searchinfo&RID={}'.format(rid)
+command = {'CMD': 'Get',
+           'FORMAT_OBJECT': 'Searchinfo',
+           'RID': rid
+           }
 
 # import time
 # maxtries = 10
