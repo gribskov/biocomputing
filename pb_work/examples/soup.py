@@ -4,55 +4,82 @@ beautiful soup blast
     
 ================================================================================================="""
 import requests
-#import lxml
-from bs4 import BeautifulSoup
+# import lxml
+from bs4 import BeautifulSoup, Comment
 
 blast = 'https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi'
 
-# program = 'blastp'
-# database = 'pdb'
-# # query = '''>AAG47671.1 ARV1 [Homo sapiens]
-# # AMGNGGRSGCQYRCIECNQEAKELYRDYNHGVLKITICKSCQKPVDKYIEYDPVIILINAILCKAQAYRHILFNTQINIHGKLYLRWWQLQDSNQNTAPDDLIRYAKEWDF'''
-# query = '''>At2
-# NGGRSGCQYRCIECNQEAKELYRDYNHGVLKITICKSCQKPVDKYIEYDPVIILINAILCKAQAYRHILFNTQINIHGKLYLRWWQLQDSNQNTAPDDLIRYAKEWDF'''
-#
-# command = 'Put&PROGRAM={}&DATABASE={}&QUERY={}'.format(program, database, query)
-# command = {'CMD': 'Put',
-#            'PROGRAM': program,
-#            'DATABASE': database,
-#            'QUERY': query,
-#            'EMAIL': 'gribskov@purdue.edu'
-#            }
-# print('command:', command)
-# response = requests.post(blast, command)
-# blast = BeautifulSoup(response.content, 'lxml')
-# rid = blast.find('input',{'id':'rid'})
-# rid = rid[0]
-#print(rid)
-print(rid['value'])
+program = 'blastp'
+database = 'pdb'
+query = '''>Aaa
+AKELYRDYNHGVLKITICKSCQKPVDKYIEYDPVIILINAILCKAQAYRHILFNTQINIHGKLYLRWWQLQDSNQNTAPDDLIRYAKEWDF'''
 
-# print(blast.prettify())
+command = 'Put&PROGRAM={}&DATABASE={}&QUERY={}'.format(program, database, query)
+command = {'CMD': 'Put',
+           'PROGRAM': program,
+           'DATABASE': database,
+           'QUERY': query,
+           'EMAIL': 'gribskov@purdue.edu'
+           }
+response = requests.post(blast, command)
+submit = BeautifulSoup(response.content, 'html.parser')
+rid = submit.find('input', {'id': 'rid'})
+rid = rid['value']
+print('RID:', rid)
 
-# <input name="RID" type="hidden" value="88PNE34R014"/>
-#      <input name="WWW_BLAST_TYPE" type="hidden" value=""/>
-#       <!--QBlastInfoBegin
-#     RID = 88PNE34R014
-#     RTOE = 23
-# QBlastInfoEnd
-# -->
+# this is the polling loop
 
-# # print(response.url)
-# # print('\n', response.text)
-# # print('response:', response)
-#
-#
-# info_key = 'QBlastInfoBegin\n    RID = '
-# info_begin = response.text.find(info_key) + len(info_key)
-# info_end = response.text.find(' ', info_begin)
-# print(info_begin, info_end, )
-# rid = response.text[info_begin:info_end]
+import time
 
-rid = '88SBTMYK014'
-command = 'CMD=Get&&FORMAT_OBJECT=Searchinfo&RID={}'.format(rid)
+maxtries = 10
+notready = 1
+# command = 'CMD=Get&FORMAT_OBJECT=Searchinfo&RID={}'.format(rid)
+command = {'CMD': 'Get',
+           'FORMAT_OBJECT': 'Searchinfo',
+           'RID': rid
+           }
+print(blast,':',command)
+status = ''
+while notready:
+    print('    polling ... try {}'.format(notready))
+    response = requests.post(blast, command)
+    check = BeautifulSoup(response.content, 'lxml')
 
+    # complicated way to get all html comments <!-- to -->
+    comments = check.find_all(string=lambda text: isinstance(text, Comment))
 
+    for c in comments:
+        if 'Status=' in c:
+            if 'READY' in c:
+                notready = False
+                status = 'READY'
+                break
+
+    notready += 1
+    if status == 'READY' or notready >= maxtries:
+        break
+
+    # don't poll too often, ncbi requests no more than 1/min
+    time.sleep(60)
+
+# end of polling loop
+
+if not status == 'READY':
+    # polling reached limit
+    print('unable to find result () in {} tries'.format(rid, notready))
+
+# final result
+
+command = 'CMD=Get&FORMAT_TYPE=XML&RID={}'.format(rid)
+response = requests.post(blast, command)
+# print(response.text)
+
+blast = BeautifulSoup(response.content, 'lxml')
+hits = blast.find_all('hit')
+print()
+for hit in hits:
+    hit_id = hit.find('hit_id')
+    hit_len = hit.find('hit_len')
+    evalue = hit.find('hsp_evalue')
+
+    print('{}\t{}\t{}'.format(evalue.get_text(), hit_len.get_text(), hit_id.get_text()))
