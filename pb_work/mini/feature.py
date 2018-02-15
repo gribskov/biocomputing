@@ -33,13 +33,19 @@ class Feature:
         """
         try:
             gffin = open(filename, 'r')
-        except:
+        except Exception as err:
             print('Features::readGFF - unable to read GFF file ({})'.format(filename))
+            print(err)
+            exit(1)
 
         columns = []
         nfeature = 0
         for line in gffin:
             if line.isspace() or line.startswith('#'):
+                continue
+
+            if not feature in line:
+                # select only matching features
                 continue
 
             col = line.split()
