@@ -110,8 +110,56 @@ class Feature:
 
         return None
 
+    def ranges(self):
+        """-----------------------------------------------------------------------------------------
+        Merges overlapping ranges, feature order may change due to sorting by position
 
-# --------------------------------------------------------------------------------------------------
+        :return: feature object with ranges merged
+        -----------------------------------------------------------------------------------------"""
+        range = Feature()
+        self.sortByPos()
+        begin = 0
+        end = 0
+        seqid = ''
+        idlist = []
+        for f in self.features:
+            if f['seqid'] == seqid:
+                if f['begin'] <= end:
+                    # continue previous range
+                    end = f['end']
+                    begin = f['begin']
+                    if 'ID' in f['attribute']:
+                        if f['attribute']['ID'] not in idlist:
+                            idlist.append(f['attribute']['ID'])
+                else:
+                    # start new range
+
+                    # TODO: save current
+                    begin = self.features[0]['begin']
+                    end = self.features[0]['end']
+                    idlist = []
+
+            else:
+                # new sequence, must start new range
+                # TODO: save current
+                begin = self.features[0]['begin']
+                end = self.features[0]['end']
+                seqid = self.features[0]['seqid']
+
+        return range
+
+    def appendIDToAttribute(idlist, feature_dict):
+        """-----------------------------------------------------------------------------------------
+
+        :param feature_dict:
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        if 'ID' in feature_dict['attribute']:
+            if feature_dict['attribute']['ID'] not in idlist:
+                idlist.append(feature_dict['attribute']['ID'])
+
+
+    # --------------------------------------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
