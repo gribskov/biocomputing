@@ -56,8 +56,8 @@ class Feature:
             feature = {'seqid': col[0],
                        'source': col[1],
                        'feature': col[2],
-                       'begin': col[3],
-                       'end': col[4],
+                       'begin': int(col[3]),
+                       'end': int(col[4]),
                        'score': col[5],
                        'strand': col[6],
                        'phase': col[7],
@@ -92,6 +92,16 @@ class Feature:
             yield feature
         raise StopIteration
 
+    def sortByPos(self):
+        """
+        Sorts the features by seqid and beginning position.  Sort is done in place.
+
+        :return: None
+        """
+        self.features.sort(key=lambda f: (f['seqid'], f['begin']))
+
+        return None
+
 
 # --------------------------------------------------------------------------------------------------
 # Testing
@@ -105,21 +115,21 @@ if __name__ == '__main__':
     for id in gff.references:
         print('    {}'.format(id))
 
-    print('iteration with generator')
+    print('\niteration with generator')
     n = 0
     for f in gff.next():
-        print('1:{} {} {}'.format(f['begin'], f['end'], f['feature']))
+        print('1:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['feature']))
         n += 1
-        if n > 10:
+        if n > 5:
             break
 
-    print('iteration with iterator')
+    print('\niteration with iterator, after sort by pos')
+    gff.sortByPos()
     n = 0
     for f in gff:
-        print('2:{} {} {}'.format(f['begin'], f['end'], f['feature']))
+        print('2:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['feature']))
         n += 1
-        if n > 10:
+        if n > 5:
             break
-    print('iteration with iterator')
 
     exit(0)
