@@ -11,7 +11,7 @@ class Feature:
 
         return None
 
-    def readGFF3(self, filename, feature=''):
+    def readGFF3(self, filename, feature_type=''):
         """
         Read a set of features from a GFF3 file. Example:
         Pt	ensembl	protein_coding_gene	15938	20068	.	-	.	ID=ATCG00170;biotype=protein_coding;description=DNA-directed RNA polymerase family protein [Source:TAIR_LOCUS%3BAcc:ATCG00170];external_name=RPOC2;logic_name=tair
@@ -28,7 +28,7 @@ class Feature:
             8: attributes
 
         :param filename: name of filename to read
-        :param feature: name of feature to read, default = '', i.e., all
+        :param feature_type: name of feature to read, default = '', i.e., all
         :return: number of features
         """
         try:
@@ -44,7 +44,7 @@ class Feature:
             if line.isspace() or line.startswith('#'):
                 continue
 
-            if not feature in line:
+            if not feature_type in line:
                 # select only matching features
                 continue
 
@@ -82,7 +82,7 @@ class Feature:
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     gff = Feature()
-    n = gff.readGFF3('at_1000k.gff3')
+    n = gff.readGFF3('at_1000k.gff3', feature_type='CDS')
     print('{} features read'.format(n))
 
     exit(0)
