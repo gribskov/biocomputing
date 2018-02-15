@@ -7,9 +7,11 @@ class Feature:
     def __init__(self):
 
         self.references = []  # references for coordinates, e.g. chromosomes
-        self.features = []  # individual features
+        self.features = []    # individual features
 
         return None
+
+
 
     def readGFF3(self, filename, feature_type=''):
         """
@@ -62,7 +64,11 @@ class Feature:
                 feature['strand'] = None
             if feature['score'] == '.':
                 feature['score'] = None
+            if not feature['seqid'] in self.references:
+                # keep a list of the reference sequences
+                self.references.append(feature['seqid'])
 
+            # the variable attributes in column 9
             attrs = col[8].split(';')
             attribute = {}
             for att in attrs:
@@ -84,5 +90,9 @@ if __name__ == '__main__':
     gff = Feature()
     n = gff.readGFF3('at_1000k.gff3', feature_type='CDS')
     print('{} features read'.format(n))
+
+    print('reference sequences:')
+    for id in gff.references:
+        print('    {}'.format(id))
 
     exit(0)
