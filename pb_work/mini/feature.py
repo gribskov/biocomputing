@@ -9,6 +9,13 @@ class Feature:
         self.references = []  # references for coordinates, e.g. chromosomes
         self.features = []  # individual features
 
+    def __iter__(self):
+        """
+        Iterator is a generator
+        :return: generator
+        """
+        return self.next()
+
     def readGFF3(self, filename, feature_type=''):
         """
         Read a set of features from a GFF3 file. Example:
@@ -77,6 +84,14 @@ class Feature:
 
         # end of readGFF3
 
+    def next(self):
+        """
+        generator for iterating over features
+        """
+        for feature in self.features:
+            yield feature
+        raise StopIteration
+
 
 # --------------------------------------------------------------------------------------------------
 # Testing
@@ -89,5 +104,22 @@ if __name__ == '__main__':
     print('reference sequences:')
     for id in gff.references:
         print('    {}'.format(id))
+
+    print('iteration with generator')
+    n = 0
+    for f in gff.next():
+        print('1:{} {} {}'.format(f['begin'], f['end'], f['feature']))
+        n += 1
+        if n > 10:
+            break
+
+    print('iteration with iterator')
+    n = 0
+    for f in gff:
+        print('2:{} {} {}'.format(f['begin'], f['end'], f['feature']))
+        n += 1
+        if n > 10:
+            break
+    print('iteration with iterator')
 
     exit(0)
