@@ -7,11 +7,7 @@ class Feature:
     def __init__(self):
 
         self.references = []  # references for coordinates, e.g. chromosomes
-        self.features = []    # individual features
-
-        return None
-
-
+        self.features = []  # individual features
 
     def readGFF3(self, filename, feature_type=''):
         """
@@ -40,13 +36,12 @@ class Feature:
             print(err)
             exit(1)
 
-        columns = []
         nfeature = 0
         for line in gffin:
             if line.isspace() or line.startswith('#'):
                 continue
 
-            if not feature_type in line:
+            if feature_type not in line:
                 # select only matching features
                 continue
 
