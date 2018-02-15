@@ -1,26 +1,29 @@
 class Feature:
-    """
+    """=============================================================================================
     The Feature class is for describing ranges in a linear coordinate system, such as are described
     in GFF3 or GTF files.
-    """
+    ============================================================================================="""
 
     def __init__(self):
+        """-----------------------------------------------------------------------------------------
+        Feature constructor
+        -----------------------------------------------------------------------------------------"""
 
         self.references = []  # references for coordinates, e.g. chromosomes
         self.features = []  # individual features
 
     def __iter__(self):
-        """
+        """-----------------------------------------------------------------------------------------
         Iterator is a generator
         :return: generator
-        """
+        -----------------------------------------------------------------------------------------"""
         return self.next()
 
     def readGFF3(self, filename, feature_type=''):
-        """
+        """-----------------------------------------------------------------------------------------
         Read a set of features from a GFF3 file. Example:
         Pt	ensembl	protein_coding_gene	15938	20068	.	-	.	ID=ATCG00170;biotype=protein_coding;description=DNA-directed RNA polymerase family protein [Source:TAIR_LOCUS%3BAcc:ATCG00170];external_name=RPOC2;logic_name=tair
-
+        TODO: bug in selection, feature_type matches in feature including the key
         Columns:
             0: seqid (reference sequence)
             1: source
@@ -35,7 +38,7 @@ class Feature:
         :param filename: name of filename to read
         :param feature_type: name of feature to read, default = '', i.e., all
         :return: number of features
-        """
+        -----------------------------------------------------------------------------------------"""
         try:
             gffin = open(filename, 'r')
         except Exception as err:
@@ -90,19 +93,19 @@ class Feature:
         # end of readGFF3
 
     def next(self):
-        """
+        """-----------------------------------------------------------------------------------------
         generator for iterating over features
-        """
+        -----------------------------------------------------------------------------------------"""
         for feature in self.features:
             yield feature
         raise StopIteration
 
     def sortByPos(self):
-        """
+        """-----------------------------------------------------------------------------------------
         Sorts the features by seqid and beginning position.  Sort is done in place.
 
         :return: None
-        """
+        -----------------------------------------------------------------------------------------"""
         self.features.sort(key=lambda f: (f['seqid'], f['begin']))
 
         return None
@@ -113,7 +116,7 @@ class Feature:
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     gff = Feature()
-    n = gff.readGFF3('at_1000k.gff3', feature_type='CDS')
+    n = gff.readGFF3('at_1000k.gff3', feature_type='gene')
     print('{} features read'.format(n))
 
     print('reference sequences:')
@@ -133,6 +136,7 @@ if __name__ == '__main__':
     n = 0
     for f in gff:
         print('2:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['feature']))
+        print('    {}'.format(f['attribute']))
         n += 1
         if n > 5:
             break
