@@ -64,8 +64,13 @@ class Feature:
                        }
             if feature['strand'] == '.' or feature['strand'] == '?':
                 feature['strand'] = None
+
             if feature['score'] == '.':
-                feature['score'] = None
+                feature['score'] = 0.0
+            else:
+                # if score is not '.' it should be a float
+                feature['score'] = float(feature['score'])
+
             if not feature['seqid'] in self.references:
                 # keep a list of the reference sequences
                 self.references.append(feature['seqid'])
