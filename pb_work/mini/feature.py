@@ -91,6 +91,55 @@ class Feature:
 
         # end of readGFF3
 
+    def readBlastTabular(self, filename, evalue_cutoff=1e-40):
+        """-----------------------------------------------------------------------------------------
+        Read blast -m 8 tabular format. 12 columns:
+        0	Query	The query sequence id
+        1	Subject	The matching subject sequence id
+        2	% id
+        3	alignment length
+        4	mistmatches
+        5	gap openings
+        6	q.start
+        7	q.end
+        8	s.start
+        9	s.end
+        10	e-value
+        11	bit score
+
+        :param filename: file to read
+        :param: evalue_cutoff - maximum E-value
+        :return: nfeature
+        -----------------------------------------------------------------------------------------"""
+        try:
+            blastin = open(filename, 'r')
+        except Exception as err:
+            print('Features::readBlastTabular - unable to read Blast file ({})'.format(filename))
+            print(err)
+            exit(1)
+
+        nfeature = 0
+        for line in blastin:
+            if line.isspace() or line.startswith('#'):
+                continue
+
+            field = line.rstrip().split()
+            if float(field[10]) > evalue_cutoff:
+                continue
+
+            # make sure begin is less than end
+            begin = int(field[8])
+            end = int(field[9])
+            if end < begin:
+                begin, end = end, begin
+
+            self.features.append({'seqid': field[1], 'begin': begin, 'end': end, 'ID': field[0]})
+            nfeature += 1
+
+        return nfeature
+
+        # end of readBlastTabular
+
     def next(self):
         """-----------------------------------------------------------------------------------------
         generator for iterating over features
@@ -180,30 +229,53 @@ if __name__ == '__main__':
     for id in gff.references:
         print('    {}'.format(id))
 
-    print('\niteration with generator')
-    n = 0
-    for f in gff.next():
-        print('1:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['feature']))
-        n += 1
-        if n > LIMIT:
-            break
+    # print('\niteration with generator')
+    # n = 0
+    # for f in gff.next():
+    #     print('1:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['feature']))
+    #     n += 1
+    #     if n > LIMIT:
+    #         break
 
     print('\niteration with iterator, after sort by pos')
     gff.sortByPos()
     n = 0
     for f in gff:
-        print('2:{} {} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['feature'], f['ID']))
+        print('range:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['ID']))
         n += 1
-        if n > LIMIT:
-            break
+        # if n > LIMIT:
+        #     break
 
-    print('\nranges')
+    print('\n    ranges')
+    out = open('gffranges.mrg.txt', 'w')
     n = 0
     ranges = gff.ranges()
-    for r in ranges:
-        print('range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
+    for r in ranges.features:
+        out.write(
+            '{} {} {} {} {}\n'.format(r['feature'], r['seqid'], r['begin'], r['end'], r['ID']))
+        print('    range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
         n += 1
-        if n > LIMIT:
-            break
+        # if n > LIMIT:
+        #     break
+
+    out.close()
+
+    print('\nread blast tabular')
+    blast = Feature()
+    n = blast.readBlastTabular('ch4.blastn', evalue_cutoff=1e-40)
+    print('    {} sdequences read'.format(n))
+    print('\n    ranges')
+    n = 0
+    ranges = blast.ranges()
+    out = open('blastranges.mrg.txt', 'w')
+    for r in ranges.features:
+        out.write(
+            '{} {} {} {} {}\n'.format(r['feature'], r['seqid'], r['begin'], r['end'], r['ID']))
+        print('    range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
+        n += 1
+        # if n > LIMIT:
+        #     break
+
+    out.close()
 
     exit(0)
