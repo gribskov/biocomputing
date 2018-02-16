@@ -84,6 +84,7 @@ class Feature:
                 left, right = att.split('=')
                 feature[left] = right
 
+            self.features.append(feature)
             nfeature += 1
 
         return nfeature
@@ -118,52 +119,59 @@ class Feature:
         range = Feature()
 
         # start a range feature
-        begin = 0
-        end = 0
-        seqid = ''
+        begin = self.features[0]['begin']
+        end = self.features[0]['end']
+        seqid = self.features[0]['seqid']
         idlist = []
 
         for feature in self.features:
             if feature['seqid'] == seqid:
                 if feature['begin'] <= end:
                     # continue previous range
-                    end = feature['end']
-                    begin = feature['begin']
-                    if 'ID' in feature:
-                        if feature['ID'] not in idlist:
-                            idlist.append['ID'])
-                else:
-                # save current
-                range.features.append({'seqid': seqid, 'begin': begin, 'end': end, 'ID': ';'.join(idlist)})
+                    end = max(end, feature['end'])
 
-                # start new range
-                begin = feature['begin']
-                end = feature['end']
-                idlist = []
+                else:
+                    # save current
+                    range.features.append(
+                        {'seqid': seqid, 'feature': 'range', 'begin': begin, 'end': end,
+                         'ID': ';'.join(idlist)})
+
+                    # start new range
+                    begin = feature['begin']
+                    end = feature['end']
+                    seqid = feature['seqid']
+                    idlist = []
+
                 if 'ID' in feature:
-                    idlist.append(feature['ID'])
+                    if feature['ID'] not in idlist:
+                        idlist.append(feature['ID'])
 
             else:
                 # new sequence, must start new range
 
                 # save current
-                    range.features.append({'seqid': seqid, 'begin': begin, 'end': end, 'ID': ';'.join(idlist)})
+                range.features.append(
+                    {'seqid': seqid, 'feature': 'range', 'begin': begin, 'end': end,
+                     'ID': ';'.join(idlist)})
 
                 # new range
                 begin = feature['begin']
                 end = feature['end']
+                seqid = feature['seqid']
                 idlist = []
                 if 'ID' in feature:
-                    idlist.append(feature['ID'])
+                    if feature['ID'] not in idlist:
+                        idlist.append(feature['ID'])
 
         return range
-
 
 
 # --------------------------------------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
+    LIMIT = 1000
+
     gff = Feature()
     n = gff.readGFF3('at_1000k.gff3', feature_type='gene')
     print('{} features read'.format(n))
@@ -177,17 +185,25 @@ if __name__ == '__main__':
     for f in gff.next():
         print('1:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['feature']))
         n += 1
-        if n > 5:
+        if n > LIMIT:
             break
 
     print('\niteration with iterator, after sort by pos')
     gff.sortByPos()
     n = 0
     for f in gff:
-        print('2:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['feature']))
-        print('    {}'.format(f['attribute']))
+        print('2:{} {} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['feature'], f['ID']))
         n += 1
-        if n > 5:
+        if n > LIMIT:
+            break
+
+    print('\nranges')
+    n = 0
+    ranges = gff.ranges()
+    for r in ranges:
+        print('range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
+        n += 1
+        if n > LIMIT:
             break
 
     exit(0)
