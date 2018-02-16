@@ -80,12 +80,10 @@ class Feature:
 
             # the variable attributes in column 9
             attrs = col[8].split(';')
-            attribute = {}
             for att in attrs:
                 left, right = att.split('=')
-                attribute[left] = right
-            feature['attribute'] = attribute
-            self.features.append(feature)
+                feature[left] = right
+
             nfeature += 1
 
         return nfeature
@@ -116,50 +114,53 @@ class Feature:
 
         :return: feature object with ranges merged
         -----------------------------------------------------------------------------------------"""
-        range = Feature()
         self.sortByPos()
+        range = Feature()
+
+        # start a range feature
         begin = 0
         end = 0
         seqid = ''
         idlist = []
-        for f in self.features:
-            if f['seqid'] == seqid:
-                if f['begin'] <= end:
-                    # continue previous range
-                    end = f['end']
-                    begin = f['begin']
-                    if 'ID' in f['attribute']:
-                        if f['attribute']['ID'] not in idlist:
-                            idlist.append(f['attribute']['ID'])
-                else:
-                    # start new range
 
-                    # TODO: save current
-                    begin = self.features[0]['begin']
-                    end = self.features[0]['end']
-                    idlist = []
+        for feature in self.features:
+            if feature['seqid'] == seqid:
+                if feature['begin'] <= end:
+                    # continue previous range
+                    end = feature['end']
+                    begin = feature['begin']
+                    if 'ID' in feature:
+                        if feature['ID'] not in idlist:
+                            idlist.append['ID'])
+                else:
+                # save current
+                range.features.append({'seqid': seqid, 'begin': begin, 'end': end, 'ID': ';'.join(idlist)})
+
+                # start new range
+                begin = feature['begin']
+                end = feature['end']
+                idlist = []
+                if 'ID' in feature:
+                    idlist.append(feature['ID'])
 
             else:
                 # new sequence, must start new range
-                # TODO: save current
-                begin = self.features[0]['begin']
-                end = self.features[0]['end']
-                seqid = self.features[0]['seqid']
+
+                # save current
+                    range.features.append({'seqid': seqid, 'begin': begin, 'end': end, 'ID': ';'.join(idlist)})
+
+                # new range
+                begin = feature['begin']
+                end = feature['end']
+                idlist = []
+                if 'ID' in feature:
+                    idlist.append(feature['ID'])
 
         return range
 
-    def appendIDToAttribute(idlist, feature_dict):
-        """-----------------------------------------------------------------------------------------
-
-        :param feature_dict:
-        :return:
-        -----------------------------------------------------------------------------------------"""
-        if 'ID' in feature_dict['attribute']:
-            if feature_dict['attribute']['ID'] not in idlist:
-                idlist.append(feature_dict['attribute']['ID'])
 
 
-    # --------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
