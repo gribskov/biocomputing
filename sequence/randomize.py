@@ -8,6 +8,7 @@ Synopsis
 
 Michael Gribskov     17 February 2018
 ================================================================================================="""
+import random
 
 
 def composition(seq='', k=1):
@@ -83,17 +84,39 @@ def tabular(*tables):
     return None
 
 
-def withReplace(seq='', k='1'):
+def withReplace(seq='', k=1):
     """---------------------------------------------------------------------------------------------
     Sample with replacement.  Composition is not guaranteed to be the same as the original
     sequence but should be close.
+
+    TODO: only works for k=1
 
     :param sequence: string, sequence to randomize
     :param k: word size, default=1
     :return: string
     ---------------------------------------------------------------------------------------------"""
     n, comp = composition(seq, k)
+    freq = frequency(comp)
 
+    # generate cumulative frequencies (thresholds)
+    threshold = {}
+    sum = 0
+    for word in sorted(freq):
+        sum += freq[word]
+        threshold[word] = sum
+
+    rseq = ''
+    found = ''
+    for i in range(len(seq)):
+        r = random.random()
+        for word in sorted(freq):
+            if r <= threshold[word]:
+                found = word
+                break
+            found = word
+        rseq += found
+
+    return rseq
 
 
 # --------------------------------------------------------------------------------------------------
@@ -109,5 +132,15 @@ if __name__ == '__main__':
 
         print()
         tabular(comp, freq)
+
+    seq2 = 'A' * 100 + 'C' * 100 + 'G' * 100 + 'T' * 100
+    n, comp = composition(seq2)
+    freq = frequency(comp)
+
+    rseq = withReplace(seq2)
+    nr, rcomp = composition(rseq)
+    rfreq = frequency(rcomp)
+    print()
+    tabular(rfreq, freq)
 
     exit(0)
