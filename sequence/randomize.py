@@ -30,6 +30,39 @@ def composition(seq='', k=1):
     return n, comp
 
 
+def frequency(comp, n=0):
+    """---------------------------------------------------------------------------------------------
+    Calculate the frequency of each word given the total number of words and observed counts.
+    :param comp:
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    if n == 0:
+        # number of words not provided, count the words
+        for word in comp:
+            n += comp[word]
+    if n <= 0:
+        print('\nrandomize::frequency - number of words <= 0')
+        exit(1)
+
+    freq = {}
+    for word in comp:
+        freq[word] = comp[word] / n
+
+    return freq
+
+
+def withReplace(seq='', k='1'):
+    """---------------------------------------------------------------------------------------------
+    Sample with replacement.  Composition is not guaranteed to be the same as the original
+    sequence but should be close.
+
+    :param sequence: string, sequence to randomize
+    :param k: word size, default=1
+    :return: string
+    ---------------------------------------------------------------------------------------------"""
+    n, comp = composition(seq, k)
+
+
 # --------------------------------------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------------------------------------
@@ -42,5 +75,8 @@ if __name__ == '__main__':
         nword, comp = composition(seq1, k)
         print('    n words:', nword)
         print('    composition:', comp)
+
+        freq = frequency({}, 0)
+        print('frequency:', freq)
 
     exit(0)
