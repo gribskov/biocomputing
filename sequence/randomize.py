@@ -32,7 +32,9 @@ def composition(seq='', k=1):
 
 def frequency(comp, n=0):
     """---------------------------------------------------------------------------------------------
-    Calculate the frequency of each word given the total number of words and observed counts.
+    Calculate the frequency (probability) of each word given the total number of words and observed
+    counts.
+
     :param comp:
     :return:
     ---------------------------------------------------------------------------------------------"""
@@ -49,6 +51,34 @@ def frequency(comp, n=0):
         freq[word] = comp[word] / n
 
     return freq
+
+
+def tabular(*tables):
+    """---------------------------------------------------------------------------------------------
+    print tables in horizonatal tabular format
+    TODO: aggregate keys across all tables
+    TODO: specify indent
+    TODO: automatically determine field width
+
+    :param tables: 1 or more composition/freuency tables
+    :return: None
+    ---------------------------------------------------------------------------------------------"""
+    indent = 4
+    field = 7
+
+    space = ' ' * indent
+    format_s = '{{:>{}}}'.format(field)
+
+    for word in sorted(tables[0]):
+        print('{:>7}'.format(word), end='')
+    print()
+
+    for table in tables:
+        for word in sorted(table):
+            print('{:7.2f}'.format(table[word]), end='')
+        print()
+
+    return None
 
 
 def withReplace(seq='', k='1'):
@@ -71,12 +101,10 @@ if __name__ == '__main__':
 
     for k in range(1, 4):
         print('\ncomposition - {}mer'.format(k))
-        print('    sequence:', seq1)
         nword, comp = composition(seq1, k)
-        print('    n words:', nword)
-        print('    composition:', comp)
+        freq = frequency(comp, 0)
 
-        freq = frequency({}, 0)
-        print('frequency:', freq)
+        print()
+        tabular(comp, freq)
 
     exit(0)
