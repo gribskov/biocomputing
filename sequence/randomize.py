@@ -65,12 +65,14 @@ def tabular(*tables):
     ---------------------------------------------------------------------------------------------"""
     indent = 4
     field = 7
+    precision = 2
 
     space = ' ' * indent
     format_s = '{{:>{}}}'.format(field)
+    format_f = '{{:{}.{}f}}'.format(field, precision)
 
     for word in sorted(tables[0]):
-        print('{:>7}'.format(word), end='')
+        print(format_s.format(word), end='')
     print()
 
     for table in tables:
@@ -91,6 +93,7 @@ def withReplace(seq='', k='1'):
     :return: string
     ---------------------------------------------------------------------------------------------"""
     n, comp = composition(seq, k)
+
 
 
 # --------------------------------------------------------------------------------------------------
