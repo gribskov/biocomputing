@@ -75,19 +75,18 @@ def difference(tab1, tab2):
     return diff
 
 
-def tabular(*tables):
+def tabular(*tables, indent=4, field=7, precision=3):
     """---------------------------------------------------------------------------------------------
     print tables in horizonatal tabular format
     TODO: aggregate keys across all tables
-    TODO: specify indent
     TODO: automatically determine field width
 
     :param tables: 1 or more composition/freuency tables
     :return: None
     ---------------------------------------------------------------------------------------------"""
-    indent = 4
-    field = 7
-    precision = 2
+    # indent = 4
+    # field = 7
+    # precision = 3
 
     space = ' ' * indent
     format_s = '{{:>{}}}'.format(field)
@@ -99,7 +98,7 @@ def tabular(*tables):
 
     for table in tables:
         for word in sorted(table):
-            print('{:7.2f}'.format(table[word]), end='')
+            print(format_f.format(table[word]), end='')
         print()
 
     return None
@@ -165,6 +164,6 @@ if __name__ == '__main__':
     tabular(rfreq, freq)
 
     diff = difference(freq,rfreq)
-    tabular(diff)
+    tabular(freq, rfreq, diff, precision=4)
 
     exit(0)
