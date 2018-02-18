@@ -1,0 +1,50 @@
+"""=================================================================================================
+query phobius server at http://phobius.sbc.su.se/
+
+Michael Gribskov     18  2018
+================================================================================================="""
+import requests
+from bs4 import BeautifulSoup
+
+# --------------------------------------------------------------------------------------------------
+# main
+# --------------------------------------------------------------------------------------------------
+if __name__ == '__main__':
+
+    phobius = 'http://phobius.sbc.su.se/'
+    submit = '/cgi-bin/predict.pl'
+
+    bri1 = '''>AEE87069.1 Leucine-rich receptor-like protein kinase family protein [Arabidopsis thaliana]
+MKTFSSFFLSVTTLFFFSFFSLSFQASPSQSLYREIHQLISFKDVLPDKNLLPDWSSNKNPCTFDGVTCR
+DDKVTSIDLSSKPLNVGFSAVSSSLLSLTGLESLFLSNSHINGSVSGFKCSASLTSLDLSRNSLSGPVTT
+LTSLGSCSGLKFLNVSSNTLDFPGKVSGGLKLNSLEVLDLSANSISGANVVGWVLSDGCGELKHLAISGN
+KISGDVDVSRCVNLEFLDVSSNNFSTGIPFLGDCSALQHLDISGNKLSGDFSRAISTCTELKLLNISSNQ
+FVGPIPPLPLKSLQYLSLAENKFTGEIPDFLSGACDTLTGLDLSGNHFYGAVPPFFGSCSLLESLALSSN
+NFSGELPMDTLLKMRGLKVLDLSFNEFSGELPESLTNLSASLLTLDLSSNNFSGPILPNLCQNPKNTLQE
+LYLQNNGFTGKIPPTLSNCSELVSLHLSFNYLSGTIPSSLGSLSKLRDLKLWLNMLEGEIPQELMYVKTL
+ETLILDFNDLTGEIPSGLSNCTNLNWISLSNNRLTGEIPKWIGRLENLAILKLSNNSFSGNIPAELGDCR
+SLIWLDLNTNLFNGTIPAAMFKQSGKIAANFIAGKRYVYIKNDGMKKECHGAGNLLEFQGIRSEQLNRLS
+TRNPCNITSRVYGGHTSPTFDNNGSMMFLDMSYNMLSGYIPKEIGSMPYLFILNLGHNDISGSIPDEVGD
+LRGLNILDLSSNKLDGRIPQAMSALTMLTEIDLSNNNLSGPIPEMGQFETFPPAKFLNNPGLCGYPLPRC
+DPSNADGYAHHQRSHGRRPASLAGSVAMGLLFSFVCIFGLILVGREMRKRRRKKEAELEMYAEGHGNSGD
+RTANNTNWKLTGVKEALSINLAAFEKPLRKLTFADLLQATNGFHNDSLIGSGGFGDVYKAILKDGSAVAI
+KKLIHVSGQGDREFMAEMETIGKIKHRNLVPLLGYCKVGDERLLVYEFMKYGSLEDVLHDPKKAGVKLNW
+STRRKIAIGSARGLAFLHHNCSPHIIHRDMKSSNVLLDENLEARVSDFGMARLMSAMDTHLSVSTLAGTP
+GYVPPEYYQSFRCSTKGDVYSYGVVLLELLTGKRPTDSPDFGDNNLVGWVKQHAKLRISDVFDPELMKED
+PALEIELLQHLKVAVACLDDRAWRRPTMVQVMAMFKEIQAGSGIDSQSTIRSIEDGGFSTIEMVDMSIKE
+VPEGKL'''
+
+    command = {'protseq':bri1, 'format':'plp'}
+    response = requests.post(phobius+submit, command)
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+    img = soup.find('img')
+    # print(img['src'])
+
+    # plot address is in image tag, beginning at character 3
+    plot = requests.get(phobius+img['src'][3:],stream=True)
+    print( plot)
+    with open('../pb_work/examples/phobius.png', 'wb') as image:
+        image.write(plot.content)
+
+    exit(0)
