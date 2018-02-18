@@ -54,6 +54,27 @@ def frequency(comp, n=0):
     return freq
 
 
+def difference(tab1, tab2):
+    """---------------------------------------------------------------------------------------------
+    return a table with the difference between the two input tables. Difference is tab1 minus tab2.
+
+    :param tab1: composition or frequency tablew
+    :param tab2: composition or frequency tablew
+    :return: difference table
+    ---------------------------------------------------------------------------------------------"""
+    s = set(tab1.keys()).union(set(tab2.keys()))
+    diff = {}
+    for word in s:
+       if word not in tab1:
+           diff[word] = -tab2[word]
+       elif word not in tab2:
+           diff[word] = tab1[word]
+       else:
+           diff[word] = tab1[word] - tab2[word]
+
+    return diff
+
+
 def tabular(*tables):
     """---------------------------------------------------------------------------------------------
     print tables in horizonatal tabular format
@@ -142,5 +163,8 @@ if __name__ == '__main__':
     rfreq = frequency(rcomp)
     print()
     tabular(rfreq, freq)
+
+    diff = difference(freq,rfreq)
+    tabular(diff)
 
     exit(0)
