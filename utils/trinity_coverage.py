@@ -15,13 +15,24 @@ def getIDParts(idstring):
     :param:idstring trinity ID string to parse
     :return: dict of cluster,  component, gene, isoform, shortid
      --------------------------------------------------------------------------------------------"""
-    id = {}
-    cluster, component, gene, isoform = idre.match(idstring).groups()
-    id['cluster'] = cluster
-    id['component'] = component
-    id['gene'] = gene
-    id['isoform'] = isoform
-    id['shortid'] = '{cl}.{co}.{g}.{i}'.format(cl=cluster, co=component, g=gene, i=isoform)
+    if 'TRINITY' in idstring:
+        id = {}
+        cluster, component, gene, isoform = idre.match(idstring).groups()
+        id['cluster'] = cluster
+        id['component'] = component
+        id['gene'] = gene
+        id['isoform'] = isoform
+        id['shortid'] = '{cl}.{co}.{g}.{i}'.format(cl=cluster, co=component, g=gene, i=isoform)
+
+    else:
+        # old trinity id string
+        # comp1000022_c0_seq1
+        component, gene, isoform = idstring.split('_')
+        id['cluster'] = None
+        id['component'] = component
+        id['gene'] = gene
+        id['isoform'] = isoform
+        id['shortid'] = '{co}.{g}.{i}'.format( co=component, g=gene, i=isoform)
 
     return id
 
@@ -83,6 +94,7 @@ n = {k: 0 for k in levels}
 while blast.next():
     nhits += 1
     id = getIDParts(blast.qseqid)
+    #TODO add treatment for no cluster
     subj_cov = (int(blast.send) - int(blast.sstart) + 1) / int(blast.slen)
     item = ''
     for k in levels:
