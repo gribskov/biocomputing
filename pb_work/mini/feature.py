@@ -80,17 +80,65 @@ class Feature:
 
             # the variable attributes in column 9
             attrs = col[8].split(';')
-            attribute = {}
             for att in attrs:
                 left, right = att.split('=')
-                attribute[left] = right
-            feature['attribute'] = attribute
+                feature[left] = right
+
             self.features.append(feature)
             nfeature += 1
 
         return nfeature
 
         # end of readGFF3
+
+    def readBlastTabular(self, filename, evalue_cutoff=1e-40):
+        """-----------------------------------------------------------------------------------------
+        Read blast -m 8 tabular format. 12 columns:
+        0	Query	The query sequence id
+        1	Subject	The matching subject sequence id
+        2	% id
+        3	alignment length
+        4	mistmatches
+        5	gap openings
+        6	q.start
+        7	q.end
+        8	s.start
+        9	s.end
+        10	e-value
+        11	bit score
+
+        :param filename: file to read
+        :param: evalue_cutoff - maximum E-value
+        :return: nfeature
+        -----------------------------------------------------------------------------------------"""
+        try:
+            blastin = open(filename, 'r')
+        except Exception as err:
+            print('Features::readBlastTabular - unable to read Blast file ({})'.format(filename))
+            print(err)
+            exit(1)
+
+        nfeature = 0
+        for line in blastin:
+            if line.isspace() or line.startswith('#'):
+                continue
+
+            field = line.rstrip().split()
+            if float(field[10]) > evalue_cutoff:
+                continue
+
+            # make sure begin is less than end
+            begin = int(field[8])
+            end = int(field[9])
+            if end < begin:
+                begin, end = end, begin
+
+            self.features.append({'seqid': field[1], 'begin': begin, 'end': end, 'ID': field[0]})
+            nfeature += 1
+
+        return nfeature
+
+        # end of readBlastTabular
 
     def next(self):
         """-----------------------------------------------------------------------------------------
@@ -116,53 +164,63 @@ class Feature:
 
         :return: feature object with ranges merged
         -----------------------------------------------------------------------------------------"""
-        range = Feature()
         self.sortByPos()
-        begin = 0
-        end = 0
-        seqid = ''
-        idlist = []
-        for f in self.features:
-            if f['seqid'] == seqid:
-                if f['begin'] <= end:
-                    # continue previous range
-                    end = f['end']
-                    begin = f['begin']
-                    if 'ID' in f['attribute']:
-                        if f['attribute']['ID'] not in idlist:
-                            idlist.append(f['attribute']['ID'])
-                else:
-                    # start new range
+        range = Feature()
 
-                    # TODO: save current
-                    begin = self.features[0]['begin']
-                    end = self.features[0]['end']
+        # start a range feature
+        begin = self.features[0]['begin']
+        end = self.features[0]['end']
+        seqid = self.features[0]['seqid']
+        idlist = []
+
+        for feature in self.features:
+            if feature['seqid'] == seqid:
+                if feature['begin'] <= end:
+                    # continue previous range
+                    end = max(end, feature['end'])
+
+                else:
+                    # save current
+                    range.features.append(
+                        {'seqid': seqid, 'feature': 'range', 'begin': begin, 'end': end,
+                         'ID': ';'.join(idlist)})
+
+                    # start new range
+                    begin = feature['begin']
+                    end = feature['end']
+                    seqid = feature['seqid']
                     idlist = []
+
+                if 'ID' in feature:
+                    if feature['ID'] not in idlist:
+                        idlist.append(feature['ID'])
 
             else:
                 # new sequence, must start new range
-                # TODO: save current
-                begin = self.features[0]['begin']
-                end = self.features[0]['end']
-                seqid = self.features[0]['seqid']
+
+                # save current
+                range.features.append(
+                    {'seqid': seqid, 'feature': 'range', 'begin': begin, 'end': end,
+                     'ID': ';'.join(idlist)})
+
+                # new range
+                begin = feature['begin']
+                end = feature['end']
+                seqid = feature['seqid']
+                idlist = []
+                if 'ID' in feature:
+                    if feature['ID'] not in idlist:
+                        idlist.append(feature['ID'])
 
         return range
 
-    def appendIDToAttribute(idlist, feature_dict):
-        """-----------------------------------------------------------------------------------------
 
-        :param feature_dict:
-        :return:
-        -----------------------------------------------------------------------------------------"""
-        if 'ID' in feature_dict['attribute']:
-            if feature_dict['attribute']['ID'] not in idlist:
-                idlist.append(feature_dict['attribute']['ID'])
-
-
-    # --------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
+    LIMIT = 1000
+
     gff = Feature()
     n = gff.readGFF3('at_1000k.gff3', feature_type='gene')
     print('{} features read'.format(n))
@@ -171,22 +229,53 @@ if __name__ == '__main__':
     for id in gff.references:
         print('    {}'.format(id))
 
-    print('\niteration with generator')
-    n = 0
-    for f in gff.next():
-        print('1:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['feature']))
-        n += 1
-        if n > 5:
-            break
+    # print('\niteration with generator')
+    # n = 0
+    # for f in gff.next():
+    #     print('1:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['feature']))
+    #     n += 1
+    #     if n > LIMIT:
+    #         break
 
     print('\niteration with iterator, after sort by pos')
     gff.sortByPos()
     n = 0
     for f in gff:
-        print('2:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['feature']))
-        print('    {}'.format(f['attribute']))
+        print('range:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['ID']))
         n += 1
-        if n > 5:
-            break
+        # if n > LIMIT:
+        #     break
+
+    print('\n    ranges')
+    out = open('gffranges.mrg.txt', 'w')
+    n = 0
+    ranges = gff.ranges()
+    for r in ranges.features:
+        out.write(
+            '{} {} {} {} {}\n'.format(r['feature'], r['seqid'], r['begin'], r['end'], r['ID']))
+        print('    range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
+        n += 1
+        # if n > LIMIT:
+        #     break
+
+    out.close()
+
+    print('\nread blast tabular')
+    blast = Feature()
+    n = blast.readBlastTabular('ch4.blastn', evalue_cutoff=1e-40)
+    print('    {} sdequences read'.format(n))
+    print('\n    ranges')
+    n = 0
+    ranges = blast.ranges()
+    out = open('blastranges.mrg.txt', 'w')
+    for r in ranges.features:
+        out.write(
+            '{} {} {} {} {}\n'.format(r['feature'], r['seqid'], r['begin'], r['end'], r['ID']))
+        print('    range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
+        n += 1
+        # if n > LIMIT:
+        #     break
+
+    out.close()
 
     exit(0)
