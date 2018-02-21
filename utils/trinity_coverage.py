@@ -15,9 +15,10 @@ def getIDParts(idstring):
     :param:idstring trinity ID string to parse
     :return: dict of cluster,  component, gene, isoform, shortid
      --------------------------------------------------------------------------------------------"""
+    id = {}
     if 'TRINITY' in idstring:
-        id = {}
-        cluster, component, gene, isoform = idre.match(idstring).groups()
+        #cluster, component, gene, isoform = idre.match(idstring).groups()
+        dummy, cluster, component, gene, isoform = idstring.split('_')
         id['cluster'] = cluster
         id['component'] = component
         id['gene'] = gene
@@ -39,6 +40,17 @@ def getIDParts(idstring):
     # end of getIDParts
 
 
+def fakeOldId(idstring):
+    """--------------------------------------------------------------------------------------------
+    for testing, convert a new id string such as TRINITY_DN88428_c0_g1_i1 
+    to an old id string such as comp1000022_c0_seq1
+    --------------------------------------------------------------------------------------------"""
+    idstring = idstring.replace('TRINITY_DN', 'comp')
+    idstring = idstring.replace('_c', '.')
+
+    return idstring
+
+
 def histogram(coverage):
     """---------------------------------------------------------------------------------------------
     print a list with a histogram of the values at 1% intervals
@@ -52,6 +64,7 @@ def histogram(coverage):
         n += 1
 
     cum = 0
+    print('\t%i\t%i+1\tfrac\tcum\t1-cum')
     for i in range(101):
         frac = hist[i] / n
         cum += frac
@@ -67,7 +80,7 @@ def histogram(coverage):
 # ==================================================================================================
 
 # TODO: make this command line option
-OLDID = True
+OLDID = False
 
 # get input file name from command line
 blastfilename = ''
@@ -100,6 +113,7 @@ n = {k: 0 for k in levels}
 while blast.next():
     nhits += 1
     id = getIDParts(blast.qseqid)
+    #id = getIDParts(fakeOldId(blast.qseqid))
     subj_cov = (int(blast.send) - int(blast.sstart) + 1) / int(blast.slen)
     item = ''
     for k in levels:
@@ -125,12 +139,12 @@ for k in levels:
 
 # generate and print histograms for each level
 for k in levels:
-    print('\n{} {}s'.format(n[k], k))
+    print('\nhistogram for {}: {} unique observations'.format(k, n[k]))
     histogram(count[k])
 
-for k in levels:
-    for i in count[k]:
-        print('{}\t{}\t{:.3f}'.format(i, best[k][i], count[k][i]))
+#for k in levels:
+#    for i in count[k]:
+#        print('{}\t{}\t{:.3f}'.format(i, best[k][i], count[k][i]))
 
 # print out best predicted transcripts
 for k in levels:
@@ -143,7 +157,7 @@ for k in levels:
 
     print('Writing best {}'.format(k))
     for item in best[k]:
-        out.write('{}\t{}\n'.format(item, best[k][item]))
+        out.write('{}\t{}{:7.3f}\n'.format(item, best[k][item],count[k][item]))
 
     out.close()
 
