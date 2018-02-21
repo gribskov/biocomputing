@@ -32,7 +32,7 @@ def getIDParts(idstring):
         id['component'] = component
         id['gene'] = gene
         id['isoform'] = isoform
-        id['shortid'] = '{co}.{g}.{i}'.format( co=component, g=gene, i=isoform)
+        id['shortid'] = '{co}.{g}.{i}'.format(co=component, g=gene, i=isoform)
 
     return id
 
@@ -66,6 +66,9 @@ def histogram(coverage):
 # main program
 # ==================================================================================================
 
+# TODO: make this command line option
+OLDID = True
+
 # get input file name from command line
 blastfilename = ''
 if len(sys.argv) > 1:
@@ -86,15 +89,17 @@ if not blast.new(blastfilename):
 
 nhits = 0
 levels = ('cluster', 'component', 'gene', 'isoform')
+if OLDID:
+    levels = ('component', 'gene', 'isoform')
+
 count = {k: {} for k in levels}
-best  = {k: {} for k in levels}
+best = {k: {} for k in levels}
 n = {k: 0 for k in levels}
 
 # count the hits at each level
 while blast.next():
     nhits += 1
     id = getIDParts(blast.qseqid)
-    #TODO add treatment for no cluster
     subj_cov = (int(blast.send) - int(blast.sstart) + 1) / int(blast.slen)
     item = ''
     for k in levels:
@@ -104,6 +109,7 @@ while blast.next():
                 count[k][item] = subj_cov
                 best[k][item] = '_'.join(['%s' % id[k] for k in levels])
         except KeyError:
+            # if item is undefined, save without testing
             count[k][item] = subj_cov
             best[k][item] = '_'.join(['%s' % id[k] for k in levels])
             n[k] += 1
@@ -125,5 +131,20 @@ for k in levels:
 for k in levels:
     for i in count[k]:
         print('{}\t{}\t{}'.format(i, best[k][i], count[k][i]))
+
+# print out best predicted transcripts
+for k in levels:
+    outfile = 'best_' + k + '.list'
+    try:
+        out = open(outfile, 'w')
+    except:
+        print('\nCould not open {} for writing'.format(outfile))
+        continue
+
+    print('Writing best {}'.format(k))
+    for item in best[k]:
+        out.write('{}\t{}\n'.format(item, best[k][item]))
+
+    out.close()
 
 exit(0)
