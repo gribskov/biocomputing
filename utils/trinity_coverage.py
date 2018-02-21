@@ -109,9 +109,9 @@ for k in levels:
 for k in levels:
     print('\n{} {}s'.format(n[k], k))
     histogram(count[k])
-[]
+
 for k in levels:
     for i in count[k]:
-        print('{}\t{}\t{}'.format(i, best[k][i], count[k][i]))
+        print('{}\t{}\t{:.3f}'.format(i, best[k][i], count[k][i]))
 
 exit(0)
