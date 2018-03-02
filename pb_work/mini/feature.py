@@ -11,6 +11,7 @@ class Feature:
 
         self.references = []  # references for coordinates, e.g. chromosomes
         self.features = []  # individual features
+        self.lable = ''
 
     def __iter__(self):
         """-----------------------------------------------------------------------------------------
@@ -166,6 +167,7 @@ class Feature:
         -----------------------------------------------------------------------------------------"""
         self.sortByPos()
         range = Feature()
+        range.label = self.label
 
         # start a range feature
         begin = self.features[0]['begin']
@@ -215,6 +217,49 @@ class Feature:
         return range
 
 
+    def compareRange(self, other):
+        """---------------------------------------------------------------------------------------------
+        must define seqid, begin, end
+    
+        :param self: first range
+        :param other: second range
+        :return: overlap
+        ---------------------------------------------------------------------------------------------"""
+        print('first:', self.features[self.ptr])
+        print('second:', other.features[other.ptr])
+
+        first = self.features[self.ptr]
+        second = other.features[other.ptr]
+
+        if first.seqid < second.seqid or first.end < second.begin:
+            return 'left'
+        elif first.seqid > second.seqid or first.begin > second.end:
+            return 'right'
+        else:
+            return 'overlap'
+
+
+        return
+
+def compareFeature(f1,f2):
+    """---------------------------------------------------------------------------------------------
+    returned feature has begin <= to other
+    :param f1:
+    :param f2:
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    if f1['seqid'] < f2['seqid']:
+        return f1
+    elif f1['seqid'] > f2['seqid']:
+        return f2
+    
+    # seqid are equal
+
+    if f1['begin'] <= f2['begin']:
+        return f1
+    elif f1['begin'] > f2['begin']:
+        return f2
+
 # --------------------------------------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------------------------------------
@@ -223,6 +268,7 @@ if __name__ == '__main__':
 
     gff = Feature()
     n = gff.readGFF3('at_1000k.gff3', feature_type='gene')
+    gff.label = 'gff'
     print('{} features read'.format(n))
 
     print('reference sequences:')
@@ -242,40 +288,55 @@ if __name__ == '__main__':
     n = 0
     for f in gff:
         print('range:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['ID']))
-        n += 1
-        # if n > LIMIT:
-        #     break
+    n += 1
+    # if n > LIMIT:
+    #     break
 
     print('\n    ranges')
     out = open('gffranges.mrg.txt', 'w')
     n = 0
-    ranges = gff.ranges()
-    for r in ranges.features:
+    gffranges = gff.ranges()
+    for r in gffranges.features:
         out.write(
             '{} {} {} {} {}\n'.format(r['feature'], r['seqid'], r['begin'], r['end'], r['ID']))
-        print('    range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
-        n += 1
-        # if n > LIMIT:
-        #     break
+    print('    range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
+    n += 1
+    # if n > LIMIT:
+    #     break
 
     out.close()
 
     print('\nread blast tabular')
     blast = Feature()
+    blast.label = 'blast'
     n = blast.readBlastTabular('ch4.blastn', evalue_cutoff=1e-40)
     print('    {} sdequences read'.format(n))
     print('\n    ranges')
     n = 0
-    ranges = blast.ranges()
+    blastranges = blast.ranges()
     out = open('blastranges.mrg.txt', 'w')
-    for r in ranges.features:
+    for r in blastranges.features:
         out.write(
             '{} {} {} {} {}\n'.format(r['feature'], r['seqid'], r['begin'], r['end'], r['ID']))
-        print('    range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
-        n += 1
-        # if n > LIMIT:
-        #     break
+    print('    range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
+    n += 1
+    # if n > LIMIT:
+    #     break
 
     out.close()
+
+    joint = Feature()
+    gffranges.ptr = 0
+    blastranges.ptr = 0
+    overlap = gffranges.compareRange(blastranges)
+    if overlap == 'left':
+        joint.features.append(gffranges.features[gffranges.ptr])
+        gffranges.ptr += 1
+    elif overlap == 'right'
+        joint.features.append(blastranges.features[blastranges.ptr])
+        blastranges.ptr += 1
+    else:
+        # TODO process overlap
+        pass
 
     exit(0)
