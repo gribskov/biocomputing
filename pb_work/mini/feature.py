@@ -11,7 +11,7 @@ class Feature:
 
         self.references = []  # references for coordinates, e.g. chromosomes
         self.features = []  # individual features
-        self.lable = ''
+        self.label = ''
 
     def __iter__(self):
         """-----------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ class Feature:
         """-----------------------------------------------------------------------------------------
         Read a set of features from a GFF3 file. Example:
         Pt	ensembl	protein_coding_gene	15938	20068	.	-	.	ID=ATCG00170;biotype=protein_coding;description=DNA-directed RNA polymerase family protein [Source:TAIR_LOCUS%3BAcc:ATCG00170];external_name=RPOC2;logic_name=tair
-        TODO: bug in selection, feature_type matches in feature including the key
+
         Columns:
             0: seqid (reference sequence)
             1: source
@@ -52,11 +52,11 @@ class Feature:
             if line.isspace() or line.startswith('#'):
                 continue
 
-            if feature_type not in line:
+            col = line.split()
+            if feature_type not in col[2]:
                 # select only matching features
                 continue
 
-            col = line.split()
             feature = {'seqid': col[0],
                        'source': col[1],
                        'feature': col[2],
@@ -216,6 +216,7 @@ class Feature:
 
         return range
 
+        # end of ranges
 
     def compareRange(self, other):
         """---------------------------------------------------------------------------------------------
@@ -238,10 +239,10 @@ class Feature:
         else:
             return 'overlap'
 
-
         return
 
-def compareFeature(f1,f2):
+
+def compareFeature(f1, f2):
     """---------------------------------------------------------------------------------------------
     returned feature has begin <= to other
     :param f1:
@@ -252,7 +253,7 @@ def compareFeature(f1,f2):
         return f1
     elif f1['seqid'] > f2['seqid']:
         return f2
-    
+
     # seqid are equal
 
     if f1['begin'] <= f2['begin']:
@@ -260,20 +261,73 @@ def compareFeature(f1,f2):
     elif f1['begin'] > f2['begin']:
         return f2
 
+
+def nextRange(r1, r2):
+    """---------------------------------------------------------------------------------------------
+    return the next feature in ranges r1 and r2
+    :param r1: Feature object
+    :param r2: Feature object
+    :return: Feature.features element
+    ---------------------------------------------------------------------------------------------"""
+    # cases where one or both ranges have been completely processed
+    if r1.ptr >= len(r1.features) and r2.ptr >= len(r2.features):
+        # both ranges are completed
+        return None
+
+    elif r1.ptr >= len(r1.features):
+        # range 1 only is completed
+        f2 = r2.features[r2.ptr]
+        f2['label'] = r2.label
+        r2.ptr += 1
+        return f2
+
+    elif r2.ptr >= len(r2.features):
+        # range 2 only is completed
+        f1 = r1.features[r1.ptr]
+        f1['label'] = r1.label
+        r1.ptr += 1
+        return f1
+
+    # general case where both ranges have available features    
+    f1 = r1.features[r1.ptr]
+    f2 = r2.features[r2.ptr]
+    f1['label'] = r1.label
+    f2['label'] = r2.label
+
+    if f1['seqid'] < f2['seqid']:
+        r1.ptr += 1
+        return f1
+
+    elif f1['seqid'] > f2['seqid']:
+        r2.ptr += 1
+        return f2
+
+    elif f1['begin'] <= f2['begin']:
+        r1.ptr += 1
+        return f1
+
+    else:
+        r2.ptr += 1
+        return f2
+
+
 # --------------------------------------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    LIMIT = 1000
+    LIMIT = 10
 
     gff = Feature()
-    n = gff.readGFF3('at_1000k.gff3', feature_type='gene')
+    gff_file = 'at_1000k.gff3'
+    n = gff.readGFF3(gff_file, feature_type='gene')
     gff.label = 'gff'
-    print('{} features read'.format(n))
+    print('read gff annotation')
+    print('     {} features read from {}'.format(n, gff_file))
 
-    print('reference sequences:')
-    for id in gff.references:
-        print('    {}'.format(id))
+    print('     reference sequences found in {}:'.format(gff_file), end='')
+    for id in sorted(gff.references):
+        print(' {}'.format(id), end='')
+    print()
 
     # print('\niteration with generator')
     # n = 0
@@ -283,60 +337,130 @@ if __name__ == '__main__':
     #     if n > LIMIT:
     #         break
 
-    print('\niteration with iterator, after sort by pos')
-    gff.sortByPos()
-    n = 0
-    for f in gff:
-        print('range:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['ID']))
-    n += 1
-    # if n > LIMIT:
-    #     break
+    # print('\niteration with iterator, after sort by pos')
+    # gff.sortByPos()
+    # n = 0
+    # for f in gff:
+    #     print('range:{} {} {} {}'.format(f['seqid'], f['begin'], f['end'], f['ID']))
+    #     n += 1
+    #     if n > LIMIT:
+    #         break
 
-    print('\n    ranges')
     out = open('gffranges.mrg.txt', 'w')
     n = 0
     gffranges = gff.ranges()
     for r in gffranges.features:
         out.write(
             '{} {} {} {} {}\n'.format(r['feature'], r['seqid'], r['begin'], r['end'], r['ID']))
-    print('    range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
-    n += 1
-    # if n > LIMIT:
-    #     break
-
+        # print('    range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
+        n += 1
+        # if n > LIMIT:
+        #     break
+    print('     {} ranges found in {}'.format(n, gff_file))
     out.close()
 
     print('\nread blast tabular')
+    blast_file = 'ch4.blastn'
     blast = Feature()
     blast.label = 'blast'
-    n = blast.readBlastTabular('ch4.blastn', evalue_cutoff=1e-40)
-    print('    {} sdequences read'.format(n))
-    print('\n    ranges')
+    n = blast.readBlastTabular(blast_file, evalue_cutoff=1e-40)
+    print('    {} sequences read from {}'.format(n, blast_file))
     n = 0
     blastranges = blast.ranges()
     out = open('blastranges.mrg.txt', 'w')
     for r in blastranges.features:
         out.write(
             '{} {} {} {} {}\n'.format(r['feature'], r['seqid'], r['begin'], r['end'], r['ID']))
-    print('    range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
-    n += 1
-    # if n > LIMIT:
-    #     break
+        # print('    range:{} {} {} {}'.format(r['seqid'], r['begin'], r['end'], r['ID']))
+        n += 1
+        # if n > LIMIT:
+        #     break
 
+    print('    {} ranges found in {}'.format(n, blast_file))
     out.close()
 
     joint = Feature()
+    # add pointers to features list
     gffranges.ptr = 0
     blastranges.ptr = 0
-    overlap = gffranges.compareRange(blastranges)
-    if overlap == 'left':
-        joint.features.append(gffranges.features[gffranges.ptr])
-        gffranges.ptr += 1
-    elif overlap == 'right'
-        joint.features.append(blastranges.features[blastranges.ptr])
-        blastranges.ptr += 1
-    else:
-        # TODO process overlap
-        pass
+
+    a = nextRange(gffranges, blastranges)
+    while True:
+
+        b = nextRange(gffranges, blastranges)
+        if not b:
+            break
+
+        # print()
+        # print('a:', a['label'], a['seqid'], a['begin'], a['end'])
+        # print('b:', b['label'], b['seqid'], b['begin'], b['end'])
+
+        # a will always be less than b either with smaller seqid or smaller begin, if on an earlier
+        # sequence (chromosome) or if a ends before b begins, accept the whole a range
+        if a['seqid'] < b['seqid'] or a['end'] < b['begin']:
+            joint.features.append({'label': a['label'], 'seqid': a['seqid'],
+                                   'begin': a['begin'], 'end': a['end']})
+            # print('    ', a['label'], a['seqid'], a['begin'], a['end'])
+            a = b
+            continue
+
+        # a and b overlap
+        begin = a['begin']
+        if a['begin'] < b['begin']:
+            # a only segment
+            joint.features.append({'label': a['label'], 'seqid': a['seqid'],
+                                   'begin': a['begin'], 'end': b['begin'] - 1})
+            # print('    ', a['label'], a['seqid'], a['begin'], b['begin'] - 1)
+
+        begin = b['begin']
+        if a['end'] >= b['end']:
+            # both segment, b ends first
+            joint.features.append({'label': 'both', 'seqid': a['seqid'],
+                                   'begin': begin, 'end': b['end']})
+            # print('    ', 'both', a['seqid'], begin, b['end'])
+            a['begin'] = b['end'] + 1
+            # possible that a['end'] is < a['begin']
+            continue
+
+        if a['end'] < b['end']:
+            # both segment, a ends first
+            joint.features.append({'label': 'both', 'seqid': a['seqid'],
+                                   'begin': begin, 'end': a['end']})
+            # print('    ', 'both', a['seqid'], begin, a['end'])
+            b['begin'] = a['end'] + 1
+            a = b
+            continue
+
+    # write overlap segments
+    filename = 'overlap.mrg.txt'
+    try:
+        out = open(filename, 'w')
+    except Exception as err:
+        print('Unable to open output file ({})'.format(filename))
+        print(err)
+        exit(1)
+
+    count = {'total': 0}
+    for overlap in joint.features:
+        out.write('{}\t{}\t{}\t{}\n'.
+                  format(overlap['label'], overlap['seqid'], overlap['begin'], overlap['end']))
+        try:
+            count[overlap['label']] += overlap['end'] - overlap['begin'] + 1
+        except KeyError:
+            count[overlap['label']] = overlap['end'] - overlap['begin'] + 1
+        count['total'] += overlap['end'] - overlap['begin'] + 1
+
+    print('\nCounts by label')
+    for type in count:
+        print('{:5}{:10d}'.format(type, count[type]))
+
+    print('\n{:5}{:>10}{:>8}{:>8}'.format('label', 'count', '%total', '%both'))
+    for type in ['gff', 'blast']:
+        print('{:5}{:10d}{:8.2f}{:8.2f}'.
+              format(type, count[type],
+                     100.0 * count[type] / count['total'], 100.0 * count['both'] / count[type],
+                     ))
+
+    out.close()
 
     exit(0)
