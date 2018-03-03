@@ -241,7 +241,8 @@ Pt	ensembl	protein_coding_gene	15013	15723	.	-	.	ID=ATCG00160;biotype=protein_co
 Pt	ensembl	transcript	15013	15723	.	-	.	ID=ATCG00160.1;Parent=ATCG00160;biotype=protein_coding;logic_name=tair
 Pt	.	CDS	15013	15723	.	-	0	ID=ATCG00160.1;Parent=ATCG00160.1;rank=1
 Pt	.	exon	15013	15723	.	-	.	ID=ATCG00160-E.1;Parent=ATCG00160.1;constitutive=1;rank=1
-\\\Pt	ensembl	transcript	15938	20068	.	-	.	ID=ATCG00170.1;Parent=ATCG00170;biotype=protein_coding;logic_name=tair
+Pt	ensembl	protein_coding_gene	15938	20068	.	-	.	ID=ATCG00170;biotype=protein_coding;description=DNA-directed RNA polymerase family protein [Source:TAIR_LOCUS%3BAcc:ATCG00170];external_name=RPOC2;logic_name=tair
+Pt	ensembl	transcript	15938	20068	.	-	.	ID=ATCG00170.1;Parent=ATCG00170;biotype=protein_coding;logic_name=tair
 Pt	.	CDS	15938	20068	.	-	0	ID=ATCG00170.1;Parent=ATCG00170.1;rank=1
 Pt	.	exon	15938	20068	.	-	.	ID=ATCG00170-E.1;Parent=ATCG00170.1;constitutive=1;rank=1
 Pt	.	repeat_region	19343	19347	.	?	.	description=dust
