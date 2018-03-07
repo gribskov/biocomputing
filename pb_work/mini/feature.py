@@ -438,6 +438,11 @@ if __name__ == '__main__':
             a = b
             continue
 
+    if a['begin'] != a['end']:
+        # if there's any a left, it is another range
+        joint.features.append({'label': a['label'], 'seqid': a['seqid'],
+                               'begin': begin, 'end': a['end']})
+
     # write overlap segments
     filename = 'overlap.mrg.txt'
     try:
