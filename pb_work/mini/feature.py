@@ -213,7 +213,9 @@ class Feature:
                 if 'ID' in feature:
                     if feature['ID'] not in idlist:
                         idlist.append(feature['ID'])
-
+        range.features.append(
+            {'seqid': seqid, 'feature': 'range', 'begin': begin, 'end': end,
+             'ID': ';'.join(idlist)})
         return range
 
         # end of ranges
