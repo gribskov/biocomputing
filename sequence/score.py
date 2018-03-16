@@ -33,9 +33,21 @@ class Score:
 
         return i
 
-# ==============================================================================================
+    def identity(self, pos=1, neg=0):
+        """-----------------------------------------------------------------------------------------
+        define an identity matrix based on the current scoring matrix
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+        n = len(self.alphabet)
+        self.table = [[neg for i in range(n)] for j in range(n)]
+        for i in range(len(self.alphabet)):
+            self.table[i][i] = pos
+
+        return True
+
+# ==================================================================================================
 # Testing
-# ==============================================================================================
+# ==================================================================================================
 if __name__ == '__main__':
 
     score = Score()
@@ -44,5 +56,9 @@ if __name__ == '__main__':
     print('    alphabet:', score.alphabet)
     print('    a2i:', score.a2i)
     print('    i2a:', score.i2a)
+
+    print('identity matrix')
+    score.identity()
+    print(score.table)
 
     exit(0)
