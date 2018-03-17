@@ -95,6 +95,19 @@ class Score:
 
         return True
 
+    def strToIndex(self, str):
+        """-----------------------------------------------------------------------------------------
+        Convert a string to a list of indices in the current alphabet.  This speeds up score lookup
+
+        :param str:
+        :return: index list
+        -----------------------------------------------------------------------------------------"""
+        istring = []
+        for c in str:
+            istring.append(self.a2i[c])
+
+        return istring
+
 
 # ==================================================================================================
 # Testing
@@ -118,10 +131,14 @@ if __name__ == '__main__':
     print(str(score))
 
     print('protein alphabet')
-    asize= score.alphabetSet('ABCDEFGHIKLMNPQRSTVWXYZ')
+    asize = score.alphabetSet('ABCDEFGHIKLMNPQRSTVWXYZ')
     print('    alphabet size:', asize)
     print(str(score))
 
-
+    print('convert sequence to index')
+    sequence = 'ACEDFG'
+    print('    sequence:', sequence)
+    iseq = score.strToIndex(sequence)
+    print('    iseq:', iseq)
 
     exit(0)
