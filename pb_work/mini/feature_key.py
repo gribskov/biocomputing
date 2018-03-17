@@ -185,50 +185,41 @@ class Feature:
         range = Feature()
         range.label = self.label
 
-        # start a range feature
-        begin = self.features[0]['begin']
-        end = self.features[0]['end']
-        seqid = self.features[0]['seqid']
-        idlist = []
+        # The first feature always starts a new range
+        range.features.append(
+            {'seqid': self.features[0]['seqid'],
+             'feature': 'range',
+             'begin': self.features[0]['begin'],
+             'end': self.features[0]['end'],
+             'ID': self.features[0]['ID']
+             })
+
+        # for convenience, make a pointer to most recent feature
+        current = range.features[-1]
 
         for feature in self.features:
-            if feature['seqid'] == seqid:
-                if feature['begin'] <= end:
-                    # continue previous range
-                    end = max(end, feature['end'])
 
-                else:
-                    # save current
-                    range.features.append(
-                        {'seqid': seqid, 'feature': 'range', 'begin': begin, 'end': end,
-                         'ID': ';'.join(idlist)})
+            if feature['seqid'] != current['seqid'] or feature['begin'] > current['end']:
+                # new sequence always requires new range
+                # otherwise, start a new range if begin <= end
+                if feature['seqid'] == 'Pt':
+                    print('{}: {}-{}'.format(feature['ID'], feature['begin'], feature['end']))
 
-                    # start new range
-                    begin = feature['begin']
-                    end = feature['end']
-                    seqid = feature['seqid']
-                    idlist = []
-
-                if 'ID' in feature:
-                    if feature['ID'] not in idlist:
-                        idlist.append(feature['ID'])
+                range.features.append(
+                    {'seqid': feature['seqid'],
+                     'feature': 'range',
+                     'begin': feature['begin'],
+                     'end': feature['end'],
+                     'ID': feature['ID']
+                     })
+                current = range.features[-1]
 
             else:
-                # new sequence, must start new range
-
-                # save current
-                range.features.append(
-                    {'seqid': seqid, 'feature': 'range', 'begin': begin, 'end': end,
-                     'ID': ';'.join(idlist)})
-
-                # new range
-                begin = feature['begin']
-                end = feature['end']
-                seqid = feature['seqid']
-                idlist = []
-                if 'ID' in feature:
-                    if feature['ID'] not in idlist:
-                        idlist.append(feature['ID'])
+                # overlap: continue previous range i - update end and id
+                current['end'] = max(current['end'], feature['end'])
+                if feature['ID'] not in current['ID']:
+                    # add id if not present if id list
+                    current['ID'] += ';{}'.format(feature['ID'])
 
         return range
 
