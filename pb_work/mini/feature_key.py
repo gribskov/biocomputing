@@ -177,7 +177,10 @@ class Feature:
 
     def ranges(self):
         """-----------------------------------------------------------------------------------------
-        Merges overlapping features, feature order may change due to sorting by position
+        Merges overlapping features, feature order may change due to sorting by position. because
+        IDs may overalp, for instant, seq1 and se11, the id list is terminated with ;
+        The final ; must be removed when the range closes.
+            current['ID'] = current['ID'].rstrip(';')
 
         :return: feature object with ranges merged
         -----------------------------------------------------------------------------------------"""
@@ -191,7 +194,7 @@ class Feature:
              'feature': 'range',
              'begin': self.features[0]['begin'],
              'end': self.features[0]['end'],
-             'ID': self.features[0]['ID']
+             'ID': self.features[0]['ID']+';'
              })
 
         # for convenience, make a pointer to most recent feature
@@ -205,21 +208,24 @@ class Feature:
                 if feature['seqid'] == 'Pt':
                     print('{}: {}-{}'.format(feature['ID'], feature['begin'], feature['end']))
 
+                current['ID'] = current['ID'].rstrip(';')
                 range.features.append(
                     {'seqid': feature['seqid'],
                      'feature': 'range',
                      'begin': feature['begin'],
                      'end': feature['end'],
-                     'ID': feature['ID']
+                     'ID': feature['ID']+';'
                      })
                 current = range.features[-1]
 
             else:
                 # overlap: continue previous range i - update end and id
                 current['end'] = max(current['end'], feature['end'])
-                if feature['ID'] not in current['ID']:
+                if feature['ID']+';' not in current['ID']:
                     # add id if not present if id list
-                    current['ID'] += ';{}'.format(feature['ID'])
+                    current['ID'] += '{};'.format(feature['ID'])
+
+        current['ID'] = current['ID'].rstrip(';')
 
         return range
 
