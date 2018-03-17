@@ -3,18 +3,22 @@ class Alignment:
     Sequence alignment class
 
     ============================================================================================="""
-    from .. import fasta
-    from .. import score
+    from sequence.fasta import Fasta
+    from sequence.score import Score
 
     def __init__(self):
         self.s1 = Fasta()
         self.s2 = Fasta()
         self.i1 = []
         self.i2 = []
-        self.score = None
+        self.score = Score()
+
 
 # ==================================================================================================
 # main/test
 # ==================================================================================================
 if __name__ == '__main__':
+
     align = Alignment()
+
+    exit(0)
