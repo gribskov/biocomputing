@@ -56,6 +56,8 @@ class Score:
         :return: alphabet size
         -----------------------------------------------------------------------------------------"""
         i = 0
+        self.a2i = {}
+        self.i2a = []
         for char in self.alphabet:
             if char in self.a2i:
                 # duplicate character
@@ -67,6 +69,19 @@ class Score:
             i += 1
 
         return i
+
+    def alphabetSet(self, alphabet=''):
+        """-----------------------------------------------------------------------------------------
+        change the alphabet.
+        1. rebulid a2i and i2f
+        2. reset table to identity
+        :return: alphabet size
+        -----------------------------------------------------------------------------------------"""
+        self.alphabet = alphabet
+        self.alphabetIndex()
+        self.identity()
+
+        return len(self.alphabet)
 
     def identity(self, pos=1, neg=0):
         """-----------------------------------------------------------------------------------------
@@ -101,5 +116,12 @@ if __name__ == '__main__':
 
     print('print in default str format')
     print(str(score))
+
+    print('protein alphabet')
+    asize= score.alphabetSet('ABCDEFGHIKLMNPQRSTVWXYZ')
+    print('    alphabet size:', asize)
+    print(str(score))
+
+
 
     exit(0)
