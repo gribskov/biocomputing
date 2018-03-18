@@ -205,9 +205,6 @@ class Feature:
             if feature['seqid'] != current['seqid'] or feature['begin'] > current['end']:
                 # new sequence always requires new range
                 # otherwise, start a new range if begin <= end
-                if feature['seqid'] == 'Pt':
-                    print('{}: {}-{}'.format(feature['ID'], feature['begin'], feature['end']))
-
                 current['ID'] = current['ID'].rstrip(';')
                 range.features.append(
                     {'seqid': feature['seqid'],
