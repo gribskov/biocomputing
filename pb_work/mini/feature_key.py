@@ -101,6 +101,10 @@ class Feature:
                 left, right = att.split('=')
                 feature[left] = right
 
+            if 'Parent' in feature:
+                # for pseudogene child features
+                feature['ID'] = feature['Parent']
+
             self.features.append(feature)
             nfeature += 1
 
