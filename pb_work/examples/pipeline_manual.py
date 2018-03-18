@@ -15,6 +15,6 @@ if __name__ == '__main__':
     input = ['data/s1_R1.fastq', 's1_R2.fastq']
 
     # create the project directory
-    sub.run(['mkdir', project], shell=True)
+    mkproject = sub.run(['mkdir', project], stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
 
     exit(0)
