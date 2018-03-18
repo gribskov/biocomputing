@@ -16,5 +16,6 @@ if __name__ == '__main__':
 
     # create the project directory
     mkproject = sub.run(['mkdir', project], stdout=sub.PIPE, stderr=sub.PIPE, shell=True)
+    print('out|err:', mkproject.stdout, '|', mkproject.stderr)
 
     exit(0)
