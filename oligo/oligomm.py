@@ -82,12 +82,12 @@ class Kmer:
                         # kmers with non ACGT letters
                         # sys.stderr.write('unknown kmer: {}\n'.format(line[i:i + KMER]))
                         pass
-                # TODO: remove for production
-                if self.total > 10000000:
-                    break
+                # restore for debugging
+                # if self.total > 10000000:
+                #     break
 
                 sys.stdout.flush()
-                seq = line[-KMER:-1]    # this is the KMER-1 letters that overlap the next line
+                seq = line[-KMER:-1]  # this is the KMER-1 letters that overlap the next line
 
         return self.total
         # end of fromFasta
@@ -129,6 +129,26 @@ class Kmer:
         return total
 
 
+def fractionGC(seq):
+    """---------------------------------------------------------------------------------------------
+    Calculate fraction GC in a sequence. non ACGT letters are ignored
+
+    :param seq:
+    :return: fraction GC
+    ---------------------------------------------------------------------------------------------"""
+    count = {}
+    all = 0
+    for base in seq:
+        try:
+            count[base] += 1
+        except KeyError:
+            count[base] = 1
+
+        all += 1
+
+    return (count['G'] + count['C']) / all
+
+
 # ==================================================================================================
 # main
 # ==================================================================================================
@@ -144,7 +164,7 @@ if __name__ == '__main__':
 
     # convert word counts to probabilities and write out
     pmin, pmax = kmer.updateProb()
-    print('    pmin pmax: {:10.3g}\t{:10.3g}'.format(pmin, pmax))
+    print('\n    pmin pmax: {:10.3g}\t{:10.3g}'.format(pmin, pmax))
     print('log pmin pmax: {:10.3g}\t{:10.3g}'.format(log(pmin), log(pmax)))
 
     nwritten = kmer.tableWrite(sys.argv[2])
@@ -170,11 +190,13 @@ if __name__ == '__main__':
         # print('{:6d} {:10}{:10.3g}'.format(nw, word, kmer.kmer[word]))
 
     # print weighted range
-    print('w: {:10.3g}{:10.3g}'.format(pmin, pmax))
+    print('w: {:10.3g}{:10.3g}'.format(wmin, wmax))
 
+    # could overlap words by KMER-1, but this is unnecessary.  try overlap = 3
     overlap = 3
     omer = {}
     for word in itertools.product(kmer.alphabet, repeat=overlap):
+        # generate all overlap len words
         oword = ''.join(word)
         omer[oword] = {'list': [], 't': [], 'w': 0.0}
 
@@ -189,25 +211,30 @@ if __name__ == '__main__':
 
     # construct an oligo
 
-    # select a weighted start point
-    r = random.random() * wsum
-    found = ''
-    for word in kmer.kmer:
-        found = word
-        if r < threshold[word]:
-            break
-
-    oligo = found
-    weight = kmer.kmer[found]
-
-    nsteps = 8
-    for step in range(nsteps):
-        # select an overlapping next word
-        lap = oligo[-overlap:]
-        r = random.random() * omer[lap]['w']
+    for n in range(0, 1000):
+        # select a weighted start point
+        r = random.random() * wsum
         found = ''
-        for i in range(len(omer[lap]['list'])):
-            found = omer[lap]['list'][i]
-            if r < omer[lap]['t'][i]:
+        for word in kmer.kmer:
+            found = word
+            if r < threshold[word]:
                 break
-        oligo += found[-overlap:]
+
+        oligo = found
+        weight = kmer.kmer[found]
+
+        nsteps = 8
+        for step in range(nsteps):
+            # select an overlapping next word
+            lap = oligo[-overlap:]
+            r = random.random() * omer[lap]['w']
+            found = ''
+            for i in range(len(omer[lap]['list'])):
+                found = omer[lap]['list'][i]
+                if r < omer[lap]['t'][i]:
+                    break
+            oligo += found[-overlap:]
+
+        gc = fractionGC(oligo)
+        print('>n{} GC={:.3}'.format(n, gc))
+        print(oligo)
