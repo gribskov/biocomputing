@@ -1,6 +1,12 @@
 """=================================================================================================
 get a count of kmers in a sequence.  The real goal is to identify the infrequent kmers and use them
 to probabilistically generate longer kmers unlikely to occur in the sequence.
+
+TODO: add command line interface with choice of number of oligos, overlap
+TODO: read save kmer distribution
+TODO: write oligos to file
+TODO: check for duplicates?
+TODO: bias towards more extreme AT/GC content?
 ================================================================================================="""
 import sys
 from math import log10 as log
@@ -10,7 +16,7 @@ import itertools
 
 class Kmer:
     """=============================================================================================
-    Holds the kmer distribution
+    Generates and holds the kmer counts and probabilities
 
     ============================================================================================="""
 
@@ -60,22 +66,27 @@ class Kmer:
         self.total = 0
         nseq = 0
         seq = ''  # for overlap
+        trace = ''
         for line in fasta:
             line = line.rstrip()
             if line.startswith('>'):
                 nseq += 1
-                print('\nn', nseq)
+                trace = nseq
+                # print('\nn', nseq)
                 seq = ''  # no overlap between sequences
             else:
                 line = seq + line
                 for i in range(len(line) - KMER + 1):
                     try:
                         self.kmer[line[i:i + KMER]] += 1
+
+                        # screen trace: TODO make interval an option
                         if not self.total % 10000000:
                             print()
                             print('{:13d} '.format(self.total), end='')
                         if not self.total % 100000:
-                            print('.', end='')
+                            print('{}'.format(trace), end='')
+                            trace = '.'
                         self.total += 1
 
                     except KeyError:
