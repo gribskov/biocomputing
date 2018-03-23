@@ -2,8 +2,7 @@
 get a count of kmers in a sequence.  The real goal is to identify the infrequent kmers and use them
 to probabilistically generate longer kmers unlikely to occur in the sequence.
 
-TODO: add command line interface with choice of number of oligos, overlap
-TODO: read save kmer distribution
+TODO: read saved kmer distribution
 TODO: write oligos to file
 TODO: check for duplicates?
 TODO: bias towards more extreme AT/GC content?
@@ -48,19 +47,14 @@ class Kmer:
 
         return n
 
-    def fromFasta(self, file):
+    def fromFasta(self, fasta):
         """-----------------------------------------------------------------------------------------
         count kmers in a Fasta file.  Some words may be excluded because they contain non-alphabet
         characters.
 
-        :param file:
+        :param file: open file handle for fasta file
         :return: number of kmers counted
         -----------------------------------------------------------------------------------------"""
-        fasta = None
-        try:
-            fasta = open(file, 'r')
-        except OSError:
-            sys.stderr.write('kmer.fromFasta - unable to open output file ({})'.format(file))
 
         # count words in sequence
         self.total = 0
@@ -76,9 +70,9 @@ class Kmer:
                 seq = ''  # no overlap between sequences
             else:
                 line = seq + line
-                for i in range(len(line) - KMER + 1):
+                for i in range(len(line) - self.k + 1):
                     try:
-                        self.kmer[line[i:i + KMER]] += 1
+                        self.kmer[line[i:i + self.k]] += 1
 
                         # screen trace: TODO make interval an option
                         if not self.total % 10000000:
@@ -98,7 +92,7 @@ class Kmer:
                 #     break
 
                 sys.stdout.flush()
-                seq = line[-KMER:-1]  # this is the KMER-1 letters that overlap the next line
+                seq = line[-self.k:-1]  # this is the KMER-1 letters that overlap the next line
 
         return self.total
         # end of fromFasta
@@ -140,6 +134,77 @@ class Kmer:
         return total
 
 
+# end of kKmer class ===============================================================================
+import sys
+import argparse
+
+
+def commandLine(default):
+    """---------------------------------------------------------------------------------------------
+    Get command line options
+
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    commandline = argparse.ArgumentParser(
+        description='calculate infrequent oligos based on kmer frequencies in an input'
+                    'Fasta file. Oligos are written Fasta format to stdout.'
+
+    )
+    commandline.add_argument('--fasta',
+                             help='FastA file to split',
+                             type=argparse.FileType('r'),
+                             )
+
+    commandline.add_argument('--kmer',
+                             help='maximum number of sequence character per segment',
+                             type=int,
+                             default=str(default['kmer'])
+                             )
+
+    commandline.add_argument('--noligo',
+                             help='number of oligos to generate',
+                             type=int,
+                             default=str(default['noligo'])
+                             )
+
+    commandline.add_argument('--table',
+                             help='precalculated kmer table',
+                             type=argparse.FileType('r'),
+                             )
+
+    commandline.add_argument('--output',
+                             help='output kmer table',
+                             type=argparse.FileType('w')
+                             )
+
+    return commandline.parse_args()
+
+
+def printParameters(clargs):
+    """---------------------------------------------------------------------------------------------
+    Print a report on command line parameters to stderr.
+
+    :param clargs: command line arguments from argparse.parse_args()
+    :return: True
+    ---------------------------------------------------------------------------------------------"""
+    sys.stderr.write('\n')
+    if clargs.fasta or clargs.table:
+        for k in clargs.__dict__:
+            if k.startswith('__') or clargs.__dict__[k] == None:
+                continue
+            if k == 'fasta' or k == 'table':
+                sys.stderr.write('{}: {}\n'.format(k, clargs.__dict__[k].name))
+            else:
+                sys.stderr.write('{}: {}\n'.format(k, clargs.__dict__[k]))
+
+    else:
+        sys.stderr('Input error: fasta (--fasta) table or kmer table (--table) must be provided\n')
+        exit(1)
+
+        sys.stderr.write('\n')
+    return True
+
+
 def fractionGC(seq):
     """---------------------------------------------------------------------------------------------
     Calculate fraction GC in a sequence. non ACGT letters are ignored
@@ -165,13 +230,16 @@ def fractionGC(seq):
 # ==================================================================================================
 if __name__ == '__main__':
 
-    KMER = 8
-    kmer = Kmer(KMER)
+    default = {'kmer': 8, 'noligo': 1000}
+    cl = commandLine(default)
+    printParameters(cl)
+
+    kmer = Kmer(cl.kmer)
     nwords = kmer.setupWords()
     print('{} words initialized'.format(nwords))
 
-    nwords = kmer.fromFasta(sys.argv[1])
-    print('\ntotal {}mer words read from {}: {}'.format(KMER, sys.argv[1], nwords))
+    nwords = kmer.fromFasta(cl.fasta)
+    print('\ntotal {}mer words read from {}: {}'.format(cl.kmer, sys.argv[1], nwords))
 
     # convert word counts to probabilities and write out
     pmin, pmax = kmer.updateProb()
