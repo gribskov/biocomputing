@@ -5,11 +5,11 @@ class Tree():
     27 March 2018     Michael Gribskov
     ============================================================================================="""
 
-    def __init__(self):
+    def __init__(self, name=''):
         """-----------------------------------------------------------------------------------------
         Tree constructor.
         -----------------------------------------------------------------------------------------"""
-        self.name = ''
+        self.name = name
         self.children = []
 
     def __str__(self):
@@ -44,19 +44,16 @@ class Tree():
 # ==================================================================================================
 if __name__ == '__main__':
     # create a tree
-    tree = Tree()
+    tree = Tree('a')
 
     # test entry of information into tree node
-    print('\n-------------\ntree a with children b, c\n-------------')
+    print('\n-------------------------\ntree a with children b, c\n------------------------')
 
-    tree.name = 'a'
     print(str(tree))
 
     # add child nodes to a
-    b = Tree()
-    b.name = 'b'
-    c = Tree()
-    c.name = 'c'
+    b = Tree('b')
+    c = Tree('c')
 
     tree.children.append(b)
     tree.children.append(c)
