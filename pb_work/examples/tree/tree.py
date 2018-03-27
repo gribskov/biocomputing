@@ -14,12 +14,13 @@ class Tree():
 
     def __str__(self):
         """-----------------------------------------------------------------------------------------
-        return a formatted string describin a tree node
+        return a formatted string describing a tree node
         :return: string
         -----------------------------------------------------------------------------------------"""
-        treestr = 'node:{}\n    children:'.format(self.name)
+        treestr = 'node:{}\n    children: '.format(self.name)
         if self.children:
-            treestr += ','.join(self.children)
+            for child in self.children:
+                treestr += str(child.name) + ' '
 
         else:
             treestr += 'None'
@@ -37,5 +38,15 @@ if __name__ == '__main__':
     # test entry of information into tree node
     tree.name = 'a'
     print(str(tree))
+
+    # add child nodes to a
+    b = Tree()
+    b.name = 'b'
+    c = Tree()
+    c.name = 'c'
+
+    tree.children.append(b)
+    tree.children.append(c)
+    print('\n{}'.format(str(tree)))
 
     exit(0)
