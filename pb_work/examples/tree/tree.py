@@ -47,6 +47,8 @@ if __name__ == '__main__':
     tree = Tree()
 
     # test entry of information into tree node
+    print('\n-------------\ntree a with children b, c\n-------------')
+
     tree.name = 'a'
     print(str(tree))
 
@@ -61,7 +63,8 @@ if __name__ == '__main__':
     print('\n{}'.format(str(tree)))
 
     # test dfs iterator
+    print('\n-------------\ndfs iteration\n-------------')
     for node in tree.dfs():
-        print('\n{}'.format(str(tree)))
+        print('\n{}'.format(str(node)))
 
     exit(0)
