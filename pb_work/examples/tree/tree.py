@@ -116,6 +116,31 @@ class Tree():
 
     # end of newickLoad
 
+    def newick(self):
+        """-----------------------------------------------------------------------------------------
+        generate newick string
+        newick format show the tree as a set of nested parentheses in which the children of a node
+        are shown as a comma delimited list inside a pair of parenthess.
+        a --|
+            |--|
+        b --|  |
+               |--
+        c -----|
+        ((a,b),c)
+
+        :return: newick formatted tree
+        -----------------------------------------------------------------------------------------"""
+        newick = ''
+        punct = '('
+        if self.children:
+            for child in self.children:
+                newick += punct + child.newick()
+                punct = ','
+            newick += '){}'.format(self.name)
+        else:
+            newick = self.name
+
+        return newick
 
 # ==================================================================================================
 # testing
@@ -159,5 +184,10 @@ if __name__ == '__main__':
     n2.newickLoad(tree)
     for node in n2.dfs():
         print('\n{}'.format(str(node)))
+
+    title = 'write newick formatted tree' + tree
+    print('\n{}\n{}\n{}'.format('-' * len(title), title, '-' * len(title)))
+
+    print(n2.newick())
 
     exit(0)
