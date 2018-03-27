@@ -27,6 +27,17 @@ class Tree():
 
         return treestr
 
+    def dfs(self):
+        """-----------------------------------------------------------------------------------------
+        generator to trace the tree in depth first order
+        :yield: next tree node
+        -----------------------------------------------------------------------------------------"""
+        yield self
+        for child in self.children:
+            for node in child.dfs():
+                yield node
+
+        StopIteration
 
 # ==================================================================================================
 # testing
@@ -48,5 +59,9 @@ if __name__ == '__main__':
     tree.children.append(b)
     tree.children.append(c)
     print('\n{}'.format(str(tree)))
+
+    # test dfs iterator
+    for node in tree.dfs():
+        print('\n{}'.format(str(tree)))
 
     exit(0)
