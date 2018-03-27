@@ -12,6 +12,20 @@ class Tree():
         self.name = ''
         self.children = []
 
+    def __str__(self):
+        """-----------------------------------------------------------------------------------------
+        return a formatted string describin a tree node
+        :return: string
+        -----------------------------------------------------------------------------------------"""
+        treestr = 'node:{}\n    children:'.format(self.name)
+        if self.children:
+            treestr += ','.join(self.children)
+
+        else:
+            treestr += 'None'
+
+        return treestr
+
 
 # ==================================================================================================
 # testing
@@ -22,6 +36,6 @@ if __name__ == '__main__':
 
     # test entry of information into tree node
     tree.name = 'a'
-    print(tree)
+    print(str(tree))
 
     exit(0)
