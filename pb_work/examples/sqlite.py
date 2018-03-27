@@ -76,4 +76,29 @@ class Genome():
 if __name__ == '__main__':
     genome = Genome('mydbfile.db', new=True)
 
+    chromosomes = [ ('1', 30427671),
+                    ('2', 19698289),
+                    ('3', 23459830),
+                    ('4', 18585056),
+                    ('5', 26975502)
+                   ]
+
+    genome.db.executemany('INSERT INTO chromosome VALUES (?, ?)', chromosomes)
+    genome.dbh.commit()
+
+    sql = '''
+    SELECT *
+    FROM chromosome
+    '''
+    genome.db.execute(sql)
+    for row in genome.db.fetchall():
+        print(row[0], row[1])
+
+    genome.db.row_factory = sq3.Row
+    genome.db.execute(sql)
+    for row in genome.db:
+        for key in row.keys():
+            print('{}:{}'.format(key,row[key]),end='\t')
+        print()
+
     exit(0)
