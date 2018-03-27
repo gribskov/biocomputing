@@ -28,6 +28,13 @@ class Tree():
 
         return treestr
 
+    def __len__(self):
+        """-----------------------------------------------------------------------------------------
+        Length of a tree is the total number of subnodes
+        :return: integer
+        -----------------------------------------------------------------------------------------"""
+        return len(list(self.dfs()))
+
     def dfs(self):
         """-----------------------------------------------------------------------------------------
         generator to trace the tree in depth first order
@@ -140,6 +147,7 @@ class Tree():
         else:
             newick = self.name
 
+        newick += ';'
         return newick
 
 # ==================================================================================================
@@ -189,5 +197,6 @@ if __name__ == '__main__':
     print('\n{}\n{}\n{}'.format('-' * len(title), title, '-' * len(title)))
 
     print(n2.newick())
+    print('the tree is {} nodes long'.format(len(n2)))
 
     exit(0)
