@@ -26,9 +26,10 @@ class Kmer:
         -----------------------------------------------------------------------------------------"""
         self.k = k
         self.alphabet = 'ACGT'
-        self.kmer = {k: 0 for k in ''.join(list(itertools.product(self.alphabet, repeat=self.k)))}
+        self.kmer = {}
+        self.p = {}
+        self.setupWords()
         self.total = 0
-        self.p = {k: 0.0 for k in ''.join(itertools.product(self.alphabet, repeat=self.k))}
         self.pmin = 1.0
         self.pmax = 0.0
 
