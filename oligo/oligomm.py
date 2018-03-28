@@ -26,11 +26,23 @@ class Kmer:
         -----------------------------------------------------------------------------------------"""
         self.k = k
         self.alphabet = 'ACGT'
-        self.kmer = {}
+        self.kmer = {k: 0 for k in ''.join(list(itertools.product(self.alphabet, repeat=self.k)))}
         self.total = 0
+        self.p = {k: 0.0 for k in ''.join(itertools.product(self.alphabet, repeat=self.k))}
+        self.pmin = 1.0
+        self.pmax = 0.0
+
+    def reset(self):
+        """-----------------------------------------------------------------------------------------
+        Reset the kmer counts, probabilities, and number of kmers
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+        self.kmer = {}
         self.p = {}
         self.pmin = 1.0
         self.pmax = 0.0
+
+        return True
 
     def setupWords(self, prior=1):
         """-----------------------------------------------------------------------------------------
@@ -114,18 +126,12 @@ class Kmer:
 
         return self.pmin, self.pmax
 
-    def tableWrite(self, file):
+    def tableWrite(self, kmerout):
         """-----------------------------------------------------------------------------------------
         write the kmer table to a file
-        :param file: file name
+        :param kmerout: file opened by argparse
         :return: kmers written
         -----------------------------------------------------------------------------------------"""
-        kmerout = None
-        try:
-            kmerout = open(file, 'w')
-        except OSError:
-            sys.stderr.write('kmer.tablewrite - unable to open output file ({})'.format(file))
-
         total = 0
         for word in self.kmer:
             kmerout.write('{}\t{}\t{:.4g}\n'.format(word, self.kmer[word], self.p[word]))
@@ -133,8 +139,39 @@ class Kmer:
 
         return total
 
+    def tableRead(self, kmerin, reset=True):
+        """-----------------------------------------------------------------------------------------
+        Read in a kmer table written by tableWrite.  If reset is True, the kmer count and
+        probability are reset
+        :param file: file opened by argparse
+        :return: integer, number of words read
+        -----------------------------------------------------------------------------------------"""
 
-# end of kKmer class ===============================================================================
+        # reset the object data if requested
+        if reset:
+            self.reset()
+
+        # read the file
+        n = 0
+        for line in kmerin:
+            if line.startswith(('#', '!')):
+                continue
+
+            kmer, count, p = line.split()
+            self.kmer[kmer] = int(count)
+            pf = float(p)
+            self.p[kmer] = pf
+            self.pmin = min(pf, self.pmin)
+            self.pmax = max(pf, self.pmax)
+            if n == 0:
+                self.k = len(kmer)
+            n += 1
+
+        self.total = n
+        return n
+
+
+# end of Kmer class ================================================================================
 import sys
 import argparse
 
@@ -205,20 +242,17 @@ def printParameters(clargs):
     return True
 
 
-def fractionGC(seq):
+def fractionGC(seq, alphabet):
     """---------------------------------------------------------------------------------------------
     Calculate fraction GC in a sequence. non ACGT letters are ignored
 
     :param seq:
     :return: fraction GC
     ---------------------------------------------------------------------------------------------"""
-    count = {}
+    count = {x: 0 for x in alphabet}
     all = 0
     for base in seq:
-        try:
-            count[base] += 1
-        except KeyError:
-            count[base] = 1
+        count[base] += 1
 
         all += 1
 
@@ -230,24 +264,33 @@ def fractionGC(seq):
 # ==================================================================================================
 if __name__ == '__main__':
 
-    default = {'kmer': 8, 'noligo': 1000}
+    default = {'kmer': 4, 'noligo': 1000}
     cl = commandLine(default)
     printParameters(cl)
 
     kmer = Kmer(cl.kmer)
-    nwords = kmer.setupWords()
-    print('{} words initialized'.format(nwords))
 
-    nwords = kmer.fromFasta(cl.fasta)
-    print('\ntotal {}mer words read from {}: {}'.format(cl.kmer, sys.argv[1], nwords))
+    nwords = 0
+    infile = ''
+    if cl.table:
+        # read kmers from file
+        nwords = kmer.tableRead(cl.table)
+        print('{} {}'.format(kmer.k, kmer.total))
+        infile = cl.table.name
+    else:
+        # calculate kmers from fasta
+        # convert word counts to probabilities and write out
+        nwords = kmer.fromFasta(cl.fasta)
+        pmin, pmax = kmer.updateProb()
+        infile = cl.fasta.name
 
-    # convert word counts to probabilities and write out
-    pmin, pmax = kmer.updateProb()
-    print('\n    pmin pmax: {:10.3g}\t{:10.3g}'.format(pmin, pmax))
-    print('log pmin pmax: {:10.3g}\t{:10.3g}'.format(log(pmin), log(pmax)))
+    print('\ntotal {}mer words read from {}: {}'.format(kmer.k, infile, kmer.total))
+    print('\n    pmin pmax: {:10.3g}\t{:10.3g}'.format(kmer.pmin, kmer.pmax))
+    print('log pmin pmax: {:10.3g}\t{:10.3g}'.format(log(kmer.pmin), log(kmer.pmax)))
 
-    nwritten = kmer.tableWrite(sys.argv[2])
-    print('\n{} kmers written to {}'.format(nwritten, sys.argv[2]))
+    if cl.output:
+        nwritten = kmer.tableWrite(cl.output)
+        print('\n{} kmers written to {}'.format(nwritten, cl.output))
 
     # weight counts - ad hoc weighting function
     # w = bias**(logP - logPmax)
@@ -256,7 +299,7 @@ if __name__ == '__main__':
     wmin = 1.0
     wmax = 0.0
     wsum = 0.0
-    cutoff = log(pmax)
+    cutoff = log(kmer.pmax)
     threshold = {}
     # for sorted list
     #  for word in sorted(kmer.kmer, key=lambda k: kmer.kmer[k]):
@@ -314,6 +357,6 @@ if __name__ == '__main__':
                     break
             oligo += found[-overlap:]
 
-        gc = fractionGC(oligo)
+        gc = fractionGC(oligo, kmer.alphabet)
         print('>n{} GC={:.3}'.format(n, gc))
         print(oligo)
