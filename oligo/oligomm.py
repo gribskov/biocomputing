@@ -26,8 +26,9 @@ class Kmer:
         -----------------------------------------------------------------------------------------"""
         self.k = k
         self.alphabet = 'ACGT'
-        self.kmer = {}
+        self.count = {}
         self.p = {}
+        self.w = {}
         self.setupWords()
         self.total = 0
         self.pmin = 1.0
@@ -38,8 +39,9 @@ class Kmer:
         Reset the kmer counts, probabilities, and number of kmers
         :return: True
         -----------------------------------------------------------------------------------------"""
-        self.kmer = {}
+        self.count = {}
         self.p = {}
+        self.w = {}
         self.pmin = 1.0
         self.pmax = 0.0
 
@@ -54,8 +56,9 @@ class Kmer:
         n = 0
         for word in itertools.product(self.alphabet, repeat=self.k):
             kstr = ''.join(word)
-            self.kmer[kstr] = prior
+            self.count[kstr] = prior
             self.p[kstr] = 0.0
+            self.w[kstr] = 1.0
             n += 1
 
         return n
@@ -85,7 +88,7 @@ class Kmer:
                 line = seq + line
                 for i in range(len(line) - self.k + 1):
                     try:
-                        self.kmer[line[i:i + self.k]] += 1
+                        self.count[line[i:i + self.k]] += 1
 
                         # screen trace: TODO make interval an option
                         if not self.total % 10000000:
@@ -120,8 +123,8 @@ class Kmer:
         self.pmin = 1.0
         self.pmax = 0.0
 
-        for word in self.kmer:
-            self.p[word] = self.kmer[word] / self.total
+        for word in self.count:
+            self.p[word] = self.count[word] / self.total
             self.pmin = min(self.pmin, self.p[word])
             self.pmax = max(self.pmax, self.p[word])
 
@@ -134,9 +137,9 @@ class Kmer:
         :return: kmers written
         -----------------------------------------------------------------------------------------"""
         total = 0
-        for word in self.kmer:
-            kmerout.write('{}\t{}\t{:.4g}\n'.format(word, self.kmer[word], self.p[word]))
-            total += self.kmer[word]
+        for word in self.count:
+            kmerout.write('{}\t{}\t{:.4g}\n'.format(word, self.count[word], self.p[word]))
+            total += self.count[word]
 
         return total
 
@@ -159,7 +162,7 @@ class Kmer:
                 continue
 
             kmer, count, p = line.split()
-            self.kmer[kmer] = int(count)
+            self.count[kmer] = int(count)
             pf = float(p)
             self.p[kmer] = pf
             self.pmin = min(pf, self.pmin)
@@ -303,14 +306,14 @@ if __name__ == '__main__':
     cutoff = log(kmer.pmax)
     threshold = {}
     # for sorted list
-    #  for word in sorted(kmer.kmer, key=lambda k: kmer.kmer[k]):
-    for word in kmer.kmer:
-        kmer.kmer[word] = 4 ** (cutoff - log(kmer.kmer[word]))
-        wsum += kmer.kmer[word]
-        wmin = min(wmin, kmer.kmer[word])
-        wmax = max(wmax, kmer.kmer[word])
+    #  for word in sorted(kmer.count, key=lambda k: kmer.count[k]):
+    for word in kmer.count:
+        kmer.count[word] = 4 ** (cutoff - log(kmer.count[word]))
+        wsum += kmer.count[word]
+        wmin = min(wmin, kmer.count[word])
+        wmax = max(wmax, kmer.count[word])
         threshold[word] = wsum
-        # print('{:6d} {:10}{:10.3g}'.format(nw, word, kmer.kmer[word]))
+        # print('{:6d} {:10}{:10.3g}'.format(nw, word, kmer.count[word]))
 
     # print weighted range
     print('w: {:10.3g}{:10.3g}'.format(wmin, wmax))
@@ -326,10 +329,10 @@ if __name__ == '__main__':
     # calculate the transitions between overlapping words: 'list' is the list of overlapping full
     # words, 't' has the threshold value for each word (cumulative weigth), and 'w' has the total
     # weight summed over the overlapping words
-    for word in kmer.kmer:
+    for word in kmer.count:
         lap = word[:overlap]
         omer[lap]['list'].append(word)
-        omer[lap]['w'] += kmer.kmer[word]
+        omer[lap]['w'] += kmer.count[word]
         omer[lap]['t'].append(omer[lap]['w'])
 
     # construct an oligo
@@ -338,13 +341,13 @@ if __name__ == '__main__':
         # select a weighted start point
         r = random.random() * wsum
         found = ''
-        for word in kmer.kmer:
+        for word in kmer.count:
             found = word
             if r < threshold[word]:
                 break
 
         oligo = found
-        weight = kmer.kmer[found]
+        weight = kmer.count[found]
 
         nsteps = 8
         for step in range(nsteps):
