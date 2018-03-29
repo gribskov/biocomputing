@@ -27,7 +27,7 @@ class Alignment:
 
         # start at 1 to avoid special treatment for edges
         for i in range(1, len(self.score)):
-            print('row j={}: {}'.format(i-1, self.s2[1-1]))
+            print('row j={}: {}'.format(i - 1, self.s2[1 - 1]))
 
             for j in range(1, len(self.score[i])):
                 s = self.table[self.s2[i - 1]][self.s1[j - 1]]
@@ -36,11 +36,35 @@ class Alignment:
 
         return
 
-    def scoreMax(self):
+    def scoreMaxFinal(self):
         """-----------------------------------------------------------------------------------------
-
-        :return:
+        retrun the maximum value and i, j position in the score matrix.  Only the final row and
+        column position are checked by this method.  Note the score matrix has
+        an extra row and column to deal with edge conditions
+        :return: max, i, j
         -----------------------------------------------------------------------------------------"""
+
+        imax = 1
+        jmax = len(self.s1)
+        maxscore = self.score[imax][jmax]
+
+        # final column
+        j = len(self.s1)
+        for i in range(1, len(self.s2) + 1):
+            if self.score[i][j] > maxscore:
+                imax = i
+                jmax = j
+                maxscore = self.score[i][j]
+
+        # final row
+        i = len(self.s2)
+        for j in range(1, len(self.s1) + 1):
+            if self.score[i][j] > maxscore:
+                imax = i
+                jmax = j
+                maxscore = self.score[i][j]
+
+        return maxscore, imax, jmax
 
 
 # ==================================================================================================
@@ -58,5 +82,7 @@ if __name__ == '__main__':
                'T': {'A': -1, 'C': -1, 'G': -1, 'T': 1}}
 
     a.globalNoGap()
+    maxscore, i, j = a.scoreMaxFinal()
+    print('maximum score: {}\t at {}, {}'.format(maxscore, i, j))
 
     exit(0)
