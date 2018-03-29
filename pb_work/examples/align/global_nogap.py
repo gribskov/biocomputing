@@ -64,7 +64,7 @@ class Alignment:
                 jmax = j
                 maxscore = self.score[i][j]
 
-        return maxscore, imax, jmax
+        return maxscore, imax-1, jmax-1
 
 
 # ==================================================================================================
