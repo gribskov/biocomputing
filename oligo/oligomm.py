@@ -2,7 +2,6 @@
 get a count of kmers in a sequence.  The real goal is to identify the infrequent kmers and use them
 to probabilistically generate longer kmers unlikely to occur in the sequence.
 
-TODO: read saved kmer distribution
 TODO: write oligos to file
 TODO: check for duplicates?
 TODO: bias towards more extreme AT/GC content?
@@ -39,6 +38,7 @@ class Kmer:
         Reset the kmer counts, probabilities, and number of kmers
         :return: True
         -----------------------------------------------------------------------------------------"""
+        self .list = []
         self.count = {}
         self.p = {}
         self.w = {}
@@ -54,8 +54,10 @@ class Kmer:
         :return: nwords
         -----------------------------------------------------------------------------------------"""
         n = 0
+        self.list = []
         for word in itertools.product(self.alphabet, repeat=self.k):
             kstr = ''.join(word)
+            self.list.append(kstr)
             self.count[kstr] = prior
             self.p[kstr] = 0.0
             self.w[kstr] = 1.0
@@ -303,15 +305,18 @@ if __name__ == '__main__':
     wmin = 1.0
     wmax = 0.0
     wsum = 0.0
+    bias = 0.5
     cutoff = log(kmer.pmax)
     threshold = {}
     # for sorted list
     #  for word in sorted(kmer.count, key=lambda k: kmer.count[k]):
     for word in kmer.count:
-        kmer.count[word] = 4 ** (cutoff - log(kmer.count[word]))
-        wsum += kmer.count[word]
-        wmin = min(wmin, kmer.count[word])
-        wmax = max(wmax, kmer.count[word])
+        # TODO it seems like the following should be kmer.p not kmer.count
+        # TODO need to rethink the whole calculation but need longer kmer data
+        kmer.w[word] = bias ** (cutoff - log(kmer.p[word]))
+        wsum += kmer.w[word]
+        wmin = min(wmin, kmer.w[word])
+        wmax = max(wmax, kmer.w[word])
         threshold[word] = wsum
         # print('{:6d} {:10}{:10.3g}'.format(nw, word, kmer.count[word]))
 
@@ -332,12 +337,12 @@ if __name__ == '__main__':
     for word in kmer.count:
         lap = word[:overlap]
         omer[lap]['list'].append(word)
-        omer[lap]['w'] += kmer.count[word]
+        omer[lap]['w'] += kmer.w[word]
         omer[lap]['t'].append(omer[lap]['w'])
 
     # construct an oligo
 
-    for n in range(0, 1000):
+    for n in range(cl.noligo):
         # select a weighted start point
         r = random.random() * wsum
         found = ''
@@ -347,7 +352,7 @@ if __name__ == '__main__':
                 break
 
         oligo = found
-        weight = kmer.count[found]
+        weight = kmer.w[found]
 
         nsteps = 8
         for step in range(nsteps):
