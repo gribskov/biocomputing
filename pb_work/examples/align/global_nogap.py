@@ -120,6 +120,32 @@ class Alignment:
         # reverse the strings when returning
         return als1[::-1], als2[::-1]
 
+    # end of traceback
+
+    def scoreFormat(self, vspace=1, hspace=1):
+        """-----------------------------------------------------------------------------------------
+        return a formatted form of the score matrix.  Assumptions is that scores are integers.
+        first find the largest number, then format numbers in fields with hspace extra space.
+        vspace blank lines are left between rows.
+        :param vspace: int, vertical space between rows
+        :param hspace: int, horizontal space between letters
+        :return: string, formatted score matrix
+        -----------------------------------------------------------------------------------------"""
+        # find the maximum width
+        width = 0
+        for row in self.score:
+            for col in row:
+                width = max(width, len(str(col)))
+
+        scorestr = ''
+        width += hspace
+        for row in self.score:
+            for col in row:
+                scorestr += '{:{}}'.format(col, width)
+            scorestr += '\n' * (vspace + 1)
+
+        return scorestr
+
 
 # ==================================================================================================
 # main/test
@@ -138,6 +164,7 @@ if __name__ == '__main__':
     a.globalNoGap()
     maxscore, i, j = a.scoreMaxFinal()
     print('maximum score: {}\t at {}, {}'.format(maxscore, i, j))
+    print(a.scoreFormat(hspace=2))
 
     al1, al2 = a.traceback(i, j)
     print(al1)
