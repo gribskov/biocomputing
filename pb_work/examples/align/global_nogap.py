@@ -64,7 +64,61 @@ class Alignment:
                 jmax = j
                 maxscore = self.score[i][j]
 
-        return maxscore, imax-1, jmax-1
+        return maxscore, imax - 1, jmax - 1
+
+    def traceback(self, i, j):
+        """-----------------------------------------------------------------------------------------
+        Traceback the alignment from the specified position.  traceback is based on pointer matrix.
+        :return: s1, s2, strings padded to align
+        -----------------------------------------------------------------------------------------"""
+        # construct strings backwards from starting position.  Overhanging sequences is filled with
+        # gap characters.  i is the row index (s2), j is the column index (s1)
+
+        # fill ends
+        gap = '-'  # TODO should be in object
+        als2 = ''
+        als1 = ''
+        ii = len(self.s2)
+        while ii > i + 1:
+            als2 += self.s2[ii - 1]
+            als1 += gap
+            ii -= 1
+
+        jj = len(self.s1)
+        while jj > j + 1:
+            als1 += self.s1[jj - 1]
+            als2 += gap
+            jj -= 1
+
+        while ii > 0 and jj > 0:
+            als1 += self.s1[jj - 1]
+            als2 += self.s2[ii - 1]
+
+            if self.pointer[ii][jj] == 0:
+                # no gap
+                ii -= 1
+                jj -= 1
+            elif self.pointer[ii][jj] < 0:
+                # vertical gap
+                ii += self.pointer[ii][jj]
+                jj -= 1
+            else:
+                # horizontal gap
+                jj -= self.pointer[ii][jj]
+                ii -= 1
+
+        while ii > 0:
+            als2 += self.s2[ii - 1]
+            als1 += gap
+            ii -= 1
+
+        while jj > 0:
+            als1 += self.s1[jj - 1]
+            als2 += gap
+            jj -= 1
+
+        # reverse the strings when returning
+        return als1[::-1], als2[::-1]
 
 
 # ==================================================================================================
@@ -84,5 +138,13 @@ if __name__ == '__main__':
     a.globalNoGap()
     maxscore, i, j = a.scoreMaxFinal()
     print('maximum score: {}\t at {}, {}'.format(maxscore, i, j))
+
+    al1, al2 = a.traceback(i, j)
+    print(al1)
+    print(al2)
+
+    al1, al2 = a.traceback(5, 5)
+    print(al1)
+    print(al2)
 
     exit(0)
