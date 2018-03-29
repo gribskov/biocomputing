@@ -12,11 +12,12 @@ class Alignment:
         self.table = {}
         self.score = []
         self.pointer = []
+        self.gapchar = '-'
 
     def globalNoGap(self):
         """-----------------------------------------------------------------------------------------
-
-        :return:
+        Calculate score matrix for the no gap case
+        :return: True
         -----------------------------------------------------------------------------------------"""
         # initialize score.  make matrix one position bigger than the sequence length.
         # since there are no gaps, the pointer matrix is never updated
@@ -34,7 +35,7 @@ class Alignment:
                 self.score[i][j] = self.score[i - 1][j - 1] + s
                 print('ij:{},{} s={} S={}'.format(i, j, s, self.score[i][j]))
 
-        return
+        return True
 
     def scoreMaxFinal(self):
         """-----------------------------------------------------------------------------------------
@@ -43,7 +44,6 @@ class Alignment:
         an extra row and column to deal with edge conditions
         :return: max, i, j
         -----------------------------------------------------------------------------------------"""
-
         imax = 1
         jmax = len(self.s1)
         maxscore = self.score[imax][jmax]
@@ -75,7 +75,7 @@ class Alignment:
         # gap characters.  i is the row index (s2), j is the column index (s1)
 
         # fill ends
-        gap = '-'  # TODO should be in object
+        gap = self.gapchar
         als2 = ''
         als1 = ''
         ii = len(self.s2)
