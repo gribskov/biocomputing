@@ -29,13 +29,16 @@ for line in map:
     nread += 1
     field = line.split()
     print('{}\t{}'.format(field[0], field[8]))
-    lendata.append(float(field[8]))
+    insert = float(field[8])
+    insert = max( insert, -insert)
+    lendata.append(insert)
 
     if nread > 1000:
         break
 
 print('\n{} reads read from {}'.format(nread, sys.argv[1]))
-n, bins, patches = plt.hist(lendata, bins=100, normed=1, facecolor='blue', alpha=0.75)
+n, bins, patches = plt.hist(lendata, bins=100, normed=1,
+                            facecolor='blue', edgecolor='black', linewidth=0.25, alpha=0.75 )
 
 plt.xlabel('Length')
 plt.ylabel('Probability')
