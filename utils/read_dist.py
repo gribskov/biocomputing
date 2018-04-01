@@ -64,7 +64,7 @@ def add_cigar(seq, pos, cigar):
         if char == 'M':
             # matching positions
 
-            #check to make sure seq list is big enough, if not add some more elements
+            # check to make sure seq list is big enough, if not add some more elements
             if pos + i + 1 > len(seq):
                 extend_list(seq, pos + i + 10000)
 
@@ -84,6 +84,31 @@ def add_cigar(seq, pos, cigar):
         return m
 
     # end of add_cigar
+
+
+def condense_seq(seq):
+    """---------------------------------------------------------------------------------------------
+    condense the seq array by removing consecutive positions with the same value.  This allows
+    easier printing. For plotting, each interval ends at the indicated position.
+
+    pos1, val1
+    pos2, val2
+    ...
+
+    SAM files use a 1 origin, so the first interval is 1 to pos1 with value val1, the second is
+    pos1 + 1 to pos2 with val2, etc.
+
+    :param seq: list of int, coverage at each base
+    :return: list of tuples, (pos, val)
+    ---------------------------------------------------------------------------------------------"""
+    compressed = []
+    cover = seq[1]
+    for pos in range(2, len(seq)):
+        if seq[pos] != cover:
+            compressed.append((pos - 1, cover))
+        cover = seq[pos]
+
+    return compressed
 
 
 # --------------------------------------------------------------------------------------------------
@@ -117,7 +142,7 @@ if __name__ == '__main__':
         cigar = field[5]
 
         # filter some lines
-        if mapq==0 or cigar =='*':
+        if mapq == 0 or cigar == '*':
             continue
 
         nread += 1
@@ -127,5 +152,9 @@ if __name__ == '__main__':
             break
 
     print('{} bases mapped'.format(bases_mapped))
+
+    comp_coverage = condense_seq(seq)
+    for coverage in comp_coverage:
+        print('{}\t{}'.format(coverage[0], coverage[1]))
 
     exit(0)
