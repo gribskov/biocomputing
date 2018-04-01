@@ -24,6 +24,8 @@ AS:i:300     XN:i:0   XM:i:0  XO:i:0  XG:i:0  NM:i:0  MD:Z:150        YS:i:300  
 Michael Gribskov    1 April 2018
 ================================================================================================="""
 import sys
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 
 
 def extend_list(arr, end, init=0):
@@ -156,5 +158,50 @@ if __name__ == '__main__':
     comp_coverage = condense_seq(seq)
     for coverage in comp_coverage:
         print('{}\t{}'.format(coverage[0], coverage[1]))
+
+    majorlocator = MultipleLocator(1000)
+    minorlocator = MultipleLocator(100)
+    majorformatter = FormatStrFormatter('%d')
+
+    fig, ax = plt.subplots(1, 1, figsize=(15, 3))
+    pos = [i + 1 for i in range(0, len(seq))]
+    ticks = [i for i in range(3000, 8000) if i % 100 == 0]
+
+    ax.fill(pos, seq, linewidth=0.75)
+    # plt.yscale('log')
+    plt.xticks(ticks)
+    plt.xlim(3000, 8000)
+    plt.ylim(0, 150)
+
+    ax.xaxis.set_major_locator(majorlocator)
+    ax.xaxis.set_major_formatter(majorformatter)
+    ax.xaxis.set_minor_locator(minorlocator)
+    ax.set(xlabel='position', ylabel='Read Count', title='Read Distribution')
+    ax.grid()
+
+    # add exon locations
+    exon = [('Chr4', 'CDS', 4127, 4149),
+            ('Chr4', 'CDS', 4227, 4438),
+            ('Chr4', 'CDS', 4545, 4749),
+            ('Chr4', 'CDS', 4839, 4901),
+            ('Chr4', 'CDS', 4977, 5119),
+            ('Chr4', 'CDS', 5406, 5588),
+            ('Chr4', 'CDS', 5657, 5855),
+            ('Chr4', 'CDS', 6605, 6676),
+            ('Chr4', 'CDS', 6760, 6871),
+            ('Chr4', 'CDS', 6975, 7056),
+            ('Chr4', 'CDS', 7144, 7194),
+            ('Chr4', 'CDS', 7294, 7375),
+            ('Chr4', 'CDS', 7453, 7638),
+            ('Chr4', 'CDS', 7712, 7813),
+            ('Chr4', 'CDS', 7914, 7947)]
+
+    span = 8000 - 3000
+    for e in exon:
+        begin = (e[2] - 3000)/span
+        end = (e[3] - 3000)/span
+        plt.axhline(5.0, begin, end, color='black', linewidth=6.0)
+
+    plt.show()
 
     exit(0)
