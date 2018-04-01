@@ -13,6 +13,8 @@ the insert length is field 8, the last field before the sequence
 Michael Gribskov     1 April 2018
 ================================================================================================="""
 import sys
+import matplotlib.mlab as mlab
+import matplotlib.pyplot as plt
 
 map = None
 try:
@@ -22,12 +24,22 @@ except:
     exit(1)
 
 nread = 0
+lendata = []
 for line in map:
     nread += 1
-    print(line)
-    if nread > 10:
+    field = line.split()
+    print('{}\t{}'.format(field[0], field[8]))
+    lendata.append(float(field[8]))
+
+    if nread > 1000:
         break
 
-print('{} reads read from {}'.format(nread, sys.argv[1]))
+print('\n{} reads read from {}'.format(nread, sys.argv[1]))
+n, bins, patches = plt.hist(lendata, bins=100, normed=1, facecolor='blue', alpha=0.75)
+
+plt.xlabel('Length')
+plt.ylabel('Probability')
+plt.title('Library Insert Length')
+plt.show()
 
 exit(0)
