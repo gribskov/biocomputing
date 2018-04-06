@@ -1,4 +1,5 @@
 import cherrypy
+import sqlite3 as sq3
 
 
 class seqServe():
@@ -7,8 +8,29 @@ class seqServe():
     ============================================================================================="""
 
     @cherrypy.expose
-    def home(self):
-        return 'welcome home'
+    def test_db(self, dbfile='gff.db'):
+        """-----------------------------------------------------------------------------------------
+        check to see the database works
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        dbh = sq3.connect(dbfile)
+        db = dbh.cursor()
+
+        gff = self.page_header() + self.title()
+        gff += '<pre>\n'
+
+        sql = 'SELECT name FROM my_db.sqlite_master WHERE type="table";'
+        db.row_factory = sq3.Row
+        db.execute(sql)
+        for row in db:
+            for key in row.keys():
+                print('{}:{}'.format(key, row[key]), end='\t')
+            print()
+
+        gff += '</pre>\n'
+        gff += self.page_footer()
+
+        return gff
 
     @cherrypy.expose
     def load(self):
@@ -23,20 +45,30 @@ class seqServe():
         return load
 
     @cherrypy.expose
-    def gffread(self, gff_file):
+    def gffread(self, gff_file, dbfile='gff.db'):
         """-----------------------------------------------------------------------------------------
         display 10 lines of the uploaded gff file
         :param gff_file:
         :return:
         -----------------------------------------------------------------------------------------"""
-        x = gff_file
+        db = sq3.connect(dbfile).cursor()
+
 
         gff = self.page_header() + self.title()
         gff += '<pre>\n'
         nline = 0
         for line in gff_file.file:
-            gff += line.decode()
+            line = line.decode()
+            if line.startswith('#'):
+                continue
+
+            gff += line
             nline += 1
+
+            field = line.split('\t')
+            sql = 'INSERT INTO gff (uid, seqname) VALUES (NULL, ?)'
+            db.execute(sql, field[0])
+
             if nline > 9:
                 break
         gff += '</pre>'
@@ -87,7 +119,6 @@ class seqServe():
         html += '{}</form>\n'.format(space)
 
         return html
-
 
 # ==================================================================================================
 # main/testing
