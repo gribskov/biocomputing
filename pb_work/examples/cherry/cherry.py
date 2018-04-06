@@ -1,3 +1,4 @@
+import time
 import cherrypy
 import sqlite3 as sq3
 
@@ -16,7 +17,7 @@ class seqServe():
         dbh = sq3.connect(dbfile)
         db = dbh.cursor()
 
-        gff = self.page_header() + self.title()
+        gff = self.page_header()
         gff += '<pre>\n'
 
         sql = 'SELECT name FROM my_db.sqlite_master WHERE type="table";'
@@ -38,14 +39,14 @@ class seqServe():
         Query page to get and load a gff file
         :return: html page via cherrypy
         -----------------------------------------------------------------------------------------"""
-        load = self.page_header() + self.title()
+        load = self.page_header()
         load += self.file_form('gffread')
         load += self.page_footer()
 
         return load
 
     @cherrypy.expose
-    def gffread(self, gff_file, dbfile='gff.db'):
+    def gffread(self, gff_file, dbfile='gff.db', samplesize=10):
         """-----------------------------------------------------------------------------------------
         display 10 lines of the uploaded gff file
         :param gff_file:
@@ -54,17 +55,16 @@ class seqServe():
         dbh = sq3.connect(dbfile)
         db = dbh.cursor()
 
-
         gff = self.page_header() + self.title()
+        gff += '<br/>Sample of the first {} features\n<br/>\n'.format(samplesize)
         gff += '<pre>\n'
+
+        timestart = time.time()
         nline = 0
         for line in gff_file.file:
             line = line.decode()
             if line.startswith('#'):
                 continue
-
-            gff += line
-            nline += 1
 
             field = line.split('\t')
 
@@ -74,27 +74,73 @@ class seqServe():
             if field[5] == '.':
                 field[5] = 0.0
             else:
-                field = float(field[5])
-
+                field[5] = float(field[5])
 
             sql = 'INSERT INTO gff VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ? )'
             db.execute(sql, tuple(field[:]))
 
-            if nline > 9:
-                break
+            if nline < samplesize:
+                gff += line
+            nline += 1
 
         dbh.commit()
+        timeend = time.time()
+
         gff += '</pre>'
+        gff += '{} features uploaded in {:.1f} seconds\n'.format(nline, timeend - timestart)
         gff += self.page_footer()
 
         return gff
+
+    @cherrypy.expose
+    def query(self):
+        """-----------------------------------------------------------------------------------------
+        Query page for genes
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        query = self.page_header()
+        query += '<h2><hr/>Query<hr/></h2>\n'
+        query += '    <form action="draw" method="post"><br/>\n'
+        query += '        <input type="text" name="gene" value="AT4G00090"><br/>\n'
+        query += '        <input type="submit" value="Search">\n'
+        query += '    </form><br/>\n'
+
+        query += self.page_footer()
+        return query
+
+    @cherrypy.expose
+    def draw(self, gene, dbfile='gff.db'):
+        """-----------------------------------------------------------------------------------------
+        make sql gene query and draw gene
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        dbh = sq3.connect(dbfile)
+        db = dbh.cursor()
+
+        draw = self.page_header()
+        draw += '<h2><hr/>Gene {}<hr/></h2>\n'.format(gene)
+
+        sql = 'SELECT * FROM gff WHERE attribute LIKE "%{}%" AND feature == "CDS";'.format(gene)
+        print('sql:',sql)
+        select = db.execute(sql)
+
+        draw += '    <pre>\n'
+        for row in select:
+            draw += str(row) + '\n'
+
+        draw += '    </pre>\n'
+        draw += self.page_footer()
+
+        return draw
+
+        return draw
 
     def page_header(self):
         """-----------------------------------------------------------------------------------------
         HTML header.  open html and body, includes complete head element
         :return:
         -----------------------------------------------------------------------------------------"""
-        return '<html>\n<head>\n</head>\n<body>\n'
+        return '<html>\n<head>\n</head>\n<body>\n<br/>' + self.menu_main() + self.title()
 
     def page_footer(self):
         """-----------------------------------------------------------------------------------------
@@ -103,6 +149,24 @@ class seqServe():
         -----------------------------------------------------------------------------------------"""
         return '\n</body\n</html\n'
 
+    def menu_main(self):
+        """-----------------------------------------------------------------------------------------
+        main navigation menu
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        style = 'display: inline;\
+padding: 0.7em 1em 0.7em 1em;\
+border: 1px solid #FFFFFF;\
+border-radius: 5px;\
+margin:10px 0px 10px 0px;\
+background-color: #000088;\
+color: #FFFFFF;text-decoration:none;'
+
+        menu = '\n<!- main menu - seqServe.menu_main ->\n'
+        menu += '    <a href="load" style="{}">load</a>\n'.format(style)
+        menu += '    <a href="query" style="{}">query</a>\n'.format(style)
+        return menu
+
     def title(self, margin=4, indent=4):
         """-----------------------------------------------------------------------------------------
         Standard HTML title for all pages
@@ -110,7 +174,7 @@ class seqServe():
         -----------------------------------------------------------------------------------------"""
         level = 0
         space = ' ' * (margin + level * indent)
-        return '{}<h1>MyGene</h1>\n'.format(space)
+        return '{}<h1>MyGene</h1><br/>\n'.format(space)
 
     def file_form(self, action, margin=4, indent=4):
         """-----------------------------------------------------------------------------------------
@@ -133,9 +197,10 @@ class seqServe():
 
         return html
 
+
 # ==================================================================================================
 # main/testing
 # ==================================================================================================
 if __name__ == '__main__':
-    cherrypy.config.update({'server.socket_port': 8081, })
+    cherrypy.config.update({'server.socket_port': 8082, })
     cherrypy.quickstart(seqServe())
