@@ -1,6 +1,10 @@
 import time
+import os
 import cherrypy
 import sqlite3 as sq3
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
+from matplotlib.patches import Rectangle
 
 
 class seqServe():
@@ -120,18 +124,21 @@ class seqServe():
         draw = self.page_header()
         draw += '<h2><hr/>Gene {}<hr/></h2>\n'.format(gene)
 
-        sql = 'SELECT * FROM gff WHERE attribute LIKE "%{}%" AND feature == "CDS";'.format(gene)
-        print('sql:',sql)
+        sql = 'SELECT * FROM gff WHERE attribute LIKE "%ID={}%" AND feature == "CDS";'.format(gene)
+        print('sql:', sql)
         select = db.execute(sql)
 
         draw += '    <pre>\n'
+        exonlist = []
         for row in select:
+            exonlist.append(row)
             draw += str(row) + '\n'
+
+        img = self.gene_img(exonlist)
+        draw += '\n<img src="{}">\n'.format(img)
 
         draw += '    </pre>\n'
         draw += self.page_footer()
-
-        return draw
 
         return draw
 
@@ -197,10 +204,63 @@ color: #FFFFFF;text-decoration:none;'
 
         return html
 
+    def gene_img(self, elements):
+        """-----------------------------------------------------------------------------------------
+        Draw the gene exons/introns as boxes/lines using matplotlib
+        :param elements: list of tuples
+        :return: image file name
+        -----------------------------------------------------------------------------------------"""
+        majorlocator = MultipleLocator(1000)
+        minorlocator = MultipleLocator(100)
+        majorformatter = FormatStrFormatter('%d')
+
+        minpos = 1e8
+        maxpos = 0
+        # find minimum and maximum positions
+        for feature in elements:
+            minpos = min(minpos, int(feature[4]))
+            maxpos = max(maxpos, int(feature[5]))
+
+        begin = minpos - 500
+        end = maxpos + 500
+
+        fig = plt.figure(figsize=(10, 3))
+        ax = fig.add_subplot(111)
+        ticks = [i for i in range(begin, end) if i % 100 == 0]
+
+        plt.xticks(ticks)
+        plt.xlim(begin, end)
+        plt.ylim(0, 100)
+
+        plt.plot([minpos, maxpos], [50.0, 50.0], color='black', linewidth=2.0)
+        y1 = 45.0
+        y2 = 55.0
+        for feature in elements:
+            x1 = float(feature[4])
+            x2 = float(feature[5])
+            plt.fill([x1, x1, x2, x2, x1], [y1, y2, y2, y1, y1], color='red', zorder=3)
+            plt.plot([x1, x1, x2, x2, x1], [y1, y2, y2, y1, y1], color='black', linewidth=1.5, zorder=4)
+
+        ax.xaxis.set_major_locator(majorlocator)
+        ax.xaxis.set_major_formatter(majorformatter)
+        ax.xaxis.set_minor_locator(minorlocator)
+
+        fig.savefig('img/plot.png')
+        return 'img/plot.png'
+
 
 # ==================================================================================================
 # main/testing
 # ==================================================================================================
 if __name__ == '__main__':
-    cherrypy.config.update({'server.socket_port': 8082, })
-    cherrypy.quickstart(seqServe())
+    file_path = os.getcwd()
+
+    cherrypy.server.socket_host = "127.0.0.1"
+    cherrypy.server.socket_port = 8086
+
+    cherrypy.quickstart(seqServe(), '/', {
+        "/img": {
+            "tools.staticdir.on": True,
+            "tools.staticdir.dir": os.path.join(file_path, "img"),
+        }
+    })
