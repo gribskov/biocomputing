@@ -51,7 +51,8 @@ class seqServe():
         :param gff_file:
         :return:
         -----------------------------------------------------------------------------------------"""
-        db = sq3.connect(dbfile).cursor()
+        dbh = sq3.connect(dbfile)
+        db = dbh.cursor()
 
 
         gff = self.page_header() + self.title()
@@ -66,11 +67,23 @@ class seqServe():
             nline += 1
 
             field = line.split('\t')
-            sql = 'INSERT INTO gff (uid, seqname, source) VALUES (NULL, "{}", "{}")'.format(field[0],field[1])
-            db.execute(sql)
+
+            # fix data types
+            field[3] = int(field[3])
+            field[4] = int(field[4])
+            if field[5] == '.':
+                field[5] = 0.0
+            else:
+                field = float(field[5])
+
+
+            sql = 'INSERT INTO gff VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ? )'
+            db.execute(sql, tuple(field[:]))
 
             if nline > 9:
                 break
+
+        dbh.commit()
         gff += '</pre>'
         gff += self.page_footer()
 
@@ -124,4 +137,5 @@ class seqServe():
 # main/testing
 # ==================================================================================================
 if __name__ == '__main__':
+    cherrypy.config.update({'server.socket_port': 8081, })
     cherrypy.quickstart(seqServe())
