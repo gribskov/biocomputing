@@ -66,8 +66,8 @@ class seqServe():
             nline += 1
 
             field = line.split('\t')
-            sql = 'INSERT INTO gff (uid, seqname) VALUES (NULL, ?)'
-            db.execute(sql, field[0])
+            sql = 'INSERT INTO gff (uid, seqname, source) VALUES (NULL, "{}", "{}")'.format(field[0],field[1])
+            db.execute(sql)
 
             if nline > 9:
                 break
