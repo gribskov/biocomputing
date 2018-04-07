@@ -85,7 +85,7 @@ class Kmer:
             line = line.rstrip()
             if line.startswith('>'):
                 nseq += 1
-                trace = nseq
+                trace = '\n{}'.format(nseq)
                 # print('\nn', nseq)
                 seq = ''  # no overlap between sequences
             else:
@@ -189,7 +189,7 @@ class Kmer:
             self.pmin = min(field[2], self.pmin)
             self.pmax = max(field[2], self.pmax)
 
-            if len(field) > 2
+            if len(field) > 3:
                 self.w[k] = float(field[3])
                 self.wmin = min(field[3], self.wmin)
                 self.wmax = max(field[3], self.wmax)
@@ -214,13 +214,61 @@ class Kmer:
         wmax = 0
         wmin = 1
         for k in self.p:
-            w = 1.0 - self.p[k] ** exp
+            # w = 1.0 - self.p[k] ** exp
+            w = self.p[k] ** exp
             wmax = max(w, wmax)
             wmin = min(w, wmin)
             self.w[k] = w
-            print('{:.3g}\t{}'.format(w, k))
+            print('{:.4g}\t{}'.format(w, k))
+
+        self.wmin = wmin
+        self.wmax = wmax
 
         return wmin, wmax
+
+    def weightExp(self, exp=1.0):
+        """-----------------------------------------------------------------------------------------
+        Similar to dirichlet wighting, inverted.  values range [0 - 1]
+        weight = f(kmer) ** exp
+
+        :parameter exp: exponent to which the base is taken
+        :return: float, min, max weight
+        -----------------------------------------------------------------------------------------"""
+        wmax = 0
+        wmin = 1
+        for k in self.p:
+            # w = 1.0 - self.p[k] ** exp
+            w = self.p[k] ** exp
+            wmax = max(w, wmax)
+            wmin = min(w, wmin)
+            self.w[k] = w
+
+        self.wmin = wmin
+        self.wmax = wmax
+
+        return wmin, wmax
+
+    def weightNormalize(self):
+        """-----------------------------------------------------------------------------------------
+        Divide weights by sum.  update wmin and wmax
+        :return: float, min and max weight
+        -----------------------------------------------------------------------------------------"""
+        wsum = 0.0
+        for k in self.w:
+            wsum += self.w[k]
+
+        wmin = 1.0
+        wmax = 0.0
+        for k in self.w:
+            w = self.w[k] / wsum
+            wmax = max(w, wmax)
+            wmin = min(w, wmin)
+            self.w[k] = w
+
+        self.wmin = wmin
+        self.wmax = wmax
+
+        return wmax, wmin
 
 
 # end of Kmer class ================================================================================
@@ -339,40 +387,20 @@ if __name__ == '__main__':
         infile = cl.fasta.name
 
     print('\ntotal {}mer words read from {}: {}'.format(kmer.k, infile, kmer.total))
+
+    # weight counts - ad hoc weighting function
+    # w = bias**(logP - logPmax)
+    # the larger the bias, the more the weights favor infrequent words, save this for future ref
+
+    kmer.weightExp(-2.0)
+    kmer.weightNormalize()
     print('\n    pmin pmax: {:10.3g}\t{:10.3g}'.format(kmer.pmin, kmer.pmax))
     print('log pmin pmax: {:10.3g}\t{:10.3g}'.format(log(kmer.pmin), log(kmer.pmax)))
+    print('\n    wmin wmax: {:10.3g}\t{:10.3g}'.format(kmer.wmin, kmer.wmax))
 
     if cl.output:
         nwritten = kmer.tableWrite(cl.output)
         print('\n{} kmers written to {}'.format(nwritten, cl.output))
-
-    # weight counts - ad hoc weighting function
-    # w = bias**(logP - logPmax)
-    # the larger the bias, the more the weights favor infrequent words
-
-    kmer.weightNegExp(1.0)
-    exit(0)
-
-    wmin = 1.0
-    wmax = 0.0
-    wsum = 0.0
-    bias = 0.5
-    cutoff = log(kmer.pmax)
-    threshold = {}
-    # for sorted list
-    #  for word in sorted(kmer.count, key=lambda k: kmer.count[k]):
-    for word in kmer.count:
-        # TODO it seems like the following should be kmer.p not kmer.count
-        # TODO need to rethink the whole calculation but need longer kmer data
-        kmer.w[word] = bias ** (cutoff - log(kmer.p[word]))
-        wsum += kmer.w[word]
-        wmin = min(wmin, kmer.w[word])
-        wmax = max(wmax, kmer.w[word])
-        threshold[word] = wsum
-        # print('{:6d} {:10}{:10.3g}'.format(nw, word, kmer.count[word]))
-
-    # print weighted range
-    print('w: {:10.3g}{:10.3g}'.format(wmin, wmax))
 
     # could overlap words by KMER-1, but this is unnecessary.  try overlap = 3
     overlap = 3
