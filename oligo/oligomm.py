@@ -32,13 +32,15 @@ class Kmer:
         self.total = 0
         self.pmin = 1.0
         self.pmax = 0.0
+        self.wmin = 1.0
+        self.wmax = 0.0
 
     def reset(self):
         """-----------------------------------------------------------------------------------------
         Reset the kmer counts, probabilities, and number of kmers
         :return: True
         -----------------------------------------------------------------------------------------"""
-        self .list = []
+        self.list = []
         self.count = {}
         self.p = {}
         self.w = {}
@@ -138,9 +140,26 @@ class Kmer:
         :param kmerout: file opened by argparse
         :return: kmers written
         -----------------------------------------------------------------------------------------"""
+
+        # check if probabilities and weights are available and write either 1, 2 or 3 values
         total = 0
-        for word in self.count:
-            kmerout.write('{}\t{}\t{:.4g}\n'.format(word, self.count[word], self.p[word]))
+        if self.pmax > 0 and self.wmax > 0:
+            # write count, p, weight
+            for word in self.count:
+                kmerout.write('{}\t{}\t{:.4g}\t{:.4g}\n'.format(
+                    word, self.count[word], self.p[word], self.w[word]))
+                total += self.count[word]
+
+        elif self.pmax > 0:
+            # write count, p
+            for word in self.count:
+                kmerout.write('{}\t{}\t{:.4g}\n'.format(word, self.count[word], self.p[word]))
+                total += self.count[word]
+
+        else:
+            # $ write count only
+            for word in self.count:
+                kmerout.write('{}\t{}\n'.format(word, self.count[word]))
             total += self.count[word]
 
         return total
@@ -163,21 +182,50 @@ class Kmer:
             if line.startswith(('#', '!')):
                 continue
 
-            kmer, count, p = line.split()
-            self.count[kmer] = int(count)
-            pf = float(p)
-            self.p[kmer] = pf
-            self.pmin = min(pf, self.pmin)
-            self.pmax = max(pf, self.pmax)
-            if n == 0:
-                self.k = len(kmer)
+            field = line.split()
+            k = field[0]
+            self.count[k] = int(field[1])
+            self.p[k] = float(field[2])
+            self.pmin = min(field[2], self.pmin)
+            self.pmax = max(field[2], self.pmax)
+
+            if len(field) > 2
+                self.w[k] = float(field[3])
+                self.wmin = min(field[3], self.wmin)
+                self.wmax = max(field[3], self.wmax)
+
             n += 1
+
+        # assume k is the length of the first word
+        keys = self.count.keys()
+        self.k = len(keys[0])
 
         self.total = n
         return n
 
+    def weightNegExp(self, exp=1.0):
+        """-----------------------------------------------------------------------------------------
+        Similar to dirichlet wighting, inverted.  values range [0 - 1]
+        weight = 1 - f(kmer) ** exp
+
+        :parameter exp: exponent to which the base is taken
+        :return: float, min, max weight
+        -----------------------------------------------------------------------------------------"""
+        wmax = 0
+        wmin = 1
+        for k in self.p:
+            w = 1.0 - self.p[k] ** exp
+            wmax = max(w, wmax)
+            wmin = min(w, wmin)
+            self.w[k] = w
+            print('{:.3g}\t{}'.format(w, k))
+
+        return wmin, wmax
+
 
 # end of Kmer class ================================================================================
+
+
 import sys
 import argparse
 
@@ -301,6 +349,9 @@ if __name__ == '__main__':
     # weight counts - ad hoc weighting function
     # w = bias**(logP - logPmax)
     # the larger the bias, the more the weights favor infrequent words
+
+    kmer.weightNegExp(1.0)
+    exit(0)
 
     wmin = 1.0
     wmax = 0.0
