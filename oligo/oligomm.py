@@ -28,6 +28,7 @@ class Kmer:
         self.count = {}
         self.p = {}
         self.w = {}
+        self.wcum = {}
         self.setupWords()
         self.total = 0
         self.pmin = 1.0
@@ -38,15 +39,20 @@ class Kmer:
     def reset(self):
         """-----------------------------------------------------------------------------------------
         Reset the kmer counts, probabilities, and number of kmers
+
         :return: True
         -----------------------------------------------------------------------------------------"""
         self.list = []
         self.count = {}
         self.p = {}
         self.w = {}
+        self.wcum = {}
+
+        self.total = 0
         self.pmin = 1.0
         self.pmax = 0.0
-
+        self.wmin = 1.0
+        self.wmax = 0.0
         return True
 
     def setupWords(self, prior=1):
@@ -250,7 +256,7 @@ class Kmer:
 
     def weightNormalize(self):
         """-----------------------------------------------------------------------------------------
-        Divide weights by sum.  update wmin and wmax
+        Divide weights by sum.  update wmin and wmax and cumulative weights, self.wcum
         :return: float, min and max weight
         -----------------------------------------------------------------------------------------"""
         wsum = 0.0
@@ -259,16 +265,38 @@ class Kmer:
 
         wmin = 1.0
         wmax = 0.0
-        for k in self.w:
+        wcum = 0.0
+        for k in self.list:
             w = self.w[k] / wsum
             wmax = max(w, wmax)
             wmin = min(w, wmin)
             self.w[k] = w
 
+            wcum += w
+            self.wcum[k] = wcum
+
         self.wmin = wmin
         self.wmax = wmax
 
         return wmax, wmin
+
+    def randomByWeight(self):
+        """-----------------------------------------------------------------------------------------
+        select a ranom kmer using the current stored weights.  Assumes weights have been normalized
+        to [0.0, 1.0].  See weightNormalize
+
+        :return: string random kmer, float weight
+        -----------------------------------------------------------------------------------------"""
+        r = random.random()
+        found = ''
+        for word in self.list:
+            found = word
+            if r > self.wcum[word]:
+                break
+
+        return found, self.w[found]
+
+
 
 
 # end of Kmer class ================================================================================
@@ -298,6 +326,12 @@ def commandLine(default):
                              help='maximum number of sequence character per segment',
                              type=int,
                              default=str(default['kmer'])
+                             )
+
+    commandline.add_argument('--overlap',
+                             help='overlap between kmer words',
+                             type=int,
+                             default=str(default['overlap'])
                              )
 
     commandline.add_argument('--noligo',
@@ -366,7 +400,7 @@ def fractionGC(seq, alphabet):
 # ==================================================================================================
 if __name__ == '__main__':
 
-    default = {'kmer': 4, 'noligo': 1000}
+    default = {'kmer': 8, 'noligo': 1000, 'overlap':3}
     cl = commandLine(default)
     printParameters(cl)
 
@@ -402,42 +436,27 @@ if __name__ == '__main__':
         nwritten = kmer.tableWrite(cl.output)
         print('\n{} kmers written to {}'.format(nwritten, cl.output))
 
-    # could overlap words by KMER-1, but this is unnecessary.  try overlap = 3
-    overlap = 3
-    omer = {}
-    for word in itertools.product(kmer.alphabet, repeat=overlap):
-        # generate all overlap len words
-        oword = ''.join(word)
-        omer[oword] = {'list': [], 't': [], 'w': 0.0}
-
-    # calculate the transitions between overlapping words: 'list' is the list of overlapping full
-    # words, 't' has the threshold value for each word (cumulative weigth), and 'w' has the total
-    # weight summed over the overlapping words
+    omer = Kmer(cl.overlap)
+    # calculate the transitions between overlapping words: the overlap transition is simply a list
+    # of shorter kmers
+    # TODO not right.  for each overlap word create a kmer object with just the overlapping kmers.
     for word in kmer.count:
         lap = word[:overlap]
-        omer[lap]['list'].append(word)
-        omer[lap]['w'] += kmer.w[word]
-        omer[lap]['t'].append(omer[lap]['w'])
+        omer.count[lap] += kmer.count[word]
+        omer.p[lap] += kmer.w[word]
+        omer.w[lap] += kmer.w[word]
 
-    # construct an oligo
+    # construct oligos
 
     for n in range(cl.noligo):
         # select a weighted start point
-        r = random.random() * wsum
-        found = ''
-        for word in kmer.count:
-            found = word
-            if r < threshold[word]:
-                break
-
-        oligo = found
-        weight = kmer.w[found]
+        oligo, weight = kmer.randomByWeight()
 
         nsteps = 8
         for step in range(nsteps):
             # select an overlapping next word
             lap = oligo[-overlap:]
-            r = random.random() * omer[lap]['w']
+            r = random.random() * omer.w[lap]
             found = ''
             for i in range(len(omer[lap]['list'])):
                 found = omer[lap]['list'][i]
