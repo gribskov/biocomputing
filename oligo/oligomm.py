@@ -38,7 +38,7 @@ class Kmer:
         Reset the kmer counts, probabilities, and number of kmers
         :return: True
         -----------------------------------------------------------------------------------------"""
-        self .list = []
+        self.list = []
         self.count = {}
         self.p = {}
         self.w = {}
@@ -215,7 +215,7 @@ def commandLine(default):
                              type=argparse.FileType('r'),
                              )
 
-    commandline.add_argument('--output',
+    commandline.add_argument('--koutput',
                              help='output kmer table',
                              type=argparse.FileType('w')
                              )
@@ -241,7 +241,7 @@ def printParameters(clargs):
                 sys.stderr.write('{}: {}\n'.format(k, clargs.__dict__[k]))
 
     else:
-        sys.stderr('Input error: fasta (--fasta) table or kmer table (--table) must be provided\n')
+        sys.stderr.write('Input error: fasta (--fasta) table or kmer table (--table) must be provided\n')
         exit(1)
 
         sys.stderr.write('\n')
@@ -290,13 +290,13 @@ if __name__ == '__main__':
         pmin, pmax = kmer.updateProb()
         infile = cl.fasta.name
 
-    print('\ntotal {}mer words read from {}: {}'.format(kmer.k, infile, kmer.total))
-    print('\n    pmin pmax: {:10.3g}\t{:10.3g}'.format(kmer.pmin, kmer.pmax))
-    print('log pmin pmax: {:10.3g}\t{:10.3g}'.format(log(kmer.pmin), log(kmer.pmax)))
+    sys.stderr.write('\ntotal {}mer words read from {}: {}\n'.format(kmer.k, infile, kmer.total))
+    sys.stderr.write('\n    pmin pmax: {:10.3g}\t{:10.3g}\n'.format(kmer.pmin, kmer.pmax))
+    sys.stderr.write('log pmin pmax: {:10.3g}\t{:10.3g}\n'.format(log(kmer.pmin), log(kmer.pmax)))
 
     if cl.output:
         nwritten = kmer.tableWrite(cl.output)
-        print('\n{} kmers written to {}'.format(nwritten, cl.output))
+        sys.stderr.write('\n{} kmers written to {}'.format(nwritten, cl.output))
 
     # weight counts - ad hoc weighting function
     # w = bias**(logP - logPmax)
@@ -310,7 +310,7 @@ if __name__ == '__main__':
     threshold = {}
     # for sorted list
     #  for word in sorted(kmer.count, key=lambda k: kmer.count[k]):
-    for word in kmer.count:
+    for word in kmer.list:
         # TODO it seems like the following should be kmer.p not kmer.count
         # TODO need to rethink the whole calculation but need longer kmer data
         kmer.w[word] = bias ** (cutoff - log(kmer.p[word]))
@@ -321,7 +321,7 @@ if __name__ == '__main__':
         # print('{:6d} {:10}{:10.3g}'.format(nw, word, kmer.count[word]))
 
     # print weighted range
-    print('w: {:10.3g}{:10.3g}'.format(wmin, wmax))
+    sys.stderr.write('w: {:10.3g}{:10.3g}\n'.format(wmin, wmax))
 
     # could overlap words by KMER-1, but this is unnecessary.  try overlap = 3
     overlap = 3
@@ -334,7 +334,7 @@ if __name__ == '__main__':
     # calculate the transitions between overlapping words: 'list' is the list of overlapping full
     # words, 't' has the threshold value for each word (cumulative weigth), and 'w' has the total
     # weight summed over the overlapping words
-    for word in kmer.count:
+    for word in kmer.list:
         lap = word[:overlap]
         omer[lap]['list'].append(word)
         omer[lap]['w'] += kmer.w[word]
@@ -346,7 +346,7 @@ if __name__ == '__main__':
         # select a weighted start point
         r = random.random() * wsum
         found = ''
-        for word in kmer.count:
+        for word in kmer.list:
             found = word
             if r < threshold[word]:
                 break
@@ -367,5 +367,5 @@ if __name__ == '__main__':
             oligo += found[-overlap:]
 
         gc = fractionGC(oligo, kmer.alphabet)
-        print('>n{} GC={:.3}'.format(n, gc))
-        print(oligo)
+        sys.stdout.write('>n{} GC={:.3}\n'.format(n, gc))
+        sys.stdout.write(oligo)
