@@ -256,7 +256,7 @@ if __name__ == '__main__':
     file_path = os.getcwd()
 
     cherrypy.server.socket_host = "127.0.0.1"
-    cherrypy.server.socket_port = 8086
+    cherrypy.server.socket_port = 8080
 
     cherrypy.quickstart(seqServe(), '/', {
         "/img": {

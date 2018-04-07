@@ -15,16 +15,17 @@ def trimNucleotide(seq):
     :param seq:
     :return: seq
     """
-    while (len(seq) % 3 != 0):  # While sequence is not divisible by 3,
-        seq = seq[0:-1]  # remove the last nucleotide from the sequence.
-    return seq  # Return sequence that is divisible by three.
+    leftover = len(seq) % 3
+    return seq[:-leftover]
 
-
-""" DEFINE VARIABLES """
+# ==================================================================================================
+# main
+# ==================================================================================================
+# DEFINE VARIABLES
 t = []  # Define Timer List.
 Start, Stop = [], []  # Define Start and Stop Codon Location Variables.
 
-""" OPEN FILES """
+# OPEN FILES
 # Open Isoform List.
 print("\nLoading Isoform List...")
 Start_time = time.time()
@@ -55,7 +56,7 @@ seq_record = SeqIO.index("acomys_0.transcripts.fa", "fasta")
 print("\tLoaded", len(seq_record),
       "Acomys Transcripts in %1.3f seconds." % (time.time() - Start_time))
 
-""" MAIN SCRIPT """
+# MAIN LOOP
 for iso in range(1137, len(IsoformList)):  # For all sequences in Isoforms list,
     # Define Open Reading Frame Variables
     n_ORF = [0, 0, 0, 0, 0, 0]  # Define/Empty list of nucleotide open reading frames.
@@ -79,6 +80,7 @@ for iso in range(1137, len(IsoformList)):  # For all sequences in Isoforms list,
     currentResult = [line for line in BLASTxResult if
                      currentID in line]  # Search for current transcript.
     BLASTxResult.close()  # Close BLASTx file.
+
     UniRef_beg = str(currentResult).find("UniRef90_")  # Search string for "UniRef90_".
     UniRef_end = str(currentResult).find("\\", UniRef_beg)  # Search string for next "\".
     UniRef = str(currentResult)[UniRef_beg:UniRef_end]  # Define Reference ID.

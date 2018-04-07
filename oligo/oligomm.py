@@ -28,23 +28,31 @@ class Kmer:
         self.count = {}
         self.p = {}
         self.w = {}
+        self.wcum = {}
         self.setupWords()
         self.total = 0
         self.pmin = 1.0
         self.pmax = 0.0
+        self.wmin = 1.0
+        self.wmax = 0.0
 
     def reset(self):
         """-----------------------------------------------------------------------------------------
         Reset the kmer counts, probabilities, and number of kmers
+
         :return: True
         -----------------------------------------------------------------------------------------"""
         self.list = []
         self.count = {}
         self.p = {}
         self.w = {}
+        self.wcum = {}
+
+        self.total = 0
         self.pmin = 1.0
         self.pmax = 0.0
-
+        self.wmin = 1.0
+        self.wmax = 0.0
         return True
 
     def setupWords(self, prior=1):
@@ -83,7 +91,7 @@ class Kmer:
             line = line.rstrip()
             if line.startswith('>'):
                 nseq += 1
-                trace = nseq
+                trace = '\n{}'.format(nseq)
                 # print('\nn', nseq)
                 seq = ''  # no overlap between sequences
             else:
@@ -138,9 +146,26 @@ class Kmer:
         :param kmerout: file opened by argparse
         :return: kmers written
         -----------------------------------------------------------------------------------------"""
+
+        # check if probabilities and weights are available and write either 1, 2 or 3 values
         total = 0
-        for word in self.count:
-            kmerout.write('{}\t{}\t{:.4g}\n'.format(word, self.count[word], self.p[word]))
+        if self.pmax > 0 and self.wmax > 0:
+            # write count, p, weight
+            for word in self.count:
+                kmerout.write('{}\t{}\t{:.4g}\t{:.4g}\n'.format(
+                    word, self.count[word], self.p[word], self.w[word]))
+                total += self.count[word]
+
+        elif self.pmax > 0:
+            # write count, p
+            for word in self.count:
+                kmerout.write('{}\t{}\t{:.4g}\n'.format(word, self.count[word], self.p[word]))
+                total += self.count[word]
+
+        else:
+            # $ write count only
+            for word in self.count:
+                kmerout.write('{}\t{}\n'.format(word, self.count[word]))
             total += self.count[word]
 
         return total
@@ -163,21 +188,120 @@ class Kmer:
             if line.startswith(('#', '!')):
                 continue
 
-            kmer, count, p = line.split()
-            self.count[kmer] = int(count)
-            pf = float(p)
-            self.p[kmer] = pf
-            self.pmin = min(pf, self.pmin)
-            self.pmax = max(pf, self.pmax)
-            if n == 0:
-                self.k = len(kmer)
+            field = line.split()
+            k = field[0]
+            self.count[k] = int(field[1])
+            self.p[k] = float(field[2])
+            self.pmin = min(field[2], self.pmin)
+            self.pmax = max(field[2], self.pmax)
+
+            if len(field) > 3:
+                self.w[k] = float(field[3])
+                self.wmin = min(field[3], self.wmin)
+                self.wmax = max(field[3], self.wmax)
+
             n += 1
+
+        # assume k is the length of the first word
+        keys = self.count.keys()
+        self.k = len(keys[0])
 
         self.total = n
         return n
 
+    def weightNegExp(self, exp=1.0):
+        """-----------------------------------------------------------------------------------------
+        Similar to dirichlet wighting, inverted.  values range [0 - 1]
+        weight = 1 - f(kmer) ** exp
+
+        :parameter exp: exponent to which the base is taken
+        :return: float, min, max weight
+        -----------------------------------------------------------------------------------------"""
+        wmax = 0
+        wmin = 1
+        for k in self.p:
+            # w = 1.0 - self.p[k] ** exp
+            w = self.p[k] ** exp
+            wmax = max(w, wmax)
+            wmin = min(w, wmin)
+            self.w[k] = w
+            print('{:.4g}\t{}'.format(w, k))
+
+        self.wmin = wmin
+        self.wmax = wmax
+
+        return wmin, wmax
+
+    def weightExp(self, exp=1.0):
+        """-----------------------------------------------------------------------------------------
+        Similar to dirichlet wighting, inverted.  values range [0 - 1]
+        weight = f(kmer) ** exp
+
+        :parameter exp: exponent to which the base is taken
+        :return: float, min, max weight
+        -----------------------------------------------------------------------------------------"""
+        wmax = 0
+        wmin = 1
+        for k in self.p:
+            # w = 1.0 - self.p[k] ** exp
+            w = self.p[k] ** exp
+            wmax = max(w, wmax)
+            wmin = min(w, wmin)
+            self.w[k] = w
+
+        self.wmin = wmin
+        self.wmax = wmax
+
+        return wmin, wmax
+
+    def weightNormalize(self):
+        """-----------------------------------------------------------------------------------------
+        Divide weights by sum.  update wmin and wmax and cumulative weights, self.wcum
+        :return: float, min and max weight
+        -----------------------------------------------------------------------------------------"""
+        wsum = 0.0
+        for k in self.w:
+            wsum += self.w[k]
+
+        wmin = 1.0
+        wmax = 0.0
+        wcum = 0.0
+        for k in self.list:
+            w = self.w[k] / wsum
+            wmax = max(w, wmax)
+            wmin = min(w, wmin)
+            self.w[k] = w
+
+            wcum += w
+            self.wcum[k] = wcum
+
+        self.wmin = wmin
+        self.wmax = wmax
+
+        return wmax, wmin
+
+    def randomByWeight(self):
+        """-----------------------------------------------------------------------------------------
+        select a ranom kmer using the current stored weights.  Assumes weights have been normalized
+        to [0.0, 1.0].  See weightNormalize
+
+        :return: string random kmer, float weight
+        -----------------------------------------------------------------------------------------"""
+        r = random.random()
+        found = ''
+        for word in self.list:
+            found = word
+            if r > self.wcum[word]:
+                break
+
+        return found, self.w[found]
+
+
+
 
 # end of Kmer class ================================================================================
+
+
 import sys
 import argparse
 
@@ -202,6 +326,12 @@ def commandLine(default):
                              help='maximum number of sequence character per segment',
                              type=int,
                              default=str(default['kmer'])
+                             )
+
+    commandline.add_argument('--overlap',
+                             help='overlap between kmer words',
+                             type=int,
+                             default=str(default['overlap'])
                              )
 
     commandline.add_argument('--noligo',
@@ -270,7 +400,7 @@ def fractionGC(seq, alphabet):
 # ==================================================================================================
 if __name__ == '__main__':
 
-    default = {'kmer': 4, 'noligo': 1000}
+    default = {'kmer': 8, 'noligo': 1000, 'overlap':3}
     cl = commandLine(default)
     printParameters(cl)
 
@@ -293,6 +423,17 @@ if __name__ == '__main__':
     sys.stderr.write('\ntotal {}mer words read from {}: {}\n'.format(kmer.k, infile, kmer.total))
     sys.stderr.write('\n    pmin pmax: {:10.3g}\t{:10.3g}\n'.format(kmer.pmin, kmer.pmax))
     sys.stderr.write('log pmin pmax: {:10.3g}\t{:10.3g}\n'.format(log(kmer.pmin), log(kmer.pmax)))
+    print('\ntotal {}mer words read from {}: {}'.format(kmer.k, infile, kmer.total))
+
+    # weight counts - ad hoc weighting function
+    # w = bias**(logP - logPmax)
+    # the larger the bias, the more the weights favor infrequent words, save this for future ref
+
+    kmer.weightExp(-2.0)
+    kmer.weightNormalize()
+    print('\n    pmin pmax: {:10.3g}\t{:10.3g}'.format(kmer.pmin, kmer.pmax))
+    print('log pmin pmax: {:10.3g}\t{:10.3g}'.format(log(kmer.pmin), log(kmer.pmax)))
+    print('\n    wmin wmax: {:10.3g}\t{:10.3g}'.format(kmer.wmin, kmer.wmax))
 
     if cl.output:
         nwritten = kmer.tableWrite(cl.output)
@@ -310,7 +451,7 @@ if __name__ == '__main__':
     threshold = {}
     # for sorted list
     #  for word in sorted(kmer.count, key=lambda k: kmer.count[k]):
-    for word in kmer.list:
+    for word in kmer.count:
         # TODO it seems like the following should be kmer.p not kmer.count
         # TODO need to rethink the whole calculation but need longer kmer data
         kmer.w[word] = bias ** (cutoff - log(kmer.p[word]))
@@ -321,7 +462,7 @@ if __name__ == '__main__':
         # print('{:6d} {:10}{:10.3g}'.format(nw, word, kmer.count[word]))
 
     # print weighted range
-    sys.stderr.write('w: {:10.3g}{:10.3g}\n'.format(wmin, wmax))
+    print('w: {:10.3g}{:10.3g}'.format(wmin, wmax))
 
     # could overlap words by KMER-1, but this is unnecessary.  try overlap = 3
     overlap = 3
@@ -334,31 +475,23 @@ if __name__ == '__main__':
     # calculate the transitions between overlapping words: 'list' is the list of overlapping full
     # words, 't' has the threshold value for each word (cumulative weigth), and 'w' has the total
     # weight summed over the overlapping words
-    for word in kmer.list:
+    for word in kmer.count:
         lap = word[:overlap]
-        omer[lap]['list'].append(word)
-        omer[lap]['w'] += kmer.w[word]
-        omer[lap]['t'].append(omer[lap]['w'])
+        omer.count[lap] += kmer.count[word]
+        omer.p[lap] += kmer.w[word]
+        omer.w[lap] += kmer.w[word]
 
-    # construct an oligo
+    # construct oligos
 
     for n in range(cl.noligo):
         # select a weighted start point
-        r = random.random() * wsum
-        found = ''
-        for word in kmer.list:
-            found = word
-            if r < threshold[word]:
-                break
-
-        oligo = found
-        weight = kmer.w[found]
+        oligo, weight = kmer.randomByWeight()
 
         nsteps = 8
         for step in range(nsteps):
             # select an overlapping next word
             lap = oligo[-overlap:]
-            r = random.random() * omer[lap]['w']
+            r = random.random() * omer.w[lap]
             found = ''
             for i in range(len(omer[lap]['list'])):
                 found = omer[lap]['list'][i]
