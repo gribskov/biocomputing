@@ -2,10 +2,11 @@
 get a count of kmers in a sequence.  The real goal is to identify the infrequent kmers and use them
 to probabilistically generate longer kmers unlikely to occur in the sequence.
 
-TODO: write oligos to file
 TODO: check for duplicates?
 TODO: bias towards more extreme AT/GC content?
 ================================================================================================="""
+import sys
+import argparse
 import random
 import itertools
 
@@ -23,6 +24,17 @@ class Kmer:
         -----------------------------------------------------------------------------------------"""
         self.k = k
         self.alphabet = 'ACGT'
+        self.list = []
+        self.count = {}
+        self.p = {}
+        self.w = {}
+        self.wcum = {}
+
+        self.total = 0
+        self.pmin = 1.0
+        self.pmax = 0.0
+        self.wmin = 1.0
+        self.wmax = 0.0
 
         self.reset()
         if setup:
@@ -78,13 +90,12 @@ class Kmer:
 
         return True
 
-
     def fromFasta(self, fasta):
         """-----------------------------------------------------------------------------------------
         count kmers in a Fasta file.  Some words may be excluded because they contain non-alphabet
         characters.
 
-        :param file: open file handle for fasta file
+        :param fasta: open file handle for fasta file
         :return: number of kmers counted
         -----------------------------------------------------------------------------------------"""
 
@@ -98,7 +109,7 @@ class Kmer:
             if line.startswith('>'):
                 nseq += 1
                 trace = '\n{}'.format(nseq)
-                # print('\nn', nseq)
+                # sys.stderr.write('\nn', nseq)
                 seq = ''  # no overlap between sequences
             else:
                 line = seq + line
@@ -108,12 +119,11 @@ class Kmer:
 
                         # screen trace: TODO make interval an option
                         if not self.total % 10000000:
-                            print()
-                            print('{:13d} '.format(self.total), end='')
-                        if not self.total % 100000:
-                            print('{}'.format(trace), end='')
-                            trace = '.'
-                        self.total += 1
+                            sys.stderr.write('\n{:13d} '.format(self.total))
+                            if not self.total % 100000:
+                                sys.stderr.write('{}'.format(trace))
+                                trace = '.'
+                            self.total += 1
 
                     except KeyError:
                         # kmers with non ACGT letters
@@ -128,7 +138,6 @@ class Kmer:
 
         return self.total
         # end of fromFasta
-
 
     def updateProb(self):
         """-----------------------------------------------------------------------------------------
@@ -147,7 +156,6 @@ class Kmer:
 
         return self.pmin, self.pmax
 
-
     def tableWrite(self, kmerout):
         """-----------------------------------------------------------------------------------------
         write the kmer table to a file
@@ -159,31 +167,31 @@ class Kmer:
         total = 0
         if self.pmax > 0 and self.wmax > 0:
             # write count, p, weight
-            for word in self.count:
+            for word in self.list:
                 kmerout.write('{}\t{}\t{:.4g}\t{:.4g}\n'.format(
                     word, self.count[word], self.p[word], self.w[word]))
                 total += self.count[word]
 
         elif self.pmax > 0:
             # write count, p
-            for word in self.count:
+            for word in self.list:
                 kmerout.write('{}\t{}\t{:.4g}\n'.format(word, self.count[word], self.p[word]))
                 total += self.count[word]
 
         else:
             # $ write count only
-            for word in self.count:
+            for word in self.list:
                 kmerout.write('{}\t{}\n'.format(word, self.count[word]))
-            total += self.count[word]
+                total += self.count[word]
 
         return total
-
 
     def tableRead(self, kmerin, reset=True):
         """-----------------------------------------------------------------------------------------
         Read in a kmer table written by tableWrite.  If reset is True, the kmer count and
         probability are reset
-        :param file: file opened by argparse
+        :param kmerin: file opened by argparse
+        :param reset: if True, clear attributes before loading
         :return: integer, number of words read
         -----------------------------------------------------------------------------------------"""
 
@@ -199,25 +207,24 @@ class Kmer:
 
             field = line.split()
             k = field[0]
+            self.list.append(k)
             self.count[k] = int(field[1])
             self.p[k] = float(field[2])
-            self.pmin = min(field[2], self.pmin)
-            self.pmax = max(field[2], self.pmax)
+            self.pmin = min(self.p[k], self.pmin)
+            self.pmax = max(self.p[k], self.pmax)
 
             if len(field) > 3:
                 self.w[k] = float(field[3])
-                self.wmin = min(field[3], self.wmin)
-                self.wmax = max(field[3], self.wmax)
+                self.wmin = min(self.w[k], self.wmin)
+                self.wmax = max(self.w[k], self.wmax)
 
             n += 1
 
         # assume k is the length of the first word
-        keys = self.count.keys()
-        self.k = len(keys[0])
+        self.k = len(list(self.count)[0])
 
         self.total = n
         return n
-
 
     def weightNegExp(self, exp=1.0):
         """-----------------------------------------------------------------------------------------
@@ -229,19 +236,18 @@ class Kmer:
         -----------------------------------------------------------------------------------------"""
         wmax = 0
         wmin = 1
-        for k in self.p:
+        for k in self.list:
             # w = 1.0 - self.p[k] ** exp
             w = self.p[k] ** exp
             wmax = max(w, wmax)
             wmin = min(w, wmin)
             self.w[k] = w
-            print('{:.4g}\t{}'.format(w, k))
+            # sys.stderr.write('{:.4g}\t{}'.format(w, k))
 
         self.wmin = wmin
         self.wmax = wmax
 
         return wmin, wmax
-
 
     def weightExp(self, exp=1.0):
         """-----------------------------------------------------------------------------------------
@@ -253,7 +259,7 @@ class Kmer:
         -----------------------------------------------------------------------------------------"""
         wmax = 0
         wmin = 1
-        for k in self.p:
+        for k in self.list:
             # w = 1.0 - self.p[k] ** exp
             w = self.p[k] ** exp
             wmax = max(w, wmax)
@@ -265,14 +271,13 @@ class Kmer:
 
         return wmin, wmax
 
-
     def weightNormalize(self):
         """-----------------------------------------------------------------------------------------
         Divide weights by sum.  update wmin and wmax and cumulative weights, self.wcum
         :return: float, min and max weight
         -----------------------------------------------------------------------------------------"""
         wsum = 0.0
-        for k in self.w:
+        for k in self.list:
             wsum += self.w[k]
 
         wmin = 1.0
@@ -292,7 +297,6 @@ class Kmer:
 
         return wmax, wmin
 
-
     def randomByWeight(self):
         """-----------------------------------------------------------------------------------------
         select a ranom kmer using the current stored weights.  Assumes weights have been normalized
@@ -304,17 +308,13 @@ class Kmer:
         found = ''
         for word in self.list:
             found = word
-            if r > self.wcum[word]:
+            if r < self.wcum[word]:
                 break
 
         return found, self.w[found]
 
 
 # end of Kmer class ================================================================================
-
-
-import sys
-import argparse
 
 
 def commandLine(default):
@@ -351,6 +351,16 @@ def commandLine(default):
                              default=str(default['noligo'])
                              )
 
+    commandline.add_argument('--loligo',
+                             help='length of oligos to generate',
+                             type=int,
+                             default=str(default['loligo'])
+                             )
+    commandline.add_argument('--oligo',
+                             help='output oligo file',
+                             type=argparse.FileType('w')
+                             )
+
     commandline.add_argument('--table',
                              help='precalculated kmer table',
                              type=argparse.FileType('r'),
@@ -376,7 +386,7 @@ def printParameters(clargs):
         for k in clargs.__dict__:
             if k.startswith('__') or clargs.__dict__[k] == None:
                 continue
-            if k == 'fasta' or k == 'table':
+            if k in ('fasta', 'table', 'oligo', 'output'):
                 sys.stderr.write('{}: {}\n'.format(k, clargs.__dict__[k].name))
             else:
                 sys.stderr.write('{}: {}\n'.format(k, clargs.__dict__[k]))
@@ -415,7 +425,7 @@ from math import log10 as log
 
 if __name__ == '__main__':
 
-    default = {'kmer': 8, 'noligo': 1000, 'overlap': 3}
+    default = {'kmer': 8, 'noligo': 1000, 'loligo': 50, 'overlap': 3}
     cl = commandLine(default)
     printParameters(cl)
 
@@ -426,7 +436,8 @@ if __name__ == '__main__':
     if cl.table:
         # read kmers from file
         nwords = kmer.tableRead(cl.table)
-        print('{} {}'.format(kmer.k, kmer.total))
+        sys.stderr.write(
+            '\n{} kmers of size {} read from {}\n'.format(kmer.total, kmer.k, cl.table.name))
         infile = cl.table.name
     else:
         # calculate kmers from fasta
@@ -441,41 +452,20 @@ if __name__ == '__main__':
 
     kmer.weightExp(-2.0)
     kmer.weightNormalize()
-    sys.stderr.write('\n    pmin pmax: {:10.3g}\t{:10.3g}'.format(kmer.pmin, kmer.pmax))
-    sys.stderr.write('log pmin pmax: {:10.3g}\t{:10.3g}'.format(log(kmer.pmin), log(kmer.pmax)))
-    sys.stderr.write('\n    wmin wmax: {:10.3g}\t{:10.3g}'.format(kmer.wmin, kmer.wmax))
+    sys.stderr.write('\n    pmin pmax: {:10.3g}\t{:10.3g}\n'.format(kmer.pmin, kmer.pmax))
+    sys.stderr.write('log pmin pmax: {:10.3g}\t{:10.3g}\n'.format(log(kmer.pmin), log(kmer.pmax)))
+    sys.stderr.write('    wmin wmax: {:10.3g}\t{:10.3g}\n'.format(kmer.wmin, kmer.wmax))
+    sys.stderr.write('\n')
 
     if cl.output:
         nwritten = kmer.tableWrite(cl.output)
-        sys.stderr.write('\n{} kmers written to {}'.format(nwritten, cl.output))
-
-    # weight counts - ad hoc weighting function
-    # w = bias**(logP - logPmax)
-    # the larger the bias, the more the weights favor infrequent words
-
-    wmin = 1.0
-    wmax = 0.0
-    wsum = 0.0
-    bias = 0.5
-    cutoff = log(kmer.pmax)
-    threshold = {}
-    # for sorted list
-    #  for word in sorted(kmer.count, key=lambda k: kmer.count[k]):
-    for word in kmer.count:
-        # TODO it seems like the following should be kmer.p not kmer.count
-        # TODO need to rethink the whole calculation but need longer kmer data
-        kmer.w[word] = bias ** (cutoff - log(kmer.p[word]))
-        wsum += kmer.w[word]
-        wmin = min(wmin, kmer.w[word])
-        wmax = max(wmax, kmer.w[word])
-        threshold[word] = wsum
+        sys.stderr.write('{} kmers written to {}\n'.format(nwritten, cl.output.name))
 
     # calculate the transitions between overlapping words: 'list' is the list of overlapping full
-    # words, 't' has the threshold value for each word (cumulative weight), and 'w' has the total
-    # weight summed over the overlapping words
+    # words, 'wcum' has the threshold value for each word (cumulative weight)
 
     owords = {}
-    for word in kmer.count:
+    for word in kmer.list:
 
         lap = word[:cl.overlap]
         if lap in owords:
@@ -485,28 +475,34 @@ if __name__ == '__main__':
             owords[lap] = omer
 
         omer.list.append(word)
-        omer.add('count', word)
-        omer.add('p', word)
-        omer.add('w', word)
+        omer.add('count', word, kmer.count[word])
+        omer.add('p', word, kmer.p[word])
+        omer.add('w', word, kmer.w[word])
+        omer.wmin = min(omer.wmin, omer.w[word])
+        omer.wmax = max(omer.wmax, omer.w[word])
+        omer.pmin = min(omer.pmin, omer.p[word])
+        omer.pmax = max(omer.pmax, omer.p[word])
 
-        # construct oligos
+    for o in owords:
+        owords[o].weightNormalize()
 
-        for n in range(cl.noligo):
-            # select a weighted start point
-            oligo, weight = kmer.randomByWeight()
+    # construct cl.noligo oligos
+    out = sys.stdout
+    if cl.oligo is not None:
+        out = cl.oligo
 
-        nsteps = 8
-        for step in range(nsteps):
+    for noligo in range(cl.noligo):
+        # select a weighted start point
+        oligo, weight = kmer.randomByWeight()
+        while len(oligo) < cl.loligo:
             # select an overlapping next word
             lap = oligo[-cl.overlap:]
-        r = random.random() * omer.w[lap]
-        found = ''
-        for i in range(len(omer[lap]['list'])):
-            found = omer[lap]['list'][i]
-        if r < omer[lap]['t'][i]:
-            break
-        oligo += found[-cl.overlap:]
+            next, weight = owords[lap].randomByWeight()
+            # sys.stdout.write('    {}  {}  {}\n'.format(lap, next, oligo))
+            oligo += next[cl.overlap:]
 
-    gc = fractionGC(oligo, kmer.alphabet)
-    sys.stdout.write('>n{} GC={:.3}\n'.format(n, gc))
-    sys.stdout.write(oligo)
+        gc = fractionGC(oligo, kmer.alphabet)
+        out.write('>n{} GC={:.3}  Len={}\n'.format(noligo, gc, len(oligo)))
+        out.write('{}\n'.format(oligo))
+
+    sys.stderr.write('{} oligos written to {}\n'.format(cl.noligo, out.name))
