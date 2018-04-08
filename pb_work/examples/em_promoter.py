@@ -129,13 +129,20 @@ class pssm():
 
         return True
 
-    def table(self):
+    def __str__(self):
         """-----------------------------------------------------------------------------------------
-        Return a list of lists with the current pssm
+        Return a formatted version of the current pssm
 
-        :return: list, 2D list of sequence letters (rows) and positons(columns)
+        :return: string, formatted version of pssm
         -----------------------------------------------------------------------------------------"""
-        pass
+        out = ''
+        for a in range(len(self.alphabet)):
+            out += '{}'.format(self.alphabet[a])
+            for w in range(self.size):
+                out += '\t{:5.3f}'.format(self.pssm[a][w])
+            out += '\n'
+
+        return out
 
     def sequenceRead(self, seqfile):
         """-----------------------------------------------------------------------------------------
@@ -223,10 +230,10 @@ if __name__ == '__main__':
         model.ml()
 
         mse = model.convergence(pssm_current)
-        sys.stderr.write('mse:{:.3g}\n'.format(mse))
         if mse < target:
             converged = True
 
+        sys.stderr.write('\nmse:{:.3g}\n{}'.format(mse, str(model)))
         pssm_current = copy.deepcopy(model.pssm)
 
     # report probability distributions
