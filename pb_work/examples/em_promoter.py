@@ -5,6 +5,7 @@ Michael Gribskov     08 April 2018
 ================================================================================================="""
 import sys
 
+
 class pssm():
     """=============================================================================================
     position specific scoring matrix class.
@@ -15,7 +16,16 @@ class pssm():
         Pssm constructor
         :param seqfile: string, name of the file containing the sequences
         -----------------------------------------------------------------------------------------"""
-        pass
+        self.size = size
+        self.pssm = []
+        self.alphabet = ''
+        self.composition = {}
+        self.sequence = []
+        self.expected = []
+        self.likelihood = []
+
+        self.sequenceRead(seqfile)
+        self.compositionCalc()
 
     def initRandom(self, p):
         """-----------------------------------------------------------------------------------------
@@ -53,9 +63,45 @@ class pssm():
     def sequenceRead(self, seqfile):
         """-----------------------------------------------------------------------------------------
         read a set of sequences, one per line with no non-sequence characters
+        duplicate seqeunces are not included
+        no checking for non-sequence characters
 
         -----------------------------------------------------------------------------------------"""
-        pass
+        try:
+            seq = open(seqfile, 'r')
+        except:
+            sys.stderr.write(
+                'pssm.sequenceRead - unable to open sequence file ({})'.format(seqfile))
+
+        self.nseq = 0
+        for line in seq:
+            line = line.rstrip()
+            if line not in self.sequence:
+                self.sequence.append(line)
+                self.nseq += 1
+
+        seq.close()
+        return self.nseq
+
+    def compositionCalc(self):
+        """-----------------------------------------------------------------------------------------
+        Calculate fractional composition of sequences.  sets composition and alphabet
+        :return: number of letters
+        -----------------------------------------------------------------------------------------"""
+        count = 0
+        for s in self.sequence:
+            for letter in s:
+                try:
+                    self.composition[letter] += 1
+                except KeyError:
+                    self.composition[letter] = 1
+                count += 1
+
+        for letter in self.composition:
+            self.composition[letter] /= count
+
+        self.alphabet = ''.join(list(self.composition))
+        return count
 
     def convergence(self, table):
         """-----------------------------------------------------------------------------------------
@@ -75,7 +121,7 @@ class pssm():
 # ==================================================================================================
 if __name__ == '__main__':
     # read promoter sequences and composition
-    model = pssm(6, seqfile=sys.argv[0])
+    model = pssm(6, seqfile=sys.argv[1])
 
     # create random pssm from random frequencies +/- random
     p_rand = 0.1
