@@ -76,6 +76,7 @@ class pssm():
         -----------------------------------------------------------------------------------------"""
         seqnum = 0
         self.expected = []
+        rowsum = [0 for k in range(len(self.sequence))]
         for s in self.sequence:
             exp = []
             self.expected.append(exp)
@@ -86,7 +87,13 @@ class pssm():
                     i = self.alphabet.find(s[pos + w])
                     p *= self.pssm[i][w]
                 exp.append(p)
+                rowsum[seqnum] += p
             seqnum += 1
+
+        # renormalize so probabilities sum to one over each sequence
+        for s in range(len(self.sequence)):
+            for pos in range(len(self.sequence[s]) - self.size + 1):
+                self.expected[s][pos] /= rowsum[s]
 
         return True
 
