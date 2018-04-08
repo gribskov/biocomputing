@@ -19,7 +19,7 @@ class Kmer:
 
     def __init__(self, k=8, setup=True):
         """-----------------------------------------------------------------------------------------
-        kmer constructor.  see reset method for most attribute definitions.
+        kmer constructor.
         :param k: length of words
         -----------------------------------------------------------------------------------------"""
         self.k = k
@@ -36,13 +36,12 @@ class Kmer:
         self.wmin = 1.0
         self.wmax = 0.0
 
-        self.reset()
         if setup:
             self.setupWords()
 
     def reset(self):
         """-----------------------------------------------------------------------------------------
-        Reset the kmer counts, probabilities, and number of kmers
+        Reset the kmer counts, probabilities, and number of kmers. k and alphabet are not reset.
 
         :return: True
         -----------------------------------------------------------------------------------------"""
@@ -90,7 +89,7 @@ class Kmer:
 
         return True
 
-    def fromFasta(self, fasta):
+    def fromFasta(self, fasta, interval=1000000):
         """-----------------------------------------------------------------------------------------
         count kmers in a Fasta file.  Some words may be excluded because they contain non-alphabet
         characters.
@@ -117,10 +116,10 @@ class Kmer:
                     try:
                         self.count[line[i:i + self.k]] += 1
 
-                        # screen trace: TODO make interval an option
-                        if not self.total % 10000000:
+                        # screen trace:
+                        if not self.total % interval:
                             sys.stderr.write('\n{:13d} '.format(self.total))
-                            if not self.total % 100000:
+                            if not self.total % interval/10:
                                 sys.stderr.write('{}'.format(trace))
                                 trace = '.'
                             self.total += 1
@@ -273,7 +272,7 @@ class Kmer:
 
     def weightNormalize(self):
         """-----------------------------------------------------------------------------------------
-        Divide weights by sum.  update wmin and wmax and cumulative weights, self.wcum
+        Divide weights by sum.  update self.wmin and self.wmax and cumulative weights, self.wcum
         :return: float, min and max weight
         -----------------------------------------------------------------------------------------"""
         wsum = 0.0
@@ -299,7 +298,7 @@ class Kmer:
 
     def randomByWeight(self):
         """-----------------------------------------------------------------------------------------
-        select a ranom kmer using the current stored weights.  Assumes weights have been normalized
+        select a random kmer using the current stored weights.  Assumes weights have been normalized
         to [0.0, 1.0].  See weightNormalize
 
         :return: string random kmer, float weight
@@ -321,7 +320,7 @@ def commandLine(default):
     """---------------------------------------------------------------------------------------------
     Get command line options
 
-    :return:
+    :return: ArgumentParser.parse_args()
     ---------------------------------------------------------------------------------------------"""
     commandline = argparse.ArgumentParser(
         description='calculate infrequent oligos based on kmer frequencies in an input'
@@ -329,12 +328,12 @@ def commandLine(default):
 
     )
     commandline.add_argument('--fasta',
-                             help='FastA file to split',
+                             help='FastA file to analyze',
                              type=argparse.FileType('r'),
                              )
 
     commandline.add_argument('--kmer',
-                             help='maximum number of sequence character per segment',
+                             help='size of kmer words',
                              type=int,
                              default=str(default['kmer'])
                              )
