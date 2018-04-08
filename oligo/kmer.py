@@ -12,7 +12,7 @@ import random
 import itertools
 
 
-class Kmer:
+class Kmer():
     """=============================================================================================
     Generates and holds the kmer counts and probabilities
 
