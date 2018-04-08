@@ -95,9 +95,30 @@ class pssm():
         Calclulate the maximum likelihood pattern based on the probabilities that each sequence
         position is a site.  The ML estimate is simply the probability weighted occurrence of the
         letters in each position of the pssm
-
+        :return: True
         -----------------------------------------------------------------------------------------"""
-        pass
+        # reinitialize pssm
+        for a in range(len(self.alphabet)):
+            for w in range(self.size):
+                self.pssm[a][w] = 0.0
+
+        colsum = [0 for k in range(self.size)]
+        seqnum = 0
+        for s in self.sequence:
+            for pos in range(len(s) - self.size + 1):
+                for w in range(0,self.size):
+                    i = self.alphabet.find(s[pos+w])
+                    self.pssm[i][w] += self.expected[seqnum][pos+w]
+                    colsum[w] += self.pssm[i][w]
+            seqnum += 1
+
+        # renormalize columns by dividing by colsums.  pssm should be probability  afterwards
+
+        for a in range(len(self.alphabet)):
+            for w in range(self.size):
+                self.pssm[a][w] /= colsum[w]
+
+        return True
 
     def table(self):
         """-----------------------------------------------------------------------------------------
