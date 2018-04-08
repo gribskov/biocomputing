@@ -5,6 +5,7 @@ Michael Gribskov     08 April 2018
 ================================================================================================="""
 import sys
 import random
+import copy
 
 
 class pssm():
@@ -81,8 +82,8 @@ class pssm():
             for pos in range(len(s) - self.size + 1):
                 i = self.alphabet.find(s[pos])
                 p = self.pssm[i][0]
-                for w in range(1,self.size):
-                    i = self.alphabet.find(s[pos+w])
+                for w in range(1, self.size):
+                    i = self.alphabet.find(s[pos + w])
                     p *= self.pssm[i][w]
                 exp.append(p)
             seqnum += 1
@@ -104,12 +105,13 @@ class pssm():
 
         colsum = [0 for k in range(self.size)]
         seqnum = 0
-        for s in self.sequence:
-            for pos in range(len(s) - self.size + 1):
-                for w in range(0,self.size):
-                    i = self.alphabet.find(s[pos+w])
-                    self.pssm[i][w] += self.expected[seqnum][pos+w]
-                    colsum[w] += self.pssm[i][w]
+        for s in range(len(self.sequence)):
+            seq = self.sequence[s]
+            for pos in range(len(seq) - self.size + 1):
+                for w in range(0, self.size):
+                    i = self.alphabet.find(seq[pos + w])
+                    self.pssm[i][w] += self.expected[s][pos]
+                    colsum[w] += self.expected[s][pos]
             seqnum += 1
 
         # renormalize columns by dividing by colsums.  pssm should be probability  afterwards
@@ -177,9 +179,14 @@ class pssm():
 
         :return: float, mean squared difference
         -----------------------------------------------------------------------------------------"""
-        mse = 1.0
+        mse = 0.0
+        n = 0
+        for a in range(len(self.alphabet)):
+            for w in range(self.size):
+                mse += (self.pssm[a][w] - table[a][w]) ** 2
+                n += 1
 
-        return mse
+        return mse / n
 
     # End of pssm class ============================================================================
 
@@ -198,9 +205,9 @@ if __name__ == '__main__':
     # EM - until convergence
     model.expectation()
     model.ml()
-    pssm_current = model.table
+    pssm_current = copy.deepcopy(model.pssm)
     converged = False
-    target = 0.01
+    target = 0.000001
     while not converged:
         # calculate position probabilities for each sequence (expectation)
         model.expectation()
@@ -209,8 +216,11 @@ if __name__ == '__main__':
         model.ml()
 
         mse = model.convergence(pssm_current)
+        sys.stderr.write('mse:{:.3g}\n'.format(mse))
         if mse < target:
             converged = True
+
+        pssm_current = copy.deepcopy(model.pssm)
 
     # report probability distributions
 
