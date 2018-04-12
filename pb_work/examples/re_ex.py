@@ -78,5 +78,31 @@ for match in matches:
 s = 'To be or not to be, that is the question'
 match = re.search('([Tt]o).+(to)', s)
 print('groups', match.group(0), '|', match.group(1) )
+print()
+
+s = 'purple alice@google.com, blah monkey bob@abc.com blah dishwasher'
+emails = re.findall(r'([\w\.-]+)@([\w\.-]+)', s, flags=re.DEBUG)
+for email in emails:
+    print('usernbame:{}     host:{}'.format(email[0], email[1]))
+
+s = 'June 24, August 9, Dec 12 December 13'
+s = re.sub('Dec[^ ]*', 'Nov', s)
+print(s)
+
+s = '123 456 789 001'
+match = re.search( '(\d+) (\d+) (\d+) (\d+)', s )
+print(match.group(0))
+print(match.group(1))
+print(match.group(2))
+print(match.group(2))
+s = '123 456 789'
+match = re.search( '(\d+) (\d+) (\d+) (\d+)', s )
+if match:
+    print(match.group(0))
+    print(match.group(1))
+    print(match.group(2))
+    print(match.group(2))
+else:
+    print('no match')
 
 exit(0)
