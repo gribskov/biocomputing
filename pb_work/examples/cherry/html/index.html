@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='content-type' content='text/html; charset=utf-8'>
+    <title>CCMF</title>
+    <script type='text/javascript'
+            src='http://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js'></script>
+    <script type='text/javascript'>
+        $(document).ready(function() {
+            $('button').on('click', function() {
+                var request = $.ajax({'url': '/getData'});
+                request.done(function(response) {
+                    $('#foo').text(response.foo);
+                    $('#baz').text(response.baz);
+                });
+
+                request.fail(function(jqXHR, textStatus) {
+                    alert('Request failed: ' + textStatus);
+                });
+            })
+        });
+
+    </script>
+
+</head>
+
+<body>
+    <button>make ajax call</button>
+
+    <h1>Foo</h1>
+
+    <div id='foo'></div>
+
+        <h1>Baz</h1>
+
+    <div id='baz'></div>
+
+</body>
+</html>
