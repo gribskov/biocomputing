@@ -34,12 +34,13 @@ class GffCherry:
         for row in db:
             for key in row.keys():
                 if row['feature']:
+                    #eaturelist.append("{}".format(row['feature']))
                     featurelist.append(row['feature'])
 
-        features = ','.join(featurelist)
+        features = '{}'.format(','.join(featurelist))
 
         return {
-            'foo': features,
+            'foo': featurelist,
             'baz': 'another one'
         }
 
@@ -54,7 +55,7 @@ if __name__ == '__main__':
     config = {
         'global': {
             'server.socket_host': '127.0.0.1',
-            'server.socket_port': 8081,
+            'server.socket_port': 8080,
             'server.thread_pool': 8
         }
     }

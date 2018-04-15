@@ -9,9 +9,15 @@
         $(document).ready(function() {
             $('button').on('click', function() {
                 var request = $.ajax({'url': '/getData'});
+                var s1 = document.getElementById("feature_type");
+
                 request.done(function(response) {
-                    $('#foo').text(response.foo);
-                    $('#baz').text(response.baz);
+                    var i;
+                    for (i=0; i<response.foo.length; i++) {
+                        s1.options[i] = new Option(response.foo[i],String(i));
+                    }
+                    $('#foo').text(response.foo.length);
+                    $('#baz').text(response.foo.length+response.foo[1])
                 });
 
                 request.fail(function(jqXHR, textStatus) {
@@ -29,9 +35,18 @@
 
     <h1>Foo</h1>
 
-    <div id='foo'></div>
+    <div>
+        <form id="s1">
+            <select id="feature_type">
+                <option name='foo' value=""option">test</option>
+            </select>
 
-        <h1>Baz</h1>
+        </form>
+
+    </div>
+
+
+    <h1>Baz</h1>
 
     <div id='baz'></div>
 
