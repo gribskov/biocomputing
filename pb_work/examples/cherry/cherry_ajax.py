@@ -34,7 +34,7 @@ class GffCherry:
         for row in db:
             for key in row.keys():
                 if row['feature']:
-                    #eaturelist.append("{}".format(row['feature']))
+                    # eaturelist.append("{}".format(row['feature']))
                     featurelist.append(row['feature'])
 
         features = '{}'.format(','.join(featurelist))
@@ -43,6 +43,34 @@ class GffCherry:
             'foo': featurelist,
             'baz': 'another one'
         }
+
+    @cherrypy.expose
+    # @cherrypy.tools.json_in()
+    # @cherrypy.tools.json_out()
+    def test(self, type, dbfile='gff.db'):
+        dbh = sq3.connect(dbfile)
+        db = dbh.cursor()
+
+        sql = 'SELECT attribute FROM gff WHERE feature="{}";'.format(type)
+        db.row_factory = sq3.Row
+        db.execute(sql)
+        idlist = []
+        for row in db:
+            if row['attribute']:
+                field = row['attribute'].split(';')
+                for f in field:
+                    if f.startswith('ID='):
+                        f = f.replace('ID=','')
+                        if f not in idlist:
+                            idlist.append(f)
+                        break
+
+        response = ''
+        for id in idlist:
+            response += '<option value="{}">{}</option>\n'.format(id,id)
+
+        print(type, response)
+        return response
 
 
 # --------------------------------------------------------------------------------------------------
@@ -61,7 +89,6 @@ if __name__ == '__main__':
     }
 
     cherrypy.quickstart(GffCherry(), '/', config)
-
 
     cherrypy.engine.exit()
 

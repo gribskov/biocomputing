@@ -23,32 +23,43 @@
                 request.fail(function(jqXHR, textStatus) {
                     alert('Request failed: ' + textStatus);
                 });
-            })
+            });
+
+            $('#feature_type').change(function() {
+                var choice = $('#feature_type').find(":selected").text();
+                //alert('feature_type changed: ' + choice );
+                $('#gene').remove();
+                $('#s1').append('<select id="gene"></select>');
+                $('#gene').load('test?type='+choice);
+            });
+
         });
+
 
     </script>
 
 </head>
 
 <body>
-    <button>make ajax call</button>
+<button>make ajax call</button>
 
-    <h1>Foo</h1>
+<h1>Foo</h1>
 
-    <div>
-        <form id="s1">
-            <select id="feature_type">
-                <option name='foo' value=""option">test</option>
-            </select>
+<div>
+    <form id="s1">
+        <select id="feature_type">
+            <option name='foo' value="" option
+            ">test</option>
+        </select>
 
-        </form>
+    </form>
 
-    </div>
+</div>
 
 
-    <h1>Baz</h1>
+<h1>Baz</h1>
 
-    <div id='baz'></div>
+<div id='baz'></div>
 
 </body>
 </html>
