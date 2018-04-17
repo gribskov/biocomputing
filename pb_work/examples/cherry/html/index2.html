@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='content-type' content='text/html; charset=utf-8'>
+    <title>CCMF</title>
+    <script type='text/javascript'
+            src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js'>
+    </script>
+    <script type='text/javascript'>
+          $(document).ready(function() {
+              $('button').on('click', function() {
+                  var request = $.ajax({'url': '/getData'});
+                  var s1 = document.getElementById("feature_type");
+                  request.done(function(response) {
+                      var i;
+                      for (i=0; i<response.foo.length; i++) {
+                          s1.options[i] = new Option(response.foo[i],String(i));
+                      }
+                      $('#baz').text(response.foo.length+response.foo[1])
+                  });
+
+              request.fail(function(jqXHR, textStatus) {
+                  alert('Request failed: ' + textStatus);
+              });
+
+              $('#feature_type').change(function() {
+                var choice = $('#feature_type').find(":selected").text();
+                //alert('feature_type changed: ' + choice );
+                $('#gene').remove();
+                $('#s1').append('<select id="gene"></select>');
+                $('#gene').load('test?type='+choice);
+              });
+            })
+          });
+
+    </script>
+</head>
+<body>
+<button>make ajax call</button>
+
+<h1>Foo</h1>
+<div>
+    <form id="s1">
+        <select id="feature_type">
+            <option name='foo' value="option">test</option>
+        </select>
+
+    </form>
+</div>
+
+
+<h1>Baz</h1>
+<div id='baz'></div>
+
+</body>
+</html>
