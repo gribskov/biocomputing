@@ -8,27 +8,41 @@
     </script>
     <script type='text/javascript'>
           $(document).ready(function() {
-            $('button').on('click', function() {
-              var request = $.ajax({'url': '/getData'});
-              request.done(function(response) {
-                $('#foo').text(response.foo);
-                $('#baz').text(response.baz);
-              });
+              $('button').on('click', function() {
+                  var request = $.ajax({'url': '/getData'});
+                  var s1 = document.getElementById("feature_type");
+                  request.done(function(response) {
+                      var i;
+                      for (i=0; i<response.foo.length; i++) {
+                          s1.options[i] = new Option(response.foo[i],String(i));
+                      }
+                      $('#baz').text(response.foo.length+response.foo[1])
+                  });
+
               request.fail(function(jqXHR, textStatus) {
-                alert('Request failed: ' + textStatus);
+                  alert('Request failed: ' + textStatus);
               });
             })
           });
+
     </script>
 </head>
 <body>
-    <button>make ajax call</button>
+<button>make ajax call</button>
 
-    <h1>Foo</h1>
-    <div id='foo'></div>
+<h1>Foo</h1>
+<div>
+    <form id="s1">
+        <select id="feature_type">
+            <option name='foo' value="option">test</option>
+        </select>
 
-    <h1>Baz</h1>
-    <div id='baz'></div>
+    </form>
+</div>
+
+
+<h1>Baz</h1>
+<div id='baz'></div>
 
 </body>
 </html>
