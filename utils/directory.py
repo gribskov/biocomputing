@@ -3,7 +3,19 @@ import os
 
 class Directory:
     """=============================================================================================
-    Traverse a directory structure and perform actions
+    Traverse a directory structure ignoring files beginning with strings listed in skipbegin and
+    files files ending with strings in skipend.
+    Defaults:
+        self.skipbegin = ['.', '_', 'venv']
+        self.skipend = ['.pyc']
+
+    Synopsis:
+        spider = Directory(dir='..\pb_work')
+
+        while spider.next():
+            print('\ndirectory: {}'.format(spider.current))
+            for fname in spider.filelist:
+                print('\t%s' % fname)
 
     31 May 2018 Michael Gribskov
     ============================================================================================="""
