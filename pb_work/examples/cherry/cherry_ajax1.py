@@ -17,15 +17,27 @@ class GffCherry:
 
     @cherrypy.expose
     def index(self):
-        return serve_file(os.path.join(path, 'index0.html'))
+        return serve_file(os.path.join(path, 'index1.html'))
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def getData(self):
+    def getData(self, dbfile='gff.db'):
+        dbh = sq3.connect(dbfile)
+        db = dbh.cursor()
+
+        sql = 'SELECT DISTINCT feature FROM gff;'
+        db.row_factory = sq3.Row
+        db.execute(sql)
+
+        featurelist = []
+        for row in db:
+            for key in row.keys():
+                if row['feature']:
+                    featurelist.append(row['feature'])
+
         return {
-            'foo': 'bar sent from cherryPy',
-            'baz': 'faz - another one'
-        }
+            'foo': featurelist,
+            'baz': 'another one' }
 
 
 # --------------------------------------------------------------------------------------------------
