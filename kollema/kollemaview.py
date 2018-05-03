@@ -21,6 +21,10 @@ class KollemaCherry:
         print('path', path)
         return serve_file(os.path.join(static, 'kollema.html'))
 
+    @cherrypy.expose
+    def signon(self, new):
+        return serve_file(os.path.join(static, 'signon.html'))
+
     """
     @cherrypy.expose
     @cherrypy.tools.json_out()
