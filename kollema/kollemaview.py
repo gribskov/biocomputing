@@ -94,8 +94,8 @@ if __name__ == '__main__':
     config = {
         'global': {
             'server.socket_host': '127.0.0.1',
-            'server.socket_port': 8080,
-            'server.thread_pool': 2
+            'server.socket_port': 8081,
+            'server.thread_pool': 4
         },
         '/css':{
             'tools.staticdir.on': True,
