@@ -26,7 +26,7 @@
             /* height: 100%; Full height */
             /* overflow: auto; Enable scroll if needed */
             /*background-color: #474e5d; */
-            background-color: rgba(0,0,0,0.2);
+            background-color: rgba(0,0,0,0.1);
 
         }
 
@@ -60,12 +60,31 @@
     </script>
 
     <script type='text/javascript'>
+
+        function closeModal() {
+            for (i = 0; i < arguments.length; i++) {
+                var modal = document.getElementById(arguments[i])
+                modal.style.display='none'
+            }
+        }
+        function openModal() {
+            for (i = 0; i < arguments.length; i++) {
+                var modal = document.getElementById(arguments[i])
+                modal.style.display='block'
+            }
+        }
+
         $(document).ready(function() {
             var register = document.getElementById('reg');
 
-            // When the user clicks anywhere outside of the modal, close it
+            $("#emailid").click( function(){
+                alert('target ' + $(this) );
+                $(this).placeholder = 'some stuff';
+            });
+
+            // When the user clicks in the register region, close it
             window.onclick = function(event) {
-                if (event.target == register) {
+                if (event.target == register){
                     register.style.display = "none";
                 }
             }
@@ -82,10 +101,6 @@
     <div class="container" style="background-image:url(/images/scroll_med.jpg);background-repeat:no-repeat;background-position:right bottom;height:360px;">
         <div class="" row>
             <div class="eight columns">
-
-
-
-
                 <h1 class="title"><em>Koll&#234;ma</em></h1>
                 <h4>Transcript Annotation System</h4>
                 In ancient times, a koll&#234;ma was one of the individual sheets that was glued together
@@ -95,26 +110,33 @@
             </div>
             <div class="four columns scroll u-pull-right" >
                 <div>
-                    <a class="button"  onclick="document.getElementById('reg').style.display='block'" style="">Sign In</a>
-                    <a class="button" href="signon?new=True">Join</a>
+                    <a class="button" onclick="openModal('reg')" style="">Sign In</a>
+                    <a class="button" onclick="openModal('reg','newuser')">Join</a>
                 </div>
             </div>
 
         </div>
-                    <div id="reg" class="modal four columns">
-                        <form>
-                            <div class="modal-content">
 
-                                <span onclick="document.getElementById('reg').style.display='none'" class="close" title="Close">&curvearrowright;</span>
+        <!-- modal text box for signin/registration -->
+        <div id="reg" class="modal four columns">
+            <form>
+                <div class="modal-content" id="signin">
 
-
-                                    <input type="text" name="id" value="enter your email" style="width:100%"><br/>
-                                    <input type="submit" value="make it so">
-
-
-                            </div>
-                        </form>
+                    <span onclick="closeModal('reg','newuser')" class="close" title="Close">&curvearrowright;</span>
+                    <div id="newuser" style="display:none;">
+                        <input type="text" id="firstname" name="firstname" placeholder="Please enter your first name" style="width:100%"><br/>
+                        <input type="text" id="lastname" name="lastname" placeholder="Please enter your last name" style="width:100%"><br/>
+                        <input type="text" id="phone" name="phone" placeholder="Please enter your phone/text contact" style="width:100%"><br/>
+                        <input type="hidden" name="new" value="1"></input>
                     </div>
+
+                    <input type="text" id="emailid" name="email" placeholder="enter your email" style="width:100%"><br/>
+                    <input type="submit" value="make it so">
+                    <input type="button" onclick="closeModal('reg', 'newuser')" value="Cancel">
+
+                </div>
+            </form>
+        </div>
 
     </div>
 </div>
@@ -126,6 +148,7 @@
                 <h4>Updates</h4>
                 <p>
                     3 May 2018 - Koll&#234;ma front end based on CherryPy and Skeleton
+                    11 May 2018 - Added modal signin dialog
                 </p>
             </div>
         </div>
