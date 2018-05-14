@@ -16,17 +16,49 @@ class KollemaCherry:
 
     ============================================================================================="""
 
+    def __init__(self):
+        """-----------------------------------------------------------------------------------------
+        constuctor
+        -----------------------------------------------------------------------------------------"""
+        self.dbfile = "kollema.sqlite3"
+
     @cherrypy.expose
     def index(self):
-        print('path', path)
+        # print('path', path)
         return serve_file(os.path.join(static, 'kollema.html'))
 
     @cherrypy.expose
-    def signon(self, new):
-        return serve_file(os.path.join(static, 'signon.html'))
+    def dashboard(self, firstname=None, lastname=None, phone=None, email=None):
+        """-----------------------------------------------------------------------------------------
 
-    @cherrypy.expose
-    def dashboard(self, id, name=''):
+        :param firstname:
+        :param lastname:
+        :param phone:
+        :param email:
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        dbh = sq3.connect(self.dbfile)
+        db = dbh.cursor()
+
+        print('first:{}\tlast:{}\temail:{}\tphone:{}'.
+              format(firstname, lastname, email, phone))
+
+        if firstname == '':
+            # known user
+            sql = 'SELECT * FROM user'
+            print (sql)
+            db.row_factory = sq3.Row
+            db.execute(sql)
+            for row in db:
+                for key in row.keys():
+                    print(row[key],end='\t')
+                print()
+
+        else:
+            # new user
+            print('new')
+            pass
+
         return serve_file(os.path.join(static, 'dashboard.html'))
 
     """
@@ -82,22 +114,24 @@ class KollemaCherry:
 #
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
+    kollema = KollemaCherry()
+
     # path to root directory
     path = os.path.abspath(os.path.dirname(__file__))
     static = os.path.join(path, 'static')
     css = os.path.abspath('./static/css')
-    print('css:', css)
+    # print('css:', css)
     images = os.path.join(static, 'images')
     fav = os.path.join(static, 'images', 'kappa-64.png')
-    print('fav:', fav)
+    # print('fav:', fav)
 
     config = {
         'global': {
             'server.socket_host': '127.0.0.1',
-            'server.socket_port': 8081,
+            'server.socket_port': 8080,
             'server.thread_pool': 4
         },
-        '/css':{
+        '/css': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': css
         },
