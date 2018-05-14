@@ -43,21 +43,35 @@ class KollemaCherry:
         print('first:{}\tlast:{}\temail:{}\tphone:{}'.
               format(firstname, lastname, email, phone))
 
-        if firstname == '':
-            # known user
-            sql = 'SELECT * FROM user'
-            print (sql)
-            db.row_factory = sq3.Row
-            db.execute(sql)
+        # known user
+        sql = 'SELECT * FROM user WHERE email={}'.format(email)
+        print (sql)
+        db.row_factory = sq3.Row
+        db.execute(sql)
+        print('rows', db.rowcount)
+        if db.rowcount <= 0:
+            # unknown user or new
+            if firstname == '':
+                # unknown
+                pass
+            else:
+                # new user
+                sql = 'INSERT INTO user VALUES ( {}, "{}", "{}", "{}", "{}", {});'.format(
+                    'Null', firstname, lastname, phone, email, 'Null')
+                print(sql)
+                db.execute(sql)
+                dbh.commit()
+
+        elif db.rowcount == 1:
+            # authenticated
             for row in db:
                 for key in row.keys():
                     print(row[key],end='\t')
                 print()
-
         else:
-            # new user
-            print('new')
+            # multiple matches - should not happen
             pass
+
 
         return serve_file(os.path.join(static, 'dashboard.html'))
 
