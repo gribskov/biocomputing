@@ -55,8 +55,9 @@
 
     </style>
 
+        <!-- src='http://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js'> -->
     <script type='text/javascript'
-        src='http://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js'>
+        src='https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js'>
     </script>
 
     <script type='text/javascript'>
@@ -68,17 +69,22 @@
             }
         }
         function openModal() {
-            for (i = 0; i < arguments.length; i++) {
-                var modal = document.getElementById(arguments[i])
-                modal.style.display='block'
-            }
+            for (var i = 0; i < arguments.length; i++) {
+                var modal = document.getElementById(arguments[i]);
+                modal.style.display='block';
+                ch = modal.getElementsByTagName('input');
+                for (var j=0; j < ch.length; j++) {
+                    if ( ch[j].getAttribute("type") == "text") {
+                        ch[j].value='';
+                    }
+                }
+             }
         }
 
         $(document).ready(function() {
             var register = document.getElementById('reg');
 
             $("#emailid").click( function(){
-                alert('target ' + $(this) );
                 $(this).placeholder = 'some stuff';
             });
 
@@ -119,7 +125,7 @@
 
         <!-- modal text box for signin/registration -->
         <div id="reg" class="modal four columns">
-            <form>
+            <form action="dashboard">
                 <div class="modal-content" id="signin">
 
                     <span onclick="closeModal('reg','newuser')" class="close" title="Close">&curvearrowright;</span>
@@ -127,7 +133,6 @@
                         <input type="text" id="firstname" name="firstname" placeholder="Please enter your first name" style="width:100%"><br/>
                         <input type="text" id="lastname" name="lastname" placeholder="Please enter your last name" style="width:100%"><br/>
                         <input type="text" id="phone" name="phone" placeholder="Please enter your phone/text contact" style="width:100%"><br/>
-                        <input type="hidden" name="new" value="1"></input>
                     </div>
 
                     <input type="text" id="emailid" name="email" placeholder="enter your email" style="width:100%"><br/>
