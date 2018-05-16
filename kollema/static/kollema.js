@@ -6,7 +6,9 @@ function closeModal() {
 }
 
 function openModal() {
+    //alert('n ' + arguments.length)
     for (var i = 0; i < arguments.length; i++) {
+        //alert('id ' + arguments[i])
         var modal = document.getElementById(arguments[i]);
         modal.style.display='block';
         ch = modal.getElementsByTagName('input');

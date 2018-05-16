@@ -36,23 +36,46 @@
 
 <body>
 
-<!-- Header -->
-<div class="twelve columns" style="margin:20px;">
-    <h1 class="title"><em>Koll&#234;ma</em></h1>
-</div>
+<div class="container">
+    <!-- Header -->
+    <div class="section header">
+        <div class="twelve columns" style="margin:20px;">
+            <h1 class="title"><em>Koll&#234;ma</em></h1>
+        </div>
+    </div>
 
-<!-- projects panel -->
-<div class="four columns" style="margin:10px;">
-    <div id="projects">
+    <!-- main content -->
+    <div class="twelve columns" style="margin:20px;">
+        <!-- projects panel -->
+        <div class="four columns" style="margin:10px;">
+            <div id="projects">
+
+            </div>
+            <a class="button" onclick="">Select</a>
+            <a class="button" onclick="openModal('new_project')">New Project</a>
+        </div>
+
+        <div class="four columns">
+            <h2>block2</h2>
+        </div>
+
+        <div id="new_project" class="modal four columns" style="display:none">
+            <form action="dashboard">
+                <div class="modal-content" >
+
+                    <span onclick="closeModal('new_project')" class="close" title="Close">&curvearrowright;</span>
+                    <input type="text" id="proj_name" name="proj_name" placeholder="Please enter project name" style="width:100%"><br/>
+                    <input type="text" id="proj_desc" name="proj_desc" placeholder="Please enter project description" style="width:100%"><br/>
+
+                    <input type="submit" value="make it so">
+                    <input type="button" onclick="closeModal('new_project')" value="Cancel">
+
+                </div>
+            </form>
+        </div>
 
     </div>
-    <a class="button" onclick="">Select</a>
-    <a class="button" onclick="openModal('new_project')">New Project</a>
-</div>
-
-<div class="four columns">
-    <h2>block2</h2>
-</div>
+<div>
 
 </body>
 </html>
