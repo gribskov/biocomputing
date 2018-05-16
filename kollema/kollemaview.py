@@ -1,5 +1,5 @@
 """=================================================================================================
-
+Kollema annotation system
 
 Michael Gribskov     02 May 2018
 ================================================================================================="""
@@ -24,32 +24,35 @@ class KollemaCherry:
 
     @cherrypy.expose
     def index(self):
+        """-----------------------------------------------------------------------------------------
+        Splash page
+        :return: kollema.htm, static page
+        -----------------------------------------------------------------------------------------"""
         # print('path', path)
         return serve_file(os.path.join(static, 'kollema.html'))
 
     @cherrypy.expose
     def dashboard(self, firstname=None, lastname=None, phone=None, email=None):
         """-----------------------------------------------------------------------------------------
-
+        The dashboard controls most display and analyses through ajax interactions.
         :param firstname:
         :param lastname:
         :param phone:
         :param email:
-        :return:
+        :return: dashboard.html, static page
         -----------------------------------------------------------------------------------------"""
         dbh = sq3.connect(self.dbfile)
         db = dbh.cursor()
 
-        print('first:{}\tlast:{}\temail:{}\tphone:{}'.
-              format(firstname, lastname, email, phone))
+        print('first:{}\tlast:{}\temail:{}\tphone:{}'.format(firstname, lastname, email, phone))
 
         # known user
-        sql = 'SELECT * FROM user WHERE email={}'.format(email)
-        print (sql)
+        sql = 'SELECT * FROM user WHERE email="{}"'.format(email)
+        # print(sql)
         db.row_factory = sq3.Row
         db.execute(sql)
-        print('rows', db.rowcount)
-        if db.rowcount <= 0:
+        row = db.fetchone()
+        if row is None:
             # unknown user or new
             if firstname == '':
                 # unknown
@@ -61,19 +64,24 @@ class KollemaCherry:
                 print(sql)
                 db.execute(sql)
                 dbh.commit()
+                self.user=email
+                cherrypy.session['user'] = email
 
-        elif db.rowcount == 1:
+        else:
             # authenticated
             for row in db:
                 for key in row.keys():
-                    print(row[key],end='\t')
+                    print(row[key], end='\t')
                 print()
-        else:
-            # multiple matches - should not happen
-            pass
+
+            self.user = email
+            cherrypy.session['user'] = email
 
 
-        return serve_file(os.path.join(static, 'dashboard.html'))
+        # create html page
+        dashboard = open('static/dashboard.html', 'r').read()
+
+        return dashboard.replace('$$user', cherrypy.session['user'])
 
     """
     @cherrypy.expose
@@ -156,6 +164,9 @@ if __name__ == '__main__':
         '/favicon.png': {
             'tools.staticfile.on': True,
             'tools.staticfile.filename': fav
+        },
+        '/': {
+            'tools.sessions.on': True
         }
 
     }
