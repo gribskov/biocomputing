@@ -59,27 +59,11 @@
     <script type='text/javascript'
         src='https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js'>
     </script>
+    <script type='text/javascript'
+        src='static/kollema.js'>
+    </script>
 
     <script type='text/javascript'>
-
-        function closeModal() {
-            for (i = 0; i < arguments.length; i++) {
-                var modal = document.getElementById(arguments[i])
-                modal.style.display='none'
-            }
-        }
-        function openModal() {
-            for (var i = 0; i < arguments.length; i++) {
-                var modal = document.getElementById(arguments[i]);
-                modal.style.display='block';
-                ch = modal.getElementsByTagName('input');
-                for (var j=0; j < ch.length; j++) {
-                    if ( ch[j].getAttribute("type") == "text") {
-                        ch[j].value='';
-                    }
-                }
-             }
-        }
 
         $(document).ready(function() {
             var register = document.getElementById('reg');

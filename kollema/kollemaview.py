@@ -83,10 +83,12 @@ class KollemaCherry:
 
         return dashboard.replace('$$user', cherrypy.session['user'])
 
+    # end of dashboard
+
     @cherrypy.expose
     def getProjects(self,user):
         """-----------------------------------------------------------------------------------------
-        Ajax function for projects
+        Ajax function for project list
         :return:
         -----------------------------------------------------------------------------------------"""
         dbh = sq3.connect(self.dbfile)
@@ -110,61 +112,10 @@ class KollemaCherry:
 
         return(html)
 
-
-
-
-
-    """
-    @cherrypy.expose
-    @cherrypy.tools.json_out()
-    def getData(self, dbfile='gff.db'):
-        dbh = sq3.connect(dbfile)
-        db = dbh.cursor()
-
-        sql = 'SELECT DISTINCT feature FROM gff;'
-        db.row_factory = sq3.Row
-        db.execute(sql)
-        featurelist = []
-        for row in db:
-            for key in row.keys():
-                if row['feature']:
-                    featurelist.append(row['feature'])
-
-        features = '{}'.format(','.join(featurelist))
-
-        return {
-            'foo': featurelist
-        }
-
-    @cherrypy.expose
-    def test(self, type, dbfile='gff.db'):
-        dbh = sq3.connect(dbfile)
-        db = dbh.cursor()
-        sql = 'SELECT attribute FROM gff WHERE feature="{}";'.format(type)
-        db.row_factory = sq3.Row
-        db.execute(sql)
-
-        idlist = []
-        for row in db:
-            if row['attribute']:
-                field = row['attribute'].split(';')
-                for f in field:
-                    if f.startswith('ID='):
-                        f = f.replace('ID=','')
-                        if f not in idlist:
-                            idlist.append(f)
-                        break
-
-        response = ''
-        for id in idlist:
-            response += '<option value="{}">{}</option>\n'.format(id,id)
-
-        return response
-    """
-
+    # end of getprojects
 
 # --------------------------------------------------------------------------------------------------
-#
+# Main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     kollema = KollemaCherry()
@@ -181,7 +132,7 @@ if __name__ == '__main__':
     config = {
         'global': {
             'server.socket_host': '127.0.0.1',
-            'server.socket_port': 8081,
+            'server.socket_port': 8080,
             'server.thread_pool': 4
         },
         '/css': {
