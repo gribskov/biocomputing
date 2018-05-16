@@ -21,6 +21,7 @@
 
         function projects(user) {
             $('#projects').append('<h2>' + user + '</h2>');
+            $('#projects').load('/getProjects?user='+user);
         }
 
         $(document).ready(function() {

@@ -83,6 +83,37 @@ class KollemaCherry:
 
         return dashboard.replace('$$user', cherrypy.session['user'])
 
+    @cherrypy.expose
+    def getProjects(self,user):
+        """-----------------------------------------------------------------------------------------
+        Ajax function for projects
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        dbh = sq3.connect(self.dbfile)
+        db = dbh.cursor()
+        sql = 'SELECT * FROM projects WHERE email="{}"'.format(user)
+        db.row_factory = sq3.Row
+        db.execute(sql)
+        result = db.fetchall()
+
+        html = 'User: {}<br>\n'.format(user)
+        html += '<table>'
+        html += '<tr><th>Name</th><th>Created</th><th>Status</th><th>Updated</th>\n'
+        if len(result) == 0:
+            html += '<tr><td colspan="4">No projects found for {}</td></tr>\n'.format(user)
+
+        else:
+            pass
+
+        html += '</table>'
+        print(html)
+
+        return(html)
+
+
+
+
+
     """
     @cherrypy.expose
     @cherrypy.tools.json_out()
@@ -150,7 +181,7 @@ if __name__ == '__main__':
     config = {
         'global': {
             'server.socket_host': '127.0.0.1',
-            'server.socket_port': 8080,
+            'server.socket_port': 8081,
             'server.thread_pool': 4
         },
         '/css': {
