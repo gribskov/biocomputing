@@ -11,11 +11,21 @@
     <link rel="stylesheet" href="/css/skeleton.css">
     <link rel="stylesheet" href="/css/kollema.css">
     <link rel="icon" type="image/png" href="favicon.png">
-    <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet">
+    <!--<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet">-->
+    <script type='text/javascript'
+        src='https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js'>
+    </script>
+
 
     <script type='text/javascript'>
-          $(document).ready(function() {
-          });
+
+        function projects(user) {
+            $('#projects').append('<h2>' + user + '</h2>');
+        }
+
+        $(document).ready(function() {
+            projects('$$user');
+        });
 
 
     </script>
@@ -26,6 +36,11 @@
 <!-- Primary Page Layout -->
 
 <h1>Dashboard coming soon</h1>
+<div id="projects">
+
+
+
+</div>
 
 </body>
 </html>
