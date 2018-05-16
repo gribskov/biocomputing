@@ -135,6 +135,11 @@ if __name__ == '__main__':
             'server.socket_port': 8080,
             'server.thread_pool': 4
         },
+        '/static': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': static
+
+        },
         '/css': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': css
