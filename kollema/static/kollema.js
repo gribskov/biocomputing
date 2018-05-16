@@ -4,6 +4,7 @@ function closeModal() {
         modal.style.display='none'
     }
 }
+
 function openModal() {
     for (var i = 0; i < arguments.length; i++) {
         var modal = document.getElementById(arguments[i]);
@@ -14,5 +15,5 @@ function openModal() {
                 ch[j].value='';
             }
         }
-     }
+    }
 }
