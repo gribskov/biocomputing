@@ -27,6 +27,16 @@
             $('#projects').load('/getProjects?user='+user);
         }
 
+        function addProject() {
+            var target = 'name=' + $("#proj_name").val() + '&desc=' + $("#proj_desc").val();
+            //alert(target);
+            var request = $.ajax({'url': '/addProject?' + target});
+            request.done(function(response) {
+                $('#projects').load('/getProjects?user='+response.user);
+                closeModal('new_project')
+            });
+        }
+
         $(document).ready(function() {
             projects('$$user');
         });
@@ -47,7 +57,7 @@
     <!-- main content -->
     <div class="twelve columns" style="margin:20px;">
         <!-- projects panel -->
-        <div class="four columns" style="margin:10px;">
+        <div class="six columns" style="margin:10px;">
             <div id="projects">
 
             </div>
@@ -65,9 +75,9 @@
 
                     <span onclick="closeModal('new_project')" class="close" title="Close">&curvearrowright;</span>
                     <input type="text" id="proj_name" name="proj_name" placeholder="Please enter project name" style="width:100%"><br/>
-                    <input type="text" id="proj_desc" name="proj_desc" placeholder="Please enter project description" style="width:100%"><br/>
+                    <textarea id="proj_desc" name="proj_desc" placeholder="Please enter project description" style="width:100%;height:60px;padding:6px 10px;"></textarea><br/>
 
-                    <input type="submit" value="make it so">
+                    <input type="button" onclick="addProject()" value="make it so">
                     <input type="button" onclick="closeModal('new_project')" value="Cancel">
 
                 </div>

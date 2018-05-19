@@ -21,6 +21,7 @@ class KollemaCherry:
         constuctor
         -----------------------------------------------------------------------------------------"""
         self.dbfile = "kollema.sqlite3"
+        self.user = 'test'
 
     @cherrypy.expose
     def index(self):
@@ -44,7 +45,7 @@ class KollemaCherry:
         dbh = sq3.connect(self.dbfile)
         db = dbh.cursor()
 
-        print('first:{}\tlast:{}\temail:{}\tphone:{}'.format(firstname, lastname, email, phone))
+        # print('first:{}\tlast:{}\temail:{}\tphone:{}'.format(firstname, lastname, email, phone))
 
         # known user
         sql = 'SELECT * FROM user WHERE email="{}"'.format(email)
@@ -61,10 +62,10 @@ class KollemaCherry:
                 # new user
                 sql = 'INSERT INTO user VALUES ( {}, "{}", "{}", "{}", "{}", {});'.format(
                     'Null', firstname, lastname, phone, email, 'Null')
-                print(sql)
+                # print(sql)
                 db.execute(sql)
                 dbh.commit()
-                self.user=email
+                self.user = email
                 cherrypy.session['user'] = email
 
         else:
@@ -77,7 +78,6 @@ class KollemaCherry:
             self.user = email
             cherrypy.session['user'] = email
 
-
         # create html page
         dashboard = open('static/dashboard.html', 'r').read()
 
@@ -86,7 +86,7 @@ class KollemaCherry:
     # end of dashboard
 
     @cherrypy.expose
-    def getProjects(self,user):
+    def getProjects(self, user):
         """-----------------------------------------------------------------------------------------
         Ajax function for project list
         :return:
@@ -100,19 +100,48 @@ class KollemaCherry:
 
         html = 'User: {}<br>\n'.format(user)
         html += '<table>'
-        html += '<tr><th>Name</th><th>Created</th><th>Status</th><th>Updated</th>\n'
+        html += '<tr><th>Name</th><th>Description</th><th>Created</th><th>Status</th><th>Updated</th>\n'
         if len(result) == 0:
-            html += '<tr><td colspan="4">No projects found for {}</td></tr>\n'.format(user)
+            html += '<tr><td colspan="5">No projects found for {}</td></tr>\n'.format(user)
 
         else:
-            pass
+            for row in result:
+                html += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>\n'.format(
+                    row['name'], row['description'], row['created'], row['status'], row['updated'])
 
         html += '</table>'
-        print(html)
+        # print('getProjects-html: ', html)
 
-        return(html)
+        return html
 
     # end of getprojects
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def addProject(self, name=None, desc=None):
+        """-----------------------------------------------------------------------------------------
+        Add a new project to the project table
+
+        :param name: string, project name
+        :param desc: string, project description
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        dbh = sq3.connect(self.dbfile)
+        db = dbh.cursor()
+        # TODO escape newline so it is stored in db
+        sql = 'INSERT INTO projects VALUES ( {}, "{}", "{}", "{}", "{}", "{}", "{}", "{}" )'.format(
+            'Null', self.user, name, desc, '', '', '', '')
+        print(sql)
+
+        db.row_factory = sq3.Row
+        db.execute(sql)
+        dbh.commit()
+
+        # print('addProject-user:', self.user )
+        return { 'user': self.user }
+
+    # end of addProject
+
 
 # --------------------------------------------------------------------------------------------------
 # Main
