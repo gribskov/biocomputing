@@ -3,25 +3,46 @@
 additional styles  that alter/extend normalize/skeleton
 */
 
+/* Base Styles
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+/* NOTE
+html is set to 62.5% so that all the REM measurements throughout Skeleton
+are based on 10px sizing. So basically 1.5rem = 15px :) */
+html {
+  font-size: 62.5%; }
+body {
+    /* kollema: change base size to 1.5->1.2em, line-height 1.6->1.28 */
+    font-size: 1.2em; /* currently ems cause chrome bug misinterpreting rems on body element */
+    line-height: 1.28;
+    font-weight: 400;
+    font-family: "Raleway", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #222;
+}
+
 /* button
 overrides skeleton button style (skeleton)
+height, line-height: 5rem (38px)
+padding: 0 2rem (0 30px)
+font-size: 1.1rem (11px)
 border: 2px (1px)
 border-radius: 8px (4px)
 on focus, background-color: #AADDFF (none)
 */
 .button,
 button,
+.menubutton,
+menubutton,
 input[type="submit"],
 input[type="reset"],
 input[type="button"] {
   display: inline-block;
-  height: 38px;
-  padding: 0 30px;
+  height: 3rem;
+  padding: 0 1rem;
   color: #555;
   text-align: center;
-  font-size: 11px;
+  font-size: 1.1rem;
   font-weight: 600;
-  line-height: 38px;
+  line-height: 3rem;
   letter-spacing: .1rem;
   text-transform: uppercase;
   text-decoration: none;
@@ -30,14 +51,19 @@ input[type="button"] {
   border-radius: 8px;
   border: 2px solid #bbb;
   cursor: pointer;
-  box-sizing: border-box; }
+  box-sizing: border-box;
+}
 .button:hover,
 button:hover,
+.menubutton:hover,
+menubutton:hover,
 input[type="submit"]:hover,
 input[type="reset"]:hover,
 input[type="button"]:hover,
 .button:focus,
 button:focus,
+.menubutton:focus,
+menubutton:focus,
 input[type="submit"]:focus,
 input[type="reset"]:focus,
 input[type="button"]:focus {
@@ -67,7 +93,22 @@ input[type="button"].button-primary:focus {
   background-color: #1EAEDB;
   border-color: #1EAEDB; }
 
-/* The Modal (background) */
+/* Menu Buttons - overrides basic button styles
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.menubutton,
+menubutton {
+  /* display: inline-block; */
+  height: 2.0rem;
+  width: 100%; /* added for menu */
+  padding: 0 10px;
+  text-align: left;
+  font-size: 0.8rem;
+  line-height: 2.0rem;
+  border-radius: 3px;
+  border: 1px solid #bbb;
+}
+
+/* Modal dialog box (background) */
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
@@ -134,36 +175,3 @@ input[type="button"].button-primary:focus {
     background-color: #e8e8e8;
 }
 
-/* Menu Buttons
-–––––––––––––––––––––––––––––––––––––––––––––––––– */
-.menubutton,
-menubutton,
-input[type="submit"],
-input[type="reset"],
-input[type="button"] {
-  display: inline-block;
-  /*height: 3.0rem;*/
-  width: 100%;
-  padding: 0 10px;
-  color: #555;
-  text-align: left;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 2.0rem;
-  letter-spacing: .1rem;
-  text-transform: uppercase;
-  text-decoration: none;
-  white-space: nowrap;
-  background-color: transparent;
-  border-radius: 3px;
-  border: 1px solid #bbb;
-  cursor: pointer;
-  box-sizing: border-box; }
-.menubutton:hover,
-menubutton:hover,
-.menubutton:focus,
-menubutton:focus {
-  color: #FFF;
-  background-color: #000;
-  border-color: #888;
-  outline: 0; }
