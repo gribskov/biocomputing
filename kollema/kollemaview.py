@@ -99,7 +99,7 @@ class KollemaCherry:
         result = db.fetchall()
 
         html = '<h6>Projects: user {}</h6><br>\n'.format(user)
-        html += '<table id="project_table">\n'
+        html += '<table id="project_table" style="font-size:1.0rem;">\n'
         html += '<tr><th>Name</th><th>Description</th><th>Created</th><th>Status</th><th>Updated</th>\n'
         if len(result) == 0:
             html += '<tr><td colspan="5">No projects found for {}</td></tr>\n'.format(user)

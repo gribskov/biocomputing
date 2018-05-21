@@ -108,8 +108,55 @@ menubutton {
   border: 1px solid #bbb;
 }
 
-/* Modal dialog box (background) */
+/* Tables
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+th,
+td {
+    padding: 0.5rem 1.0rem; /* 12px 15px; */
+    text-align: left;
+    border-bottom: 1px solid #E1E1E1; }
+th:first-child,
+td:first-child {
+    padding-left: 0;
+}
+th:last-child,
+td:last-child {
+    padding-right: 0;
+}
+/* small table styles */
+
+.sm-narrow {
+    /*font-size:0.75em;*/
+    min-width:5%;
+    width:10%;
+    max-width:25%;
+}
+
+.sm-medium {
+    /* font-size:0.75em; */
+    min-width:10%;
+    width:20%;
+    max-width:50%;
+}
+
+.sm-wide {
+    /* font-size:0.75em; */
+    min-width:10%;
+    width:40%;
+    max-width:100%;
+}
+
+/* selected class for selecting from tables */
+.selected {
+    border: 2px solid #aaa;
+    background-color: #1EAEDB; /* #e8e8e8; */
+}
+
+/* -------------------------------------------------------------------------------------------------
+Modal dialog box
+--------------------------------------------------------------------------------------------------*/
 .modal {
+    /* box background */
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
@@ -123,8 +170,8 @@ menubutton {
     background-color: rgba(0,0,0,0.1);
 }
 
-/* Modal Content/Box */
 .modal-content {
+    /* Modal Content/Box */
     background-color: #fefefe;
     margin: 5%;
     padding: 5%;
@@ -132,8 +179,8 @@ menubutton {
     /* width: 70%; Could be more or less, depending on screen size */
 }
 
-/* The Close Button (x) */
 .close {
+    /* Close Button (x) */
     position: relative;
     left:95%;
     text-align:right;
@@ -147,31 +194,4 @@ menubutton {
     cursor: pointer;
 }
 
-/* small table styles */
-
-.sm-narrow {
-    font-size:0.75em;
-    min-width:5%;
-    width:10%;
-    max-width:25%;
-}
-
-.sm-medium {
-    font-size:0.75em;
-    min-width:10%;
-    width:20%;
-    max-width:50%;
-}
-
-.sm-wide {
-    font-size:0.75em;
-    min-width:10%;
-    width:40%;
-    max-width:100%;
-}
-
-.selected {
-    border: 2px solid #aaa;
-    background-color: #e8e8e8;
-}
 
