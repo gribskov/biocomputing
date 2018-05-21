@@ -98,13 +98,8 @@ class KollemaCherry:
         db.execute(sql)
         result = db.fetchall()
 
-        html = '<span id="utitle">User: {}</span><br>\n'.format(user)
+        html = '<h6>Projects: user {}</h6><br>\n'.format(user)
         html += '<table id="project_table">\n'
-        # html += '<col class="sm-medium">\n'
-        # html += '<col class ="sm-wide">\n'
-        # html += '<col class ="sm-narrow">\n'
-        # html += '<col class ="sm-narrow">\n'
-        # html += '<col class ="sm-narrow">\n'
         html += '<tr><th>Name</th><th>Description</th><th>Created</th><th>Status</th><th>Updated</th>\n'
         if len(result) == 0:
             html += '<tr><td colspan="5">No projects found for {}</td></tr>\n'.format(user)
@@ -143,9 +138,19 @@ class KollemaCherry:
         dbh.commit()
 
         # print('addProject-user:', self.user )
-        return { 'user': self.user }
+        return {'user': self.user}
 
     # end of addProject
+
+    @cherrypy.expose
+    def setProject(self, project_id=None):
+        """-----------------------------------------------------------------------------------------
+        look up selected project and populate screens
+        -----------------------------------------------------------------------------------------"""
+        dbh = sq3.connect(self.dbfile)
+        db = dbh.cursor()
+
+        return "Under development:{}".format(project_id)
 
 
 # --------------------------------------------------------------------------------------------------

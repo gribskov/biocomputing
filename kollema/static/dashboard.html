@@ -25,6 +25,12 @@
         function projects(user) {
             $('#projects').append('<h2>' + user + '</h2>');
             $('#projects').load('/getProjects?user='+user);
+            $("body").on("click", '#project_table tr', function() {
+                //console.log(this);
+                $('.selected').removeClass('selected');
+                $(this).addClass("selected");
+            });
+
         }
 
         function addProject() {
@@ -37,16 +43,17 @@
             });
         }
 
+        function selectProject() {
+            //alert("selectProject "+$(".selected td:first-child").text());
+            var target = 'project_id=' + $(".selected td:first-child").text();
+            console.log(target);
+            var request = $.ajax({'url': '/setProject?' + target});
+        }
+
         $(document).ready(function() {
+            /* $$user is substituted with user id when page is loaded by kollemaview.py */
             projects('$$user');
-            $("body").on("click", 'tr', function() {
-                //console.log(this);
-                $('.selected').removeClass('selected');
-                $(this).addClass("selected");
-            });
-        });
-
-
+           });
 
     </script>
 </head>
@@ -63,12 +70,21 @@
 
     <!-- main content -->
     <div class="twelve columns" style="margin:20px;">
-        <!-- projects panel -->
-        <div class="six columns" style="margin:10px;">
-            <div id="projects">
-
+        <!-- left menu -->
+        <div class="two columns" style="margin-right:10px;">
+            <div id="menu" >
+            <h6>Menu</h6>
+            <a class="menubutton">Change user</a><br/>
+            <a class="menubutton">Show projects</a><br/>
+            <a class="menubutton">Load transcripts</a>
             </div>
-            <a class="button" onclick="">Select</a>
+        </div>
+
+        <!-- projects panel -->
+        <div class="six columns" style="margin:0px 10px;">
+            <div id="projects">
+            </div>
+            <a class="button" onclick="selectProject()">Select</a>
             <a class="button" onclick="openModal('new_project')">New Project</a>
         </div>
 
