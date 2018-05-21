@@ -98,15 +98,20 @@ class KollemaCherry:
         db.execute(sql)
         result = db.fetchall()
 
-        html = 'User: {}<br>\n'.format(user)
-        html += '<table>'
+        html = '<span id="utitle">User: {}</span><br>\n'.format(user)
+        html += '<table id="project_table">\n'
+        # html += '<col class="sm-medium">\n'
+        # html += '<col class ="sm-wide">\n'
+        # html += '<col class ="sm-narrow">\n'
+        # html += '<col class ="sm-narrow">\n'
+        # html += '<col class ="sm-narrow">\n'
         html += '<tr><th>Name</th><th>Description</th><th>Created</th><th>Status</th><th>Updated</th>\n'
         if len(result) == 0:
             html += '<tr><td colspan="5">No projects found for {}</td></tr>\n'.format(user)
 
         else:
             for row in result:
-                html += '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>\n'.format(
+                html += '<tr><td class="sm-medium">{}</td><td class="sm-wide">{}</td><td class="sm-narrow">{}</td><td class="sm-narrow">{}</td><td class="sm-narrow">{}</td></tr>\n'.format(
                     row['name'], row['description'], row['created'], row['status'], row['updated'])
 
         html += '</table>'
@@ -161,7 +166,7 @@ if __name__ == '__main__':
     config = {
         'global': {
             'server.socket_host': '127.0.0.1',
-            'server.socket_port': 8080,
+            'server.socket_port': 8081,
             'server.thread_pool': 4
         },
         '/static': {

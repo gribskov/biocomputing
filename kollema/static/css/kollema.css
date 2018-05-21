@@ -105,3 +105,31 @@ input[type="button"].button-primary:focus {
     color: #f44336;
     cursor: pointer;
 }
+
+/* small table styles */
+
+.sm-narrow {
+    font-size:0.75em;
+    min-width:5%;
+    width:10%;
+    max-width:25%;
+}
+
+.sm-medium {
+    font-size:0.75em;
+    min-width:10%;
+    width:20%;
+    max-width:50%;
+}
+
+.sm-wide {
+    font-size:0.75em;
+    min-width:10%;
+    width:40%;
+    max-width:100%;
+}
+
+.selected {
+    border: 2px solid #aaa;
+    background-color: #e8e8e8;
+}

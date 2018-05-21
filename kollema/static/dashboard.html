@@ -33,13 +33,20 @@
             var request = $.ajax({'url': '/addProject?' + target});
             request.done(function(response) {
                 $('#projects').load('/getProjects?user='+response.user);
-                closeModal('new_project')
+                closeModal('new_project');
             });
         }
 
         $(document).ready(function() {
             projects('$$user');
+            $("body").on("click", 'tr', function() {
+                //console.log(this);
+                $('.selected').removeClass('selected');
+                $(this).addClass("selected");
+            });
         });
+
+
 
     </script>
 </head>
@@ -50,7 +57,7 @@
     <!-- Header -->
     <div class="section header">
         <div class="twelve columns" style="margin:20px;">
-            <h1 class="title"><em>Koll&#234;ma</em></h1>
+            <h1 class="title" id="ttt"><em>Koll&#234;ma</em></h1>
         </div>
     </div>
 
