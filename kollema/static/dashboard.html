@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="/css/skeleton.css">
     <link rel="stylesheet" href="/css/kollema.css">
     <link rel="icon" type="image/png" href="favicon.png">
-    <!--<link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet">-->
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet">
+    <!--link href="http://fonts.useso.com/css?family=Raleway:400,300,600" rel="stylesheet"-->
     <script type='text/javascript'
         src='https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js'>
     </script>
@@ -74,10 +75,14 @@
         <div class="two columns" style="margin-right:10px;">
             <div id="menu" >
             <h6>Menu</h6>
-            <a class="menubutton">Change user</a><br/>
+            <a class="menubutton" onclick="openModalUrl('static/signon.html #signin', '#reg')">Change user</a><br/>
             <a class="menubutton">Show projects</a><br/>
             <a class="menubutton">Load transcripts</a>
             </div>
+        </div>
+
+        <!-- change user dialog -->
+        <div id="reg" class="modal four columns">
         </div>
 
         <!-- projects panel -->
@@ -85,7 +90,7 @@
             <div id="projects">
             </div>
             <a class="button" onclick="selectProject()">Select</a>
-            <a class="button" onclick="openModal('new_project')">New Project</a>
+            <a class="button" onclick="openModal('static/signon.html', 'new_project')">New Project</a>
         </div>
 
         <div class="four columns">

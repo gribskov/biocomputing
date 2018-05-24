@@ -1,47 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta http-equiv='content-type' content='text/html; charset=utf-8'>
+<!-- signon.html newuser modal dialog -->
+<div class="modal-content" id="newuser">
+    <form action="dashboard">
 
-    <title>Koll&#234;ma</title>
-    <meta name="description" content="Transcript annotation">
-    <meta name="author" content="Michael Gribskov">
+        <span onclick="closeModal('newuser')" class="close" title="Close">&curvearrowright;</span>
+        <input type="text" id="firstname" name="firstname" placeholder="Please enter your first name" style="width:100%"><br/>
+        <input type="text" id="lastname" name="lastname" placeholder="Please enter your last name" style="width:100%"><br/>
+        <input type="text" id="phone" name="phone" placeholder="Please enter your phone/text contact" style="width:100%"><br/>
 
-    <link rel="stylesheet" href="/css/normalize.css">
-    <link rel="stylesheet" href="/css/skeleton.css">
-    <link rel="stylesheet" href="/css/kollema.css">
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet">
+        <input type="text" id="emailid" name="email" placeholder="enter your email" style="width:100%"><br/>
+        <input type="submit" value="make it so">
+        <input type="button" onclick="closeModal('newuser')" value="Cancel">
+    </form>
+</div>
 
-    <script type='text/javascript'>
-          $(document).ready(function() {
-          });
+<!-- signon.html signin modal dialog -->
+<div class="modal-content" id="signin">
+    <form action="dashboard">
 
-
-    </script>
-</head>
-
-<body>
-
-    <!-- signon.html - Primary Page Layout -->
-    <div class="section register">
-        <div class="container">
-            <h1><em>Koll&#234;ma</em></h1>
-            <div class="" row>
-                <form action="dashboard">
-                    <div class="four columns">
-                        <input type="text" name="id" value="enter your email"size = 30>
-                        <input type="submit" value="make it so">
-                    </div>
-                    <div class="four columns" >
-                        <input type="text" name="name" value="enter your name" size = 40>
-                    </div>
-                </form>
-            </div>
-
-        </div>
-    </div>
-
-<body>
-
-</html>
+        <span onclick="closeModal('signin')" class="close" title="Close">&curvearrowright;</span>
+        <input type="text" id="emailid" name="email" placeholder="enter your email" style="width:100%"><br/>
+        <input type="submit" value="make it so">
+        <input type="button" onclick="closeModal('signin')" value="Cancel">
+    </form>
+</div>

@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/css/skeleton.css">
     <link rel="stylesheet" href="/css/kollema.css">
     <link rel="icon" type="image/png" href="favicon.png">
+    <!--link href="https://fonts.useso.com/css?family=Raleway:400,300,600" rel="stylesheet"-->
     <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet">
 
     <style>
@@ -53,7 +54,7 @@
 
 <div class="section header" >
     <div class="container" style="background-image:url(/images/scroll_med.jpg);background-repeat:no-repeat;background-position:right bottom;height:360px;">
-        <div class="" row>
+        <div class="">
             <div class="eight columns">
                 <h1 class="title"><em>Koll&#234;ma</em></h1>
                 <h2>Transcript Annotation System</h2>
@@ -64,8 +65,8 @@
             </div>
             <div class="four columns scroll u-pull-right" >
                 <div>
-                    <a class="button" onclick="openModal('reg')" style="">Sign In</a>
-                    <a class="button" onclick="openModal('reg','newuser')">Join</a>
+                    <a class="button" onclick="openModalUrl('static/signon.html #signin', '#reg')" style="">Sign In</a>
+                    <a class="button" onclick="openModalUrl('static/signon.html #newuser', '#reg')">Join</a>
                 </div>
             </div>
 
@@ -73,22 +74,6 @@
 
         <!-- modal text box for signin/registration -->
         <div id="reg" class="modal four columns">
-            <form action="dashboard">
-                <div class="modal-content" id="signin">
-
-                    <span onclick="closeModal('reg','newuser')" class="close" title="Close">&curvearrowright;</span>
-                    <div id="newuser" style="display:none;">
-                        <input type="text" id="firstname" name="firstname" placeholder="Please enter your first name" style="width:100%"><br/>
-                        <input type="text" id="lastname" name="lastname" placeholder="Please enter your last name" style="width:100%"><br/>
-                        <input type="text" id="phone" name="phone" placeholder="Please enter your phone/text contact" style="width:100%"><br/>
-                    </div>
-
-                    <input type="text" id="emailid" name="email" placeholder="enter your email" style="width:100%"><br/>
-                    <input type="submit" value="make it so">
-                    <input type="button" onclick="closeModal('reg', 'newuser')" value="Cancel">
-
-                </div>
-            </form>
         </div>
 
     </div>
