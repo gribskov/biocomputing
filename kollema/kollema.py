@@ -6,7 +6,7 @@ import os
 import sqlite3 as sql
 from kollemadb import Kollemadb
 from menu import Menu
-from trinity import Trinity
+from trinity.trinity import Trinity
 
 
 def status():

@@ -5,6 +5,7 @@ Michael Gribskov     02 May 2018
 ================================================================================================="""
 import os
 import sqlite3 as sq3
+from trinity.trinity import Trinity
 
 import cherrypy
 from cherrypy.lib.static import serve_file
@@ -22,6 +23,17 @@ class KollemaCherry:
         -----------------------------------------------------------------------------------------"""
         self.dbfile = "kollema.sqlite3"
         self.user = 'test'
+
+    def connect(self):
+        """-----------------------------------------------------------------------------------------
+        Get a database handle and curson and return
+        :return: dbh, db; sqlite3 database handle and database cursor
+        -----------------------------------------------------------------------------------------"""
+        dbh = sq3.connect(self.dbfile)
+        db = dbh.cursor()
+
+        return dbh, db
+
 
     @cherrypy.expose
     def index(self):
@@ -151,6 +163,37 @@ class KollemaCherry:
         db = dbh.cursor()
 
         return "Under development:{}".format(project_id)
+
+    @cherrypy.expose
+    def transcriptLoad(self, transcript_file=None, override=None):
+        """-----------------------------------------------------------------------------------------
+                id TEXT,
+                component INTEGER,
+                gene INTEGER,
+                isoform INTEGER,
+                seq TEXT,
+                doc TEXT
+
+        -----------------------------------------------------------------------------------------"""
+        dbh, db = self.connect()
+        print('transcript file:', transcript_file)
+        # trinity = Trinity()
+        # trinity.open(transcript_file)
+        # ntranscript = 0
+        # sql = '''
+        #     INSERT INTO transcript
+        #     VALUES ( :id, :component, :gene, :isoform, :seq, :doc )
+        #     '''
+        # kdb.db.execute("PRAGMA synchronous = OFF")
+        # while trinity.next():
+        #     kdb.db.execute(sql, {'id': trinity.id, 'component': trinity.component, 'gene': trinity.gene,
+        #                          'isoform': trinity.isoform, 'seq': trinity.seq, 'doc': trinity.doc})
+        #     ntranscript += 1
+        #     print('n:', ntranscript)
+        #
+        # print('{} transcripts loaded'.format(ntranscript))
+
+        return
 
 
 # --------------------------------------------------------------------------------------------------

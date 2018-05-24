@@ -1,5 +1,5 @@
 import re
-from biocomputing.sequence.fasta import Fasta
+from sequence.fasta import Fasta
 
 lenre = re.compile('len=(\d+)')
 pathre = re.compile('.*path=\[([^\]]*)\]')
