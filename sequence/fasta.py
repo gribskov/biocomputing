@@ -70,7 +70,13 @@ class Fasta:
 
         for line in self.fh:
             if line.isspace(): continue
-            line = line.rstrip('\n')
+            try:
+                line = line.rstrip('\n')
+            except TypeError:
+                # in case of a byte string
+                line = line.decode()
+                line = line.rstrip('\n')
+
             if line[0] == '>':
                 self.buffer = line
                 break
@@ -98,7 +104,13 @@ class Fasta:
             self.buffer = ''
         else:
             line = self.fh.readline()
-            line = line.rstrip('\n')
+            try:
+                line = line.rstrip('\n')
+            except TypeError:
+                # in case of a byte string
+                # line = line.rstrip('\n'.encode())
+                line = line.decode()
+                line = line.rstrip('\n')
 
         # get the ID and documentation from the doc line
         try:
