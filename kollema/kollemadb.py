@@ -1,38 +1,38 @@
-"""---------------------------------------------------------------------------------------------------------------------
+"""-------------------------------------------------------------------------------------------------
 kollemadb
 Database object for kollema transcriptome annotation tool
----------------------------------------------------------------------------------------------------------------------"""
-import sys
+-------------------------------------------------------------------------------------------------"""
+# import sys
 import re
 import sqlite3 as s3
 
 
 class Kollemadb(object):
-    """-----------------------------------------------------------------------------------------------------------------
+    """---------------------------------------------------------------------------------------------
     kollemadb
     Persistant class built on sqlite3
-    -----------------------------------------------------------------------------------------------------------------"""
+    ---------------------------------------------------------------------------------------------"""
 
     def __init__(self, dbfile=':memory:', new=False):
-        """
+        """-----------------------------------------------------------------------------------------
         Kollemadb class constructor
         :dbfile: database file, use :memory: for in memory only, default = :memory:
         :new: initialize tables (be careful), default = False
         :return: None
-        """
+        -----------------------------------------------------------------------------------------"""
         # isolation_level None is autocommit
-        dbh = s3.connect(dbfile, isolation_level=None)
-        dbh.row_factory = s3.Row
-        self.db = dbh.cursor()
+        self.dbh = s3.connect(dbfile, isolation_level=None)
+        self.dbh.row_factory = s3.Row
+        self.db = self.dbh.cursor()
 
         if new:
             self.initAllTables()
 
     def initAllTables(self):
-        """-------------------------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         Constructs all tables, does not drop existing tables if present
         :return: True
-        -------------------------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
         self.initProjectTable()
         self.initTaskTable()
         self.initTranscriptTable()
@@ -41,10 +41,10 @@ class Kollemadb(object):
         return True
 
     def initProjectTable(self):
-        """-------------------------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         sql to build the project table
         :return: True
-        -------------------------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
         sql = '''
             CREATE TABLE 
             IF NOT EXISTS
@@ -61,9 +61,9 @@ class Kollemadb(object):
         return True
 
     def initTaskTable(self):
-        """-------------------------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         sql to build the task table
-        -------------------------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
         sql = '''
             CREATE TABLE 
             IF NOT EXISTS
@@ -80,31 +80,33 @@ class Kollemadb(object):
         return True
 
     def initTranscriptTable(self):
-        """-------------------------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         sql to build transcript table
         :return: True
-        -------------------------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
         sql = '''
-            CREATE TABLE 
-            IF NOT EXISTS
-            transcript (
-                id TEXT, 
-                component INTEGER, 
-                gene INTEGER, 
-                isoform INTEGER,
-                seq TEXT, 
-                doc TEXT
-            )
+            CREATE TABLE `transcript` (
+                `transcript_id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+                `project_id`	INTEGER,
+                `email`	TEXT,
+                `cluster`	INTEGER,
+                `component`	INTEGER,
+                `gene`	INTEGER,
+                `isoform`	INTEGER,
+                `sequence`	TEXT,
+                `path`	TEXT,
+                `timestamp`	TEXT )
             '''
         self.db.execute(sql)
 
         return True
 
     def initPathTable(self):
-        """-------------------------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
+        path is currently incorporated in transcript, path is not used.
         sql to build path table
         :return: True
-        -------------------------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
         sql = '''
             CREATE TABLE 
             IF NOT EXISTS
@@ -119,11 +121,11 @@ class Kollemadb(object):
         return True
 
     def clear(self, table):
-        """-------------------------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         delete all rows of the named table
         :param table: table name
         :return: True
-        -------------------------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
         sql = '''
             DELETE FROM {table_id}
             '''.format(table_id=table)
@@ -132,10 +134,10 @@ class Kollemadb(object):
         return True
 
     def clearAll(self):
-        """-------------------------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         delete all rows from all tables
         :return: True
-        -------------------------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
 
         self.db.execute("SELECT * FROM sqlite_master WHERE type='table'")
         for row in self.db:
@@ -144,14 +146,14 @@ class Kollemadb(object):
         return True
 
     def loadFromList(self, table, columns, data):
-        """
+        """-----------------------------------------------------------------------------------------
         Construct an SQL insert statement for the listed columns using placeholders
         use synchronize=False pragma and executemany to accelerate
         :param table: name of table
         :param columns: list of column names
         :param data: list of rows of values.  Each row is a list of data
         :return: number of rows
-        """
+        -----------------------------------------------------------------------------------------"""
         colnames = '({})'.format(','.join(columns))
 
         sql = '''
@@ -164,11 +166,11 @@ class Kollemadb(object):
         return res
 
     def showTables(self):
-        """-------------------------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         list the tables in the database and their column definition
         usage
             print( kollemadb.showTables() )
-        -------------------------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
         rtab = re.compile('\t$')
         rspace = re.compile('\s+')
         s = ''
@@ -184,8 +186,21 @@ class Kollemadb(object):
             s = rtab.sub('\n', s)
         return s.strip()
 
+    def getByUser(self, table, user_id):
+        """-----------------------------------------------------------------------------------------
+        Select rows from table by user_id (email)
+        :param table: sqlite3 table name
+        :param user_id: string, user email
+        :return: sqlite3 row object
+        -----------------------------------------------------------------------------------------"""
+        sql = 'SELECT * FROM {} WHERE email="{}"'.format(table, user_id)
+        # print(sql)
+        self.db.execute(sql)
+
+        return self.db.fetchall()
+
     def get(self, table, limits='', showsql=False):
-        """-------------------------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         retrieve contents of table as a dictionary
         :param table: table name
         :param limits: sql where clause
@@ -194,7 +209,7 @@ class Kollemadb(object):
         usage
             project = kollemadb.get('project')
             task = kollemadb.get('task')
-        -------------------------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
         sql = '''
                 SELECT * FROM {0}
                 {1}
@@ -222,13 +237,13 @@ class Kollemadb(object):
         return len(result)
 
     def asFormatted(self, indent=2):
-        """-------------------------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         return string with a formatted tabular version of the current result
         usage
             print(kollemadb.asFormatted())
         :param indent: number of spaces to indent at the left
         :return: formatted string
-        -------------------------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
         out = ''
         if len(self.result) == 0:
             return out
@@ -272,7 +287,7 @@ class Kollemadb(object):
                 # print column values
                 f = '{:<' + '{}'.format(fieldsize[k] + pad) + '}|'
                 # print('f=', f)
-                if row[k] == None:
+                if row[k] is None:
                     out += f.format('')
                 else:
                     out += f.format(row[k])
@@ -282,11 +297,14 @@ class Kollemadb(object):
         return out
 
     def set(self, table, data):
-        """-------------------------------------------------------------------------------------------------------------
-        add a new row to an existing table
+        """-----------------------------------------------------------------------------------------
+        add a new row to an existing table. first column is always null
         usage
             kollemadb.set( table, data )
-        -------------------------------------------------------------------------------------------------------------"""
+
+        :param: table, string; table in sqlite database
+        :data: dict: columns and values for table.
+        -----------------------------------------------------------------------------------------"""
         columns = ''
         values = ''
         comma = ''
@@ -299,18 +317,20 @@ class Kollemadb(object):
                 INSERT INTO {0} 
                     ({1}) VALUES ({2})'''.format(table, columns.strip(), values.strip())
 
-        # print('sql:', sql)
+        print('sql:', sql)
         try:
             self.db.execute(sql)
         except s3.Error as e:
             print("Kollemadb::set - error:", e.args[0])
 
+        return True
+
     def fromTerm(self, id):
-        """-------------------------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         interactively acquire information for a table row
         :param id: table name
         :return: True
-        -------------------------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
         self.db.execute('SELECT * FROM {0} LIMIT 1'.format(id))
         newdata = {}
         for tup in self.db.description:
@@ -318,10 +338,10 @@ class Kollemadb(object):
         self.set(id, newdata)
 
 
-'''---------------------------------------------------------------------------------------------------------------------
+'''-------------------------------------------------------------------------------------------------
 kollemadb testing
 
----------------------------------------------------------------------------------------------------------------------'''
+-------------------------------------------------------------------------------------------------'''
 if __name__ == '__main__':
     kdb = Kollemadb(new=True)
     print(kdb.showTables())

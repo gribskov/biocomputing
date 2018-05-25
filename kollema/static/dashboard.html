@@ -65,7 +65,7 @@
     <!-- Header -->
     <div class="section header">
         <div class="twelve columns" style="margin:20px;">
-            <h1 class="title" id="ttt"><em>Koll&#234;ma</em></h1>
+            <h1 class="title" id="ttt"><em><a class="title" href="/">Koll&#234;ma</a></em></h1>
         </div>
     </div>
 
@@ -90,26 +90,10 @@
             <div id="projects">
             </div>
             <a class="button" onclick="selectProject()">Select</a>
-            <a class="button" onclick="openModal('static/signon.html', 'new_project')">New Project</a>
-        </div>
-
-        <div class="four columns">
-            <h2>block2</h2>
+            <a class="button" onclick="openModalUrl('static/project.html', '#new_project')">New Project</a>
         </div>
 
         <div id="new_project" class="modal four columns" style="display:none">
-            <form action="dashboard">
-                <div class="modal-content" >
-
-                    <span onclick="closeModal('new_project')" class="close" title="Close">&curvearrowright;</span>
-                    <input type="text" id="proj_name" name="proj_name" placeholder="Please enter project name" style="width:100%"><br/>
-                    <textarea id="proj_desc" name="proj_desc" placeholder="Please enter project description" style="width:100%;height:60px;padding:6px 10px;"></textarea><br/>
-
-                    <input type="button" onclick="addProject()" value="make it so">
-                    <input type="button" onclick="closeModal('new_project')" value="Cancel">
-
-                </div>
-            </form>
         </div>
 
     </div>

@@ -19,6 +19,14 @@ body {
     color: #222;
 }
 
+a.title:link,
+a.title:visited,
+a.title:hover,
+a.title:active  {
+    color: #222;
+    text-decoration:none;
+}
+
 /* button
 overrides skeleton button style (skeleton)
 height, line-height: 5rem (38px)

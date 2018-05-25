@@ -6,6 +6,7 @@ Michael Gribskov     02 May 2018
 import os
 import sqlite3 as sq3
 from trinity.trinity import Trinity
+from kollemadb import Kollemadb
 
 import cherrypy
 from cherrypy.lib.static import serve_file
@@ -23,17 +24,6 @@ class KollemaCherry:
         -----------------------------------------------------------------------------------------"""
         self.dbfile = "kollema.sqlite3"
         self.user = 'test'
-
-    def connect(self):
-        """-----------------------------------------------------------------------------------------
-        Get a database handle and curson and return
-        :return: dbh, db; sqlite3 database handle and database cursor
-        -----------------------------------------------------------------------------------------"""
-        dbh = sq3.connect(self.dbfile)
-        db = dbh.cursor()
-
-        return dbh, db
-
 
     @cherrypy.expose
     def index(self):
@@ -54,35 +44,25 @@ class KollemaCherry:
         :param email:
         :return: dashboard.html, static page
         -----------------------------------------------------------------------------------------"""
-        dbh = sq3.connect(self.dbfile)
-        db = dbh.cursor()
+        kdb = Kollemadb(self.dbfile)
 
-        # print('first:{}\tlast:{}\temail:{}\tphone:{}'.format(firstname, lastname, email, phone))
-
-        # known user
-        sql = 'SELECT * FROM user WHERE email="{}"'.format(email)
-        # print(sql)
-        db.row_factory = sq3.Row
-        db.execute(sql)
-        row = db.fetchone()
-        if row is None:
-            # unknown user or new
+        result = kdb.getByUser('user', email)
+        if len(result) == 0:
+            # no matching user in user table: unknown user or new
+            print('row is none')
             if firstname == '':
-                # unknown
+                # unknown user
+                # TODO error handling when data is missing, javascript?
                 pass
             else:
                 # new user
-                sql = 'INSERT INTO user VALUES ( {}, "{}", "{}", "{}", "{}", {});'.format(
-                    'Null', firstname, lastname, phone, email, 'Null')
-                # print(sql)
-                db.execute(sql)
-                dbh.commit()
+                kdb.set('user', {'firstname': firstname, 'lastname': lastname, 'phone': phone,
+                                 'email': email})
                 self.user = email
                 cherrypy.session['user'] = email
-
         else:
-            # authenticated
-            for row in db:
+            # match in user table: authenticated
+            for row in result:
                 for key in row.keys():
                     print(row[key], end='\t')
                 print()
@@ -90,7 +70,7 @@ class KollemaCherry:
             self.user = email
             cherrypy.session['user'] = email
 
-        # create html page
+        # create html page, substitute the session user for the token $$user in the static html
         dashboard = open('static/dashboard.html', 'r').read()
 
         return dashboard.replace('$$user', cherrypy.session['user'])
@@ -103,12 +83,8 @@ class KollemaCherry:
         Ajax function for project list
         :return:
         -----------------------------------------------------------------------------------------"""
-        dbh = sq3.connect(self.dbfile)
-        db = dbh.cursor()
-        sql = 'SELECT * FROM projects WHERE email="{}"'.format(user)
-        db.row_factory = sq3.Row
-        db.execute(sql)
-        result = db.fetchall()
+        kdb = Kollemadb(self.dbfile)
+        result = kdb.getByUser('projects', user)
 
         html = '<h6>Projects: user {}</h6><br>\n'.format(user)
         html += '<table id="project_table" style="font-size:1.0rem;">\n'
@@ -136,20 +112,14 @@ class KollemaCherry:
 
         :param name: string, project name
         :param desc: string, project description
-        :return:
+        :return: JSON object, user_id
         -----------------------------------------------------------------------------------------"""
-        dbh = sq3.connect(self.dbfile)
-        db = dbh.cursor()
+        kdb = Kollemadb(self.dbfile)
+
         # TODO escape newline so it is stored in db
-        sql = 'INSERT INTO projects VALUES ( {}, "{}", "{}", "{}", "{}", "{}", "{}", "{}" )'.format(
-            'Null', self.user, name, desc, '', '', '', '')
-        print(sql)
+        desc.replace('\n', '\\n')
+        kdb.set('projects', {'email': self.user, 'name': name, 'description': desc})
 
-        db.row_factory = sq3.Row
-        db.execute(sql)
-        dbh.commit()
-
-        # print('addProject-user:', self.user )
         return {'user': self.user}
 
     # end of addProject
@@ -159,8 +129,7 @@ class KollemaCherry:
         """-----------------------------------------------------------------------------------------
         look up selected project and populate screens
         -----------------------------------------------------------------------------------------"""
-        dbh = sq3.connect(self.dbfile)
-        db = dbh.cursor()
+        kdb = Kollemadb(self.dbfile)
 
         return "Under development:{}".format(project_id)
 
@@ -175,7 +144,7 @@ class KollemaCherry:
                 doc TEXT
 
         -----------------------------------------------------------------------------------------"""
-        dbh, db = self.connect()
+        kdb = Kollemadb(self.dbfile)
         print('transcript file:', transcript_file)
         # trinity = Trinity()
         # trinity.open(transcript_file)

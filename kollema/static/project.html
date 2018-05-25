@@ -1,0 +1,12 @@
+<form action="dashboard">
+    <div class="modal-content" >
+
+        <span onclick="closeModal('new_project')" class="close" title="Close">&curvearrowright;</span>
+        <input type="text" id="proj_name" name="proj_name" placeholder="Please enter project name" style="width:100%"><br/>
+        <textarea id="proj_desc" name="proj_desc" placeholder="Please enter project description" style="width:100%;height:60px;padding:6px 10px;"></textarea><br/>
+
+        <input type="button" onclick="addProject()" value="make it so">
+        <input type="button" onclick="closeModal('new_project')" value="Cancel">
+
+    </div>
+</form>
