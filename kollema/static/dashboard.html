@@ -31,7 +31,6 @@
                 $('.selected').removeClass('selected');
                 $(this).addClass("selected");
             });
-
         }
 
         function addProject() {
@@ -52,9 +51,13 @@
         }
 
         $(document).ready(function() {
-            /* $$user is substituted with user id when page is loaded by kollemaview.py */
-            projects('$$user');
-           });
+            request = $.ajax({'url': '/getSessionVar?key=user'});
+            request.done(function(response) {
+                var user = response.user;
+                console.log('user ' + user);
+                projects(user);
+            });
+        });
 
     </script>
 </head>
@@ -86,11 +89,7 @@
         </div>
 
         <!-- projects panel -->
-        <div class="six columns" style="margin:0px 10px;">
-            <div id="projects">
-            </div>
-            <a class="button" onclick="selectProject()">Select</a>
-            <a class="button" onclick="openModalUrl('static/project.html #new', '#new_project')">New Project</a>
+        <div id="projects" class="six columns" style="margin:0px 10px;">
         </div>
 
         <div id="new_project" class="modal four columns" style="display:none">

@@ -35,8 +35,24 @@ function openModal(source, element_id) {
 }
 
 function openModalUrl(url, target) {
+/*--------------------------------------------------------------------------------------------------
+Load a url into a target, typically a modal dialog
+url: address of target html document, possibly containing id selector
+
+example:
+<a class="menubutton" onclick="openModalUrl('static/transcript.html #load', '#reg')">
+
+:param: url, address of html page, possibly containing sub-selector
+:param: target, html id of page element
+--------------------------------------------------------------------------------------------------*/
     $(target).load( url );
     $(target+' input').value='';
     $(target).show();
     //console.log('showing '+ target);
+}
+
+function getSessionVar( key ) {
+    var request = $.ajax({'url': '/getSessionVar?key=' + key});
+    alert('getSessionVar '+request[key]);
+    return request[key];
 }

@@ -1,16 +1,24 @@
 <!-- project.html -->
-<form action="dashboard">
-    <div class="modal-content" >
+<div id="new">
+    <form action="dashboard">
+        <div class="modal-content" >
 
-        <span onclick="closeModal('new_project')" class="close" title="Close">&curvearrowright;</span>
-        <input type="text" id="proj_name" name="proj_name" placeholder="Please enter project name" style="width:100%"><br/>
-        <textarea id="proj_desc" name="proj_desc" placeholder="Please enter project description" style="width:100%;height:60px;padding:6px 10px;"></textarea><br/>
+            <span onclick="closeModal('new_project')" class="close" title="Close">&curvearrowright;</span>
+            <input type="text" id="proj_name" name="proj_name" placeholder="Please enter project name" style="width:100%"><br/>
+            <textarea id="proj_desc" name="proj_desc" placeholder="Please enter project description" style="width:100%;height:60px;padding:6px 10px;"></textarea><br/>
 
-        <input type="button" onclick="addProject()" value="make it so">
-        <input type="button" onclick="closeModal('new_project')" value="Cancel">
+            <input type="button" onclick="addProject()" value="make it so">
+            <input type="button" onclick="closeModal('new_project')" value="Cancel">
 
+        </div>
+    </form>
+</div>
+
+<div id="list">
+    <div id="projects">
     </div>
-</form>
-
+    <a class="button" onclick="selectProject()">Select</a>
+    <a class="button" onclick="openModalUrl('static/project.html #new', '#new_project')">New Project</a>
+</div>
 <!-- end of project.html -->
 

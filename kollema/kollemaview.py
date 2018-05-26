@@ -49,7 +49,7 @@ class KollemaCherry:
         result = kdb.getByUser('user', email)
         if len(result) == 0:
             # no matching user in user table: unknown user or new
-            print('row is none')
+            print('Kollemaview.dashboard - row is none')
             if firstname == '':
                 # unknown user
                 # TODO error handling when data is missing, javascript?
@@ -61,21 +61,31 @@ class KollemaCherry:
                 self.user = email
                 cherrypy.session['user'] = email
         else:
-            # match in user table: authenticated
-            for row in result:
-                for key in row.keys():
-                    print(row[key], end='\t')
-                print()
+            #     # match in user table: authenticated
+            #     for row in result:
+            #         for key in row.keys():
+            #             print(row[key], end='\t')
+            #         print()
 
             self.user = email
             cherrypy.session['user'] = email
 
-        # create html page, substitute the session user for the token $$user in the static html
-        dashboard = open('static/dashboard.html', 'r').read()
+        # create html page, user id is passed through session variable using ajax getSessionVar
+        # service
 
-        return dashboard.replace('$$user', cherrypy.session['user'])
+        return open('static/dashboard.html', 'r').read()
 
     # end of dashboard
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def getSessionVar(self, key):
+        """-----------------------------------------------------------------------------------------
+        Look up the value of a key stored in the session
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        print('Kollemaview.getSessionVar - key={}:{}'.format(key, cherrypy.session[key]))
+        return {key: cherrypy.session[key]}
 
     @cherrypy.expose
     def getProjects(self, user):
