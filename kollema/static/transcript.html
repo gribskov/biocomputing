@@ -1,6 +1,6 @@
 <!-- transcript.html load transcript modal dialog -->
 <div class="modal-content" id="load">
-    <form action="transcriptLoad">
+    <form action="transcriptLoad" enctype="multipart/form-data" method="post">
         <span onclick="closeModal('load')" class="close" title="Close">&curvearrowright;</span>
         <input type="file" id="transcript_file" name="transcript_file" placeholder="Transcript file" style="width:100%"><br/>
         <input type="submit" value="make it so">

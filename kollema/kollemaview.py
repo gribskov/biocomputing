@@ -5,8 +5,8 @@ Michael Gribskov     02 May 2018
 ================================================================================================="""
 import os
 import sqlite3 as sq3
-from trinity.trinity import Trinity
 from kollemadb import Kollemadb
+from trinity.trinity import Trinity
 
 import cherrypy
 from cherrypy.lib.static import serve_file
@@ -130,37 +130,65 @@ class KollemaCherry:
         look up selected project and populate screens
         -----------------------------------------------------------------------------------------"""
         kdb = Kollemadb(self.dbfile)
+        cherrypy.session['project_id'] = project_id
 
         return "Under development:{}".format(project_id)
 
     @cherrypy.expose
     def transcriptLoad(self, transcript_file=None, override=None):
         """-----------------------------------------------------------------------------------------
-                id TEXT,
-                component INTEGER,
-                gene INTEGER,
-                isoform INTEGER,
-                seq TEXT,
-                doc TEXT
-
+         CREATE TABLE `transcript` (
+            `transcript_id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+            `project_id`	INTEGER,
+            `email`	TEXT,
+            `cluster`	INTEGER,
+            `component`	INTEGER,
+            `gene`	INTEGER,
+            `isoform`	INTEGER,
+            `seq`   TEXT,
+            `doc`   TEXT,
+            `path`	TEXT,
+            `timestamp`	TEXT
+        );
         -----------------------------------------------------------------------------------------"""
+        try:
+            project_id = cherrypy.session['project_id']
+        except KeyError:
+            project_id = None
+
+        if project_id is None:
+            print('Kollemaview.transcriptLoad - project is undefined')
+            return
+        user = cherrypy.session['user']
+
         kdb = Kollemadb(self.dbfile)
-        print('transcript file:', transcript_file)
-        # trinity = Trinity()
-        # trinity.open(transcript_file)
-        # ntranscript = 0
-        # sql = '''
-        #     INSERT INTO transcript
-        #     VALUES ( :id, :component, :gene, :isoform, :seq, :doc )
-        #     '''
-        # kdb.db.execute("PRAGMA synchronous = OFF")
-        # while trinity.next():
-        #     kdb.db.execute(sql, {'id': trinity.id, 'component': trinity.component, 'gene': trinity.gene,
-        #                          'isoform': trinity.isoform, 'seq': trinity.seq, 'doc': trinity.doc})
-        #     ntranscript += 1
-        #     print('n:', ntranscript)
-        #
-        # print('{} transcripts loaded'.format(ntranscript))
+        trinity = Trinity()
+        trinity.fh = transcript_file.file
+        sql = '''
+            INSERT INTO transcript
+            (project_id, email, cluster, component, gene, isoform, seq, doc)
+            VALUES ( :project_id, :user_id, :cluster, :component, 
+                     :gene, :isoform, :seq, :doc )
+            '''
+        kdb.db.execute('PRAGMA synchronous = NORMAL')
+        kdb.db.execute('PRAGMA journal_mode=WAL')
+        kdb.dbh.set_trace_callback(print)
+
+        ntranscript = 0
+        while trinity.next():
+            cluster, component, gene, isoform = Trinity.splitID(trinity.id)
+            kdb.db.execute(sql, {'project_id': project_id,
+                                 'user_id': user,
+                                 'cluster': cluster,
+                                 'component': int(component),
+                                 'gene': int(gene),
+                                 'isoform': int(isoform),
+                                 'seq': trinity.seq,
+                                 'doc': trinity.doc
+                                 })
+            ntranscript += 1
+
+        print('Kollemaview.transcriptLoad - {} transcripts loaded'.format(ntranscript))
 
         return
 
@@ -183,7 +211,7 @@ if __name__ == '__main__':
     config = {
         'global': {
             'server.socket_host': '127.0.0.1',
-            'server.socket_port': 8081,
+            'server.socket_port': 8080,
             'server.thread_pool': 4
         },
         '/static': {
