@@ -11,18 +11,10 @@
     <link rel="stylesheet" href="/css/skeleton.css">
     <link rel="stylesheet" href="/css/kollema.css">
     <link rel="icon" type="image/png" href="favicon.png">
-    <!--link href="https://fonts.useso.com/css?family=Raleway:400,300,600" rel="stylesheet"-->
+    <!-- china link href="https://fonts.useso.com/css?family=Raleway:400,300,600" rel="stylesheet"-->
     <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet">
-
-    <style>
-
-
-    </style>
-
-        <!-- src='http://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js'> -->
-    <script type='text/javascript'
-        src='https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js'>
-    </script>
+    <!-- china script type='text/javascript' src='https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js'-->
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 
     <script type='text/javascript'
         src='/static/kollema.js'>
@@ -65,8 +57,8 @@
             </div>
             <div class="four columns scroll u-pull-right" >
                 <div>
-                    <a class="button" onclick="openModalUrl('static/signon.html #signin', '#reg')" style="">Sign In</a>
-                    <a class="button" onclick="openModalUrl('static/signon.html #newuser', '#reg')">Join</a>
+                    <a class="button" onclick="openModalUrl('#reg','static/signon.html #signin')">Sign In</a>
+                    <a class="button" onclick="openModalUrl('#reg','static/signon.html #newuser')">Join</a>
                 </div>
             </div>
 

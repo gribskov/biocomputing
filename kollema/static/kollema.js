@@ -34,16 +34,16 @@ function openModal(source, element_id) {
     }
 }
 
-function openModalUrl(url, target) {
+function openModalUrl(target, url) {
 /*--------------------------------------------------------------------------------------------------
 Load a url into a target, typically a modal dialog
 url: address of target html document, possibly containing id selector
 
 example:
-<a class="menubutton" onclick="openModalUrl('static/transcript.html #load', '#reg')">
+<a class="menubutton" onclick="openModalUrl('#reg','static/transcript.html #load')">
 
-:param: url, address of html page, possibly containing sub-selector
-:param: target, html id of page element
+:param: target, html id of page element:
+param: url, address of html page, possibly containing sub-selector
 --------------------------------------------------------------------------------------------------*/
     $(target).load( url );
     $(target+' input').value='';

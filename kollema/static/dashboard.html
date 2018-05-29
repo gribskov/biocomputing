@@ -11,26 +11,33 @@
     <link rel="stylesheet" href="/css/skeleton.css">
     <link rel="stylesheet" href="/css/kollema.css">
     <link rel="icon" type="image/png" href="favicon.png">
+    <!-- china link href="http://fonts.useso.com/css?family=Raleway:400,300,600" rel="stylesheet"-->
     <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet">
-    <!--link href="http://fonts.useso.com/css?family=Raleway:400,300,600" rel="stylesheet"-->
-    <script type='text/javascript'
-        src='https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js'>
-    </script>
-
+   <!-- china script type='text/javascript' src='https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js'-->
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    
     <script type='text/javascript'
         src='static/kollema.js'>
     </script>
 
     <script type='text/javascript'>
 
-        function projects(user) {
-            $('#projects').append('<h2>' + user + '</h2>');
-            $('#projects').load('/getProjects?user='+user);
-            $("body").on("click", '#project_table tr', function() {
-                //console.log(this);
-                $('.selected').removeClass('selected');
-                $(this).addClass("selected");
+        function projects() {
+            request = $.ajax({'url': '/getSessionVar?key=user'});
+            var user = ''
+            request.done(function(response) {
+                user = response.user;
+                console.log('ajax response '+user);
+
+                $('#projects').append('<h2>' + user + '</h2>');
+                $('#projects').load('/getProjects?user='+user);
+                $("body").on("click", '#project_table tr', function() {
+                    //console.log(this);
+                    $('.selected').removeClass('selected');
+                    $(this).addClass("selected");
+                });
             });
+
         }
 
         function addProject() {
@@ -51,12 +58,8 @@
         }
 
         $(document).ready(function() {
-            request = $.ajax({'url': '/getSessionVar?key=user'});
-            request.done(function(response) {
-                var user = response.user;
-                console.log('user ' + user);
-                projects(user);
-            });
+            projects();
+            console.log('document ready projects');
         });
 
     </script>
@@ -78,9 +81,9 @@
         <div class="two columns" style="margin-right:10px;">
             <div id="menu" >
             <h6>Menu</h6>
-            <a class="menubutton" onclick="openModalUrl('static/signon.html #signin', '#reg')">Change user</a><br/>
-            <a class="menubutton">Show projects</a><br/>
-            <a class="menubutton" onclick="openModalUrl('static/transcript.html #load', '#reg')">Load transcripts</a>
+            <a class="menubutton" onclick="openModalUrl('#reg','static/signon.html #signin')">Change user</a><br/>
+            <a class="menubutton" onclick="projects()">Show projects</a><br/>
+            <a class="menubutton" onclick="openModalUrl('#reg','static/transcript.html #load')">Load transcripts</a>
             </div>
         </div>
 
@@ -93,6 +96,9 @@
         </div>
 
         <div id="new_project" class="modal four columns" style="display:none">
+        </div>
+
+        <div id="notify" class="modal four columns" style="display:none">
         </div>
 
     </div>
