@@ -157,7 +157,8 @@ td:last-child {
 /* selected class for selecting from tables */
 .selected {
     border: 2px solid #aaa;
-    background-color: #1EAEDB; /* #e8e8e8; */
+    background-color: #666;
+    color: #EEE;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -171,7 +172,7 @@ Modal dialog box
     left: 35%;
     top: 25%;
     margin:2.5%;
-    /* width: 100%; Full width */
+    /*width: 100%; Full width*/
     /* height: 100%; Full height */
     /* overflow: auto; Enable scroll if needed */
     /*background-color: #474e5d; */
@@ -190,8 +191,8 @@ Modal dialog box
 .close {
     /* Close Button (x) */
     position: relative;
-    left:65%;
-    text-align:right;
+    /*left:65%; */
+    float:right;
     font-size: 30px;
     font-weight: bold;
     color: #FF0000;

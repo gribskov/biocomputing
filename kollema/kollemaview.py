@@ -89,6 +89,28 @@ class KollemaCherry:
         return {key: value}
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def getSessionVarList(self, keystring):
+        """-----------------------------------------------------------------------------------------
+        Look up the value of a key stored in the session
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        vals = {}
+        keylist = keystring.split(',')
+        print('getSessionVarList - keylist {}'.format(keylist))
+        for key in keylist:
+            try:
+                value = cherrypy.session[key]
+                print('Kollemaview.getSessionVar - key={}:{}'.format(key, value))
+            except KeyError:
+                value = ''
+                print('Kollemaview.getSessionVar - key={}:{}'.format(key, 'undefined'))
+
+            vals[key] = value
+
+        return vals
+
+    @cherrypy.expose
     def getProjects(self, user):
         """-----------------------------------------------------------------------------------------
         Ajax function for project list
@@ -98,7 +120,7 @@ class KollemaCherry:
         result = kdb.getByUser('projects', user)
 
         html = '<h6>Projects: user {}</h6><br>\n'.format(user)
-        html += '<table id="project_table" style="font-size:1.0rem;">\n'
+        html += '<table id="project_table" style="font-size:1.0rem;margin-bottom:1rem;">\n'
         html += '<tr><th>Name</th><th>Description</th><th>Created</th><th>Status</th><th>Updated</th>\n'
         if len(result) == 0:
             html += '<tr><td colspan="5">No projects found for {}</td></tr>\n'.format(user)
@@ -108,9 +130,10 @@ class KollemaCherry:
                 html += '<tr><td class="sm-medium">{}</td><td class="sm-wide">{}</td><td class="sm-narrow">{}</td><td class="sm-narrow">{}</td><td class="sm-narrow">{}</td></tr>\n'.format(
                     row['name'], row['description'], row['created'], row['status'], row['updated'])
 
-        html += '</table>'
+        html += '</table>\n'
+        html += 'Choose project with mouse and click select<br><br>\n'
         html += '<a class="button" onclick="selectProject()">Select</a>\n'
-        html += '<a class="button" onclick="openModalUrl("static/project.html #new", "#new_project")">New Project</a>\n'
+        html += '<a class="button" onclick="openModalUrl(\'#new_project\', \'static/project.html #new\' )">New Project</a>\n'
         # print('getProjects-html: ', html)
 
         return html

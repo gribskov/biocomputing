@@ -22,16 +22,15 @@
 
     <script type='text/javascript'>
 
-        var project_id = '';
-        var user = '';
+        var session = {};
 
         function projects() {
             request = $.ajax({'url': '/getSessionVar?key=user'});
             request.done(function(response) {
-                user = response.user;
-                console.log('projects: ajax response '+user);
+                session.user = response.user;
+                console.log('projects: ajax response  ' + session.user);
 
-                $('#projects').load('/getProjects?user='+user);
+                $('#projects').load('/getProjects?user='+session.user);
                 $("body").on("click", '#project_table tr', function() {
                     //console.log(this);
                     $('.selected').removeClass('selected');
@@ -53,8 +52,8 @@
 
         function selectProject() {
             //alert("selectProject "+$(".selected td:first-child").text());
-            project_id = $(".selected td:first-child").text();
-            console.log('project_id:'+project_id);
+            session.project_id = $(".selected td:first-child").text();
+            console.log('selectProject project_id:'+session.project_id);
             var target = 'project_id=' + $(".selected td:first-child").text();
             console.log('selectProject: '+target);
             var request = $.ajax({'url': '/setProject?' + target});
@@ -63,10 +62,10 @@
         function transcriptLoad() {
             request = $.ajax({'url': '/getSessionVar?key=project_id'});
             request.done(function(response) {
-                project_id = response.project_id;
+                session.project_id = response.project_id;
             });
-            console.log('transcriptLoad: user='+user+'  project_id='+project_id);
-            if (project_id) {
+            console.log('transcriptLoad: user='+session.user+'  project_id='+session.project_id);
+            if (session.project_id) {
                 openModalUrl('#reg','static/transcript.html #load');
             } else {
                 openModalUrl('#reg','static/transcript.html #project_undef');
@@ -74,9 +73,17 @@
         }
 
         $(document).ready(function() {
+            request = $.ajax({'url': '/getSessionVarList?keystring=user,project_id'});
+            request.done(function(response) {
+                $.each( response, function( key, value ) {
+                    //console.log('   key '+key+'   value '+value);
+                    session[key] = response[key];
+                });
+            });
+            console.log('document.ready  user ' + session.user);
             projects();
-            console.log('document ready projects');
-            console.log('user: '+user+'   project_id: '+project_id)
+            console.log('document.ready projects');
+            console.log('    user: ' + session.user + '   project_id: ' + session.project_id)
         });
 
     </script>
