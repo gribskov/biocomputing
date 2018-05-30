@@ -1,11 +1,17 @@
 <!-- transcript.html load transcript modal dialog -->
 <div class="modal-content" id="load">
     <form action="transcriptLoad" enctype="multipart/form-data" method="post">
-        <span onclick="closeModal('load')" class="close" title="Close">&curvearrowright;</span>
+        <h4>Load Transcripts<span onclick="closeModal('load')" class="close" title="Close">&curvearrowright;</span></h4>
         <input type="file" id="transcript_file" name="transcript_file" placeholder="Transcript file" style="width:100%"><br/>
         <input type="submit" value="make it so">
         <input type="button" onclick="closeModal('load')" value="Cancel">
     </form>
+</div>
+
+<div class="modal-content" id="project_undef">
+    <h4>Error<span onclick="closeModal('project_undef')" class="close" title="Close">&curvearrowright;</span></h4>
+    <p>You must select a project before loading transcripts</p>
+    <input type="button" onclick="closeModal('project_undef')" value="Cancel">
 </div>
 
 <!-- end of transcript.html -->

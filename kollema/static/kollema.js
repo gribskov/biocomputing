@@ -34,7 +34,7 @@ function openModal(source, element_id) {
     }
 }
 
-function openModalUrl(target, url) {
+function openModalUrl(target, url, error) {
 /*--------------------------------------------------------------------------------------------------
 Load a url into a target, typically a modal dialog
 url: address of target html document, possibly containing id selector
@@ -43,8 +43,20 @@ example:
 <a class="menubutton" onclick="openModalUrl('#reg','static/transcript.html #load')">
 
 :param: target, html id of page element:
-param: url, address of html page, possibly containing sub-selector
+:param: url, address of html page, possibly containing sub-selector
+:param: error,
 --------------------------------------------------------------------------------------------------*/
+    if (error != null) {
+        Object.keys(error).forEach(function(key) {
+            console.log('key: ' + key );
+            if (!error[key]) {
+                alert('error: ' + key + ':' + error[key]);
+            } else {
+                alert(key+' '+error[key])
+            }
+        });
+    }
+
     $(target).load( url );
     $(target+' input').value='';
     $(target).show();

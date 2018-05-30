@@ -190,7 +190,7 @@ Modal dialog box
 .close {
     /* Close Button (x) */
     position: relative;
-    left:95%;
+    left:65%;
     text-align:right;
     font-size: 30px;
     font-weight: bold;

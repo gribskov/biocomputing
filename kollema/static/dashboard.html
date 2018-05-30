@@ -22,14 +22,15 @@
 
     <script type='text/javascript'>
 
+        var project_id = '';
+        var user = '';
+
         function projects() {
             request = $.ajax({'url': '/getSessionVar?key=user'});
-            var user = ''
             request.done(function(response) {
                 user = response.user;
-                console.log('ajax response '+user);
+                console.log('projects: ajax response '+user);
 
-                $('#projects').append('<h2>' + user + '</h2>');
                 $('#projects').load('/getProjects?user='+user);
                 $("body").on("click", '#project_table tr', function() {
                     //console.log(this);
@@ -52,14 +53,30 @@
 
         function selectProject() {
             //alert("selectProject "+$(".selected td:first-child").text());
+            project_id = $(".selected td:first-child").text();
+            console.log('project_id:'+project_id);
             var target = 'project_id=' + $(".selected td:first-child").text();
-            console.log(target);
+            console.log('selectProject: '+target);
             var request = $.ajax({'url': '/setProject?' + target});
+        }
+
+        function transcriptLoad() {
+            request = $.ajax({'url': '/getSessionVar?key=project_id'});
+            request.done(function(response) {
+                project_id = response.project_id;
+            });
+            console.log('transcriptLoad: user='+user+'  project_id='+project_id);
+            if (project_id) {
+                openModalUrl('#reg','static/transcript.html #load');
+            } else {
+                openModalUrl('#reg','static/transcript.html #project_undef');
+            }
         }
 
         $(document).ready(function() {
             projects();
             console.log('document ready projects');
+            console.log('user: '+user+'   project_id: '+project_id)
         });
 
     </script>
@@ -83,8 +100,8 @@
             <h6>Menu</h6>
             <a class="menubutton" onclick="openModalUrl('#reg','static/signon.html #signin')">Change user</a><br/>
             <a class="menubutton" onclick="projects()">Show projects</a><br/>
-            <a class="menubutton" onclick="openModalUrl('#reg','static/transcript.html #load')">Load transcripts</a>
-            </div>
+             <a class="menubutton" onclick="transcriptLoad()">Load transcripts</a>
+           </div>
         </div>
 
         <!-- change user dialog -->

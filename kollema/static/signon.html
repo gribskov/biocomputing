@@ -2,7 +2,8 @@
 <div class="modal-content" id="newuser">
     <form action="dashboard">
 
-        <span onclick="closeModal('newuser')" class="close" title="Close">&curvearrowright;</span>
+        <h4>Register
+        <span onclick="closeModal('newuser')" class="close" title="Close">&curvearrowright;</span></h4>
         <input type="text" id="firstname" name="firstname" placeholder="Please enter your first name" style="width:100%"><br/>
         <input type="text" id="lastname" name="lastname" placeholder="Please enter your last name" style="width:100%"><br/>
         <input type="text" id="phone" name="phone" placeholder="Please enter your phone/text contact" style="width:100%"><br/>
@@ -16,9 +17,9 @@
 <!-- signon.html signin modal dialog -->
 <div class="modal-content" id="signin">
     <form action="dashboard">
-
-        <span onclick="closeModal('signin')" class="close" title="Close">&curvearrowright;</span>
-        <input type="text" id="emailid" name="email" placeholder="enter your email" style="width:100%"><br/>
+        <h4 style="margin-bottom:0px;">Sign In
+        <span onclick="closeModal('signin')" class="close" title="Close">&curvearrowright;</span></h4>
+        <input type="text" id="emailid" name="email" placeholder="enter your registered email" style="width:100%"><br/>
         <input type="submit" value="make it so">
         <input type="button" onclick="closeModal('signin')" value="Cancel">
     </form>

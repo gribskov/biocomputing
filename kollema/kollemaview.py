@@ -61,17 +61,12 @@ class KollemaCherry:
                 self.user = email
                 cherrypy.session['user'] = email
         else:
-            #     # match in user table: authenticated
-            #     for row in result:
-            #         for key in row.keys():
-            #             print(row[key], end='\t')
-            #         print()
-
             self.user = email
             cherrypy.session['user'] = email
 
         # create html page, user id is passed through session variable using ajax getSessionVar
         # service
+        # print('user', cherrypy.session['user'])
 
         return open('static/dashboard.html', 'r').read()
 
@@ -84,8 +79,14 @@ class KollemaCherry:
         Look up the value of a key stored in the session
         :return:
         -----------------------------------------------------------------------------------------"""
-        print('Kollemaview.getSessionVar - key={}:{}'.format(key, cherrypy.session[key]))
-        return {key: cherrypy.session[key]}
+        try:
+            value = cherrypy.session[key]
+            print('Kollemaview.getSessionVar - key={}:{}'.format(key, value))
+        except KeyError:
+            value = ''
+            print('Kollemaview.getSessionVar - key={}:{}'.format(key, 'undefined'))
+
+        return {key: value}
 
     @cherrypy.expose
     def getProjects(self, user):
@@ -108,6 +109,8 @@ class KollemaCherry:
                     row['name'], row['description'], row['created'], row['status'], row['updated'])
 
         html += '</table>'
+        html += '<a class="button" onclick="selectProject()">Select</a>\n'
+        html += '<a class="button" onclick="openModalUrl("static/project.html #new", "#new_project")">New Project</a>\n'
         # print('getProjects-html: ', html)
 
         return html
@@ -141,6 +144,7 @@ class KollemaCherry:
         -----------------------------------------------------------------------------------------"""
         kdb = Kollemadb(self.dbfile)
         cherrypy.session['project_id'] = project_id
+        print('project_is={}: stored in session'.format('project_id'))
 
         return "Under development:{}".format(project_id)
 
@@ -199,8 +203,12 @@ class KollemaCherry:
             ntranscript += 1
 
         print('Kollemaview.transcriptLoad - {} transcripts loaded'.format(ntranscript))
+        html = """
+            <script type="text/javascript">
+            window.location.href = document.referrer;
+            </script>"""
 
-        return
+        return html
 
 
 # --------------------------------------------------------------------------------------------------
@@ -221,7 +229,7 @@ if __name__ == '__main__':
     config = {
         'global': {
             'server.socket_host': '127.0.0.1',
-            'server.socket_port': 8080,
+            'server.socket_port': 8081,
             'server.thread_pool': 4
         },
         '/static': {
