@@ -17,6 +17,23 @@ Michael Gribskov     01 June 2018
 ================================================================================================="""
 import sys
 
+
+def add(target, key, value):
+    """---------------------------------------------------------------------------------------------
+    add 1 to the count of a key in a dict, target.  Create key if unknown
+    :param target: dictionary
+    :param key: string, dictionary key
+    :param value: string, complete id
+    :return: True
+    ---------------------------------------------------------------------------------------------"""
+    if key in target:
+        target[key].append(value)
+    else:
+        target[key] = [value]
+
+    return True
+
+
 # --------------------------------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------------------------------
@@ -38,6 +55,7 @@ if __name__ == '__main__':
     genelist = {}
     isoformlist = {}
     nline = 0
+    nisoform = 0
 
     field = []
 
@@ -46,14 +64,35 @@ if __name__ == '__main__':
         if not line.startswith('>'):
             continue
 
+        nisoform += 1
         id, info = line.replace('>', '').split(maxsplit=1)
         field = id.split('_')
         cluster = '{}_{}'.format(field[0], field[1])
         component = '{}_{}'.format(cluster, field[2])
         gene = '{}_{}'.format(component, field[3])
+        isoform = '{}_{}'.format(gene, field[4])
 
-        print('{}\n\t{}\n\t{}\n\t{}\n'.format(id, cluster, component, gene))
+        add(clusterlist, cluster, isoform)
+        add(componentlist, component, isoform)
+        add(genelist, gene, isoform)
 
-    sys.stderr.write('lines read: {}'.format(nline))
+    sys.stderr.write('lines read: {}\n'.format(nline))
+    sys.stderr.write('clusters: {}\n'.format(len(clusterlist)))
+    sys.stderr.write('components: {}\n'.format(len(componentlist)))
+    sys.stderr.write('genes: {}\n'.format(len(genelist)))
+    sys.stderr.write('isoforms: {}\n'.format(nisoform))
+
+    if level == 'cluster':
+        group = clusterlist
+    elif level == 'component':
+        group = componentlist
+    elif level == 'gene':
+        group = genelist
+    else:
+        sys.sterr.write('unknown level: {}'.format(level))
+
+    for id in group:
+        for mapped in group[id]:
+            sys.stdout.write('{}\t{}\n'.format(id, mapped))
 
     exit(0)
