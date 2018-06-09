@@ -16,7 +16,27 @@ usage:
 Michael Gribskov     09 June 2018
 ================================================================================================="""
 import sys
+import os
 import glob
+
+
+def select_by_group(value, group, minval):
+    """---------------------------------------------------------------------------------------------
+    returns true if any group has equal or more than minval counts
+    :param value: dict of count values
+    :param group: list of data groups
+    :param minval: integer, minimum value must be greater for any group
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    if value['_total'] < minval:
+        return False
+
+    for g in group:
+        if value[g] >= minval:
+            return True
+
+    return False
+
 
 # --------------------------------------------------------------------------------------------------
 # main
@@ -24,12 +44,17 @@ import glob
 if __name__ == '__main__':
 
     junk = []
-    data = {} = {}
-    for file in glob.iglob(sys.argv[1])
+    data = {}
+    group = []  # names of sample groups
+    lastgene = ''
+    minval = int(sys.argv[2])
+
+    for wild in glob.iglob(sys.argv[1]):
+        path, file = os.path.split(wild)
         sys.stderr.write('processing file: {}\n'.format(file))
 
         # get sample
-        sample, junk = file.split('.')
+        sample, junk = file.split('.', maxsplit=1)
         samplenum, samplename = sample.split('_')
         samplegroup = samplename.rstrip('0123456789')
         sys.stderr.write('    sample number: {}    name: {}    group: {}\n'.format(
@@ -41,9 +66,14 @@ if __name__ == '__main__':
             continue
 
         try:
-            rsem = open(file, 'r')
+            rsem = open(wild, 'r')
         except:
-            sys.stderr.write('Error opening rsem results file ({})'.format(trinity_file))
+            sys.stderr.write('Error opening rsem results file ({})'.format(wild))
+            continue
+
+        # save in list of sample groups if new
+        if samplegroup not in group:
+            group.append(samplegroup)
 
         nline = 0
         nvalue = 0
@@ -55,46 +85,56 @@ if __name__ == '__main__':
         line = rsem.readline()
 
         # column for each sample and for sum over sample group
-        data[samplename] = {}
-        if samplegroup not in data:
-            data[group] = {}
-            
         for line in rsem:
             nline += 1
             # fields are gene_id, transcript_id(s), length, effective_length, expected_count, TPM, FPKM
             field = line.split()
             gene = field[0]
-            count = field[4]
+            count = float(field[4])
             icount = round(count)
-            
+
             count_sum += count
             icount_sum += icount
-            
+
             if count == 0:
                 nzero += 1
             else:
                 nvalue += 1
-                
-            data[gene][samplename] = count
-            for set in [samplegroup, 'total']:
+
+            if gene not in data:
+                data[gene] = {}
+                lastgene = gene
+
+            data[gene][samplename] = icount
+            for set in [samplegroup, '_total']:
                 if set in data[gene]:
-                    data[gene][set] += count
+                    data[gene][set] += icount
                 else:
-                    data[gene][set] = count
+                    data[gene][set] = icount
 
         sys.stderr.write('    lines: {}\n'.format(nline))
         sys.stderr.write('    values: {}\n'.format(nvalue))
         sys.stderr.write('    zeroes: {}\n'.format(nzero))
-        sys.stderr.write('    sum(float): {}\n'.format(count_sum))
+        sys.stderr.write('    sum(float): {:.2f}\n'.format(count_sum))
         sys.stderr.write('    sum(int): {}\n'.format(icount_sum))
-            
+
     # end of loop over files
 
     # tabular result
-    for gene in sorted(data.keys()):
-        sys.stdout.write(gene)
-        for set in sorted[data[gene]]:
-            sys.stdout.write('\t{}'.format(data[gene][set])
-        sys.stdout.write('\n')
+    sys.stdout.write('#gene')
+    for gene in sorted(data[lastgene].keys()):
+        sys.stdout.write('\t{}'.format(gene))
+    sys.stdout.write('\n')
+
+    nselect = 0
+    for gene in sorted(data.keys(), key=lambda x: data[x]['_total']):
+        if select_by_group(data[gene], group, minval):
+            sys.stdout.write('{}'.format(gene))
+            for set in sorted(data[gene].keys()):
+                sys.stdout.write('\t{}'.format(data[gene][set]))
+            sys.stdout.write('\n')
+            nselect += 1
+
+    sys.stderr.write('\n{} genes selected\n'.format(nselect))
 
     exit(0)
