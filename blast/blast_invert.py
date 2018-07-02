@@ -19,7 +19,7 @@ from blast import Blast
 # ==================================================================================================
 if __name__ == '__main__':
 
-    blast = Blast(file='data/diamond.moreinfo.blastx')
+    blast = Blast(file='sys.argv[1]')
 
     format = 'qname qlen qbegin qend sname slen sbegin send alignlen score evalue stitle'
     nfields = blast.setFormat(format)
