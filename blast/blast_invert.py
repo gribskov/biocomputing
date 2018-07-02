@@ -45,11 +45,13 @@ if __name__ == '__main__':
     sys.stderr.write('{} records read from blast file\n'.format(record_n))
 
     for subj in sidx:
-        print('{}'.format(subj))
-        for i in sidx[subj]:
+        r = record[sidx[subj][0]]['stitle']
+        l = record[sidx[subj][0]]['slen']
+        print('{}\tlen={}\t{}'.format(subj, l, r))
+        for i in sorted(sidx[subj], key=lambda x: record[x]['qname']):
             q = record[i]
             print(
-                '\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(q['qname'], q['sbegin'], q['send'], q['slen'],
-                                                      q['qbegin'], q['qend'], q['qlen']))
+                '\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(q['qname'], q['sbegin'], q['send'], q['slen'],
+                                                      q['qbegin'], q['qend'], q['qlen'], q['evalue']))
 
 exit(0)
