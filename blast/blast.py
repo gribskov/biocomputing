@@ -25,7 +25,7 @@ class Blast(object):
 
     ============================================================================================="""
 
-    def __init__(self):
+    def __init__(self, file=''):
         """-----------------------------------------------------------------------------------------
         initialize data structure.  The following fields should always be defined:
             file, fh    # filename, filehandle
@@ -45,8 +45,12 @@ class Blast(object):
         self.line = ''
         self.read = self.readTabular
         self.fields = []
-        self.setFormat(
-            'qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore')
+        self.format = \
+            'qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore'
+
+        # if file is provided, open it
+        if file:
+            self.new(file)
 
     def dump(self, indent=4):
         """-----------------------------------------------------------------------------------------
@@ -75,7 +79,7 @@ class Blast(object):
             while blast.read:
                ... do something
         -----------------------------------------------------------------------------------------"""
-        return (self.read())
+        return self.read()
 
     def new(self, file):
         """-----------------------------------------------------------------------------------------
@@ -115,7 +119,7 @@ class Blast(object):
                 # print('{0} => {1}'.format(key,token[n]))
                 n += 1
             self.line = line
-            return (line)
+            return line
         else:
             # end of file
             return False
@@ -138,6 +142,17 @@ class Blast(object):
             self.__dict__[attribute] = None
 
         return len(self.fields)
+
+    def toDict(self):
+        """-----------------------------------------------------------------------------------------
+        Return the current line as a dictionary
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        info = {}
+        for key in self.fields:
+            info[key] = self.__dict__[key]
+
+        return info
 
 
 # ==================================================================================================
