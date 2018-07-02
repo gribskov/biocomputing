@@ -19,7 +19,9 @@ from blast import Blast
 # ==================================================================================================
 if __name__ == '__main__':
 
-    blast = Blast(file='sys.argv[1]')
+    infile = sys.argv[1]
+    sys.stderr.write('Blast serach: {}\n'.format(infile))
+    blast = Blast(file=sys.argv[1])
 
     format = 'qname qlen qbegin qend sname slen sbegin send alignlen score evalue stitle'
     nfields = blast.setFormat(format)
@@ -46,6 +48,8 @@ if __name__ == '__main__':
         print('{}'.format(subj))
         for i in sidx[subj]:
             q = record[i]
-            print('\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(q['qname'], q['sbegin'], q['send'], q['slen'], q['qbegin'], q['qend'], q['qlen']))
+            print(
+                '\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(q['qname'], q['sbegin'], q['send'], q['slen'],
+                                                      q['qbegin'], q['qend'], q['qlen']))
 
 exit(0)
