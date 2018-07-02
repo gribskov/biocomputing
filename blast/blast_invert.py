@@ -20,7 +20,7 @@ from blast import Blast
 if __name__ == '__main__':
 
     infile = sys.argv[1]
-    sys.stderr.write('Blast serach: {}\n'.format(infile))
+    sys.stderr.write('Blast search: {}\n'.format(infile))
     blast = Blast(file=sys.argv[1])
 
     format = 'qname qlen qbegin qend sname slen sbegin send alignlen score evalue stitle'
