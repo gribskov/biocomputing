@@ -114,10 +114,16 @@ class Blast(object):
             token = line.split()
             # TODO check to see fields are defined
             n = 0
+            last_key = ''
             for key in self.fields:
                 self.__dict__[key] = token[n]
+                last_key = key
                 # print('{0} => {1}'.format(key,token[n]))
                 n += 1
+
+            if n < len(token):
+                self.__dict__[last_key] += ' ' + ' '.join(token[n:])
+
             self.line = line
             return line
         else:
