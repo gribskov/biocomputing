@@ -23,6 +23,7 @@ if __name__ == '__main__':
 
     for infilename in glob.iglob(inglob):
 
+        infile = None
         try:
             infile = open(infilename, 'r')
         except:
@@ -32,10 +33,11 @@ if __name__ == '__main__':
         base = base.replace('.seq', '')
         sys.stderr.write('Expanded file: {}\t{}\n'.format(infilename, base))
         outfilename = base + '.fasta'
+        outfile = None
         try:
             outfile = open(outfilename, 'w')
         except:
-            yss.stderr.write('Unable to open output file ({})\n'.format(outfilename))
+            sys.stderr.write('Unable to open output file ({})\n'.format(outfilename))
 
         n = 0
         for seq in infile:
