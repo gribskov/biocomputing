@@ -4,14 +4,15 @@ file is converted to a fasta formatted file in the local directory.  Sequence ch
 converted to uppercase.  Sequence names are the name of the file with a numeric suffix, e.g. _2
 
 usage
-    raw2fasta <files>
+    raw2fasta '<files>'
+    quotes required to prevent OS expansion of wildcard
 
 16 August 2018  Michael Gribskov
 -------------------------------------------------------------------------------------------------"""
 import sys
 import glob
 import os
-from fasta import Fasta
+from sequence.fasta import Fasta
 
 """-------------------------------------------------------------------------------------------------
 main
@@ -20,7 +21,7 @@ if __name__ == '__main__':
 
     inglob = sys.argv[1]
     sys.stdout.write('raw2fasta\n')
-    sys.stdout.write('\tInput file: {}'.format(inglob))
+    sys.stdout.write('\tInput file: {}\n'.format(inglob))
 
     for infilename in glob.iglob(inglob):
 
@@ -34,7 +35,7 @@ if __name__ == '__main__':
         # get base filename and open output file
         base = os.path.basename(infilename)
         base = base.replace('.seq', '')
-        sys.stdout.write('\tExpanded file: {}\t{}\n'.format(infilename, base))
+        sys.stdout.write('\n\tExpanded file: {}\n\tbasename: {}\n'.format(infilename, base))
         outfilename = base + '.fasta'
         outfile = None
         try:
@@ -55,8 +56,7 @@ if __name__ == '__main__':
 
         infile.close()
         outfile.close()
-        sys.stdout.write(
-            '\t{} sequences in {} written to {}\n\n'.format(n, infilename, outfilename))
+        sys.stdout.write('\t{} sequences written to {}\n'.format(n, outfilename))
 
     # end of loop over files
 
