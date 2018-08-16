@@ -19,26 +19,31 @@ main
 if __name__ == '__main__':
 
     inglob = sys.argv[1]
-    sys.stderr.write('Input file: {}'.format(inglob))
+    sys.stdout.write('raw2fasta\n')
+    sys.stdout.write('\tInput file: {}'.format(inglob))
 
     for infilename in glob.iglob(inglob):
 
-        infile = None
+        # open input fileinfile = None
         try:
             infile = open(infilename, 'r')
         except:
             sys.stderr.write('Unable to open input file ({})\n'.format(infilename))
+            exit(1)
 
+        # get base filename and open output file
         base = os.path.basename(infilename)
         base = base.replace('.seq', '')
-        sys.stderr.write('Expanded file: {}\t{}\n'.format(infilename, base))
+        sys.stdout.write('\tExpanded file: {}\t{}\n'.format(infilename, base))
         outfilename = base + '.fasta'
         outfile = None
         try:
             outfile = open(outfilename, 'w')
         except:
             sys.stderr.write('Unable to open output file ({})\n'.format(outfilename))
+            exit(2)
 
+        # process all sequences in the file
         n = 0
         for seq in infile:
             fasta = Fasta()
@@ -50,6 +55,9 @@ if __name__ == '__main__':
 
         infile.close()
         outfile.close()
-        sys.stderr.write('{} sequences in {} written to {}\n'.format(n, infilename, outfilename))
+        sys.stdout.write(
+            '\t{} sequences in {} written to {}\n\n'.format(n, infilename, outfilename))
+
+    # end of loop over files
 
 exit(0)
