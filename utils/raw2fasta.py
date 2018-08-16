@@ -1,5 +1,7 @@
 """-------------------------------------------------------------------------------------------------
-convert sequence in raw format to fasta.  Raw format is one sequence/line with no annotation
+convert sequence in raw format to fasta.  Raw format is one sequence/line with no annotation.  Each
+file is converted to a fasta formatted file in the local directory.  Sequence characters are
+converted to uppercase.  Sequence names are the name of the file with a numeric suffix, e.g. _2
 
 usage
     raw2fasta <files>
