@@ -2,6 +2,8 @@
 """-------------------------------------------------------------------------------------------------
 Read feature ranges from GTF file and extract fast formatted sequence
 
+TODO: add reports on features and sequences
+
 usage
     gtf2fasta <gtf_file> <fasta_file>
 -------------------------------------------------------------------------------------------------"""
@@ -61,7 +63,7 @@ if __name__ == '__main__':
     sys.stderr.write('\tGTF: {}\n'.format(gtffile))
     sys.stderr.write('\tFasta: {}\n'.format(sys.argv[2]))
 
-    features = ('gene', 'pseudogene', 'tRNA', 'rRNA')
+    features = ('gene', 'pseudogene', 'tRNA' )
     skip = ['region', 'direct_repeat', 'riboswitch']
     save = ['begin', 'end', 'strand', 'Name', 'Dbxref', 'gene_biotype', 'product', 'locus_tag']
     flist = {}
@@ -73,7 +75,8 @@ if __name__ == '__main__':
             # skip comment lines
             continue
 
-        sys.stderr.write('{}\n'.format(line))
+        # save for debugging
+        # sys.stderr.write('{}\n'.format(line))
         nline += 1
         # if nline > 50:
         #     break
