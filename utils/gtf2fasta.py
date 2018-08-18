@@ -32,7 +32,7 @@ if __name__ == '__main__':
     sys.stderr.write('\tGTF: {}\n'.format(gtffile))
     sys.stderr.write('\tFasta: {}\n'.format(fastafile))
 
-    features = ()
+    features = ('gene', 'pseudogene' )
     nline = 0
     nfeature = 0
     for line in gtf:
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
         print(line)
         nline += 1
-        if nline > 10:
+        if nline > 50:
             break
 
         field = line.rstrip().split(maxsplit=8)
@@ -60,14 +60,20 @@ if __name__ == '__main__':
         a = info['attributes'].split(';')
         attr = {}
         for note in a:
-            print('\tnote:{}:'.format(note))
-            tag, value = note.split(' ')
-            print('\ttag:{}:\tvalue:{}:'.format(tag, value))
-            attr[tag] = value.strip('"')
-        info['attributes'] = attr
+            # print('\tnote:{}:'.format(note))
+            try:
+                tag, value = note.split(maxsplit=1)
+            except:
+                continue
+            # print('\ttag:{}:\tvalue:{}:'.format(tag, value))
+            info[tag] = value.strip('"')
+        del info['attributes']
 
+        if info['feature'] in features:
+            flist[info['ID']] = info
         for k in info:
             print('\t{}\t{}'.format(k, info[k]))
+
         print('')
 
 exit(0)
