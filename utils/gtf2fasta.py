@@ -8,6 +8,29 @@ usage
 import sys
 from sequence.fasta import Fasta
 
+
+def complement(seq):
+    """---------------------------------------------------------------------------------------------
+    reverse complement the sequence
+    ---------------------------------------------------------------------------------------------"""
+    r = str.maketrans('ACGT', 'TGCA')
+    return seq.translate(r)[::-1]
+
+
+def formatseq(seq, linelen=100):
+    """---------------------------------------------------------------------------------------------
+    return a string with no more than linelen characters per line
+    ---------------------------------------------------------------------------------------------"""
+    fstr = ''
+    begin = 0
+    end = len(seq)
+    while begin < end:
+        fstr += seq[begin:begin + linelen] + '\n'
+        begin += linelen
+
+    return fstr
+
+
 # --------------------------------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------------------------------
@@ -21,18 +44,27 @@ if __name__ == '__main__':
         sys.stderr.write('Unable to open GTF file ({})\n'.format(gtffile))
         exit(1)
 
-    fastafile = sys.argv[2]
-    try:
-        fasta = open(fastafile, 'r')
-    except:
-        sys.stderr.write('Unable to open fasta file ({})\n'.format(fastafile))
-        exit(2)
+    seq = {}
+    fasta = Fasta()
+    fasta.open(sys.argv[2])
+    sys.stderr.write('Reading Fasta {}...\n'.format(sys.argv[2]))
+    nseq = 0
+    while fasta.next():
+        seq[fasta.id] = fasta.seq
+        nseq += 1
 
-    sys.stderr.write('gtf2fasta\n')
+    sys.stderr.write('\n{} Sequences read from {}\n'.format(nseq, sys.argv[2]))
+    for s in seq:
+        sys.stderr.write('\t{} len={}\n'.format(s, len(seq[s])))
+
+    sys.stderr.write('\ngtf2fasta\n')
     sys.stderr.write('\tGTF: {}\n'.format(gtffile))
-    sys.stderr.write('\tFasta: {}\n'.format(fastafile))
+    sys.stderr.write('\tFasta: {}\n'.format(sys.argv[2]))
 
-    features = ('gene', 'pseudogene' )
+    features = ('gene', 'pseudogene', 'tRNA', 'rRNA')
+    skip = ['region', 'direct_repeat', 'riboswitch']
+    save = ['begin', 'end', 'strand', 'Name', 'Dbxref', 'gene_biotype', 'product', 'locus_tag']
+    flist = {}
     nline = 0
     nfeature = 0
     for line in gtf:
@@ -41,21 +73,25 @@ if __name__ == '__main__':
             # skip comment lines
             continue
 
-        print(line)
+        sys.stderr.write('{}\n'.format(line))
         nline += 1
-        if nline > 50:
-            break
+        # if nline > 50:
+        #     break
 
-        field = line.rstrip().split(maxsplit=8)
+        field = line.rstrip().split('\t', maxsplit=8)
         info = {'seqname': field[0],
                 'source': field[1],
                 'feature': field[2],
-                'begin': field[3],
-                'end': field[4],
+                'begin': int(field[3]),
+                'end': int(field[4]),
                 'score': field[5],
                 'strand': field[6],
                 'frame': field[7],
                 'attributes': field[8]}
+
+        # print('n:{} f:{}'.format(nline, info['feature']))
+        if info['feature'] in skip:
+            continue
 
         a = info['attributes'].split(';')
         attr = {}
@@ -71,9 +107,32 @@ if __name__ == '__main__':
 
         if info['feature'] in features:
             flist[info['ID']] = info
-        for k in info:
-            print('\t{}\t{}'.format(k, info[k]))
+            nfeature += 1
+        elif info['Parent'] in flist:
+            for k in info:
+                if k not in flist[info['Parent']]:
+                    flist[info['Parent']][k] = info[k]
+        else:
+            # flist[info['ID']] = info
+            sys.stderr.write('unknown feature {}\n'.format(info['feature']))
 
-        print('')
+     # write out sequences
+    for gene in flist:
+        thisgene = flist[gene]
+        f = Fasta()
+        f.id = thisgene['ID']
+        f.doc = ''
+        for k in save:
+            if k in thisgene:
+                f.doc += ' {}:{}'.format(k, thisgene[k])
+        f.seq = seq[thisgene['seqname']][thisgene['begin'] - 1:thisgene['end']]
+        if (thisgene['end'] - thisgene['begin'] > 100000):
+            # coordinates cross origin
+            f.seq = seq[thisgene['seqname']][thisgene['end'] - 1:] + seq[thisgene['seqname']][:thisgene['begin']]
+
+        if thisgene['strand'] == '-':
+            f.seq = complement(f.seq)
+
+        sys.stdout.write(f.format(linelen=100))
 
 exit(0)
