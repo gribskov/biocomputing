@@ -14,7 +14,8 @@ class Alignment:
         self.i1 = []
         self.i2 = []
         self.score = Score()
-
+        self.gi = 0  # length independent gap penalty
+        self.gd = 0  # length dependent gap penalty
 
     def index(self, i1=True, i2=True):
         """-----------------------------------------------------------------------------------------
@@ -49,5 +50,31 @@ if __name__ == '__main__':
     print(align.s2.format())
 
     align.index()
+    align.score.identity()
+    align.gi = 0
+    align.gd = -1
 
-    exit(0)
+    smat = [[0 for c in range(len(align.i2))] for r in range(len(align.i1))]
+    pmat = [[0 for c in range(len(align.i2))] for r in range(len(align.i1))]
+
+    # fill first row (including end gap penalties)
+    r = 0
+    c = 0
+    s = align.score.table
+    i1 = align.i1
+    i2 = align.i2
+    gi = align.gi
+    gd = align.gd
+
+    smat[r][c] = s[i1[r]][i2[c]]
+    for c in range(1, len(align.i2)):
+        smat[r][c] = s[i1[r]][i2[c]] + gi + c * gd
+
+    for r in range(1,len(align.i1)):
+        c = 0
+        smat[r][c] = s[i1[r]][i2[c]] + gi + r * gd
+        for c in range(1, len(align.i2)):
+            smat[r][c] = s[i1[r]][i2[c]]
+
+
+exit(0)
