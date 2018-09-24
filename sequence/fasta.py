@@ -18,7 +18,7 @@ Fasta sequence class.  Supports iteration over a multi-fasta file
 
 class Fasta:
 
-    def __init__(self):
+    def __init__(self, file=""):
         """-----------------------------------------------------------------------------------------
         Fasta class constructor. Attributes
             filename
@@ -27,11 +27,14 @@ class Fasta:
             seq
             buffer  (read ahead buffer, only internal)
         -----------------------------------------------------------------------------------------"""
-        self.filename = ''
+        self.filename = file
         self.id = ''
         self.doc = ''
         self.seq = ''
         self.buffer = ''
+
+        if self.filename:
+            self.open(self.filename)
 
     def open(self, filename):
         '''-----------------------------------------------------------------------------------------
