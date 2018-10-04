@@ -33,7 +33,7 @@ if __name__ == '__main__':
     f2 = sys.argv[2]
 
     L = 135
-    if len(sys.argv) > 2:
+    if len(sys.argv) > 3:
         L = int(sys.argv[3])
 
     sys.stdout.write('fastq_trimlength\n')
@@ -45,33 +45,37 @@ if __name__ == '__main__':
     r1 = r2 = None
     try:
         r1 = open(f1, 'r')
-    except:
+    except IOError:
         sys.stderr.write('Unable to open fastq 1 ({})\n'.format(f1))
     try:
         r2 = open(f2, 'r')
-    except:
+    except IOError:
         sys.stderr.write('Unable to open fastq 2 ({})\n'.format(f2))
 
     # open output files
     out1 = f1 + '.clipped'
     out2 = f2 + '.clipped'
+    o1 = o2 = None
     try:
         o1 = open(out1, 'w')
-    except:
+    except IOError:
         sys.stderr.write('Unable to open output fastq 1 ({})\n'.format(out1))
 
     try:
         o2 = open(out2, 'w')
-    except:
+    except IOError:
         sys.stderr.write('Unable to open output fastq 2 ({})\n'.format(out2))
 
     nread = 0
     nwritten = 0
     ndropped = 0
-    limit = L + 1       # sequence strings have a newline so add one
-    while (True):
+    limit = L + 1  # sequence strings have a newline so add one
+    while True:
         fq1 = read_fastq(r1)
         fq2 = read_fastq(r2)
+        if fq1['title'] == '' or fq2['title'] == '':
+            break
+
         nread = nread + 1
         # if nread > 900:
         #     nread -= 1
@@ -90,8 +94,10 @@ if __name__ == '__main__':
             fq2['qual'] = fq2['qual'][:L]
 
             nwritten += 1
-            o1.write('{}\n{}\n{}\n{}\n'.format(fq1['title'].rstrip(), fq1['seq'].rstrip(), fq1['sep'].rstrip(), fq1['qual'].rstrip()))
-            o2.write('{}\n{}\n{}\n{}\n'.format(fq2['title'].rstrip(), fq2['seq'].rstrip(), fq2['sep'].rstrip(), fq2['qual'].rstrip()))
+            o1.write('{}\n{}\n{}\n{}\n'.format(fq1['title'].rstrip(), fq1['seq'].rstrip(),
+                                               fq1['sep'].rstrip(), fq1['qual'].rstrip()))
+            o2.write('{}\n{}\n{}\n{}\n'.format(fq2['title'].rstrip(), fq2['seq'].rstrip(),
+                                               fq2['sep'].rstrip(), fq2['qual'].rstrip()))
 
     sys.stdout.write('\n{} reads read\n'.format(nread))
     sys.stdout.write('{} reads written to {} and {}\n'.format(nwritten, out1, out2))
