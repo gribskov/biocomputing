@@ -41,4 +41,13 @@ if __name__ == '__main__':
             if p > 5:
                 break
 
+        nread = 0
+        for read in bam.fetch(ref):
+            # print(read)
+            nread += 1
+            # if nread > 5:
+            #     break
+
+        print('nread:',nread)
+
 exit(0)
