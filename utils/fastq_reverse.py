@@ -5,21 +5,41 @@ Reverse complement the read sequence and quality.  this should chage "outies" to
 -------------------------------------------------------------------------------------------------"""
 import sys
 
+complement = str.maketrans('acgtunACGTUN', 'tgcaanTGCAAN')
 
-def read_fastq(fh):
+
+def fastq_read(fh):
     """---------------------------------------------------------------------------------------------
     Read the next 4 lines, a fastq read from the filehandle, fh.
     :param fh: open filehandle
     :return: fq, dict, keys = /title seq sep qual/
     ---------------------------------------------------------------------------------------------"""
 
-    fq = {'title': fh.readline(), 'seq': fh.readline(), 'sep': fh.readline(), 'qual': fh.readline()}
+    fq = {'title': fh.readline().rstrip(),
+          'seq': fh.readline().rstrip(),
+          'sep': fh.readline().rstrip(),
+          'qual': fh.readline().rstrip() }
     # fq['title'] = fh.readline()
     # fq['seq'] = fh.readline()
     # fq['sep'] = fh.readline()
     # fq['qual'] = fh.readline()
 
     return fq
+
+def fastq_write(fastq, fh):
+    """---------------------------------------------------------------------------------------------
+
+    :param fastq:
+    :param fh:
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+def sequence_revcomp(seq):
+    """-----------------------------------------------------------------------------------------
+    reverse complement the sequence
+    :param seq:
+    :return: string, reverse complement of sequence
+    -----------------------------------------------------------------------------------------"""
+    return seq.translate(complement)[::-1]
 
 
 # --------------------------------------------------------------------------------------------------
@@ -52,14 +72,16 @@ if __name__ == '__main__':
     nread = 0
     nwritten = 0
     while True:
-        fastq = read_fastq(r1)
-        if fastq['title']:
+        fastq = fastq_read(r1)
+        if not fastq['title']:
             break
+        print('seq:', fastq['seq'])
+        print('rev:', sequence_revcomp(fastq['seq']))
 
         nread = nread + 1
-        # if nread > 900:
-        #     nread -= 1
-        #     break
+        if nread > 10:
+           break
+
         if not nread % 1000000:
             sys.stderr.write('\n{}\t{}\n'.format(nread, nwritten))
 
