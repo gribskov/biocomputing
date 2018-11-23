@@ -100,8 +100,8 @@ if __name__ == '__main__':
         fastq_write(fastq, o1)
 
         nread = nread + 1
-        if nread > 10:
-            break
+        # if nread > 10:
+        #     break
 
         if not nread % 1000000:
             sys.stderr.write('\n{}\t{}\n'.format(nread, nwritten))
