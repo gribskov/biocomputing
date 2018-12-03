@@ -25,8 +25,10 @@ if __name__ == '__main__':
     for f in blast.fields:
         print('        ', f, '\t', getattr(blast, f))
 
+    n=0
     while blast.next():
         n += 1
         print('   ', n, blast.line)
+        print('   {}\t{}\t{}'.format(n, blast.sid, blast.evalue))
 
 exit(0)
