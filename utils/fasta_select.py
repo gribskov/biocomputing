@@ -67,6 +67,7 @@ if __name__ == '__main__':
     # read the sequences and store all that match the IDs
     # duplicates will be stored twice
     n_match = {}
+    n_notmatch = {}
     n_unique = {}
     n_sequence = {}
     n_file = 0
@@ -75,28 +76,31 @@ if __name__ == '__main__':
         fasta = Fasta()
         fasta.open(fastafile)
         n_sequence[fastafile] = 0
-        n_unique[fastafile] = 0
         n_match[fastafile] = 0
         n_file += 1
 
         while fasta.next():
             n_sequence[fastafile] += 1
+            n_total += 1
+            n_notfound = 0
             if fasta.id in id:
-                n_match[fastafile] += 1
+                # desired selected sequences
                 sys.stdout.write('{}\n'.format(fasta.format(linelen=100)))
+                if fasta.id in n_match:
+                    n_match[fasta.id] += 1
+                else:
+                    n_match[fasta.id] = 1
+
             else:
-                n_uniqueperfile += 1
+                # not selected sequence
+                n_notmatch[fastafile] += 1
+                n_notfound += 1
 
 
-        n_total += n_perfile
-        n_unique_total += n_uniqueperfile
+    for fastafile in n_sequence:
         sys.stderr.write(
-            '{}\t{}\t{}\t{}\t{}\t{}\n'.format(n_file, fastafile, n_perfile, n_uniqueperfile,
-                                              n_total,
-                                              n_unique_total))
+        '{}\t{}\t{}\t{}\t{}\t{}\n'.format(n_file, fastafile, n_sequence[fastafile]))
 
-    # write out sequences
-    for seq in unique_seq:
-        sys.stdout.write(unique_seq[seq])
+
 
 exit(0)
