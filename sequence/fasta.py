@@ -1,4 +1,4 @@
-'''-------------------------------------------------------------------------------------------------
+"""-------------------------------------------------------------------------------------------------
 Fasta sequence class.  Supports iteration over a multi-fasta file
     filename
     id
@@ -13,7 +13,8 @@ Fasta sequence class.  Supports iteration over a multi-fasta file
     while fasta.next():
         print(fasta.format(linelen=60))
 
--------------------------------------------------------------------------------------------------'''
+-------------------------------------------------------------------------------------------------"""
+import sys
 
 
 class Fasta:
@@ -39,7 +40,7 @@ class Fasta:
 
     complement = {'A': 'T', 'a': 't', 'C': 'G', 'c': 'g', 'G': 'C', 'g': 'c', 'T': 'A', 't': 'a'}
 
-    def __init__(self, file=""):
+    def __init__(fasta, filename=""):
         """-----------------------------------------------------------------------------------------
         Fasta class constructor. Attributes
             filename
@@ -48,52 +49,54 @@ class Fasta:
             seq
             buffer  (read ahead buffer, only internal)
         -----------------------------------------------------------------------------------------"""
-        self.filename = ''
-        self.id = ''
-        self.doc = ''
-        self.seq = ''
-        self.buffer = ''
+        fasta.filename = ''
+        fasta.id = ''
+        fasta.doc = ''
+        fasta.seq = ''
+        fasta.buffer = ''
+        fasta.fh = None
 
-        if self.filename:
-            self.open(self.filename)
+        if filename:
+            fasta.open(filename)
 
-    def open(self, filename):
-        '''-----------------------------------------------------------------------------------------
+    def open(fasta, filename):
+        """-----------------------------------------------------------------------------------------
         open a file for reading
-        -----------------------------------------------------------------------------------------'''
+        -----------------------------------------------------------------------------------------"""
         # print('opening:', filename)
         try:
-            self.fh = open(filename, 'r')
-        except:
+            fasta.fh = open(filename, 'r')
+        except (OSError, IOError):
             print('Fasta::open - file open error')
 
-        self.filename = filename
+        fasta.filename = filename
 
-    def next(self):
-        '''-----------------------------------------------------------------------------------------
+    def next(fasta):
+        """-----------------------------------------------------------------------------------------
         return the next entry from an open file into the object
         usage
             while fasta.next():
                ...
-        -----------------------------------------------------------------------------------------'''
-        return self.read()
+        -----------------------------------------------------------------------------------------"""
+        return fasta.read()
 
-    def read(self):
-        '''-----------------------------------------------------------------------------------------
+    def read(fasta):
+        """-----------------------------------------------------------------------------------------
         read one sequence from the file, leave the following line in buffer
         usage:
         fasta.read()
-        -----------------------------------------------------------------------------------------'''
+        -----------------------------------------------------------------------------------------"""
 
-        self.id = ''
-        self.doc = ''
-        self.seq = ''
+        fasta.id = ''
+        fasta.doc = ''
+        fasta.seq = ''
 
         # get the ID and doc
-        self.getID()
+        fasta.getID()
 
-        for line in self.fh:
-            if line.isspace(): continue
+        for line in fasta.fh:
+            if line.isspace():
+                continue
             try:
                 line = line.rstrip('\n')
             except TypeError:
@@ -102,32 +105,32 @@ class Fasta:
                 line = line.rstrip('\n')
 
             if line[0] == '>':
-                self.buffer = line
+                fasta.buffer = line
                 break
 
             else:
-                self.seq += line
+                fasta.seq += line
 
-        if len(self.id) > 0 or len(self.doc) > 0 or len(self.seq) > 0:
+        if len(fasta.id) > 0 or len(fasta.doc) > 0 or len(fasta.seq) > 0:
             return True
 
         # fall through to false if nothing can be read
         return False
 
-    def getID(self):
-        '''-----------------------------------------------------------------------------------------
+    def getID(fasta):
+        """-----------------------------------------------------------------------------------------
         intended to be used internally for sequence reading
         check the buffer, and if not empty read the ID and documentation
-        sore in id and doc attributes
+        store in id and doc attributes
         id will be stripped of >
         documentation will be and empty string if there is nothing following the ID
-        -----------------------------------------------------------------------------------------'''
+        -----------------------------------------------------------------------------------------"""
         # if buffer is empty read a line
-        if self.buffer:
-            line = self.buffer
-            self.buffer = ''
+        if fasta.buffer:
+            line = fasta.buffer
+            fasta.buffer = ''
         else:
-            line = self.fh.readline()
+            line = fasta.fh.readline()
             try:
                 line = line.rstrip('\n')
             except TypeError:
@@ -138,50 +141,52 @@ class Fasta:
 
         # get the ID and documentation from the doc line
         try:
-            id, doc = line.split(" ", 1)
+            seqid, doc = line.split(" ", 1)
         except ValueError:
             # documentation is missing
-            id = line
+            seqid = line
             doc = ''
 
-        self.id = id.lstrip('>')
-        self.doc = doc
+        fasta.id = seqid.lstrip('>')
+        fasta.doc = doc
 
-    def length(self):
-        '''-----------------------------------------------------------------------------------------
+        return True
+
+    def length(fasta):
+        """-----------------------------------------------------------------------------------------
         return the length of the  current sequence
         return 0 if there is none
         usage
             seqlen = fasta.length()
-        -----------------------------------------------------------------------------------------'''
-        return len(self.seq)
+        -----------------------------------------------------------------------------------------"""
+        return len(fasta.seq)
 
-    def format(self, linelen=50):
-        '''-----------------------------------------------------------------------------------------
+    def format(fasta, linelen=50):
+        """-----------------------------------------------------------------------------------------
         return a formatted string with the current sequence
         usage
             seq = fasta.format()
-        -----------------------------------------------------------------------------------------'''
-        string = '>{0} {1}'.format(self.id, self.doc)
+        -----------------------------------------------------------------------------------------"""
+        string = '>{0} {1}'.format(fasta.id, fasta.doc)
         pos = 0
-        while pos < len(self.seq):
-            string += '\n{0}'.format(self.seq[pos:pos + linelen])
+        while pos < len(fasta.seq):
+            string += '\n{0}'.format(fasta.seq[pos:pos + linelen])
             pos += linelen
 
         return string
 
-    def trimDocByRegex(self, target):
-        '''-----------------------------------------------------------------------------------------
+    def trimDocByRegex(fasta, target):
+        """-----------------------------------------------------------------------------------------
         Shorten documentation by substituting the target regex with nothing
         target must be a compiled regex
         The new documentation string is returned
         usage
             trim = re.compile( 'len=\d+ ' )
             doc = fasta.trimDocAfterMatch( trim )
-        -----------------------------------------------------------------------------------------'''
-        self.doc = target.sub('', self.doc)
+        -----------------------------------------------------------------------------------------"""
+        fasta.doc = target.sub('', fasta.doc)
 
-        return self.doc
+        return fasta.doc
 
     def reverseComplement(fasta):
         """-----------------------------------------------------------------------------------------
@@ -214,7 +219,7 @@ class Fasta:
         trans.doc = fasta.id + ' reading_frame: {}'.format(rf)
 
         if direction == 'f':
-            seq  = fasta.seq
+            seq = fasta.seq
         else:
             seq = fasta.reverseComplement()
 
