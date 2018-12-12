@@ -17,6 +17,27 @@ Fasta sequence class.  Supports iteration over a multi-fasta file
 
 
 class Fasta:
+    codon2aa = {"AAA": "K", "AAC": "N", "AAG": "K", "AAT": "N",
+                "ACA": "T", "ACC": "T", "ACG": "T", "ACT": "T",
+                "AGA": "R", "AGC": "S", "AGG": "R", "AGT": "S",
+                "ATA": "I", "ATC": "I", "ATG": "M", "ATT": "I",
+
+                "CAA": "Q", "CAC": "H", "CAG": "Q", "CAT": "H",
+                "CCA": "P", "CCC": "P", "CCG": "P", "CCT": "P",
+                "CGA": "R", "CGC": "R", "CGG": "R", "CGT": "R",
+                "CTA": "L", "CTC": "L", "CTG": "L", "CTT": "L",
+
+                "GAA": "E", "GAC": "D", "GAG": "E", "GAT": "D",
+                "GCA": "A", "GCC": "A", "GCG": "A", "GCT": "A",
+                "GGA": "G", "GGC": "G", "GGG": "G", "GGT": "G",
+                "GTA": "V", "GTC": "V", "GTG": "V", "GTT": "V",
+
+                "TAA": "_", "TAC": "Y", "TAG": "_", "TAT": "T",
+                "TCA": "S", "TCC": "S", "TCG": "S", "TCT": "S",
+                "TGA": "_", "TGC": "C", "TGG": "W", "TGT": "C",
+                "TTA": "L", "TTC": "F", "TTG": "L", "TTT": "F"}
+
+    complement = {'A': 'T', 'a': 't', 'C': 'G', 'c': 'g', 'G': 'C', 'g': 'c', 'T': 'A', 't': 'a'}
 
     def __init__(self, file=""):
         """-----------------------------------------------------------------------------------------
@@ -27,7 +48,7 @@ class Fasta:
             seq
             buffer  (read ahead buffer, only internal)
         -----------------------------------------------------------------------------------------"""
-        self.filename = file
+        self.filename = ''
         self.id = ''
         self.doc = ''
         self.seq = ''
@@ -141,10 +162,10 @@ class Fasta:
         usage
             seq = fasta.format()
         -----------------------------------------------------------------------------------------'''
-        string = '>{0} {1}\n'.format(self.id, self.doc)
+        string = '>{0} {1}'.format(self.id, self.doc)
         pos = 0
         while pos < len(self.seq):
-            string += '{0}\n'.format(self.seq[pos:pos + linelen])
+            string += '\n{0}'.format(self.seq[pos:pos + linelen])
             pos += linelen
 
         return string
@@ -161,3 +182,143 @@ class Fasta:
         self.doc = target.sub('', self.doc)
 
         return self.doc
+
+    def reverseComplement(fasta):
+        """-----------------------------------------------------------------------------------------
+        Return the sequence converted to reverse complement
+        :return: string
+        -----------------------------------------------------------------------------------------"""
+        seq = fasta.seq
+        seq = seq.translate(Fasta.complement)
+
+        return seq[::-1]
+
+    def translate(fasta, frame=0, direction='f'):
+        """-----------------------------------------------------------------------------------------
+        translate in a nucleic acid sequence in the desired direction (f,r) and frame (0..2)
+        incomplete codons at end are not translated
+        stop codons are shown as '*'
+        codons with ambiguity characters are translated as 'X';
+        currently uses standard amino acid code
+        TODO use supplied genetic code
+        :param frame: integer, offset from beginning of sequence
+        :param direction: string, forward (f) or reverse(r)
+        :return: Fasta object (new)
+        -----------------------------------------------------------------------------------------"""
+        if not fasta.isACGT():
+            sys.stderr.write('Fasta::translate - sequence must be ACGT')
+
+        rf = '{}{}'.format(direction, frame)
+        trans = Fasta()
+        trans.id = fasta.id + '_{}'.format(rf)
+        trans.doc = fasta.id + ' reading_frame: {}'.format(rf)
+
+        if direction == 'f':
+            seq  = fasta.seq
+        else:
+            seq = fasta.reverseComplement()
+
+        pos = frame
+        while pos < len(seq) - 2:
+            codon = seq[pos:pos + 3]
+            codon = codon.upper()
+            # print('{}:{}:{}'.format(pos, codon, Fasta.codon2aa[codon]))
+            trans.seq += Fasta.codon2aa[codon]
+            pos += 3
+
+        return trans
+
+    def composition(fasta, uppercase=False):
+        """-----------------------------------------------------------------------------------------
+        Returns a dictionary with the composition of the sequence
+        If uppercase is true, characters are converted to uppercase
+        :return: dict, keys are letters in the sequence
+        -----------------------------------------------------------------------------------------"""
+        seq = fasta.seq
+        if uppercase:
+            seq = fasta.seq.upper()
+
+        count = {}
+        for ch in seq:
+            if ch in count:
+                count[ch] += 1
+            else:
+                count[ch] = 1
+
+        return count
+
+    def isACGT(fasta, threshold=0.8):
+        """-----------------------------------------------------------------------------------------
+        Return True if at least threshold fraction of characters in the sequence are ACGT
+
+        :param threshold: float
+        :return: Boolean
+        -----------------------------------------------------------------------------------------"""
+        total = fasta.length()
+        if not total:
+            return False
+
+        comp = fasta.composition(uppercase=True)
+        acgt = 0
+        for base in 'ACGT':
+            try:
+                acgt += comp[base]
+            except KeyError:
+                # ignore missing bases
+                continue
+
+        if acgt / total > threshold:
+            return True
+
+        return False
+
+
+# --------------------------------------------------------------------------------------------------
+# testing
+# --------------------------------------------------------------------------------------------------
+if __name__ == '__main__':
+    fasta = Fasta()
+    fasta.id = 'sample1'
+    fasta.doc = '20 each A,C,G,T'
+    fasta.seq = 'A' * 20 + 'C' * 20 + 'G' * 20 + 't' * 20
+
+    print(fasta.format(40))
+
+    print('\nComposition')
+    comp = fasta.composition()
+    for ch in comp:
+        print('\t{}\t{}'.format(ch, comp[ch]))
+    comp = fasta.composition(uppercase=True)
+    print('Uppercase')
+    for ch in comp:
+        print('\t{}\t{}'.format(ch, comp[ch]))
+
+    # test isACGT
+    print('\nACGT should be true')
+    print(fasta.format(80))
+    print('ACGT:{}'.format(fasta.isACGT()))
+
+    print('\nACGT should be true')
+    fasta.doc = 'No T'
+    fasta.seq = 'A' * 20 + 'C' * 20 + 'G' * 20
+    print(fasta.format(80))
+    print('ACGT:{}'.format(fasta.isACGT()))
+
+    print('\nACGT should be false')
+    fasta.doc = 'ABC - 20 each'
+    fasta.seq = 'A' * 20 + 'B' * 20 + 'C' * 20
+    print(fasta.format(80))
+    print('ACGT:{}'.format(fasta.isACGT()))
+
+    # translation
+    print('\nTranslation')
+    fasta.id = 'sample1'
+    fasta.doc = '20 each A,C,G,T'
+    fasta.seq = 'A' * 20 + 'C' * 20 + 'G' * 20 + 't' * 20
+
+    for direction in 'rf':
+        for frame in range(3):
+            trans = fasta.translate(frame=frame, direction=direction)
+            print(trans.format(80))
+
+exit(0)
