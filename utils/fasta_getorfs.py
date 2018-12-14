@@ -34,6 +34,7 @@ class Orf:
         the naming will be the same, even if run with different parameters
 
         coordinates are calculated in terms of the forward strand with the first base as position 1
+        this is the same convention as used for GFF/GTF
 
         :param direction, string - use '+' for forward, '-' for reverse
         :param frame, tuple with a list of the reading frames to translate
@@ -90,6 +91,17 @@ class Orf:
         -----------------------------------------------------------------------------------------"""
         fasta = Fasta()
         nwritten = 0
+
+        if n:
+            orf = self.orf[n]
+            fasta.id = orf['id']
+            fasta.doc = 'len={} strand={} frame={} begin={} end={}'. \
+                format(orf['length'], orf['direction'], orf['frame'], orf['begin'], orf['end'])
+            fasta.seq = orf['sequence']
+            fh.write(fasta.format(linelen=60))
+            fh.write('\n')
+            nwritten = 1
+
         for orf in self.orf:
             fasta.id = orf['id']
             fasta.doc = 'len={} strand={} frame={} begin={} end={}'. \
@@ -110,13 +122,23 @@ class Orf:
         :return: nwritten number writtedn
         -----------------------------------------------------------------------------------------"""
         nwritten = 0
-        for orf in self.orf:
+        if n:
+            orf = self.orf[n]
             fh.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
                 orf['id'], orf['direction'], orf['frame'], orf['begin'],
                 orf['end'], orf['length'], orf['sequence']))
-            nwritten += 1
+            nwritten = 1
+
+        else:
+            for orf in self.orf:
+                fh.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
+                    orf['id'], orf['direction'], orf['frame'], orf['begin'],
+                    orf['end'], orf['length'], orf['sequence']))
+                nwritten += 1
 
         return nwritten
+
+    # ====== end of class Orf ======================================================================
 
 
 def arguments_get():
@@ -134,19 +156,19 @@ def arguments_get():
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     args = arguments_get()
+    sys.stderr.write('\nfasta_getorfs - Get ORFs from transcript sequences\n')
+    sys.stderr.write('\tinput transcript file: {}\n'.format(args.fasta_in.name))
+    sys.stderr.write('\tminimum ORF length: {}\n'.format(args.minlen))
 
     fasta = Fasta(fh=args.fasta_in)
     fasta.read()
-    print(fasta.format())
+    # print(fasta.format())
 
     orf = Orf(fasta)
     orf.min_len = args.minlen
     orf.get()
 
-    out = open('a.a', 'w')
-    print('{} sequences written'.format(orf.write_as_fasta(out)))
-    orf.write_as_tabular(out)
-
-    sys.stderr.write('done\n')
+    sys.stderr.write('\n{} sequences written\n'.format(orf.write_as_fasta(sys.stdout)))
+    orf.write_as_tabular(sys.stderr)
 
 exit(0)
