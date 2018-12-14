@@ -158,17 +158,25 @@ if __name__ == '__main__':
     args = arguments_get()
     sys.stderr.write('\nfasta_getorfs - Get ORFs from transcript sequences\n')
     sys.stderr.write('\tinput transcript file: {}\n'.format(args.fasta_in.name))
-    sys.stderr.write('\tminimum ORF length: {}\n'.format(args.minlen))
+    sys.stderr.write('\tminimum ORF length: {}\n\n'.format(args.minlen))
 
     fasta = Fasta(fh=args.fasta_in)
-    fasta.read()
-    # print(fasta.format())
+    nsequence = 0
+    npeptide = 0
+    npeptide_total = 0
+    while fasta.next():
+        nsequence += 1
 
-    orf = Orf(fasta)
-    orf.min_len = args.minlen
-    orf.get()
+        orf = Orf(fasta)
+        orf.min_len = args.minlen
+        orf.get()
 
-    sys.stderr.write('\n{} sequences written\n'.format(orf.write_as_fasta(sys.stdout)))
-    orf.write_as_tabular(sys.stderr)
+        npeptide = orf.write_as_fasta(sys.stdout)
+        npeptide_total += npeptide
+        orf.write_as_tabular(sys.stderr)
+        sys.stderr.write('\n{} peptide sequences written from {}\n'.format(npeptide, fasta.id))
+
+    sys.stderr.write('\n{} transcripts read from {}\n'.format(nsequence, args.fasta_in.name))
+    sys.stderr.write('{} peptides with len > {} extracted\n'.format(npeptide_total, args.minlen))
 
 exit(0)
