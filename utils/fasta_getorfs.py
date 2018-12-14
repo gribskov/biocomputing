@@ -11,7 +11,7 @@ import argparse
 from sequence.fasta import Fasta
 
 
-class Orf():
+class Orf:
     """=============================================================================================
     Open reading frame object.
 
@@ -27,45 +27,57 @@ class Orf():
         self.orf = []  # list of ORFs
         self.min_len = 50  # minimum length for orfs
 
-    def get(self, direction='fr', frame=(0, 1, 2)):
+    def get(self, direction='+-', frame=(0, 1, 2)):
         """-----------------------------------------------------------------------------------------
         Add ORFs >= min_len to ORF list (self.orf)
+        All ORFs are numbered, even if they are shorter than the minimum length.  This ensures that 
+        the naming will be the same, even if run with different parameters
         TODO: correctly calculate position for forward and reverse
-        TODO: change direction to +- instead of rf
 
-        :param direction, string - use 'f' for forward, 'r' for reverse
+        :param direction, string - use '+' for forward, '-' for reverse
         :param frame, tuple with a list of the reading frames to translate
         :return: n_added, integer
         -----------------------------------------------------------------------------------------"""
         n_orf = 0
 
-        for dir in direction:
+        for strand in direction:
+            step = 3
+            if strand == '-':
+                step = -3
+
 
             for f in frame:
-                trans = self.transcript.translate(frame=f, direction=dir)
+                trans = self.transcript.translate(frame=f, direction=strand)
                 begin = f
+                if strand == '-':
+                    begin = len(trans.seq) * 3 - 1
 
                 for pep in trans.seq.split('*'):
+                    n_orf += 1
                     peplen = len(pep)
-                    end = begin + 3 * peplen
+                    end = begin + step * peplen
 
-                    if peplen > args.minlen:
-                        n_orf += 1
+                    if peplen > self.min_len:
+                        start = begin + 1
+                        stop = end
+                        if strand == '-':
+                            start = end + 1
+                            stop = begin
 
-                        # print('\t',pep)
-
-                        this_orf = {}
-                        this_orf['id'] = '{}_{}'.format(self.transcript.id, n_orf)
-                        this_orf['direction'] = dir
-                        this_orf['frame'] = f
-                        this_orf['begin'] = begin
-                        this_orf['end'] = end
-                        this_orf['length'] = peplen
-                        this_orf['sequence'] = pep
+                        this_orf = {'id': '{}_{}'.format(self.transcript.id, n_orf),
+                                    'direction': strand,
+                                    'frame': f,
+                                    'begin': start,
+                                    'end': stop,
+                                    'length': peplen,
+                                    'sequence': pep}
 
                         self.orf.append(this_orf)
 
-                    begin = end + 3
+                    begin = end + step
+                        # end of loop of ORFS
+                        # end of loop over frames
+                        # end of loop over strands (directions)
 
         return len(self.orf)
 
@@ -74,29 +86,38 @@ class Orf():
         Write to a file in fasta format, if n is defined, write only the specified ORF in the list
 
         :param fh, open filehandle for writing
-        :param n:
-        :return:
+        :param n: integer, index of ORF to write (not implemented)
+        :return: n
         -----------------------------------------------------------------------------------------"""
         fasta = Fasta()
+        nwritten = 0
         for orf in self.orf:
             fasta.id = orf['id']
-            fasta.doc = 'strand={} frame={} begin={} end={}'.format(orf['direction'], orf['frame'], orf['begin'], orf['end'])
+            fasta.doc = 'len={} strand={} frame={} begin={} end={}'. \
+                format(orf['length'], orf['direction'], orf['frame'], orf['begin'], orf['end'])
             fasta.seq = orf['sequence']
             fh.write(fasta.format(linelen=60))
             fh.write('\n')
+            nwritten += 1
 
-        return
+        return nwritten
 
-    def write_as_tabular(self, n=None):
+    def write_as_tabular(self, fh, n=None):
         """-----------------------------------------------------------------------------------------
         Write to a file in tabular format, if n is defined, write only the specified ORF in the list
 
-        :param n:
-        :return:
+        :param fh, open filehandle for writing
+        :param n:  integer, index of ORF to write (not implemented)
+        :return: nwritten number writtedn
         -----------------------------------------------------------------------------------------"""
-        pass
+        nwritten = 0
+        for orf in self.orf:
+            fh.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
+                orf['id'], orf['direction'], orf['frame'], orf['begin'],
+                orf['end'], orf['length'], orf['sequence']))
+            nwritten += 1
 
-        return
+        return nwritten
 
 
 def arguments_get():
@@ -120,10 +141,12 @@ if __name__ == '__main__':
     print(fasta.format())
 
     orf = Orf(fasta)
+    orf.min_len = args.minlen
     orf.get()
 
     out = open('a.a', 'w')
-    orf.write_as_fasta(out)
+    print('{} sequences written'.format(orf.write_as_fasta(out)))
+    orf.write_as_tabular(out)
 
     sys.stderr.write('done\n')
 
