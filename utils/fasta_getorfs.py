@@ -32,37 +32,36 @@ class Orf:
         Add ORFs >= min_len to ORF list (self.orf)
         All ORFs are numbered, even if they are shorter than the minimum length.  This ensures that 
         the naming will be the same, even if run with different parameters
-        TODO: correctly calculate position for forward and reverse
+
+        coordinates are calculated in terms of the forward strand with the first base as position 1
 
         :param direction, string - use '+' for forward, '-' for reverse
         :param frame, tuple with a list of the reading frames to translate
         :return: n_added, integer
         -----------------------------------------------------------------------------------------"""
         n_orf = 0
+        seqlen = len(self.transcript.seq)
 
         for strand in direction:
-            step = 3
-            if strand == '-':
-                step = -3
-
 
             for f in frame:
                 trans = self.transcript.translate(frame=f, direction=strand)
                 begin = f
-                if strand == '-':
-                    begin = len(trans.seq) * 3 - 1
+                # len_eff = len(trans.seq) * 3
+                # if strand == '-':
+                #     begin = (len(trans.seq) - f) % 3
 
                 for pep in trans.seq.split('*'):
                     n_orf += 1
                     peplen = len(pep)
-                    end = begin + step * peplen
+                    end = begin + 3 * peplen
 
                     if peplen > self.min_len:
                         start = begin + 1
                         stop = end
                         if strand == '-':
-                            start = end + 1
-                            stop = begin
+                            start = seqlen - end + 1
+                            stop = seqlen - begin
 
                         this_orf = {'id': '{}_{}'.format(self.transcript.id, n_orf),
                                     'direction': strand,
@@ -74,10 +73,10 @@ class Orf:
 
                         self.orf.append(this_orf)
 
-                    begin = end + step
-                        # end of loop of ORFS
-                        # end of loop over frames
-                        # end of loop over strands (directions)
+                    begin = end + 3
+                    # end of loop of ORFS
+                    # end of loop over frames
+                    # end of loop over strands (directions)
 
         return len(self.orf)
 
