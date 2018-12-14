@@ -33,14 +33,14 @@ class Fasta:
                 "GGA": "G", "GGC": "G", "GGG": "G", "GGT": "G",
                 "GTA": "V", "GTC": "V", "GTG": "V", "GTT": "V",
 
-                "TAA": "_", "TAC": "Y", "TAG": "_", "TAT": "T",
+                "TAA": "*", "TAC": "Y", "TAG": "*", "TAT": "T",
                 "TCA": "S", "TCC": "S", "TCG": "S", "TCT": "S",
-                "TGA": "_", "TGC": "C", "TGG": "W", "TGT": "C",
+                "TGA": "*", "TGC": "C", "TGG": "W", "TGT": "C",
                 "TTA": "L", "TTC": "F", "TTG": "L", "TTT": "F"}
 
-    complement = {'A': 'T', 'a': 't', 'C': 'G', 'c': 'g', 'G': 'C', 'g': 'c', 'T': 'A', 't': 'a'}
+    complement = str.maketrans('ACGTUacgtu', 'TGCAAtgcaa')
 
-    def __init__(fasta, filename=""):
+    def __init__(fasta, filename="", fh=None):
         """-----------------------------------------------------------------------------------------
         Fasta class constructor. Attributes
             filename
@@ -56,7 +56,9 @@ class Fasta:
         fasta.buffer = ''
         fasta.fh = None
 
-        if filename:
+        if fh:
+            fasta.fh = fh
+        elif filename:
             fasta.open(filename)
 
     def open(fasta, filename):
@@ -193,32 +195,38 @@ class Fasta:
         Return the sequence converted to reverse complement
         :return: string
         -----------------------------------------------------------------------------------------"""
-        seq = fasta.seq
-        seq = seq.translate(Fasta.complement)
+        seq = fasta.seq.translate(Fasta.complement)
+        fasta.seq = seq[::-1]
 
-        return seq[::-1]
+        return fasta.seq
 
-    def translate(fasta, frame=0, direction='f'):
+    def translate(fasta, frame=0, direction='+'):
         """-----------------------------------------------------------------------------------------
-        translate in a nucleic acid sequence in the desired direction (f,r) and frame (0..2)
+        translate in a nucleic acid sequence in the desired direction (+.-) and frame (0..2)
         incomplete codons at end are not translated
         stop codons are shown as '*'
         codons with ambiguity characters are translated as 'X';
         currently uses standard amino acid code
         TODO use supplied genetic code
         :param frame: integer, offset from beginning of sequence
-        :param direction: string, forward (f) or reverse(r)
+        :param direction: string, forward (+) or reverse(-)
         :return: Fasta object (new)
         -----------------------------------------------------------------------------------------"""
         if not fasta.isACGT():
             sys.stderr.write('Fasta::translate - sequence must be ACGT')
 
-        rf = '{}{}'.format(direction, frame)
+        # rf is a suffix added to the ID to distinguish the reading frame
+        rf = 'f0'
+        if direction == '+':
+            rf = '{}{}'.format(direction, frame)
+        else:
+            rf = 'r{}'.format(frame)
+
         trans = Fasta()
         trans.id = fasta.id + '_{}'.format(rf)
-        trans.doc = fasta.id + ' reading_frame: {}'.format(rf)
+        trans.doc = fasta.id + ' strand={} frame={}'.format(direction, frame)
 
-        if direction == 'f':
+        if direction == '+':
             seq = fasta.seq
         else:
             seq = fasta.reverseComplement()
@@ -326,4 +334,4 @@ if __name__ == '__main__':
             trans = fasta.translate(frame=frame, direction=direction)
             print(trans.format(80))
 
-exit(0)
+    exit(0)
