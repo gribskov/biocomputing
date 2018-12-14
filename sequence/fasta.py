@@ -196,9 +196,8 @@ class Fasta:
         :return: string
         -----------------------------------------------------------------------------------------"""
         seq = fasta.seq.translate(Fasta.complement)
-        fasta.seq = seq[::-1]
 
-        return fasta.seq
+        return seq[::-1]
 
     def translate(fasta, frame=0, direction='+'):
         """-----------------------------------------------------------------------------------------
