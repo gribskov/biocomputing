@@ -82,7 +82,7 @@ class Orf:
                     peplen = len(pep)
                     end = begin + 3 * peplen
 
-                    if peplen > self.min_len:
+                    if peplen >= self.min_len:
                         start = begin + 1
                         stop = end
                         if strand == '-':
@@ -180,6 +180,7 @@ def arguments_get():
 # main program
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
+    peptide_maxlen = 20000
     args = arguments_get()
     sys.stderr.write('\nfasta_getorfs - Get ORFs from transcript sequences\n')
     sys.stderr.write('\tinput transcript file: {}\n'.format(args.fasta_in.name))
@@ -189,6 +190,13 @@ if __name__ == '__main__':
     nsequence = 0
     npeptide = 0
     npeptide_total = 0
+
+    lenhist = [0 for _ in range(peptide_maxlen)]
+    lentotal = 0
+
+    longhist = [0 for _ in range(peptide_maxlen)]
+    longtotal = 0
+
     while fasta.next():
         nsequence += 1
 
@@ -196,12 +204,41 @@ if __name__ == '__main__':
         orf.min_len = args.minlen
         orf.get()
 
-        npeptide = orf.write_as_fasta(sys.stdout)
+        longest = True
+        for pep in sorted(orf.orf,key=lambda k: k['length'],reverse=True):
+            if longest:
+                longhist[pep['length']] += 1
+                longtotal += 1
+                longest = False
+
+            lenhist[pep['length']] += 1
+            lentotal += 1
+
+
+        # npeptide = orf.write_as_fasta(sys.stdout)
         npeptide_total += npeptide
-        orf.write_as_tabular(sys.stderr)
+        # orf.write_as_tabular(sys.stderr)
         sys.stderr.write('\n{} peptide sequences written from {}\n'.format(npeptide, fasta.id))
 
     sys.stderr.write('\n{} transcripts read from {}\n'.format(nsequence, args.fasta_in.name))
     sys.stderr.write('{} peptides with len > {} extracted\n'.format(npeptide_total, args.minlen))
+
+    cumulative = 0
+    print('\nall ORFs\n{:>8s}{:>8s}{:>10s}{:>8s}{:>10s}'.format('# len', 'n', 'frac', 'sum', 'sumfrac'))
+    for i in range(peptide_maxlen):
+        if lenhist[i]:
+            cumulative += lenhist[i]
+            print('{:8d}{:8d}{:10.4g}{:8d}{:10.4f}'.format(i,
+                                                           lenhist[i], lenhist[i] / lentotal,
+                                                           cumulative, cumulative / lentotal))
+
+    cumulative = 0
+    print('\nlongest ORFs\n{:>8s}{:>8s}{:>10s}{:>8s}{:>10s}'.format('# len', 'n', 'frac', 'sum', 'sumfrac'))
+    for i in range(peptide_maxlen):
+        if longhist[i]:
+            cumulative += longhist[i]
+            print('{:8d}{:8d}{:10.4g}{:8d}{:10.4f}'.format(i,
+                                                           longhist[i], longhist[i] / longtotal,
+                                                           cumulative, cumulative / longtotal))
 
 exit(0)
