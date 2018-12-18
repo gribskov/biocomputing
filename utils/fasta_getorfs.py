@@ -15,6 +15,31 @@ class Orf:
     """=============================================================================================
     Open reading frame object.
 
+    As usual with sequence features, numbering can be confusing.  The sequence strings are treated
+    as normal zero-based python strings.  When the begin/end coordinates are written out, they are
+    changed to the conventional one-based convention you biologists are more familiar with.
+
+    Ranges begin at the first base of the first codon, and end at the last base of a non-stop codon.
+    The stop codon is not included.
+
+    Synopsis
+
+    fasta = Fasta(fh=args.fasta_in)
+    nsequence = 0
+    npeptide = 0
+    npeptide_total = 0
+    while fasta.next():
+        nsequence += 1
+
+        orf = Orf(fasta)
+        orf.min_len = args.minlen
+        orf.get()
+
+        npeptide = orf.write_as_fasta(sys.stdout)
+        npeptide_total += npeptide
+        orf.write_as_tabular(sys.stderr)
+        sys.stderr.write('\n{} peptide sequences written from {}\n'.format(npeptide, fasta.id))
+
     ============================================================================================="""
 
     def __init__(self, transcript=None):
