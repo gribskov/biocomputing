@@ -10,7 +10,7 @@ and gap penalty, which differ in global/local/suboptimal alignment problems.
 Backtrace the route of score,and finally,
 output scoring table && alignment result shown by conventional pairs.
 
-Author: Bo Huang Intoduction to Bioinformatics, Biol47800, Fall 2018
+Author: Bo Huang Introduction to Bioinformatics, Biol47800, Fall 2018
 '''
 
 import os
@@ -65,17 +65,22 @@ def getProteinSubstituetionMatrix(lines):
         linesep = line.split()
         # get AA index from the 1st line
         if 0 == i:
-            for j in range(23): # total 23 Amino acid
+            for j in range(25): # total 23 Amino acid (25 counting _ and *)
                 AA_index.append(linesep[j])
         # get gap value from last line
-        elif 24 == i:
+        elif 26 == i:
             gap = int(linesep[1])
         else:
             tmp = []
             # get score for AA pairs
-            for j in range(1,24):
+            for j in range(1,26):
                 tmp.append(int(linesep[j]))
             substitution_matrix.append(tmp)
+    i = 0
+    # for aa in AA_index:
+    #     print('aa[{}] = {}'.format(i, aa))
+    #     i += 1
+
     return substitution_matrix
 
 # read data from file
@@ -96,9 +101,11 @@ def globalAlignment(seq1, seq2, mat):
     print("Global Alignment:")
     global AA_index
     global gap
+    print('gap:', gap)
     best_score = np.zeros((len(seq1), len(seq2)), dtype = np.int) # scoring tabel initalization
     source  = np.zeros((len(seq1), len(seq2)), dtype = np.int) # direction of score source each pair
     # Traversing seq1
+    gg=gap
     for i, aa1 in enumerate(seq1):
         # Traversing seq2
         for j, aa2 in enumerate(seq2):
@@ -165,10 +172,13 @@ def globalAlignment(seq1, seq2, mat):
     # result above does not include the first pair, add it!
     if i == 0 and j == 0:
         result.append((seq1[i], seq2[j]))
-    elif i == 0 and j != 0:
+    elif i == 0 and j < 0:
+        result.append((seq1[i], '.'))
+    elif i < 0 and j == 0:
         result.append(('.', seq2[j]))
     else:
-        result.append((seq1[i], '.'))
+        # should never reach here, both sequences have passed their beginning
+        result.append(('.', '.'))
     result.reverse() # reverse the result to sequence's order
     # print result at command line
     for i in range(len(result)):
