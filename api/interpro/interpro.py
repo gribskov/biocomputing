@@ -7,25 +7,26 @@ class Interpro:
     import sys
     import requests
 
-    def __init__(self):
+    def __init__(self, loglevel=0, poll_time=60, poll_count=20):
         """-----------------------------------------------------------------------------------------
         interpro query/response constructor
 
         track   0 no log, 1 job submission/completion, 2 all
         -----------------------------------------------------------------------------------------"""
-        self.log = 0
+        self.log = loglevel
         self.commands_avail = {'run', 'status', 'result'}
         self.output_avail = {'xml', 'json', 'tsv', 'out', 'gff', 'svg'}
         self.output = 'tsv'
-        self.poll_time = 60   # seconds between polling
-        self.poll_count = 20  # maximum number of times to poll
+        self.poll_time = poll_time  # seconds between polling
+        self.poll_count = poll_count  # maximum number of times to poll
 
-        self.email = ''       # user email (optional)
-        self.title = ''       # title for job (optional)
+        self.email = ''  # user email (optional)
+        self.title = ''  # title for job (optional)
         self.sequence = ''
 
-        self.url = 'https://www.ebi.ac.uk/Tools/services/rest/iprscan5'
+        self.url = 'https://www.ebi.ac.uk/Tools/services/rest/iprscan5/'
         self.jobid = ''
+        self.state = 'UNKNOWN'
         self.result = ''
 
     def run(self):
@@ -35,10 +36,12 @@ class Interpro:
         :return:
         -----------------------------------------------------------------------------------------"""
         # send the initial query
-        command = {'email': self.email, 'title': self.title, 'sequence': self.sequence}
-        response = requests.post(run, command)
+        param = {'email': self.email, 'title': self.title, 'sequence': self.sequence}
+        command = self.url + 'run'
+        response = requests.post(command, param)
         self.jobid = response.text
-        
+        # TODO add error trapping
+
         if self.log:
             # TODO add time and sequence name
             sys.stderr.write('job {} submitted\n'.format(self.jobid))
@@ -58,7 +61,8 @@ class Interpro:
             time.sleep(self.poll_time)
             tries += 1
 
-            response = requests.get(status + self.jobid)
+            command = self.url + self.jobid
+            response = requests.get(command)
             if self.log > 1:
                 # TODO add time and jobid
                 sys.stderr.write('    polling... response->{}\n'.format(response.text))
@@ -68,17 +72,19 @@ class Interpro:
                 break
             elif tries >= self.poll_count:
                 break
- 
+
+        self.state = response.text
         if not complete:
             # polling reached limit
             # TODO add time
             if self.log > 0:
-                sys.stderr.write(('unable to find result () in {} tries\n'.format(self.jobid, self.poll_count))
+                sys.stderr.write(
+                    ('unable to find result () in {} tries\n'.format(self.jobid, self.poll_count))
 
-        else:
-            # TODO add time
-            if self.log > 0:
-                sys.stderr.write('interproscan {} finished\n'.format(self.jobid))
+                else:
+                # TODO add time
+                if self.log > 0:
+                    sys.stderr.write('interproscan {} finished\n'.format(self.jobid))
 
         return complete
 
@@ -89,18 +95,18 @@ class Interpro:
         :return:
         -----------------------------------------------------------------------------------------"""
         # get the final result
-        result = 'http://www.ebi.ac.uk/Tools/services/rest/iprscan5/result/'
-        result += id + '/{}'.format('self.output')
-        response = requests.get(result)
+        command = '{}{}/{}/{}'.format(self.url, 'result', self.jobid, self.output)
+        response = requests.get(command)
         self.result = response.text
+        # TODO error trapping
 
         return
+
 
 # ==================================================================================================
 # Testing
 # ==================================================================================================
 if __name__ == '__main__':
-
     ips = Interpro()
     ips.email = 'gribskov@purdue.edu'
     ipos.title = 'globin'
@@ -108,5 +114,9 @@ if __name__ == '__main__':
     MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNA
     VAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSK
     YR'''
+
+    ips.run()
+    if ips.status:
+        ips.result()
 
 exit(0)
