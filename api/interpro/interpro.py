@@ -36,26 +36,24 @@ class Interpro:
         """-----------------------------------------------------------------------------------------
         Construct a REST command and dispatch the job to the server
         Any previously existing jobID is overwritten
-        :return:
+        :return: logical, True = success, False = failure
         -----------------------------------------------------------------------------------------"""
+        is_success = False
+
         # send the initial query
         param = {'email': self.email, 'title': self.title, 'sequence': self.sequence}
         command = self.url + 'run'
         response = requests.post(command, param)
-        if response.status_code == 200:
+        if not self.response_is_error('submitting job', response):
             # success
             self.jobid = response.text
-        else:
-        # failure
+            if self.log:
+                # TODO add sequence name?
+                sys.stderr.write(
+                    '{}\tinterproscan job {} submitted\n'.format(Interpro.logtime(), self.jobid))
+            is_success = True
 
-        #  TODO add error trapping
-
-        if self.log:
-            # TODO add sequence name?
-            sys.stderr.write(
-                '{}\tinterproscan job {} submitted\n'.format(Interpro.logtime(), self.jobid))
-
-        return self.jobid
+        return is_success
 
     def status(self):
         """-----------------------------------------------------------------------------------------
@@ -74,7 +72,7 @@ class Interpro:
             command = self.url + 'status/' + self.jobid
             response = requests.get(command)
             if self.log > 1:
-                sys.stderr.write('{}\tinterproscan job{} polling - {}\n'.format(
+                sys.stderr.write('{}\tinterproscan job {} polling - {}\n'.format(
                     Interpro.logtime(), self.jobid, response.text))
 
             if 'FINISHED' in response.text:
@@ -106,7 +104,7 @@ class Interpro:
         # get the final result
         command = self.url + 'result/' + self.jobid + '/' + self.output
         response = requests.get(command)
-        if response.status_code == 200:
+        if not self.response_is_error('retrieving result', response):
             # success
             self.content = response.text
             if self.log > 1:
@@ -114,12 +112,25 @@ class Interpro:
                     Interpro.logtime(), self.jobid, self.url, self.output))
             return True
 
-        else:
-            # failure
-            sys.stderr.write('{}\t{}interproscan job {} error retrieving result\tstatus={}'.format(
-                Interpro.logtime(), self.jobid, response.status_code))
+        return False
 
-        return
+    def response_is_error(self, task, response):
+        """-----------------------------------------------------------------------------------------
+        Return true if the response code is other than 200. Write error message to stderr if
+        loglevel > 1. Task is a string describing the task that failed for inclusion in the error
+        message
+
+        :param response: requests object response
+        :return: logical True = error, False = no error
+        -----------------------------------------------------------------------------------------"""
+        is_error = False
+        if not response.status_code == 200:
+            if self.log > 0:
+                sys.stderr.write('{}\t{}interproscan job {} error\tstatus={}'.format(
+                    Interpro.logtime(), self.jobid, task, response.status_code))
+            is_error = True
+
+        return is_error
 
     @classmethod
     def logtime(cls):
@@ -131,25 +142,6 @@ class Interpro:
         -----------------------------------------------------------------------------------------"""
         return time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
 
-    def response_is_error(self, task, response):
-        """-----------------------------------------------------------------------------------------
-        Return true if the response code is other than 200. Write error message to stderr if
-        loglevel > 1. Task is a string describing the task that failed for inclusion in the error message
-
-        :param response: requests object response
-        :return: logical True = error, False = no error
-        -----------------------------------------------------------------------------------------"""
-        is_error = False
-        if response.status_code == 200:
-        # success
-        else:
-            if self.log > 0:
-                sys.stderr.write('{}\t{}interproscan job {} error {}\tstatus={}'.format(
-                    Interpro.logtime(), self.jobid, task, response.status_code))
-            is_error = True
-
-        return is_error
-
 
 # ==================================================================================================
 # Testing
@@ -158,13 +150,20 @@ if __name__ == '__main__':
     ips = Interpro(loglevel=2, poll_time=20)
     ips.email = 'gribskov@purdue.edu'
     ips.title = 'globin'
-    ips.sequence = '''>sp|P69905.2|HBA_HUMAN RecName: Full=Hemoglobin subunit alpha; AltName: Full=Alpha-globin; AltName: Full=Hemoglobin alpha chain
-    MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNA
-    VAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSK
-    YR'''
+    ips.sequence = '''>leghemoglobin [Medicago sativa]
+MQIQIAKQKQKNKKRNMGFTEKQEALVNSSFESFKQNPGYSVLFYTIILEKAPAAKGMFSFLKDSAGVQD
+SPKLQAHAGKVFGMVRDSAAQLRATGGVVLGDATLGAIHIQNGVVDPHFVVVKEALLKTIKESSGDKWSE
+ELSTAWEVAYDALATAIKKAMS
+>Erythrocruorin Precursor
+MKFFAVLALCIVGAIASPLTADEASLVQSSWKAVSHNEVDILAAVFAAYPDIQAKFPQFAGKDLASIKDT
+GAFATHATRIVSFLSEVIALSGNASNAAAVEGLLNKLGSDHKARGVSAAQFGEFRTALVSYLSNHVSWGD
+NVAAAWNKALDNTMAVAVAHL'''
 
-    ips.run()
+    if not ips.run():
+        exit(1)
+
     if ips.status():
         ips.result()
+        sys.stdout.write(ips.content)
 
 exit(0)
