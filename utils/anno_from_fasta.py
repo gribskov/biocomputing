@@ -26,7 +26,7 @@ if __name__ == '__main__':
     try:
         pep = open(pepfile, 'r')
     except:
-        sys.stderr.write('Unable to open petide fasta file ({})\n'.format(pepfile))
+        sys.stderr.write('Unable to open peptide fasta file ({})\n'.format(pepfile))
 
     try:
         transcript = open(transcriptfile, 'r')
