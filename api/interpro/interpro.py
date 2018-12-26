@@ -65,8 +65,6 @@ class Interpro:
         complete = False
         tries = 0
         while not complete:
-            # don't poll too often
-            time.sleep(self.poll_time)
             tries += 1
 
             command = self.url + 'status/' + self.jobid
@@ -80,6 +78,9 @@ class Interpro:
                 break
             elif tries >= self.poll_count:
                 break
+
+            # don't poll too often
+            time.sleep(self.poll_time)
 
         self.state = response.text
         if not complete:
@@ -154,10 +155,7 @@ if __name__ == '__main__':
 MQIQIAKQKQKNKKRNMGFTEKQEALVNSSFESFKQNPGYSVLFYTIILEKAPAAKGMFSFLKDSAGVQD
 SPKLQAHAGKVFGMVRDSAAQLRATGGVVLGDATLGAIHIQNGVVDPHFVVVKEALLKTIKESSGDKWSE
 ELSTAWEVAYDALATAIKKAMS
->Erythrocruorin Precursor
-MKFFAVLALCIVGAIASPLTADEASLVQSSWKAVSHNEVDILAAVFAAYPDIQAKFPQFAGKDLASIKDT
-GAFATHATRIVSFLSEVIALSGNASNAAAVEGLLNKLGSDHKARGVSAAQFGEFRTALVSYLSNHVSWGD
-NVAAAWNKALDNTMAVAVAHL'''
+'''
 
     if not ips.run():
         exit(1)
