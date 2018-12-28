@@ -29,6 +29,8 @@ def arguments_get():
     batch_wait_default = 30
     cl = argparse.ArgumentParser(description='Interproscan of ORF sequences',
                                  formatter_class=CustomFormatter)
+    cl.add_argument('--logfile', type=argparse.FileType('w'), default=sys.stderr,
+                    help='Output file for log information')
     cl.add_argument('-m', '--minlen', type=int, default=minlen_default,
                     help='Minimum length ORF to run')
     cl.add_argument('--batch_limit', type=int, default=batch_limit_default,
@@ -92,12 +94,12 @@ def batch_process(jobs_pending, n_sequence, batch_limit, batch_wait):
 # batch_limit = 20
 # batch_wait = 300
 batch_limit = 4
-batch_wait = 40
+batch_wait = 60
 
 args = arguments_get()
-sys.stderr.write('\ninterpro_batch - interproscan of ORF sequences\n')
-sys.stderr.write('\tinput ORF file: {}\n'.format(args.fasta_in.name))
-sys.stderr.write('\tminimum ORF length: {}\n\n'.format(args.minlen))
+args.logfile.write('\ninterpro_batch - interproscan of ORF sequences\n')
+args.logfile.write('\tinput ORF file: {}\n'.format(args.fasta_in.name))
+args.logfile.write('\tminimum ORF length: {}\n\n'.format(args.minlen))
 
 fasta = Fasta(fh=args.fasta_in)
 n_sequence = 0
@@ -108,7 +110,10 @@ outputlist = []
 while fasta.next():
     if fasta.length() >= args.minlen:
         n_sequence += 1
+        if n_sequence < 50:
+            continue
         ips = Interpro(loglevel=1, poll_time=5, poll_count=1)
+        ips.log_fh = args.logfile
         ips.email = 'gribskov@purdue.edu'
         ips.title = 'ORF{}'.format(n_sequence)
         ips.sequence = fasta.format(linelen=60)
@@ -124,7 +129,7 @@ while fasta.next():
         sys.stdout.write('{}\n'.format(line))
         jobs_pending = []
 
-    if n_sequence > 5:
+    if n_sequence > 50:
         break
 
 # end of loop over all sequences
@@ -134,4 +139,5 @@ for line in outputlist:
     sys.stdout.write('{}\n'.format(line))
     jobs_pending = []
 
+args.log_fh.close()
 exit(0)
