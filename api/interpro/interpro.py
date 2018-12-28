@@ -57,7 +57,8 @@ class Interpro:
 
     def status(self):
         """-----------------------------------------------------------------------------------------
-        Poll job status at the server
+        Poll job status at the server.
+        wait for self.poll_time seconds after polling
 
         :return: Logical, True if a result was returned
         -----------------------------------------------------------------------------------------"""
@@ -164,4 +165,4 @@ ELSTAWEVAYDALATAIKKAMS
         ips.result()
         sys.stdout.write(ips.content)
 
-exit(0)
+    exit(0)
