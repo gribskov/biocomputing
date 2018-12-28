@@ -17,6 +17,7 @@ class Interpro:
         track   0 no log, 1 job submission/completion, 2 all
         -----------------------------------------------------------------------------------------"""
         self.log = loglevel
+        self.log_fh = sys.stderr
         self.commands_avail = ['run', 'status', 'result']
         self.output_avail = {'xml', 'json', 'tsv', 'out', 'gff', 'svg'}
         self.output = 'tsv'
@@ -49,7 +50,7 @@ class Interpro:
             self.jobid = response.text
             if self.log:
                 # TODO add sequence name?
-                sys.stderr.write(
+                self.log_fh.write(
                     '{}\tinterproscan job {} submitted\n'.format(Interpro.logtime(), self.jobid))
             is_success = True
 
@@ -71,7 +72,7 @@ class Interpro:
             command = self.url + 'status/' + self.jobid
             response = requests.get(command)
             if self.log > 1:
-                sys.stderr.write('{}\tinterproscan job {} polling - {}\n'.format(
+                self.log_fh.write('{}\tinterproscan job {} polling - {}\n'.format(
                     Interpro.logtime(), self.jobid, response.text))
 
             if 'FINISHED' in response.text:
@@ -87,12 +88,12 @@ class Interpro:
         if not complete:
             # polling reached limit
             if self.log > 0:
-                sys.stderr.write('{}\tinterproscan job {} unsuccessful after {} tries\n'.format(
-                    Interpro.logtime(), self.jobid, self.poll_count))
+                self.log_fh.write('{}\tinterproscan job {} {} - poll_limit={}\n'.format(
+                    Interpro.logtime(), self.jobid, self.state, self.poll_count))
 
         else:
             if self.log > 0:
-                sys.stderr.write(
+                self.log_fh.write(
                     '{}\tinterproscan job {} finished\n'.format(Interpro.logtime(), self.jobid))
 
         return complete
@@ -110,7 +111,7 @@ class Interpro:
             # success
             self.content = response.text
             if self.log > 1:
-                sys.stderr.write('{}\tinterproscan job {} result retrieved from {} as {}'.format(
+                self.log_fh.write('{}\tinterproscan job {} result retrieved from {} as {}'.format(
                     Interpro.logtime(), self.jobid, self.url, self.output))
             return True
 
@@ -128,11 +129,18 @@ class Interpro:
         is_error = False
         if not response.status_code == 200:
             if self.log > 0:
-                sys.stderr.write('{}\t{}interproscan job {} error\tstatus={}'.format(
+                self.log_fh.write('{}\t{}interproscan job {} error\tstatus={}'.format(
                     Interpro.logtime(), self.jobid, task, response.status_code))
             is_error = True
 
         return is_error
+
+    def set_log_fh(self, fh):
+        """-----------------------------------------------------------------------------------------
+        The output for the log is STDERR by default.  This function allows you to change it
+        -----------------------------------------------------------------------------------------"""
+        self.log_fh = fh
+        return fh
 
     @classmethod
     def logtime(cls):
