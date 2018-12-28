@@ -28,8 +28,8 @@ def arguments_get():
 # # ==================================================================================================
 # batch_limit = 20
 # batch_wait = 300
-batch_limit = 2
-batch_wait = 10
+batch_limit = 4
+batch_wait = 30
 
 args = arguments_get()
 sys.stderr.write('\ninterpro_batch - interproscan of ORF sequences\n')
@@ -40,7 +40,7 @@ fasta = Fasta(fh=args.fasta_in)
 n_sequence = 0
 
 job_list = {}
-jobs_pending = 0
+jobs_pending = []
 while fasta.next():
     if fasta.length() >= args.minlen:
         n_sequence += 1
@@ -52,6 +52,8 @@ while fasta.next():
             sys.stderr.write('Error - sequence={}\n'.format(fasta.id))
             continue
         jobs_pending.append(ips)
+    else:
+        continue
 
     if not (n_sequence % batch_limit):
         # False when the maximum number of sequences have been submitted
@@ -65,12 +67,10 @@ while fasta.next():
                     sys.stdout.write(ips.content)
 
                 else:
-                    unfinished.append(ips[i])
+                    unfinished.append(jobs_pending[i])
 
             jobs_pending = unfinished.copy()
-
-
-        time.sleep(batch_wait)
+            time.sleep(batch_wait)
 
     if n_sequence > 3:
         break
