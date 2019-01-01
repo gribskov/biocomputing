@@ -31,7 +31,8 @@ if __name__ == '__main__':
     blast = Blast()
     blast.new(blastfile)
     # format (diamond)
-    nfields = blast.setFormat('qid qlen qbegin qend sid slen sbegin send len pid evalue doc')
+    # nfields = blast.setFormat('qid qlen qbegin qend sid slen sbegin send len pid evalue doc')
+    nfields = blast.setFormat('qid qlen qbegin qend slen sbegin send length pident evalue doc')
 
     # read in and store DEG file
     try:
@@ -58,8 +59,10 @@ if __name__ == '__main__':
     top = 1
     blast.read()
     query = blast.qid
-    info = '{}\t{}\t{}\t{}\t{}\t{}'.format(blast.qbegin, blast.qend, blast.sbegin, blast.send,
-                                           blast.evalue, blast.doc)
+    info = '\n{:>6d}{:>6d}{:>6d}{:>6d}{:>8.1g} {}'.format(
+        int(blast.qbegin), int(blast.qend), int(blast.sbegin),
+        int(blast.send), float(blast.evalue), blast.doc)
+
     while blast.next():
 
         if blast.qid == query:
@@ -70,25 +73,27 @@ if __name__ == '__main__':
             # a new query, save the old query top lines
             if query in deginfo:
                 nfound += 1
-                out.write('{}\t{}\t"{}"\n'.format(query, deginfo[query], info))
+
+                out.write('{}\t{}\t"{}"\n'.format(query, deginfo[query], info.lstrip('\n')))
             nblast += 1
             query = blast.qid
-            info = '{}\t{}\t{}\t{}\t{}\t{}'.format(blast.qbegin, blast.qend, blast.sbegin,
-                                                   blast.send,
-                                                   blast.evalue, blast.doc)
+            # info = '{}\t{}\t{}\t{}\t{}\t{}'.format(blast.qbegin, blast.qend, blast.sbegin,
+            #                                        blast.send,
+            #                                        blast.evalue, blast.doc)
 
             top = 1
             info = ''
 
         if top <= topmax:
-            info += '\n{}\t{}\t{}\t{}\t{}\t{}'.format(blast.qbegin, blast.qend, blast.sbegin,
-                                                      blast.send, blast.evalue, blast.doc)
+            info += '\n{:>6d}{:>6d}{:>6d}{:>6d}{:>8.1g} {}'.format(
+                int(blast.qbegin), int(blast.qend), int(blast.sbegin),
+                int(blast.send), float(blast.evalue), blast.doc)
         # if nfound > 5:
         #     break
 
     if query in deginfo:
         nfound += 1
-        out.write('{}\t{}\t"{}"\n'.format(query, deginfo[query], info))
+        out.write('{}\t{}\t"{}"\n'.format(query, deginfo[query], info.lstrip('\n')))
 
     sys.stderr.write('{} genes found in blast result {}\n'.format(nfound, blastfile))
 
