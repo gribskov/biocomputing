@@ -8,6 +8,7 @@ Michael Gribskov    13 December 2018
 import sys
 # import re
 import argparse
+import textwrap as _textwrap
 from sequence.fasta import Fasta
 
 
@@ -24,7 +25,7 @@ class Orf:
 
     Synopsis
 
-    fasta = Fasta(fh=args.fasta_in)
+    fasta = Fasta(fh=args.transcript)
     nsequence = 0
     npeptide = 0
     npeptide_total = 0
@@ -111,13 +112,25 @@ class Orf:
         Write to a file in fasta format, if n is defined, write only the specified ORF in the list
 
         :param fh, open filehandle for writing
-        :param n: integer, index of ORF to write (not implemented)
+        :param n: integer, index of ORF to write, write all if not specified
         :return: n
         -----------------------------------------------------------------------------------------"""
         fasta = Fasta()
         nwritten = 0
 
-        if n:
+        if n is None:
+            # print all ORFS
+            for orf in self.orf:
+                fasta.id = orf['id']
+                fasta.doc = 'len={} strand={} frame={} begin={} end={}'. \
+                    format(orf['length'], orf['direction'], orf['frame'], orf['begin'], orf['end'])
+                fasta.seq = orf['sequence']
+                fh.write(fasta.format(linelen=60))
+                fh.write('\n')
+                nwritten += 1
+
+        elif n < len(self.orf):
+            # print the selected ORF
             orf = self.orf[n]
             fasta.id = orf['id']
             fasta.doc = 'len={} strand={} frame={} begin={} end={}'. \
@@ -126,15 +139,6 @@ class Orf:
             fh.write(fasta.format(linelen=60))
             fh.write('\n')
             nwritten = 1
-
-        for orf in self.orf:
-            fasta.id = orf['id']
-            fasta.doc = 'len={} strand={} frame={} begin={} end={}'. \
-                format(orf['length'], orf['direction'], orf['frame'], orf['begin'], orf['end'])
-            fasta.seq = orf['sequence']
-            fh.write(fasta.format(linelen=60))
-            fh.write('\n')
-            nwritten += 1
 
         return nwritten
 
@@ -143,35 +147,60 @@ class Orf:
         Write to a file in tabular format, if n is defined, write only the specified ORF in the list
 
         :param fh, open filehandle for writing
-        :param n:  integer, index of ORF to write (not implemented)
-        :return: nwritten number writtedn
+        :param n:  integer, index of ORF to write, write all if not specified
+        :return: nwritten number written
         -----------------------------------------------------------------------------------------"""
         nwritten = 0
-        if n:
-            orf = self.orf[n]
-            fh.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
-                orf['id'], orf['direction'], orf['frame'], orf['begin'],
-                orf['end'], orf['length'], orf['sequence']))
-            nwritten = 1
-
-        else:
+        if n is None:
             for orf in self.orf:
                 fh.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
                     orf['id'], orf['direction'], orf['frame'], orf['begin'],
                     orf['end'], orf['length'], orf['sequence']))
                 nwritten += 1
 
+
+        elif n < len(self.orf):
+            orf = self.orf[n]
+            fh.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
+                orf['id'], orf['direction'], orf['frame'], orf['begin'],
+                orf['end'], orf['length'], orf['sequence']))
+            nwritten = 1
+
         return nwritten
 
     # ====== end of class Orf ======================================================================
 
 
+class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter):
+    """---------------------------------------------------------------------------------------------
+    Custom formatter for argparse.  Less ugly breaking of lines.
+    ---------------------------------------------------------------------------------------------"""
+
+    def _split_lines(self, text, width):
+        text = self._whitespace_matcher.sub(' ', text).strip()
+        self._max_help_position = 30
+        return _textwrap.wrap(text, 90)
+
+
 def arguments_get():
+    """---------------------------------------------------------------------------------------------
+    Get command line arguments with argparse
+    :return:
+    ---------------------------------------------------------------------------------------------"""
     minlen_default = 50
-    cl = argparse.ArgumentParser(description='Get ORFs from transcript sequences')
+    cl = argparse.ArgumentParser(description='Get ORFs from transcript sequences',
+                                 formatter_class=CustomFormatter)
     cl.add_argument('-m', '--minlen', type=int, default=minlen_default,
                     help='minimum length open reading frame to report')
-    cl.add_argument('fasta_in', type=argparse.FileType('r'))
+    cl.add_argument('--longest_only', action='store_true', default=False,
+                    help='report only the longest ORF from each transcript')
+    cl.add_argument('--fasta', type=argparse.FileType('w'), default=sys.stdout,
+                    help='fasta output file for ORFs')
+    cl.add_argument('--tabular', type=argparse.FileType('w'), default=None,
+                    help='tabular output file for ORFs')
+    cl.add_argument('--histogram', type=argparse.FileType('w'), default=sys.stderr,
+                    help='output file for ORF length histogram')
+    cl.add_argument('transcript', type=argparse.FileType('r'))
 
     return cl.parse_args()
 
@@ -183,13 +212,24 @@ if __name__ == '__main__':
     peptide_maxlen = 20000
     args = arguments_get()
     sys.stderr.write('\nfasta_getorfs - Get ORFs from transcript sequences\n')
-    sys.stderr.write('\tinput transcript file: {}\n'.format(args.fasta_in.name))
-    sys.stderr.write('\tminimum ORF length: {}\n\n'.format(args.minlen))
+    sys.stderr.write('\tinput transcript file: {}\n'.format(args.transcript.name))
+    sys.stderr.write('\toutput ORF Fasta file: {}\n'.format(args.fasta.name))
+    if args.tabular:
+        sys.stderr.write('\toutput ORF tabular file: {}\n'.format(args.tabular.name))
+    sys.stderr.write('\tORF histogram file: {}\n'.format(args.histogram.name))
+    sys.stderr.write('\tminimum ORF length: {}\n'.format(args.minlen))
+    if args.longest_only:
+        sys.stderr.write('\tOnly longest ORFs will be reported\n')
+    sys.stderr.write('\n')
 
-    fasta = Fasta(fh=args.fasta_in)
+    fasta = Fasta(fh=args.transcript)
     nsequence = 0
     npeptide = 0
     npeptide_total = 0
+
+    # initialize lists for histograms
+    # lenhist is for all ORFs
+    # longhist is for the longerst ORF in each transcript
 
     lenhist = [0 for _ in range(peptide_maxlen)]
     lentotal = 0
@@ -197,7 +237,13 @@ if __name__ == '__main__':
     longhist = [0 for _ in range(peptide_maxlen)]
     longtotal = 0
 
+    n = None
+    if args.longest_only:
+        n = 0  # write only the first in sorted by length order
+
     while fasta.next():
+        # loop over transcripts
+
         nsequence += 1
 
         orf = Orf(fasta)
@@ -205,7 +251,7 @@ if __name__ == '__main__':
         orf.get()
 
         longest = True
-        for pep in sorted(orf.orf,key=lambda k: k['length'],reverse=True):
+        for pep in sorted(orf.orf, key=lambda k: k['length'], reverse=True):
             if longest:
                 longhist[pep['length']] += 1
                 longtotal += 1
@@ -214,31 +260,43 @@ if __name__ == '__main__':
             lenhist[pep['length']] += 1
             lentotal += 1
 
+        if args.fasta:
+            npeptide = orf.write_as_fasta(args.fasta, n)
 
-        # npeptide = orf.write_as_fasta(sys.stdout)
+        if args.tabular:
+            npeptide = orf.write_as_tabular(args.tabular, n)
+            args.tabular.write('# {} peptide sequences written from {}\n'.format(
+                npeptide, fasta.id))
+
         npeptide_total += npeptide
-        # orf.write_as_tabular(sys.stderr)
-        sys.stderr.write('\n{} peptide sequences written from {}\n'.format(npeptide, fasta.id))
 
-    sys.stderr.write('\n{} transcripts read from {}\n'.format(nsequence, args.fasta_in.name))
+    # end of loop over transcripts
+
+    sys.stderr.write('\n{} transcripts read from {}\n'.format(nsequence, args.transcript.name))
     sys.stderr.write('{} peptides with len > {} extracted\n'.format(npeptide_total, args.minlen))
 
-    cumulative = 0
-    print('\nall ORFs\n{:>8s}{:>8s}{:>10s}{:>8s}{:>10s}'.format('# len', 'n', 'frac', 'sum', 'sumfrac'))
-    for i in range(peptide_maxlen):
-        if lenhist[i]:
-            cumulative += lenhist[i]
-            print('{:8d}{:8d}{:10.4g}{:8d}{:10.4f}'.format(i,
-                                                           lenhist[i], lenhist[i] / lentotal,
-                                                           cumulative, cumulative / lentotal))
+    # histograms of ORF and longest ORF lengths
 
     cumulative = 0
-    print('\nlongest ORFs\n{:>8s}{:>8s}{:>10s}{:>8s}{:>10s}'.format('# len', 'n', 'frac', 'sum', 'sumfrac'))
-    for i in range(peptide_maxlen):
-        if longhist[i]:
-            cumulative += longhist[i]
-            print('{:8d}{:8d}{:10.4g}{:8d}{:10.4f}'.format(i,
-                                                           longhist[i], longhist[i] / longtotal,
-                                                           cumulative, cumulative / longtotal))
+    if args.histogram:
+
+        args.histogram.write('\nall ORFs\n{:>8s}{:>8s}{:>10s}{:>8s}{:>10s}\n'.format(
+            '# len', 'n', 'frac', 'sum', 'sumfrac'))
+        for i in range(peptide_maxlen):
+            if lenhist[i]:
+                cumulative += lenhist[i]
+                args.histogram.write('{:8d}{:8d}{:10.4g}{:8d}{:10.4f}\n'.
+                                     format(i, lenhist[i], lenhist[i] / lentotal,
+                                            cumulative, cumulative / lentotal))
+
+        cumulative = 0
+        args.histogram.write('\nlongest ORFs\n{:>8s}{:>8s}{:>10s}{:>8s}{:>10s}\n'.format(
+            '# len', 'n', 'frac', 'sum', 'sumfrac'))
+        for i in range(peptide_maxlen):
+            if longhist[i]:
+                cumulative += longhist[i]
+                args.histogram.write('{:8d}{:8d}{:10.4g}{:8d}{:10.4f}\n'.
+                                     format(i, longhist[i], longhist[i] / longtotal, cumulative,
+                                            cumulative / longtotal))
 
 exit(0)
