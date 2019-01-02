@@ -51,7 +51,7 @@ class Interpro:
             if self.log:
                 # TODO add sequence name?
                 self.log_fh.write(
-                    '{}\tinterproscan job {} submitted\n'.format(Interpro.logtime(), self.jobid))
+                    '{}\tinterproscan job {} submitted\n'.format(Interpro.logtime(), self.jobid), flush=True)
             is_success = True
 
         return is_success
@@ -73,7 +73,7 @@ class Interpro:
             response = requests.get(command)
             if self.log > 1:
                 self.log_fh.write('{}\tinterproscan job {} polling - {}\n'.format(
-                    Interpro.logtime(), self.jobid, response.text))
+                    Interpro.logtime(), self.jobid, response.text), flush=True)
 
             if 'FINISHED' in response.text:
                 complete = True
@@ -89,12 +89,12 @@ class Interpro:
             # polling reached limit
             if self.log > 0:
                 self.log_fh.write('{}\tinterproscan job {} {} - poll_limit={}\n'.format(
-                    Interpro.logtime(), self.jobid, self.state, self.poll_count))
+                    Interpro.logtime(), self.jobid, self.state, self.poll_count), flush=True)
 
         else:
             if self.log > 0:
                 self.log_fh.write(
-                    '{}\tinterproscan job {} finished\n'.format(Interpro.logtime(), self.jobid))
+                    '{}\tinterproscan job {} finished\n'.format(Interpro.logtime(), self.jobid), flush=True)
 
         return complete
 
@@ -112,7 +112,7 @@ class Interpro:
             self.content = response.text
             if self.log > 1:
                 self.log_fh.write('{}\tinterproscan job {} result retrieved from {} as {}'.format(
-                    Interpro.logtime(), self.jobid, self.url, self.output))
+                    Interpro.logtime(), self.jobid, self.url, self.output), flush=True)
             return True
 
         return False
@@ -130,7 +130,8 @@ class Interpro:
         if not response.status_code == 200:
             if self.log > 0:
                 self.log_fh.write('{}\t{}interproscan job {} error\tstatus={}'.format(
-                    Interpro.logtime(), self.jobid, task, response.status_code))
+                    Interpro.logtime(), self.jobid, task, response.status_code), flush=True)
+
             is_error = True
 
         return is_error
