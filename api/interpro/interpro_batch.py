@@ -26,7 +26,7 @@ def arguments_get():
     minlen_default = 80
     loglevel_default = 1
     batch_limit_default = 20
-    batch_wait_default = 30
+    batch_wait_default = 60
     cl = argparse.ArgumentParser(description='Interproscan of ORF sequences',
                                  formatter_class=CustomFormatter)
     cl.add_argument('--logfile', type=argparse.FileType('w'), default=sys.stderr,
@@ -34,7 +34,7 @@ def arguments_get():
     cl.add_argument('-m', '--minlen', type=int, default=minlen_default,
                     help='Minimum length ORF to run')
     cl.add_argument('--batch_limit', type=int, default=batch_limit_default,
-                    help='Number of sequences to submit per batch with some extra very longs stuff to see if the line wraps')
+                    help='Number of sequences to submit per batch')
     cl.add_argument('--batch_wait', type=int, default=batch_wait_default,
                     help='Seconds to wait between polling batch')
     cl.add_argument('--loglevel', type=int, default=loglevel_default,
@@ -91,10 +91,6 @@ def batch_process(jobs_pending, n_sequence, batch_limit, batch_wait):
 # ==================================================================================================
 # Main
 # ==================================================================================================
-# batch_limit = 20
-# batch_wait = 300
-batch_limit = 4
-batch_wait = 60
 
 args = arguments_get()
 args.logfile.write('\ninterpro_batch - interproscan of ORF sequences\n')
@@ -118,7 +114,7 @@ while fasta.next():
         ips.title = 'ORF{}'.format(n_sequence)
         ips.sequence = fasta.format(linelen=60)
         if not ips.run():
-            sys.stderr.write('Error - sequence={}\n'.format(fasta.id))
+            sys.stderr.write('Error - sequence={}\n'.format(fasta.id),flush=True)
             continue
         jobs_pending.append(ips)
     else:
@@ -129,8 +125,8 @@ while fasta.next():
         sys.stdout.write('{}\n'.format(line))
         jobs_pending = []
 
-    if n_sequence > 50:
-        break
+    # if n_sequence > 50:
+    #     break
 
 # end of loop over all sequences
 
@@ -139,5 +135,5 @@ for line in outputlist:
     sys.stdout.write('{}\n'.format(line))
     jobs_pending = []
 
-args.log_fh.close()
+args.logfile.close()
 exit(0)
