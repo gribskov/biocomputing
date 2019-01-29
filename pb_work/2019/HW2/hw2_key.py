@@ -67,6 +67,28 @@ def trim(sequence, qstring, qthreshold):
     return sequence[:endpos]
 
 
+def count_hq(sequence, qstring, qthreshold):
+    """---------------------------------------------------------------------------------------------
+
+    :param sequence: string
+    :param qstring: string
+    :param qthreshold: int
+    :return: dict
+    ---------------------------------------------------------------------------------------------"""
+    q = quality(qstring)
+
+    comp = {'total': 0}
+    for i in range(len(q)):
+        if q[i] >= qthreshold:
+            comp['total'] += 1
+            if sequence[i] in comp:
+                comp[sequence[i]] += 1
+            else:
+                comp[sequence[i]] = 1
+
+    return comp
+
+
 # --------------------------------------------------------------------------------------------------
 # main program
 # the if test isn't strictly necessary, but some indication that the methods are done and the
@@ -92,6 +114,7 @@ if __name__ == '__main__':
     n_base_hq = 0
     count_base = {}
     count_base_hq = {}
+    comp_base_hq = {}
 
     sequence = ''
     for line in fastq:
@@ -122,6 +145,14 @@ if __name__ == '__main__':
                 else:
                     count_base_hq[base] = bases[base]
 
+            # alternate method to count
+            basecomp = count_hq(sequence, line.rstrip(), quality_threshold)
+            for base in basecomp:
+                if base in comp_base_hq:
+                    comp_base_hq[base] += basecomp[base]
+                else:
+                    comp_base_hq[base] = basecomp[base]
+
         n_line += 1
 
     # end of loop over lines of file
@@ -138,7 +169,11 @@ if __name__ == '__main__':
     for base in count_base_hq:
         print('\t{}: {}'.format(base, count_base_hq[base]))
 
-    print('\tAverage trimmed length: {}'.format(n_base_hq/n_entry))
+    print('\tAverage trimmed length: {}'.format(n_base_hq / n_entry))
+
+    print('\nHigh quality bases (Q>={}) - method 2: {}'.format(quality_threshold, n_base_hq))
+    for base in comp_base_hq:
+        print('\t{}: {}'.format(base, comp_base_hq[base]))
 
 # exit with successful status
 exit(0)
