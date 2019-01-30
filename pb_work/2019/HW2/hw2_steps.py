@@ -89,5 +89,18 @@ if __name__ == '__main__':
 
         n_line += 1
 
+    # end of loop over data lines
+
+    print('\nAll bases:')
+    for base in count_all:
+        print('\t{}: {}'.format(base, count_all[base]))
+
+    print('\nHQ bases:')
+    for base in count_hq:
+        print('\t{}: {}'.format(base, count_hq[base]))
+
+    print('\nTrimmed bases:')
+    for base in count_trim:
+        print('\t{}: {}'.format(base, count_trim[base]))
 
     exit(0)
