@@ -14,16 +14,27 @@ def get_quality_list(qual):
     """---------------------------------------------------------------------------------------------
     Convert the quality string to a list of integer quality values.
 
-    CURRENTLY  A DUMMY FUNCTION THAT RETURNS A LIST COUNTING DOWN FROM 100
+    The ASCII characters in the quality line represent the probability that the base call at the
+    corresponding position in the sequenceis incorrect. The are obtained as follows
+
+    Q = int( -10 * log10( P(error) ) )
+
+    Character = chr( 33 + Q )
+
+    Q is referred to as the Phred quality, or more often as simply quality . The character '5',
+    which is ASCII 53, represents quality = 20, which means an error probability of 10-2 or 0.01.
+    A conventional choice for the minimum permissible quality is 20.
+
+    Usage
+        quality = get_quality_list(qual)
 
     :param qual: string
     :return: list of int
     ---------------------------------------------------------------------------------------------"""
-    q = 100
     quality = []
-    for pos in qual:
+    for qval in qual:
+        q = ord(qval) - 33
         quality.append(q)
-        q -= 1
 
     return quality
 
