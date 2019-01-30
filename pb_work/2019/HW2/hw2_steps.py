@@ -30,10 +30,16 @@ if __name__ == '__main__':
 
     data = fq.readlines()
 
-    # For each line of data
+    n_line = 0
+    for line in data:
 
-        # Save the line if it is a line a sequence line
-        # Save the line if it is a quality line, after converting to a numeric string
+        if n_line % 4 == 1:
+            # Save the line if it is a line a sequence line
+            seq = line.rstrip()
+
+        if n_line %4 == 3:
+            # Save the line if it is a quality line, after converting to a numeric string
+            qual = line.rstrip()
 
             # process this entry
 
@@ -41,5 +47,6 @@ if __name__ == '__main__':
                     # count bases
                     # if high quality, count HQ bases
                     # if not trimmed, count trimmed bases
+        n_line += 1
 
     exit(0)
