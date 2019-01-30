@@ -51,10 +51,12 @@ if __name__ == '__main__':
             # process this entry
             count_all['sum'] += len(seq)
 
-            # for each sequence position
-            # count bases
-            # if high quality, count HQ bases
-            # if not trimmed, count trimmed bases
+            for pos in range(len(seq)):
+                # for each sequence position, count bases
+                count_all[seq[pos]] += 1
+
+                # if high quality, count HQ bases
+                # if not trimmed, count trimmed bases
         n_line += 1
 
     exit(0)
