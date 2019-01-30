@@ -69,6 +69,7 @@ if __name__ == '__main__':
             # process this entry
             count_all['sum'] += len(seq)
 
+            trimmed = False
             for pos in range(len(seq)):
                 # for each sequence position, count bases
                 count_all[seq[pos]] += 1
@@ -77,8 +78,16 @@ if __name__ == '__main__':
                     # if high quality, count HQ bases
                     count_hq[seq[pos]] += 1
                     count_hq['sum'] += 1
+                    if not trimmed:
+                        # do not count if a low quality base has been seen
+                        count_trim[seq[pos]] += 1
+                        count_trim['sum'] += 1
 
-                # if not trimmed, count trimmed bases
+                else:
+                    # quality is < threshold, all position after this are trimmed
+                    trimmed = True
+
         n_line += 1
+
 
     exit(0)
