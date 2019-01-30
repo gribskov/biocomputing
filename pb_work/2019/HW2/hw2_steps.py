@@ -15,7 +15,20 @@ Michael Gribskov     30 January 2019
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    # open the fastq file and read into a list of lines
+    fastqname = '../HW1/8044.5k.fastq'
+    quality_threshold = 20  # pre-adaptation for future command line use
+
+    # open the fastq file and read into a list of lines. terminate with unsuccessful status if
+    # file cannot be read
+    # Defining fq as None prevents the warning about possibly undefined variable
+    fq = None
+    try:
+        fq = open(fastqname, 'r')
+    except (IOError, OSError):
+        print('Error opening file {}'.format(fastqname))
+        exit(1)
+
+    data = fq.readlines()
 
     # For each line of data
 
