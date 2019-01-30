@@ -30,23 +30,31 @@ if __name__ == '__main__':
 
     data = fq.readlines()
 
+    # collect data for all bases, hq bases, and trimmed bases.  Use sum to store the total counts
+    count_hq = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'sum': 0}
+    count_all = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'sum': 0}
+    count_trim = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'sum': 0}
+
     n_line = 0
+    seq = ''
+    qual = ''
     for line in data:
 
         if n_line % 4 == 1:
             # Save the line if it is a line a sequence line
             seq = line.rstrip()
 
-        if n_line %4 == 3:
+        if n_line % 4 == 3:
             # Save the line if it is a quality line, after converting to a numeric string
             qual = line.rstrip()
 
             # process this entry
+            count_all['sum'] += len(seq)
 
-                # for each sequence position
-                    # count bases
-                    # if high quality, count HQ bases
-                    # if not trimmed, count trimmed bases
+            # for each sequence position
+            # count bases
+            # if high quality, count HQ bases
+            # if not trimmed, count trimmed bases
         n_line += 1
 
     exit(0)
