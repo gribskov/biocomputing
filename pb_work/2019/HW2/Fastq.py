@@ -20,6 +20,22 @@ class Fastq():
         self.sequence = ''
         self.quality = []
 
+    def openfile(self, fname):
+        """-----------------------------------------------------------------------------------------
+        Open the specified file fname.  Terminate with error status = 1 if there is an error.
+
+        :param fname: string, filepath
+        :return: filehandle
+        -----------------------------------------------------------------------------------------"""
+        self.filename = fname
+        try:
+            self.fh = open(fname, 'r')
+        except (IOError, OSError):
+            print('Error opening file {}'.format(fname))
+            exit(1)
+
+        return self.fh
+
 
 # --------------------------------------------------------------------------------------------------
 # testing
@@ -28,7 +44,8 @@ if __name__ == '__main__':
     fastqname = '../HW1/8044.5k.fastq'
     fq = Fastq()
 
-    fq.filename = fastqname
+    fh = fq.openfile(fastqname)
     print('file: {}'.format(fq.filename))
+    print('filehandle: {}'.format(fh))
 
     exit(0)
