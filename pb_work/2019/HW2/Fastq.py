@@ -5,7 +5,6 @@ class Fastq():
     Michael Gribskov     03 February 2019
     ============================================================================================="""
 
-
     def __init__(self):
         """-----------------------------------------------------------------------------------------
         FAstq object has attributes
@@ -26,5 +25,10 @@ class Fastq():
 # testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
+    fastqname = '../HW1/8044.5k.fastq'
+    fq = Fastq()
+
+    fq.filename = fastqname
+    print('file: {}'.format(fq.filename))
 
     exit(0)
