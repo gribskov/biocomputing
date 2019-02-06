@@ -19,6 +19,7 @@ class Fastq():
         self.id = ''
         self.sequence = ''
         self.quality = []
+        self.quality_min = 0
 
     def openfile(self, fname):
         """-----------------------------------------------------------------------------------------
@@ -60,7 +61,7 @@ class Fastq():
         return True
 
     def get_quality_list(self, qual):
-        """---------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         Convert the quality string to a list of integer quality values.
 
         The ASCII characters in the quality line represent the probability that the base call at the
@@ -79,12 +80,30 @@ class Fastq():
 
         :param qual: string
         :return: list of int
-        ---------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
         for qval in qual:
             q = ord(qval) - 33
             self.quality.append(q)
 
         return self.quality
+
+    def base_count(self):
+        """-----------------------------------------------------------------------------------------
+        Count the bases in the sequence that have quality > self.quality_min
+
+        :return: dict of int, keys are bases plus 'total'
+        -----------------------------------------------------------------------------------------"""
+        count = {'A':0, 'C':0, 'G':0, 'T':0, 'N':0}
+        for pos in range(len(self.sequence)):
+            if self.quality[pos] >= self.quality_min:
+                try:
+                    count[self.sequence[pos]] += 1
+                    count['total'] += 1
+                except KeyError:
+                    count[self.sequence[pos]] = 1
+                    count['total'] = 1
+
+        return count
 
 
 # --------------------------------------------------------------------------------------------------
@@ -102,7 +121,7 @@ if __name__ == '__main__':
 
         print('\t{}\t{}'.format(n_entry, fq.id))
         print('\t{}'.format(fq.sequence))
-
+        print(fq.base_count())
         if n_entry > 4:
             break
 
