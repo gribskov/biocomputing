@@ -9,7 +9,7 @@ class Fastq():
         """-----------------------------------------------------------------------------------------
         FAstq object has attributes
         filename - filename of data file
-        fh - filehandle of opend file
+        fh - filehandle of opened file
         id - ID of current entry
         sequence - sequence of current entry (string)
         quality - quality of current entry (list of int)
@@ -38,7 +38,7 @@ class Fastq():
 
     def next(self):
         """-----------------------------------------------------------------------------------------
-        read the next entry from the file.  Return false whten all entries have been read
+        read the next entry from the file.  Return false when all entries have been read
 
         :return: logical, false when done
         -----------------------------------------------------------------------------------------"""
@@ -51,6 +51,10 @@ class Fastq():
 
         plus = self.fh.readline()
         qual = self.fh.readline()
+        if not qual:
+            # at end of file nothing can be read, qual is empty and therefore False
+            return False
+
         self.quality = self.get_quality_list(qual)
 
         return True
@@ -60,7 +64,7 @@ class Fastq():
         Convert the quality string to a list of integer quality values.
 
         The ASCII characters in the quality line represent the probability that the base call at the
-        corresponding position in the sequenceis incorrect. The are obtained as follows
+        corresponding position in the sequence is incorrect. The are obtained as follows
 
         Q = int( -10 * log10( P(error) ) )
 
