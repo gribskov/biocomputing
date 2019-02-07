@@ -81,6 +81,7 @@ class Fastq():
         :param qual: string
         :return: list of int
         -----------------------------------------------------------------------------------------"""
+        self.quality = []
         for qval in qual:
             q = ord(qval) - 33
             self.quality.append(q)
@@ -105,6 +106,24 @@ class Fastq():
 
         return count
 
+    def trim(self):
+        """-----------------------------------------------------------------------------------------
+        Truncate the sequence and quality before the first base with quality < quality_min. This
+        operation cannot be undone.
+
+        :return: int, trimmed length
+        -----------------------------------------------------------------------------------------"""
+        pos = 0
+        for q in self.quality:
+            if q < self.quality_min:
+                break
+            pos += 1
+
+        self.sequence = self.sequence[:pos]
+        self.quality = self.quality[:pos]
+
+        return pos
+
 
 # --------------------------------------------------------------------------------------------------
 # testing
@@ -118,10 +137,11 @@ if __name__ == '__main__':
     n_entry = 0
     all = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, 'total': 0}
     hq = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, 'total': 0}
+    trim = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, 'total': 0}
     while fq.next():
         n_entry += 1
 
-        print(fq.sequence)
+        # print(n_entry, fq.sequence)
         fq.quality_min = 0
         count = fq.base_count()
         for base in count:
@@ -132,8 +152,13 @@ if __name__ == '__main__':
         for base in count:
             hq[base] += count[base]
 
-        if n_entry > 4:
-            break
+        fq.trim()
+        count = fq.base_count()
+        for base in count:
+            trim[base] += count[base]
+
+        # if n_entry > 400:
+        #     break
 
     # end of loop of Fastq entries
     print('{} entries read'.format(n_entry))
@@ -144,5 +169,9 @@ if __name__ == '__main__':
     print('\nHigh quality bases')
     for base in hq:
         print('{:>10s}: {}'.format(base, hq[base]))
+
+    print('\nTrimmed bases')
+    for base in hq:
+        print('{:>10s}: {}'.format(base, trim[base]))
 
     exit(0)
