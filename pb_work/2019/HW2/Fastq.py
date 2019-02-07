@@ -5,7 +5,7 @@ class Fastq():
     Michael Gribskov     03 February 2019
     ============================================================================================="""
 
-    def __init__(self):
+    def __init__(self, filename = ''):
         """-----------------------------------------------------------------------------------------
         FAstq object has attributes
         filename - filename of data file
@@ -14,25 +14,27 @@ class Fastq():
         sequence - sequence of current entry (string)
         quality - quality of current entry (list of int)
         -----------------------------------------------------------------------------------------"""
-        self.filename = ''
+        self.filename = filename
         self.fh = None
         self.id = ''
         self.sequence = ''
         self.quality = []
         self.quality_min = 0
 
-    def openfile(self, fname):
+        if filename:
+            self.openfile()
+
+    def openfile(self):
         """-----------------------------------------------------------------------------------------
         Open the specified file fname.  Terminate with error status = 1 if there is an error.
 
         :param fname: string, filepath
         :return: filehandle
         -----------------------------------------------------------------------------------------"""
-        self.filename = fname
         try:
-            self.fh = open(fname, 'r')
+            self.fh = open(self.filename, 'r')
         except (IOError, OSError):
-            print('Error opening file {}'.format(fname))
+            print('Error opening file ({})'.format(self.filename))
             exit(1)
 
         return self.fh
@@ -130,9 +132,7 @@ class Fastq():
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     fastqname = '../HW1/8044.5k.fastq'
-    fq = Fastq()
-
-    fh = fq.openfile(fastqname)
+    fq = Fastq(fastqname)
 
     n_entry = 0
     all = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, 'total': 0}
