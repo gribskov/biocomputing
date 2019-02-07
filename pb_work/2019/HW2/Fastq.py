@@ -147,7 +147,7 @@ class Count:
 
     def add(self, count):
         """-----------------------------------------------------------------------------------------
-        Add the counts in count to the object
+        Add the counts in dictionary count to the object
 
         :param count: dict
         :return: int, total counts
@@ -170,8 +170,9 @@ class Count:
         report = '\n{}\n'.format(title)
         total = 0
         for base in self.alphabet:
-            report += '{:>10s}: {}\n'.format(base, self.count[base])
-            total += self.count[base]
+            if self.count[base] > 0:
+                report += '{:>10s}: {}\n'.format(base, self.count[base])
+                total += self.count[base]
 
         report += '{:>10s}: {}\n'.format('total', total)
 
@@ -186,9 +187,9 @@ if __name__ == '__main__':
     fq = Fastq(fastqname)
 
     n_entry = 0
-    all_bases = Count()   # all bases
-    hq_bases = Count()    # bases with quality >= minimum
-    trimmed_bases = Count()  # bases trimmed at firt base with quality < minimum
+    all_bases = Count()      # all bases
+    hq_bases = Count()       # bases with quality >= minimum
+    trimmed_bases = Count()  # bases trimmed at first base with quality < minimum
     while fq.next():
         n_entry += 1
 
