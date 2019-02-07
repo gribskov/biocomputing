@@ -26,9 +26,9 @@ class Fastq():
 
     def openfile(self):
         """-----------------------------------------------------------------------------------------
-        Open the specified file fname.  Terminate with error status = 1 if there is an error.
+        Open the specified file in self.filename.  Terminate with error status = 1 if there is an
+        error.
 
-        :param fname: string, filepath
         :return: filehandle
         -----------------------------------------------------------------------------------------"""
         try:
@@ -186,32 +186,25 @@ if __name__ == '__main__':
     fq = Fastq(fastqname)
 
     n_entry = 0
-    all = Count()
-    hq = Count()
-    trim = Count()
+    all_bases = Count()   # all bases
+    hq_bases = Count()    # bases with quality >= minimum
+    trimmed_bases = Count()  # bases trimmed at firt base with quality < minimum
     while fq.next():
         n_entry += 1
 
-        # print(n_entry, fq.sequence)
         fq.quality_min = 0
-        count = fq.base_count()
-        all.add(count)
+        all_bases.add(fq.base_count())
 
         fq.quality_min = 20
-        count = fq.base_count()
-        hq.add(count)
+        hq_bases.add(fq.base_count())
 
         fq.trim()
-        count = fq.base_count()
-        trim.add(count)
-
-        # if n_entry > 400:
-        #     break
+        trimmed_bases.add(fq.base_count())
 
     # end of loop of Fastq entries
     print('{} entries read'.format(n_entry))
-    print(all.report('All bases'))
-    print(hq.report('High quality bases'))
-    print(trim.report('Trimmed bases'))
+    print(all_bases.report('All bases'))
+    print(hq_bases.report('High quality bases'))
+    print(trimmed_bases.report('Trimmed bases'))
 
     exit(0)
