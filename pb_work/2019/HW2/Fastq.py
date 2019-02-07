@@ -93,7 +93,7 @@ class Fastq():
 
         :return: dict of int, keys are bases plus 'total'
         -----------------------------------------------------------------------------------------"""
-        count = {'A':0, 'C':0, 'G':0, 'T':0, 'N':0, 'total':0}
+        count = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, 'total': 0}
         for pos in range(len(self.sequence)):
             if self.quality[pos] >= self.quality_min:
                 try:
@@ -116,13 +116,21 @@ if __name__ == '__main__':
     fh = fq.openfile(fastqname)
 
     n_entry = 0
-    all = {'A':0, 'C':0, 'G':0, 'T':0, 'N':0, 'total':0}
+    all = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, 'total': 0}
+    hq = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, 'total': 0}
     while fq.next():
         n_entry += 1
 
+        print(fq.sequence)
+        fq.quality_min = 0
         count = fq.base_count()
         for base in count:
             all[base] += count[base]
+
+        fq.quality_min = 20
+        count = fq.base_count()
+        for base in count:
+            hq[base] += count[base]
 
         if n_entry > 4:
             break
@@ -132,5 +140,9 @@ if __name__ == '__main__':
     print('\nAll bases')
     for base in all:
         print('{:>10s}: {}'.format(base, all[base]))
+
+    print('\nHigh quality bases')
+    for base in hq:
+        print('{:>10s}: {}'.format(base, hq[base]))
 
     exit(0)
