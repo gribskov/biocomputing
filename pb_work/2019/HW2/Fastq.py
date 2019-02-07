@@ -5,7 +5,7 @@ class Fastq():
     Michael Gribskov     03 February 2019
     ============================================================================================="""
 
-    def __init__(self, filename = ''):
+    def __init__(self, filename=''):
         """-----------------------------------------------------------------------------------------
         FAstq object has attributes
         filename - filename of data file
@@ -127,6 +127,57 @@ class Fastq():
         return pos
 
 
+class Count:
+    """=============================================================================================
+    The count object keeps a count of letters, generally from a DNA or protein sequence
+
+    ============================================================================================="""
+
+    def __init__(self, alphabet='ACGTN'):
+        """-----------------------------------------------------------------------------------------
+        Constructor
+        Letter counts are stored in a dictionary  with the letters as keys
+        The alphabet specifies the valid letters that can be counted
+        -----------------------------------------------------------------------------------------"""
+        self.alphabet = alphabet
+        self.count = {}
+        for letter in alphabet:
+            self.count[letter] = 0
+        self.total = 0
+
+    def add(self, count):
+        """-----------------------------------------------------------------------------------------
+        Add the counts in count to the object
+
+        :param count: dict
+        :return: int, total counts
+        -----------------------------------------------------------------------------------------"""
+        total = 0
+        for letter in self.alphabet:
+            self.count[letter] += count[letter]
+            total += count[letter]
+
+        self.total += total
+        return total
+
+    def report(self, title=''):
+        """-----------------------------------------------------------------------------------------
+        Return a formatted string reporting the counts
+
+        :param title: string, title to print before counts
+        :return: string
+        -----------------------------------------------------------------------------------------"""
+        report = '\n{}\n'.format(title)
+        total = 0
+        for base in self.alphabet:
+            report += '{:>10s}: {}\n'.format(base, self.count[base])
+            total += self.count[base]
+
+        report += '{:>10s}: {}\n'.format('total', total)
+
+        return report
+
+
 # --------------------------------------------------------------------------------------------------
 # testing
 # --------------------------------------------------------------------------------------------------
@@ -135,43 +186,32 @@ if __name__ == '__main__':
     fq = Fastq(fastqname)
 
     n_entry = 0
-    all = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, 'total': 0}
-    hq = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, 'total': 0}
-    trim = {'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, 'total': 0}
+    all = Count()
+    hq = Count()
+    trim = Count()
     while fq.next():
         n_entry += 1
 
         # print(n_entry, fq.sequence)
         fq.quality_min = 0
         count = fq.base_count()
-        for base in count:
-            all[base] += count[base]
+        all.add(count)
 
         fq.quality_min = 20
         count = fq.base_count()
-        for base in count:
-            hq[base] += count[base]
+        hq.add(count)
 
         fq.trim()
         count = fq.base_count()
-        for base in count:
-            trim[base] += count[base]
+        trim.add(count)
 
         # if n_entry > 400:
         #     break
 
     # end of loop of Fastq entries
     print('{} entries read'.format(n_entry))
-    print('\nAll bases')
-    for base in all:
-        print('{:>10s}: {}'.format(base, all[base]))
-
-    print('\nHigh quality bases')
-    for base in hq:
-        print('{:>10s}: {}'.format(base, hq[base]))
-
-    print('\nTrimmed bases')
-    for base in hq:
-        print('{:>10s}: {}'.format(base, trim[base]))
+    print(all.report('All bases'))
+    print(hq.report('High quality bases'))
+    print(trim.report('Trimmed bases'))
 
     exit(0)
