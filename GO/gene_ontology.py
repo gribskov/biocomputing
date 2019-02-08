@@ -189,4 +189,16 @@ if __name__ == '__main__':
     nloaded = go.load()
     print('{} terms loaded from {}'.format(nloaded, gofile))
 
+    all_features = {}
+    for goitem in go.term:
+        for key in goitem.info:
+            if key in all_features:
+                all_features[key] += 1
+            else:
+                all_features[key] = 1
+
+    print('\nFeatures')
+    for key in all_features:
+        print('{}: {}'.format(key, all_features[key]))
+
     exit(0)
