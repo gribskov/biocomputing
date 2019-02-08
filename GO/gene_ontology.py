@@ -11,16 +11,15 @@ class GeneOntologyItem():
     the object is an array of information tag-value pairs, stored in GeneOntologyItem.info
     ============================================================================================="""
 
-    def __init__(self, GO):
+    def __init__(self, obo_block):
         """-----------------------------------------------------------------------------------------
         GeneOntologyItem constructor
         -----------------------------------------------------------------------------------------"""
         self.type = ''
         self.info = []
         self.count = {}
-        if GO.block:
-            self.parse(GO.block)
-
+        if obo_block:
+            self.parse(obo_block)
 
     def parse(self, text):
         """-----------------------------------------------------------------------------------------
@@ -83,16 +82,15 @@ class GeneOntology(object):
         -----------------------------------------------------------------------------------------"""
         try:
             self.fh = open(self.filename, 'r')
-            self.obo_block()
         except (OSError, IOError):
             return False
 
         return True
 
-    def obo_block(self):
+    def read_obo_block(self):
         """-----------------------------------------------------------------------------------------
         OBO format is broken up into blocks separated by blank lines.  This function reads the
-        block beginning at the current file position
+        block beginning at the current file position. Each block corresponds to a GeneOntologyItem.
 
         :return: logical, True if block is read
         "----------------------------------------------------------------------------------------"""
@@ -100,6 +98,10 @@ class GeneOntology(object):
         self.block = []
 
         line = self.fh.readline()
+        if not line:
+            # end of file
+            return status
+
         while line.rstrip(' \n'):
             status = True
             self.block.append(line)
@@ -114,16 +116,28 @@ class GeneOntology(object):
 
         :return: logical
         -----------------------------------------------------------------------------------------"""
-        item = GeneOntologyItem(self)
-        self.term.append(item)
-        while not item.type == 'Term':
-            if self.obo_block():
-                item = GeneOntologyItem(self)
-                self.term.append(item)
-            else:
-                break
+        block_available = self.read_obo_block()
+        if block_available:
+            item = GeneOntologyItem(self.block)
+            self.term.append(item)
+            # TODO index GO terms
 
-        return self.obo_block()
+        return block_available
+
+    def load(self):
+        """-----------------------------------------------------------------------------------------
+        Read the entire obo file and add to the object.  does not clear internal storage so multiple
+        files can be read into the same object
+
+        :return: int, number of records loaded (all types)
+        -----------------------------------------------------------------------------------------"""
+        n_load = 0
+        while self.next():
+            n_load += 1
+            if not n_load % 1000:
+                print('.', end='')
+
+        return n_load
 
 
 # --------------------------------------------------------------------------------------------------
@@ -132,7 +146,9 @@ class GeneOntology(object):
 if __name__ == '__main__':
     gofile = 'go-basic.obo'
     go = GeneOntology(file=gofile)
-    go.next()
+    # go.next()
     print('file: {}'.format(go.filename))
+    nloaded = go.load()
+    print('{} terms loaded from {}'.format(nloaded, gofile))
 
     exit(0)
