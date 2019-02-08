@@ -52,6 +52,22 @@ class GeneOntologyItem():
 
         return nread
 
+    def id(self):
+        """-----------------------------------------------------------------------------------------
+        REturn the GO ID if present.  This should be in a line such as
+        id: GO:0000006
+        in the OBO file, and should be stored in the info as a single key value pair
+
+        :return: string, empty string indicates not present
+        -----------------------------------------------------------------------------------------"""
+        id = ''
+        for pair in self.info:
+            if pair['key'] == 'id':
+                id = pair['value']
+                break
+
+        return id
+
 
 class GeneOntology(object):
     """=============================================================================================
@@ -60,12 +76,15 @@ class GeneOntology(object):
 
     def __init__(self, file=''):
         """-----------------------------------------------------------------------------------------
-        GeneOntology is mostly a bag of GeneOntologyItem
+        GeneOntology is mostly a bag of GeneOntologyItem. The GO terms are are stored in term.
+        index is a dictionary in dexed by the GO ID, e.g. GO:0051082, that allows you to navigate
+        between terms following relationships such as is_a
         -----------------------------------------------------------------------------------------"""
         self.filename = file
         self.fh = None
         self.block = []
         self.term = []
+        self.index = {}
 
         if self.filename:
             if not self.openfile():
