@@ -1,5 +1,7 @@
 """=================================================================================================
-
+Two classes in this file.
+    GeneOntologyItem: parses an OBO formatted entry for a single GO term and stores is
+    GeneOntology: a container of GeneOntologyItems that can iterate and load an entire GO file
 
 Michael Gribskov     12 January 2019
 ================================================================================================="""
