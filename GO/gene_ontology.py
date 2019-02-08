@@ -68,8 +68,21 @@ class GeneOntologyItem():
                                  format(self.info['id']))
             id = self.info['id'][0]
 
-
         return id
+
+    def feature(self, key):
+        """-----------------------------------------------------------------------------------------
+        Return the array of values for any defined feature.  If feature is unknown, and empty
+        list is returned.  An empty list tests as False
+
+        :param key: string
+        :return: list of strings or empty list
+        -----------------------------------------------------------------------------------------"""
+        result = ()
+        if key in self.info:
+            result = self.info[key]
+
+        return result
 
 
 class GeneOntology(object):
