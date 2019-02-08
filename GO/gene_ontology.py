@@ -16,7 +16,7 @@ class GeneOntologyItem():
         GeneOntologyItem constructor
         -----------------------------------------------------------------------------------------"""
         self.type = ''
-        self.info = []
+        self.info = {}
         self.count = {}
         if obo_block:
             self.parse(obo_block)
@@ -26,8 +26,7 @@ class GeneOntologyItem():
         parse a block of OBO formatted text, stored as a list of strings.
         each line is a tag value pair separated by the first colon
 
-        returns the key-value pairs as a list of ditionaries in self.info
-        returns the count of each key in self.count
+        the keys are used as dictionary keys and the values are stored as lists of strings
 
         :param text: list of lines read from file
         :return: number of liens processed
@@ -42,10 +41,12 @@ class GeneOntologyItem():
         for pair in text[1:]:
             nread += 1
             key, value = pair.rstrip('\n').split(':', maxsplit=1)
-            self.info.append({'key': key, 'value': value})
-            try:
+
+            if key in self.info:
+                self.info[key].append(value)
                 self.count[key] += 1
-            except KeyError:
+            else:
+                self.info[key] = [value]
                 self.count[key] = 1
 
         self.n = nread
@@ -61,10 +62,12 @@ class GeneOntologyItem():
         :return: string, empty string indicates not present
         -----------------------------------------------------------------------------------------"""
         id = ''
-        for pair in self.info:
-            if pair['key'] == 'id':
-                id = pair['value']
-                break
+        if 'id' in self.info:
+            if len(self.info['id']) > 1:
+                sys.stderr.write('GeneOntologyItem::id - ID multiply defined {}'.
+                                 format(self.info['id']))
+            id = self.info['id'][0]
+
 
         return id
 
