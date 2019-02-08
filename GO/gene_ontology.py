@@ -139,7 +139,10 @@ class GeneOntology(object):
         if block_available:
             item = GeneOntologyItem(self.block)
             self.term.append(item)
-            # TODO index GO terms
+            id = item.id()
+            if id:
+                # index GO terms
+                self.index[id] = len(self.term)
 
         return block_available
 
