@@ -21,7 +21,7 @@ class Point:
         return self.magnitude()
 
     def values(self):
-        return self._pos
+        return self._pos[:]
 
 
 # --------------------------------------------------------------------------------------------------
