@@ -14,6 +14,12 @@ class Point:
     def magnitude(self):
         return math.sqrt(self._pos[0] ** 2 + self._pos[1] ** 2)
 
+    def add(self, other):
+        self._pos[0] += other._pos[0]
+        self._pos[1] += other._pos[1]
+
+        return self.magnitude()
+
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -24,5 +30,8 @@ if __name__ == '__main__':
 
     print('pt1 length = {}'.format(pt1.magnitude()))
     print('pt2 length = {}'.format(pt2.magnitude()))
+
+    length = pt1.add(pt2)
+    print( 'pt1 + pt2 = {}'.format(length))
 
     exit(0)
