@@ -42,8 +42,9 @@ if __name__ == '__main__':
 
     xy = []
     xy = pt1.values()
-    print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), xy[0], xy[0]))
+    print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), xy[0], xy[1]))
     xy[0] = 10
-    print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), xy[0], xy[0]))
+    xy = pt1.values()
+    print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), xy[0], xy[1]))
 
     exit(0)
