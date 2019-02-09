@@ -5,26 +5,24 @@ Michael Gribskov     09 February 2019
 ================================================================================================="""
 import math
 
+
 class Point:
 
-    def __init__(self):
-        self.pos = []
+    def __init__(self, x, y):
+        self._pos = [x, y]
 
     def magnitude(self):
-        return math.sqrt(self.pos[0] ** 2 + self.pos[1] ** 2)
+        return math.sqrt(self._pos[0] ** 2 + self._pos[1] ** 2)
 
 
 # --------------------------------------------------------------------------------------------------
 #
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    pt1 = Point()
-    pt1.pos = [1, 2]
-    pt2 = Point()
-    pt2.pos = [4,4]
+    pt1 = Point(1, 2)
+    pt2 = Point(4, 4)
 
     print('pt1 length = {}'.format(pt1.magnitude()))
     print('pt2 length = {}'.format(pt2.magnitude()))
-
 
     exit(0)
