@@ -20,6 +20,9 @@ class Point:
 
         return self.magnitude()
 
+    def values(self):
+        return self._pos
+
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -32,6 +35,15 @@ if __name__ == '__main__':
     print('pt2 length = {}'.format(pt2.magnitude()))
 
     length = pt1.add(pt2)
-    print( 'pt1 + pt2 = {}'.format(length))
+    print('pt1 + pt2 = {}'.format(length))
+
+    x, y = pt1.values()
+    print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), x, y))
+
+    xy = []
+    xy = pt1.values()
+    print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), xy[0], xy[0]))
+    xy[0] = 10
+    print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), xy[0], xy[0]))
 
     exit(0)
