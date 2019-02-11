@@ -63,7 +63,7 @@ def composition_sum(composition):
 
 
 # ==================================================================================================
-# testing
+# testing - do not change the main program
 # ==================================================================================================
 if __name__ == '__main__':
 
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     # report
     sys.stdout.write('\n{} proteins read from {}\n'.format(n_protein, filename))
     sys.stdout.write('\taverage molecular weight: {:.2f}\n'.format(mw_average(mweight)))
-    sys.stdout.write('\taverage composition:\n')
+    sys.stdout.write('\taverage composition (percent):\n')
 
     sum_comp = composition_sum(composition)
     for aa in sum_comp:
