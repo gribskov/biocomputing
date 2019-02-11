@@ -7,7 +7,10 @@ class Fasta:
     Reads FastA sequences sequentially from a file, see testing section for usage examples
     ============================================================================================="""
     # molecular wt data is a class variable
-    aa_mw = { 'A': 100, 'C':200, 'D':300}
+    aa_mw = {'A': 71.08, 'C': 103.14, 'D': 115.09, 'E': 129.12, 'F': 147.18,
+             'G': 57.06, 'H': 137.15, 'I': 113.17, 'K': 128.18, 'L': 113.17,
+             'M': 131.21, 'N': 114.11, 'P': 97.11, 'Q': 128.14, 'R': 156.20,
+             'S': 87.08, 'T': 101.11, 'V': 99.14, 'W': 186.21, 'Y': 163.18}
 
     def __init__(self, filename):
         """-----------------------------------------------------------------------------------------
@@ -104,10 +107,10 @@ class Fasta:
         mw = 0
         for aa in comp:
             if aa in Fasta.aa_mw:
-                mw += Fasta.aa_mw[aa]
+                mw += Fasta.aa_mw[aa] * comp[aa]
 
         # add one water for the ends
-        return  mw + 18.0
+        return mw + 18.02
 
 
 # end of class Fasta ===============================================================================
@@ -169,7 +172,6 @@ if __name__ == '__main__':
     n_protein = 0
     n_residue = 0
     while protein.next():
-
         n_protein += 1
         n_residue += len(protein.sequence)
         sys.stdout.write('{}\t{} residues\n'.format(protein.id, len(protein.sequence)))
@@ -180,11 +182,11 @@ if __name__ == '__main__':
     # report
     sys.stdout.write('\n{} proteins read from {}\n'.format(n_protein, filename))
     sys.stdout.write('\taverage molecular weight: {:.2f}\n'.format(mw_average(mweight)))
-    sys.stdout.write('\taverage composition:\n')
+    sys.stdout.write('\taverage composition (percent):\n')
 
     sum_comp = composition_sum(composition)
     for aa in sum_comp:
         sys.stdout.write(
-            '{:>10}{:>10d}{:>10.3f}\n'.format(aa, sum_comp[aa], 100*sum_comp[aa] / n_residue))
+            '{:>10}{:>10d}{:>10.3f}\n'.format(aa, sum_comp[aa], 100 * sum_comp[aa] / n_residue))
 
     exit(0)
