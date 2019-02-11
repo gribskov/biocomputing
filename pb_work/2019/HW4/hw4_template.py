@@ -41,6 +41,27 @@ def mw_average(mwlist):
     return average
 
 
+def composition_sum(composition):
+    """---------------------------------------------------------------------------------------------
+    calculates the total composition of each letter.
+
+    :param composition: list of dict of int, keys are sequence characters, values are counts
+    :return: dict of int
+    ---------------------------------------------------------------------------------------------"""
+    n_char = 0
+    sum = {}
+    for eachprotein in composition:
+
+        for letter in eachprotein:
+            n_char += eachprotein[letter]
+            try:
+                sum[letter] += eachprotein[letter]
+            except KeyError:
+                sum[letter] = eachprotein[letter]
+
+    return sum
+
+
 # ==================================================================================================
 # testing
 # ==================================================================================================
@@ -58,18 +79,19 @@ if __name__ == '__main__':
 
         n_protein += 1
         n_residue += len(protein.sequence)
-        sys.stdout.write('{}\t{} residues\n'.format(protein.id, protein.sequence))
+        sys.stdout.write('{}\t{} residues\n'.format(protein.id, len(protein.sequence)))
 
         composition.append(protein.composition())
         mweight.append(protein.mw())
 
-        # report
-        sys.stdout.write('{} proteins read from {}\n'.format(n_protein, filename))
-        sys.stdout.write('\taverage molecular weight: {:.2f'.format(mw_average(mweight)))
-        sys.stdout.write('\taverage composition:')
+    # report
+    sys.stdout.write('\n{} proteins read from {}\n'.format(n_protein, filename))
+    sys.stdout.write('\taverage molecular weight: {:.2f}\n'.format(mw_average(mweight)))
+    sys.stdout.write('\taverage composition:\n')
 
-        for aa in composition:
-            sys.stdout.write(
-                '{:>10}{:>10d}{:>10.2f}'.format(aa, composition[aa], composition[aa] / n_residue))
+    sum_comp = composition_sum(composition)
+    for aa in sum_comp:
+        sys.stdout.write(
+            '{:>10}{:>10d}{:>10.3f}\n'.format(aa, sum_comp[aa], 100*sum_comp[aa] / n_residue))
 
     exit(0)
