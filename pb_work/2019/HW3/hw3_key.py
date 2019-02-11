@@ -87,7 +87,7 @@ def basecount(fq_entry, count, threshold=0):
     qual = fq_entry['qual']
     for pos in range(len(seq)):
 
-        if qual[pos] > threshold:
+        if qual[pos] >= threshold:
             count['total'] += 1
             base = seq[pos]
             if base in count:
@@ -138,6 +138,7 @@ def report(count, title):
 
     return True
 
+
 # --------------------------------------------------------------------------------------------------
 # Main program
 # --------------------------------------------------------------------------------------------------
@@ -167,6 +168,7 @@ if __name__ == '__main__':
         all = basecount(fq_entry, all)
         high_quality = basecount(fq_entry, high_quality, quality_threshold)
         trimmed = basecount(truncate(fq_entry, quality_threshold), trimmed)
+        # break
 
     # report
     print('Fastq entries read: {}'.format(n_entry))
