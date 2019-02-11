@@ -6,6 +6,8 @@ class Fasta:
     """=============================================================================================
     Reads FastA sequences sequentially from a file, see testing section for usage examples
     ============================================================================================="""
+    # molecular wt data is a class variable
+    aa_mw = { 'A': 100, 'C':200, 'D':300}
 
     def __init__(self, filename):
         """-----------------------------------------------------------------------------------------
@@ -68,9 +70,10 @@ class Fasta:
 
             self.sequence += self.buffer.rstrip(' \n')
 
-        if self.buffer:
+        if self.sequence:
             return True
         else:
+            # if sequence is empty, nothing was read == eof
             return False
 
     def composition(self, force=True):
@@ -97,7 +100,14 @@ class Fasta:
 
         :return:
         -----------------------------------------------------------------------------------------"""
-        return 0.0
+        comp = self.composition()
+        mw = 0
+        for aa in comp:
+            if aa in Fasta.aa_mw:
+                mw += Fasta.aa_mw[aa]
+
+        # add one water for the ends
+        return  mw + 18.0
 
 
 # end of class Fasta ===============================================================================
