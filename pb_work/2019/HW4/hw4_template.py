@@ -57,7 +57,9 @@ if __name__ == '__main__':
     while protein.next():
 
         n_protein += 1
-        n_residue += len(protein.seq)
+        n_residue += len(protein.sequence)
+        sys.stdout.write('{}\t{} residues\n'.format(protein.id, protein.sequence))
+
         composition.append(protein.composition())
         mweight.append(protein.mw())
 
