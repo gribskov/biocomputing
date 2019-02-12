@@ -42,7 +42,9 @@ class GeneOntologyItem():
 
         for pair in text[1:]:
             nread += 1
-            key, value = pair.rstrip('\n').split(':', maxsplit=1)
+            key, value = pair.strip(' \n').split(':', maxsplit=1)
+            key = key.strip(' ')
+            value = value.strip(' ')
 
             if key in self.info:
                 self.info[key].append(value)
@@ -94,8 +96,9 @@ class GeneOntology(object):
 
     def __init__(self, file=''):
         """-----------------------------------------------------------------------------------------
-        GeneOntology is mostly a bag of GeneOntologyItem. The GO terms are are stored in term.
-        index is a dictionary in dexed by the GO ID, e.g. GO:0051082, that allows you to navigate
+        GeneOntology is mostly a bag of GeneOntologyItem. The list of GO terms are are stored in
+        term.
+        index is a dictionary indexed by the GO ID, e.g. GO:0051082, that allows you to navigate
         between terms following relationships such as is_a
         -----------------------------------------------------------------------------------------"""
         self.filename = file
@@ -103,6 +106,8 @@ class GeneOntology(object):
         self.block = []
         self.term = []
         self.index = {}
+        self.parent = {}
+        self.child = {}
 
         if self.filename:
             if not self.openfile():
@@ -158,9 +163,14 @@ class GeneOntology(object):
             item = GeneOntologyItem(self.block)
             self.term.append(item)
             id = item.id()
+            idx = len(self.term) - 1
             if id:
                 # index GO terms
-                self.index[id] = len(self.term)
+                self.index[id] = idx
+            alt_id = item.feature('alt_id')
+            if alt_id:
+                for id in alt_id:
+                    self.index[id] = idx
 
         return block_available
 
@@ -178,6 +188,41 @@ class GeneOntology(object):
                 print('.', end='')
 
         return n_load
+
+    def parent_child(self):
+        """-----------------------------------------------------------------------------------------
+        Identify parent child relationships, and build two indexes base on the serial index
+
+        :return: it, number of parent-child relationships
+        -----------------------------------------------------------------------------------------"""
+        idx = 0
+        for term in self.term:
+            if not term.type == 'Term':
+                idx += 1
+                continue
+
+            print('index: {}\tid: {}\tname {}'.format(
+                idx, term.info['id'][0], term.info['name'][0]))
+            idx += 1
+            if 'is_a' not in term.info:
+                continue
+
+            for is_a in term.info['is_a']:
+                go_id, comment = is_a.split('!', maxsplit=1)
+                go_id = go_id.strip(' ')
+                comment = comment.strip(' ')
+                print('\tgo_id: {}\tcomment: {}'.format(go_id, comment))
+                try:
+                    self.parent[term.info['id'][0]].append(go_id)
+                except KeyError:
+                    self.parent[term.info['id'][0]] = [go_id]
+
+                try:
+                    self.child[go_id].append(term.info['id'][0])
+                except KeyError:
+                    self.child[go_id] = [term.info['id'][0]]
+
+        return True
 
 
 # --------------------------------------------------------------------------------------------------
@@ -202,5 +247,17 @@ if __name__ == '__main__':
     print('\nFeatures')
     for key in all_features:
         print('{}: {}'.format(key, all_features[key]))
+
+    go.parent_child()
+
+    n = 0
+    for c in go.child:
+        if c not in go.parent:
+            print('index: {}'.format(go.index[c]))
+            term = go.term[go.index[c]]
+            if 'obsolete' not in term.info:
+                n += 1
+                print('{} child but no parent: {}'.format(n, c))
+                print(term.info)
 
     exit(0)
