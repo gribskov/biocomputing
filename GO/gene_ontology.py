@@ -224,6 +224,29 @@ class GeneOntology(object):
 
         return True
 
+    def trace(self,leaf):
+        """-----------------------------------------------------------------------------------------
+        trace the path from a leaf to a node with no parent (i.e., the root)
+
+        :param leaf: string, a GO ID
+        :return: list of string, GO IDs
+        -----------------------------------------------------------------------------------------"""
+        golist = []
+        while leaf in self.parent:
+            golist.append(leaf)
+            idx = self.index[leaf]
+            term = self.term[idx]
+            print('{} {} ({})'.format(term.info['id'][0], term.info['name'][0], idx))
+
+            if leaf in self.parent:
+                leaf = self.parent[leaf][0]
+
+        golist.append(leaf)
+        idx = self.index[leaf]
+        term = self.term[idx]
+        print('{} {} ({})'.format(term.info['id'][0], term.info['name'][0], idx))
+
+        return True
 
 # --------------------------------------------------------------------------------------------------
 # testing
@@ -259,5 +282,10 @@ if __name__ == '__main__':
                 n += 1
                 print('{} child but no parent: {}'.format(n, c))
                 print(term.info)
+
+    gotest = ['GO:2001314', 'GO:0014041', 'GO:1902679']
+    for g in gotest:
+        print('\nstart:{}'.format(g))
+        go.trace(g)
 
     exit(0)
