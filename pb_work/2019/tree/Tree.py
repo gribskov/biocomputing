@@ -44,7 +44,7 @@ class Tree:
     def tree_length(self):
         """-----------------------------------------------------------------------------------------
         Recursively calculate the length of the tree rooted at the  current node
-        :return: int (total length of tree)
+        :return: float (total length of tree)
         -----------------------------------------------------------------------------------------"""
         l = self.branch_length
         if self.left:
@@ -54,6 +54,21 @@ class Tree:
             l += self.right.tree_length()
 
         return l
+
+    def nodes(self):
+        """-----------------------------------------------------------------------------------------
+        Return a list of nodes in depth-first order, rooted at this node
+
+        :return: list of Tree
+        -----------------------------------------------------------------------------------------"""
+        nodelist = [self]
+        if self.left:
+            nodelist += self.left.nodes()
+
+        if self.right:
+            nodelist += self.right.nodes()
+
+        return nodelist
 
 
 # --------------------------------------------------------------------------------------------------
@@ -91,7 +106,7 @@ if __name__ == '__main__':
     cde.left = de
 
     d = Tree()
-    d.nbame = 'd'
+    d.name = 'd'
     d.branch_length = 0.7
 
     e = Tree()
@@ -115,5 +130,16 @@ if __name__ == '__main__':
 
     root.dump()
     print('\ntree length:{}'.format(root.tree_length()))
+
+    print('\nNode list')
+    print('root:')
+    l = root.nodes()
+    for node in root.nodes():
+        print('\t{}'.format(node.name))
+
+    print('cde:')
+    for node in cde.nodes():
+        print('\t{}'.format(node.name))
+
 
     exit(0)
