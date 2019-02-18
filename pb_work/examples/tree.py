@@ -50,7 +50,7 @@ if __name__ == '__main__':
     root.name = 'root'
     root.dump()
 
-    print('add children ab and cde')
+    print('\nadd children ab and cde')
     ab = Tree()
     ab.name = 'ab'
     ab.branch_length = 1.1
@@ -61,6 +61,18 @@ if __name__ == '__main__':
 
     root.left = cde
     root.right = ab
+
+    print('\nadd children of cde')
+    c = Tree()
+    c.name = 'c'
+    c.branch_length = 0.7
+
+    de = Tree()
+    de.name = 'de'
+    de.branch_length = 0.5
+
+    cde.right = c
+    cde.left = de
 
     root.dump()
 
