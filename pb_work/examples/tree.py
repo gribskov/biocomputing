@@ -39,6 +39,20 @@ class Tree:
         if self.right:
             self.right.dump()
 
+    def tree_length(self):
+        """-----------------------------------------------------------------------------------------
+        Recursively calculate the length of the tree rooted at the  current node
+        :return: float (total length of tree)
+        -----------------------------------------------------------------------------------------"""
+        l = self.branch_length
+        if self.left:
+            l += self.left.tree_length()
+
+        if self.right:
+            l += self.right.tree_length()
+
+        return l
+
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -75,5 +89,6 @@ if __name__ == '__main__':
     cde.left = de
 
     root.dump()
+    print('tree length:', root.tree_length())
 
     exit(0)
