@@ -53,6 +53,21 @@ class Tree:
 
         return l
 
+    def nodes(self):
+        """-----------------------------------------------------------------------------------------
+        Return a list of nodes in depth-first order, rooted at this node
+
+        :return: list of Tree
+        -----------------------------------------------------------------------------------------"""
+        nodelist = [self]
+        if self.left:
+            nodelist += self.left.nodes()
+
+        if self.right:
+            nodelist += self.right.nodes()
+
+        return nodelist
+
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -89,6 +104,16 @@ if __name__ == '__main__':
     cde.left = de
 
     root.dump()
-    print('tree length:', root.tree_length())
+    print('\ntree length:', root.tree_length())
+
+    print('\nNode list')
+    print('root:')
+    l = root.nodes()
+    for node in root.nodes():
+        print('\t{}'.format(node.name))
+
+    print('cde:')
+    for node in cde.nodes():
+        print('\t{}'.format(node.name))
 
     exit(0)
