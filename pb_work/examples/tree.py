@@ -32,7 +32,12 @@ class Tree:
         print('\tleft:{}'.format(self.left))
         print('\tright:{}'.format(self.right))
 
-        return True
+        # recursively dump child nodes
+        if self.left:
+            self.left.dump()
+
+        if self.right:
+            self.right.dump()
 
 
 # --------------------------------------------------------------------------------------------------
@@ -58,7 +63,5 @@ if __name__ == '__main__':
     root.right = ab
 
     root.dump()
-    root.left.dump()
-    root.right.dump()
 
     exit(0)
