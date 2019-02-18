@@ -41,7 +41,24 @@ class Tree:
 if __name__ == '__main__':
     root = Tree()
 
+    print('make a single node named root')
     root.name = 'root'
     root.dump()
+
+    print('add children ab and cde')
+    ab = Tree()
+    ab.name = 'ab'
+    ab.branch_length = 1.1
+
+    cde = Tree()
+    cde.name = 'cde'
+    cde.branch_length = 0.5
+
+    root.left = cde
+    root.right = ab
+
+    root.dump()
+    root.left.dump()
+    root.right.dump()
 
     exit(0)
