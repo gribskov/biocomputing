@@ -24,6 +24,16 @@ class Tree:
         self.left = None
         self.right = None
 
+    def dump(self):
+        print('\n{}'.format(self))
+        print('\tname:{}'.format(self.name))
+        if self.branch_length:
+            print('\tbranch length:{}'.format(self.branch_length))
+        print('\tleft:{}'.format(self.left))
+        print('\tright:{}'.format(self.right))
+
+        return True
+
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -32,6 +42,6 @@ if __name__ == '__main__':
     root = Tree()
 
     root.name = 'root'
-    print(root)
+    root.dump()
 
     exit(0)
