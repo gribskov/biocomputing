@@ -155,6 +155,17 @@ class Gff:
 if __name__ == '__main__':
     gff = Gff('../2019/HW5/at_1000k.gff3')
 
-    print(gff)
+    # test database
+    db = gff.genome.db
+    sql = '''
+    SELECT * from gene
+    WHERE begin > 100 AND
+          end < 5000;
+        '''
+    db.execute(sql)
+    for row in db:
+        for key in row.keys():
+            print('{}:{}'.format(key, row[key]), end='\t')
+        print()
 
     exit(0)
