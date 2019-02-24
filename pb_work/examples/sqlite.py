@@ -96,9 +96,49 @@ class Gff:
 
         try:
             self.fh = open(self.filename, 'r')
+            self.Gff_load()
 
         except IOError:
             sys.stderr.write('Gff::__init__ - error opening file ({})\n'.format(self.filename))
+
+    def Gff_load(self):
+        """-----------------------------------------------------------------------------------------
+        load a GFF3 data file into the database
+        GFF3 format is defined at https://useast.ensembl.org/info/website/upload/gff3.html
+
+        :return: int, number of rows loaded
+        -----------------------------------------------------------------------------------------"""
+        nrow = 0
+        for line in self.fh:
+            if line.startswith('#'):
+                continue
+
+            nrow += 1
+            ( seqid, source, type, start, end, score, strand, phase, attributes ) = \
+                line.rstrip().split('\t')
+            # except ValueError:
+            #     print('Error', line)
+            #     continue
+
+            if type.find('gene') >= 0:
+                # load gene into gene table
+                self.parse_attributes(attributes)
+                sql = '''
+                INSERT INTO gene
+                VALUES ( "{}", "{}", {}, {}, "{}" );
+                '''.format( gene_id, seqid, start, end, strand)
+
+                self.genome.db.execute(sql)
+
+
+                print( seqid, type, start, end )
+
+            # if nrow > 5:
+            #     break
+
+        return nrow
+
+
 
 
 # --------------------------------------------------------------------------------------------------
