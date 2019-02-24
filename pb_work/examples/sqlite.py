@@ -1,8 +1,9 @@
 """=================================================================================================
-SQLite3 example
+SQLite3 example.  This example combines a GFF object and the same database as in sqlite2.py
 
-Michael Gribskov     March 04  2018
+Michael Gribskov     24 February 2019
 ================================================================================================="""
+import sys
 import sqlite3 as sq3
 
 
@@ -14,9 +15,12 @@ class Genome():
     def __init__(self, dbfile='genome.db', new=False):
         """-----------------------------------------------------------------------------------------
         creates the database connection and initializes tables
+
+        Database is set up to use the SQLite row interface
         -----------------------------------------------------------------------------------------"""
         self.dbh = sq3.connect(dbfile)
         self.db = self.dbh.cursor()
+        self.db.row_factory = sq3.Row
 
         self.setupDBTables(new)
 
@@ -70,35 +74,34 @@ class Genome():
         return None
 
 
+class Gff:
+    """=============================================================================================
+    Simple class to read features from GFF3 file and store in database
+
+    Michael Gribskov    24 February 2019
+    ============================================================================================="""
+
+    def __init__(self, filename):
+        """-----------------------------------------------------------------------------------------
+        Gff constructor
+
+        :param filename: string, GFF3 file name
+        -----------------------------------------------------------------------------------------"""
+        self.filename = filename
+        self.fh = None
+
+        try:
+            self.fh = open(self.filename, 'r')
+
+        except IOError:
+            sys.stderr.write('Gff::__init__ - error opening file ({})\n'.format(self.filename))
+
+
 # --------------------------------------------------------------------------------------------------
 # main/testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
+    gff = Gff('../2019/HW5/at_1000k.gff3')
     genome = Genome('mydbfile.db', new=True)
-
-    chromosomes = [ ('1', 30427671),
-                    ('2', 19698289),
-                    ('3', 23459830),
-                    ('4', 18585056),
-                    ('5', 26975502)
-                   ]
-
-    genome.db.executemany('INSERT INTO chromosome VALUES (?, ?)', chromosomes)
-    genome.dbh.commit()
-
-    sql = '''
-    SELECT *
-    FROM chromosome
-    '''
-    genome.db.execute(sql)
-    for row in genome.db.fetchall():
-        print(row[0], row[1])
-
-    genome.db.row_factory = sq3.Row
-    genome.db.execute(sql)
-    for row in genome.db:
-        for key in row.keys():
-            print('{}:{}'.format(key,row[key]),end='\t')
-        print()
 
     exit(0)
