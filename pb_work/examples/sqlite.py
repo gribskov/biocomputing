@@ -81,7 +81,7 @@ class Gff:
     Michael Gribskov    24 February 2019
     ============================================================================================="""
 
-    def __init__(self, filename):
+    def __init__(self, filename, dbfilename='genomedb.db', dbnew=True):
         """-----------------------------------------------------------------------------------------
         Gff constructor
 
@@ -89,6 +89,10 @@ class Gff:
         -----------------------------------------------------------------------------------------"""
         self.filename = filename
         self.fh = None
+
+        self.dbfilename = dbfilename
+        self.dbnew = dbnew
+        self.genome = Genome(self.dbfilename, dbnew)
 
         try:
             self.fh = open(self.filename, 'r')
@@ -102,6 +106,7 @@ class Gff:
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     gff = Gff('../2019/HW5/at_1000k.gff3')
-    genome = Genome('mydbfile.db', new=True)
+
+    print(gff)
 
     exit(0)
