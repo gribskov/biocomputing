@@ -114,7 +114,7 @@ class Gff:
                 continue
 
             nrow += 1
-            ( seqid, source, type, start, end, score, strand, phase, attributes ) = \
+            (seqid, source, type, start, end, score, strand, phase, attributes) = \
                 line.rstrip().split('\t')
             # except ValueError:
             #     print('Error', line)
@@ -122,23 +122,31 @@ class Gff:
 
             if type.find('gene') >= 0:
                 # load gene into gene table
-                self.parse_attributes(attributes)
+                attr = self.parse_attributes(attributes)
                 sql = '''
                 INSERT INTO gene
                 VALUES ( "{}", "{}", {}, {}, "{}" );
-                '''.format( gene_id, seqid, start, end, strand)
+                '''.format(attr['ID'], seqid, start, end, strand)
 
                 self.genome.db.execute(sql)
 
-
-                print( seqid, type, start, end )
-
-            # if nrow > 5:
-            #     break
-
         return nrow
 
+    def parse_attributes(self, attributes):
+        """-----------------------------------------------------------------------------------------
+        Attributes are a semicolon delimited string, with each clause a tag/value pair separated
+        by equals
 
+        :param attributes: string
+        :return: dict, parsed attributes
+        -----------------------------------------------------------------------------------------"""
+        field = attributes.split(';')
+        attr = {}
+        for f in field:
+            tag, value = f.split('=')
+            attr[tag] = value
+
+        return attr
 
 
 # --------------------------------------------------------------------------------------------------
