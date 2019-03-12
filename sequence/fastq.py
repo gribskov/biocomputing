@@ -19,6 +19,7 @@ class Fastq:
         self.sequence = ''
         self.separator = ''
         self.quality = ''
+        self.error = '' # contains last error message
 
         self.filename = filename
         self.fh = None
@@ -78,6 +79,38 @@ class Fastq:
         -----------------------------------------------------------------------------------------"""
         return self.quality[::-1]
 
+    def check(self):
+        """-----------------------------------------------------------------------------------------
+        Check the read format.  There are limited checks that can be done with fastq:
+            ID line begins with @
+            Sequence line has only ACGTN
+            Separator line begins with +
+            quality line is same length as sequence line (could check range of values)
+
+        :return: logical, True if all checks are passed
+        -----------------------------------------------------------------------------------------"""
+        status = True
+        self.error = ''
+
+        if not self.id.startswith('@'):
+            status = False
+            self.error += 'ID line does not start with @\n'
+
+        if not self.separator.startswith('+'):
+            status = False
+            self.error += 'Separator line does not start with +\n'
+
+        if len(self.sequence) != len(self.quality):
+            status = False
+            self.error += 'Sequence and quality are different lengths +\n'
+
+        tmp = self.sequence
+        if len(tmp.strip('ACGTNacgtn')) != 0:
+            status = False
+            self.error += 'Sequence contains non ACGTN characters'
+
+        return status
+
 
 # ==================================================================================================
 # Testing
@@ -103,6 +136,18 @@ if __name__ == '__main__':
         fastq.quality = fastq.quality_rev()
         fastq.write(sys.stdout)
         if n_read >= 5:
+            break
+
+    sys.stderr.write('\ncheck for errors in reads:\n')
+    while fastq.next():
+        n_read += 1
+        sys.stderr.write('\n\tno sequence\n')
+        fastq.id = fastq.id.replace('@','X')
+        if not fastq.check():
+            sys.stdout.write(fastq.error)
+            fastq.write(sys.stdout)
+
+        if n_read >= 10:
             break
 
     exit(0)
