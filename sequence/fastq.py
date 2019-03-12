@@ -68,9 +68,9 @@ class Fastq:
 
         :return: string, reverse complement of sequence
         -----------------------------------------------------------------------------------------"""
-        return self.sequence.translate(complement)[::-1]
+        return self.sequence.translate(Fastq.complement)[::-1]
 
-    def quality_rev(selfl):
+    def quality_rev(self):
         """-----------------------------------------------------------------------------------------
         Reverse the quality vector to correspond to reverse complement of sequence
 
@@ -86,6 +86,7 @@ if __name__ == '__main__':
     f1 = '../data/small.fq'
     fastq = Fastq(filename=f1)
 
+    sys.stderr.write('\nBasic reading and writing:\n')
     n_read = 0
     while fastq.next():
         n_read += 1
@@ -93,5 +94,15 @@ if __name__ == '__main__':
 
     sys.stderr.write('{} reads read from {}'.format(n_read, f1))
 
+    sys.stderr.write('\nReverse first five reads:\n')
+    n_read = 0
+    fastq.fh.seek(0)
+    while fastq.next():
+        n_read += 1
+        fastq.sequence = fastq.sequence_revcomp()
+        fastq.quality = fastq.quality_rev()
+        fastq.write(sys.stdout)
+        if n_read >= 5:
+            break
 
     exit(0)
