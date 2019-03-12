@@ -26,53 +26,52 @@ class Fastq:
                     'Fastq:__init__ - unable to open filename ({})\n'.format(self.filename))
                 exit(1)
 
-    def fastq_read(fh):
+    def fastq_read(self):
         """-----------------------------------------------------------------------------------------
-        Read the next 4 lines, a fastq read from the filehandle, fh.
-        :param fh: open filehandle
-        :return: fq, dict, keys = /title seq sep qual/
+        Read the next 4 lines, a fastq read, from the filehandle, self.fh.
+
+        :return: logical, True if an entry was read
         -----------------------------------------------------------------------------------------"""
 
-        fq = {'title': fh.readline().rstrip(),
-              'seq': fh.readline().rstrip(),
-              'sep': fh.readline().rstrip(),
-              'qual': fh.readline().rstrip()}
-        # fq['title'] = fh.readline()
-        # fq['seq'] = fh.readline()
-        # fq['sep'] = fh.readline()
-        # fq['qual'] = fh.readline()
+        fq.id = fh.readline().rstrip()
+        fq.sequence = fh.readline().rstrip()
+        fq.separator = fh.readline().rstrip()
+        fq.quality = fh.readline().rstrip()
 
-        return fq
+        if fq.quality:
+            # if quality is None, eof was reached
+            return True
+        else:
+            return False
 
-    def fastq_write(fastq, fh):
+    def fastq_write(self):
         """-----------------------------------------------------------------------------------------
+        Write out the current Fastq entry.  Formatting should be correct before calling this method
 
-        :param fastq: dictionary with fastq information: keys - title, seq, sep, qual
-        :param fh: output filehandle
-        :return:
-        -----------------------------------------------------------------------------------------"""
-        fh.write('{}\n'.format(fastq['title']))
-        fh.write('{}\n'.format(fastq['seq']))
-        fh.write('{}\n'.format(fastq['sep']))
-        fh.write('{}\n'.format(fastq['qual']))
+        :return: logical, True
+       ------------------------------------------------------------------------------------------"""
+        fh.write('{}\n'.format(self.id))
+        fh.write('{}\n'.format(self.sequence))
+        fh.write('{}\n'.format(self.separator))
+        fh.write('{}\n'.format(self.quality))
 
-        return
+        return True
 
-    def sequence_revcomp(seq):
-        """----------------------------------------------------------------------------------------
+    def sequence_revcomp(self):
+        """-----------------------------------------------------------------------------------------
         reverse complement the sequence
-        :param seq:
-        :return: string, reverse complement of sequence--
-        -----------------------------------------------------------------------------------------"""
-        return seq.translate(complement)[::-1]
 
-    def quality_rev(qual):
+        :return: string, reverse complement of sequence
+        -----------------------------------------------------------------------------------------"""
+        return self.sequence.translate(complement)[::-1]
+
+    def quality_rev(selfl):
         """-----------------------------------------------------------------------------------------
         Reverse the quality vector to correspond to reverse complement of sequence
-        :param qual: list of ascii quality scores
+
         :return: list (reversed)
         -----------------------------------------------------------------------------------------"""
-        return qual[::-1]
+        return self.quality[::-1]
 
 
 # ==================================================================================================
