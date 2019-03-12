@@ -4,6 +4,28 @@ class Fastq:
 
     A simple sequential fastq class
     ============================================================================================="""
+    import sys
+
+    def __init__(self, filename=''):
+        """-----------------------------------------------------------------------------------------
+        Object holds a single read plus the filename and filehandle (fh)
+        -----------------------------------------------------------------------------------------"""
+        self.id = ''
+        self.sequence = ''
+        self.separator = ''
+        self.quality = ''
+
+        self.filename = filename
+        self.fh = None
+
+        if filename:
+            try:
+                self.fh = open(self.filename, 'r')
+            except (IOError, OSError):
+                sys.stderr.write(
+                    'Fastq:__init__ - unable to open filename ({})\n'.format(self.filename))
+                exit(1)
+
     def fastq_read(fh):
         """-----------------------------------------------------------------------------------------
         Read the next 4 lines, a fastq read from the filehandle, fh.
@@ -22,7 +44,6 @@ class Fastq:
 
         return fq
 
-
     def fastq_write(fastq, fh):
         """-----------------------------------------------------------------------------------------
 
@@ -37,7 +58,6 @@ class Fastq:
 
         return
 
-
     def sequence_revcomp(seq):
         """----------------------------------------------------------------------------------------
         reverse complement the sequence
@@ -45,7 +65,6 @@ class Fastq:
         :return: string, reverse complement of sequence--
         -----------------------------------------------------------------------------------------"""
         return seq.translate(complement)[::-1]
-
 
     def quality_rev(qual):
         """-----------------------------------------------------------------------------------------
@@ -55,10 +74,9 @@ class Fastq:
         -----------------------------------------------------------------------------------------"""
         return qual[::-1]
 
+
 # ==================================================================================================
 # Testing
 # ==================================================================================================
 if __name__ == '__main__':
-
-
     exit(0)
