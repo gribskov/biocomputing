@@ -1,10 +1,15 @@
+import sys
+
+
 class Fastq:
     """=============================================================================================
     fastq.py
 
     A simple sequential fastq class
     ============================================================================================="""
-    import sys
+
+    # class variable holds the GATCN alphabet
+    complement = str.maketrans('acgtunACGTUN', 'tgcaanTGCAAN')
 
     def __init__(self, filename=''):
         """-----------------------------------------------------------------------------------------
@@ -26,34 +31,34 @@ class Fastq:
                     'Fastq:__init__ - unable to open filename ({})\n'.format(self.filename))
                 exit(1)
 
-    def fastq_read(self):
+    def next(self):
         """-----------------------------------------------------------------------------------------
         Read the next 4 lines, a fastq read, from the filehandle, self.fh.
 
         :return: logical, True if an entry was read
         -----------------------------------------------------------------------------------------"""
 
-        fq.id = fh.readline().rstrip()
-        fq.sequence = fh.readline().rstrip()
-        fq.separator = fh.readline().rstrip()
-        fq.quality = fh.readline().rstrip()
+        self.id = self.fh.readline().rstrip()
+        self.sequence = self.fh.readline().rstrip()
+        self.separator = self.fh.readline().rstrip()
+        self.quality = self.fh.readline().rstrip()
 
-        if fq.quality:
+        if self.quality:
             # if quality is None, eof was reached
             return True
         else:
             return False
 
-    def fastq_write(self):
+    def write(self, outfh):
         """-----------------------------------------------------------------------------------------
         Write out the current Fastq entry.  Formatting should be correct before calling this method
 
         :return: logical, True
        ------------------------------------------------------------------------------------------"""
-        fh.write('{}\n'.format(self.id))
-        fh.write('{}\n'.format(self.sequence))
-        fh.write('{}\n'.format(self.separator))
-        fh.write('{}\n'.format(self.quality))
+        outfh.write('{}\n'.format(self.id))
+        outfh.write('{}\n'.format(self.sequence))
+        outfh.write('{}\n'.format(self.separator))
+        outfh.write('{}\n'.format(self.quality))
 
         return True
 
@@ -78,4 +83,15 @@ class Fastq:
 # Testing
 # ==================================================================================================
 if __name__ == '__main__':
+    f1 = '../data/small.fq'
+    fastq = Fastq(filename=f1)
+
+    n_read = 0
+    while fastq.next():
+        n_read += 1
+        fastq.write(sys.stdout)
+
+    sys.stderr.write('{} reads read from {}'.format(n_read, f1))
+
+
     exit(0)
