@@ -102,12 +102,12 @@ class Fastq:
 
         if len(self.sequence) != len(self.quality):
             status = False
-            self.error += 'Sequence and quality are different lengths +\n'
+            self.error += 'Sequence and quality are different lengths\n'
 
         tmp = self.sequence
         if len(tmp.strip('ACGTNacgtn')) != 0:
             status = False
-            self.error += 'Sequence contains non ACGTN characters'
+            self.error += 'Sequence contains non ACGTN characters\n'
 
         return status
 
@@ -125,9 +125,9 @@ if __name__ == '__main__':
         n_read += 1
         fastq.write(sys.stdout)
 
-    sys.stderr.write('{} reads read from {}'.format(n_read, f1))
+    sys.stdout.write('{} reads read from {}\n'.format(n_read, f1))
 
-    sys.stderr.write('\nReverse first five reads:\n')
+    sys.stdout.write('\nReverse first five reads:\n')
     n_read = 0
     fastq.fh.seek(0)
     while fastq.next():
@@ -138,16 +138,33 @@ if __name__ == '__main__':
         if n_read >= 5:
             break
 
-    sys.stderr.write('\ncheck for errors in reads:\n')
+    sys.stdout.write('\ncheck for errors in reads:\n')
+    n_read = 0
     while fastq.next():
         n_read += 1
-        sys.stderr.write('\n\tno sequence\n')
-        fastq.id = fastq.id.replace('@','X')
-        if not fastq.check():
-            sys.stdout.write(fastq.error)
-            fastq.write(sys.stdout)
+        message = 'no changes'
+        if n_read ==1:
+            message = 'replace @ with X in id line'
+            fastq.id = fastq.id.replace('@', 'X')
+        elif n_read == 2:
+            message = 'Replace A with Y ins sequence'
+            fastq.sequence = fastq.sequence.replace('A', 'Y')
+        elif n_read == 3:
+            message = 'replace + with X in separator'
+            fastq.separator = fastq.separator.replace('+', 'X')
+        elif n_read == 4:
+            message = 'truncate quality at length=10'
+            fastq.quality = fastq.quality[0:10]
 
-        if n_read >= 10:
+        sys.stdout.write('\n{}\n'.format(message))
+        if fastq.check():
+            sys.stdout.write('Sequence is OK\n')
+        else:
+            sys.stdout.write('Error: {}'.format(fastq.error))
+
+        fastq.write(sys.stdout)
+
+        if n_read >= 5:
             break
 
     exit(0)
