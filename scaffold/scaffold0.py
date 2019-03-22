@@ -141,7 +141,7 @@ class Feature:
 
 class Sam:
     """=============================================================================================
-    Since Pysam is unreliable/hard to install, here is a simple parser
+    Since Pysam is unreliable/hard to install, here is a simple parser for sam format
     ============================================================================================="""
 
     def __init__(self, filename=''):
@@ -225,9 +225,22 @@ class Sam:
 
         :return:
         -----------------------------------------------------------------------------------------"""
-        self.align = self.buffer.split('\t')
+        field = self.buffer.split('\t')
+        self.align.append( {
+            'qname':field[0],
+            'flag':int(field[1]),
+            'rname':field[2],
+            'pos': int(field[3]),
+            'mapq': int(field[4]),
+            'cigar':field[5],
+            'rnext':field[6],
+            'pnext':field[7],
+            'tlen':int(field[8]),
+            'seq':field[9],
+            'qual':field[10]
+        } )
 
-        return self.align
+        return field
 
 
 # --------------------------------------------------------------------------------------------------
