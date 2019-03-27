@@ -4,7 +4,9 @@ scaffold
 15 October 2018     Michael Gribskov
 -------------------------------------------------------------------------------------------------"""
 import sys
-import pysam
+
+
+# import pysam
 
 
 class Feature:
@@ -137,14 +139,121 @@ class Feature:
         return bases
 
 
+class Sam:
+    """=============================================================================================
+    Since Pysam is unreliable/hard to install, here is a simple parser for sam format
+    ============================================================================================="""
+
+    def __init__(self, filename=''):
+        """-----------------------------------------------------------------------------------------
+        it makes not sense to read the entire mapping file into meory as a default, so the class
+        just allows youy to iterate over he file
+
+        -----------------------------------------------------------------------------------------"""
+        self.buffer = ''
+
+        self.filename = filename
+        self.fh = None
+        if self.filename:
+            self.opensam()
+
+        self.header = []
+        self.sequence = []
+        self.program = []
+        self.align = []
+
+    def opensam(self):
+        """-----------------------------------------------------------------------------------------
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        try:
+            self.fh = open(self.filename, 'r')
+        except IOError:
+            sys.stderr.write('Sam::opensam - unable to open file ({})\n'.format(self.filename))
+            exit(1)
+
+        self.buffer = self.fh.readline().rstrip()
+
+        return True
+
+    def read_header(self):
+        """-----------------------------------------------------------------------------------------
+        Read and store header records from filehandle
+
+        :return: int, number of header records
+        -----------------------------------------------------------------------------------------"""
+        header_n = 0
+        while self.buffer.startswith('@HD'):
+            self.header.append(self.buffer.rstrip())
+            self.buffer = self.fh.readline()
+            header_n += 1
+
+        return header_n
+
+    def read_sequence(self):
+        """-----------------------------------------------------------------------------------------
+        read and store sequence records from filehandle
+
+        :return: int, number of sequence records
+        -----------------------------------------------------------------------------------------"""
+        seq_n = 0
+        while self.buffer.startswith('@SQ'):
+            self.sequence.append(self.buffer.rstrip())
+            self.buffer = self.fh.readline()
+            seq_n += 1
+
+        return seq_n
+
+    def read_program(self):
+        """-----------------------------------------------------------------------------------------
+        Read and store the program record
+
+        :return:int, number of program records read
+        -----------------------------------------------------------------------------------------"""
+        pg_n = 0
+        while self.buffer.startswith('@PG'):
+            self.program.append(self.buffer.rstrip())
+            self.buffer = self.fh.readline()
+            pg_n += 1
+
+        return pg_n
+
+    def next(self):
+        """-----------------------------------------------------------------------------------------
+        Read the next alignment.  Assumes header, sequence, and program records have been read
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        field = self.buffer.split('\t')
+        self.align = {
+            'qname':field[0],
+            'flag':int(field[1]),
+            'rname':field[2],
+            'pos': int(field[3]),
+            'mapq': int(field[4]),
+            'cigar':field[5],
+            'rnext':field[6],
+            'pnext':field[7],
+            'tlen':int(field[8]),
+            'seq':field[9],
+            'qual':field[10]
+        }
+        self.buffer = self.fh.readline().rstrip()
+
+        return field
+
+
 # --------------------------------------------------------------------------------------------------
 # main program
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    bamfile = sys.argv[1]
-    sys.stderr.write('bam file: {}\n'.format(bamfile))
+    # old pysam based test
 
-    bam = pysam.AlignmentFile(bamfile, 'rb')
+    # bamfile = sys.argv[1]
+    # sys.stderr.write('bam file: {}\n'.format(bamfile))
+    #
+    # bam = pysam.AlignmentFile(bamfile, 'rb')
 
     # ref = {}
     # nref = 0
@@ -155,39 +264,79 @@ if __name__ == '__main__':
     #     if nref > 99:
     #         break
 
-    sys.stderr.write('references: {}\n'.format(bam.nreferences))
+    # sys.stderr.write('references: {}\n'.format(bam.nreferences))
+    #
+    # nbam = 0
+    # nref = 0
+    # for ref in bam.references:
+    #     nref += 1
+    #     if nref > 4:
+    #         break
+    #
+    #     # p = 0
+    #     # print(ref)
+    #     # for pos in bam.pileup(ref):
+    #     #     p += 1
+    #     #     print(pos.n)
+    #     #     if p > 5:
+    #     # break
+    #
+    #     evidence = Feature()
+    #     evidence.get_alignment(bam, ref)
+    #     print('contig {}\n\t{} reads\n\t{} bases'.format(evidence.name, evidence.nreads,
+    #                                                      evidence.length))
+    #
+    #     nread = 0
+    #     for read in evidence.alignment:
+    #         # print(read)
+    #         nread += 1
+    #         # sys.stderr.write('{}     {}\n'.format(nread, read.query_name))
+    #         evidence.from_cigar(read)
+    #
+    #     print('contig {}\n\t{} reads\n\t{} bases'.format(evidence.name, evidence.nreads,
+    #                                                      evidence.length))
+    #     print('match: {}'.format(evidence.bases('match')))
+    #     print('insert: {}'.format(evidence.bases('insert')))
+    #     print('nref:', nref, '\tnread:', nread, '\tpassed', evidence.passed)
 
-    nbam = 0
-    nref = 0
-    for ref in bam.references:
-        nref += 1
-        if nref > 4:
+    samfile = sys.argv[1]
+    sam = Sam(samfile)
+    nheader = sam.read_header()
+    print('{} header records'.format(nheader))
+
+    nseq = sam.read_sequence()
+    print('{} sequence records'.format(nseq))
+
+    npg = sam.read_program()
+    print('{} program records'.format(npg))
+
+    mapped_n = 0
+    link = {}
+    while (sam.next()):
+        mapped_n += 1
+        rname = sam.align['rname']
+        rnext = sam.align['rnext']
+
+        if not rname in link:
+            link[rname] = {}
+            print('new r1 {}'.format(rname))
+
+        if rnext in link[rname]:
+            link[rname][rnext] += 1
+        else:
+            link[rname][rnext] = 1
+            print('\tnew r2 {}'.format(rnext))
+
+        if not mapped_n % 100000:
+            print('{}\t{}'.format(mapped_n,sam.align['pos']))
+
+        if not rname == 'NODE_1_length_118272_cov_3588.566145':
             break
 
-        # p = 0
-        # print(ref)
-        # for pos in bam.pileup(ref):
-        #     p += 1
-        #     print(pos.n)
-        #     if p > 5:
-        # break
+    for r1 in link:
+        for r2 in link[r1]:
+            print('{}\t{}\t{}'.format(r1, r2, link[r1][r2]))
 
-        evidence = Feature()
-        evidence.get_alignment(bam, ref)
-        print('contig {}\n\t{} reads\n\t{} bases'.format(evidence.name, evidence.nreads,
-                                                         evidence.length))
-
-        nread = 0
-        for read in evidence.alignment:
-            # print(read)
-            nread += 1
-            # sys.stderr.write('{}     {}\n'.format(nread, read.query_name))
-            evidence.from_cigar(read)
-
-        print('contig {}\n\t{} reads\n\t{} bases'.format(evidence.name, evidence.nreads,
-                                                         evidence.length))
-        print('match: {}'.format(evidence.bases('match')))
-        print('insert: {}'.format(evidence.bases('insert')))
-        print('nref:', nref, '\tnread:', nread, '\tpassed', evidence.passed)
+    for r1, r2 in
 
 exit(0)
