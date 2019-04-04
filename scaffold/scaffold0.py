@@ -227,21 +227,40 @@ class Sam:
         -----------------------------------------------------------------------------------------"""
         field = self.buffer.split('\t')
         self.align = {
-            'qname':field[0],
-            'flag':int(field[1]),
-            'rname':field[2],
+            'qname': field[0],
+            'flag': int(field[1]),
+            'rname': field[2],
             'pos': int(field[3]),
             'mapq': int(field[4]),
-            'cigar':field[5],
-            'rnext':field[6],
-            'pnext':field[7],
-            'tlen':int(field[8]),
-            'seq':field[9],
-            'qual':field[10]
+            'cigar': field[5],
+            'rnext': field[6],
+            'pnext': field[7],
+            'tlen': int(field[8]),
+            'seq': field[9],
+            'qual': field[10]
         }
         self.buffer = self.fh.readline().rstrip()
 
         return field
+
+
+def check_too_low(coverage_min, rname):
+    """---------------------------------------------------------------------------------------------
+    parse the scaffold name to see if it passes minimum coverage.  spades scaffolds names look like
+    NODE_2062_length_883_cov_48801.959103
+
+    :param coverage_min: int
+    :param rname: string
+    :return: logical
+    ---------------------------------------------------------------------------------------------"""
+    field = rname.split('_')
+    try:
+        if float(field[5]) < coverage_min:
+            return True
+    except IndexError:
+        pass
+
+    return False
 
 
 # --------------------------------------------------------------------------------------------------
@@ -310,33 +329,64 @@ if __name__ == '__main__':
     npg = sam.read_program()
     print('{} program records'.format(npg))
 
+    coverage_min = 500
+
     mapped_n = 0
     link = {}
+    skip = {}
     while (sam.next()):
         mapped_n += 1
         rname = sam.align['rname']
         rnext = sam.align['rnext']
 
+        if rname in skip:
+            continue
+
+        # skip links to low coverage scaffolds
+        if check_too_low(coverage_min, rname):
+            skip[rname] = 1
+            continue
+
         if not rname in link:
-            link[rname] = {}
-            print('new r1 {}'.format(rname))
+            link[rname] = {'=':{'n':0, 'sum':0}}
+            # link[rname]['=']['n'] = 0
+            # link[rname]['=']['sum'] = 0
+            # print('new r1 {}'.format(rname))
+
+        if rnext in skip:
+            continue
 
         if rnext in link[rname]:
-            link[rname][rnext] += 1
+            link[rname][rnext]['n'] += 1
+            link[rname][rnext]['sum'] += sam.align['pos']
         else:
-            link[rname][rnext] = 1
-            print('\tnew r2 {}'.format(rnext))
+            if check_too_low(coverage_min, rnext):
+                skip[rnext] = 1
+                continue
+
+            else:
+                link[rname][rnext] = {'n': 1, 'sum': sam.align['pos']}
+                # print('\tnew r2 {}'.format(rnext))
 
         if not mapped_n % 100000:
-            print('{}\t{}'.format(mapped_n,sam.align['pos']))
+            print('{}\t{}'.format(mapped_n, sam.align['pos']))
 
-        if not rname == 'NODE_1_length_118272_cov_3588.566145':
-            break
+        # if mapped_n > 50000000:
+        #     break
 
-    for r1 in link:
-        for r2 in link[r1]:
-            print('{}\t{}\t{}'.format(r1, r2, link[r1][r2]))
+    # for r1 in link:
+    #     for r2 in link[r1]:
+    #         print('{}\t{}\t{}'.format(r1, r2, link[r1][r2]))
 
-    for r1, r2 in
+    for r1 in sorted(link.keys(), key=lambda x: x):
+        print('r1:{}'.format(r1))
+        ntop = 0
+        for r2 in sorted(link[r1].keys(), key=lambda x: link[r1][x]['n'], reverse=True):
+            avepos = link[r1][r2]['sum'] / link[r1][r2]['n']
+            print('\tr2:{}\t{}\t{:d}'.format(r2, link[r1][r2]['n'], int(avepos)))
+            ntop += 1
+            if ntop > 8:
+                break
+            # print('{}\t{}\t{}'.format(r1, r2, link[r1][r2]))
 
 exit(0)
