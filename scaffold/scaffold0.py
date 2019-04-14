@@ -310,12 +310,19 @@ if __name__ == '__main__':
     print('{} program records'.format(npg))
 
     mapped_n = 0
+    internal = []
+    external = []
+    bridge = []
     while (sam.next()):
         mapped_n += 1
-        print(sam.align)
+        read = sam.align[-1]
+        if read['rnext'] == '=':
+            internal.append(read)
+        else:
+            print(read['rname'], read['rnext'])
 
-        if mapped_n > 5:
-            break
+        # if mapped_n > 500:
+        #     break
 
     x = 0
 
