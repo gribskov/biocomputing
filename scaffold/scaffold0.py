@@ -226,7 +226,7 @@ class Sam:
         :return:
         -----------------------------------------------------------------------------------------"""
         field = self.buffer.split('\t')
-        self.align.append( {
+        self.align = {
             'qname':field[0],
             'flag':int(field[1]),
             'rname':field[2],
@@ -238,7 +238,8 @@ class Sam:
             'tlen':int(field[8]),
             'seq':field[9],
             'qual':field[10]
-        } )
+        }
+        self.buffer = self.fh.readline().rstrip()
 
         return field
 
@@ -310,20 +311,32 @@ if __name__ == '__main__':
     print('{} program records'.format(npg))
 
     mapped_n = 0
-    internal = []
-    external = []
-    bridge = []
+    link = {}
     while (sam.next()):
         mapped_n += 1
-        read = sam.align[-1]
-        if read['rnext'] == '=':
-            internal.append(read)
+        rname = sam.align['rname']
+        rnext = sam.align['rnext']
+
+        if not rname in link:
+            link[rname] = {}
+            print('new r1 {}'.format(rname))
+
+        if rnext in link[rname]:
+            link[rname][rnext] += 1
         else:
-            print(read['rname'], read['rnext'])
+            link[rname][rnext] = 1
+            print('\tnew r2 {}'.format(rnext))
 
-        # if mapped_n > 500:
-        #     break
+        if not mapped_n % 100000:
+            print('{}\t{}'.format(mapped_n,sam.align['pos']))
 
-    x = 0
+        if not rname == 'NODE_1_length_118272_cov_3588.566145':
+            break
+
+    for r1 in link:
+        for r2 in link[r1]:
+            print('{}\t{}\t{}'.format(r1, r2, link[r1][r2]))
+
+    for r1, r2 in
 
 exit(0)

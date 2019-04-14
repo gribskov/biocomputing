@@ -2,10 +2,8 @@
 Invert a blast search - reorganize by subject instead of query.  This is usefule for transcript
 sequences to see which predicted transcripts correspond to the same gene
 
-Search is assumed to be diamond (blast tabular)
-TRINITY_DN88428_c0_g1_i1        1146    1106    705
-A0A059DJS1_EUCGR        290     1       135
-135     65.2    4.2e-45 A0A059DJS1_EUCGR
+Search is assumed to be diamond (blast tabular), tab separated
+TRINITY_DN88428_c0_g1_i1   1146   1106   705   A0A059DJS1_EUCGR   290   1   135   135   65.2   4.2e-45   A0A059DJS1_EUCGR
 
 qname qlen qbegin qend
 sname slen sbegin send
@@ -50,8 +48,10 @@ if __name__ == '__main__':
         print('{}\tlen={}\t{}'.format(subj, l, r))
         for i in sorted(sidx[subj], key=lambda x: record[x]['qname']):
             q = record[i]
-            print(
-                '\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(q['qname'], q['sbegin'], q['send'], q['slen'],
-                                                      q['qbegin'], q['qend'], q['qlen'], q['evalue']))
+            qcov = (q['qend'] - q['qbegin'] + 1) / q['qlen']
+            scov = (q['send'] - q['sbegin'] + 1) / q['slen']
+            print('\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
+                scov, q['sbegin'], q['send'], q['slen'],
+                q['qname'], qcov, q['qbegin'], q['qend'], q['qlen'], q['evalue']))
 
 exit(0)
