@@ -133,7 +133,7 @@ if __name__ == '__main__':
     cluster = Cluster()
 
     for subj in sorted(sidx, key=lambda x: len(sidx[x]), reverse=True):
-        print(subj)
+        # print(subj)
         for edge in sidx[subj]:
             (sgroup, qgroup) = cluster.group_num(edge)
 
@@ -146,7 +146,7 @@ if __name__ == '__main__':
 
                 else:
                     # sgroup unknown, qgroup known, add s to q group
-                    cluster.add(qgroup,edge)
+                    cluster.add(qgroup, edge)
                     continue
 
             if qgroup is None:
@@ -159,11 +159,38 @@ if __name__ == '__main__':
                 # merge groups
                 cluster.group_merge(sgroup, qgroup)
 
+    group_n = 0
     for group in cluster.group:
+
         if group is None:
             continue
 
+        print(f'Group {group_n}')
+        group_n += 1
+        count = {}
+        for edge in group:
+            if edge['qname'] in count:
+                count[edge['qname']] += 1
+            else:
+                count[edge['qname']] = 1
+            if edge['sname'] in count:
+                count[edge['sname']] += 1
+            else:
+                count[edge['sname']] = 1
+
+        for seq in sorted(count, key=lambda x: count[x], reverse=True):
+            print('\t{}\t{}'.format(count[seq], seq))
+
         print(group[0]['qname'])
         for edge in group:
-            print("\t", edge['stitle'])
+            # print('\t{qname}\t{int(qbegin):6d}\t{qend}\t{evalue}\t{sbegin}\t{send}\t{slen}\t{stitle}'.format(**edge))
+            print('\t{}{:6d}{:6d}{:9.2g}{:6d}{:6d}{:6d}\t{}'.format(edge['qname'],
+                                                                    int(edge['qbegin']),
+                                                                    int(edge['qend']),
+                                                                    float(edge['evalue']),
+                                                                    int(edge['sbegin']),
+                                                                    int(edge['send']),
+                                                                    int(edge['slen']),
+                                                                    edge['stitle']))
+
 exit(0)
