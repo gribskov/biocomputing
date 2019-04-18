@@ -1,4 +1,4 @@
-'''=================================================================================================
+"""=================================================================================================
 Cluster Trinity isoforms based on comparison to Uniref
 
 Search is assumed to be diamond (blast tabular), tab separated
@@ -7,7 +7,7 @@ TRINITY_DN88428_c0_g1_i1   1146   1106   705   A0A059DJS1_EUCGR   290   1   135 
 qname qlen qbegin qend
 sname slen sbegin send
 alignlen score evalue stitle
-================================================================================================='''
+================================================================================================="""
 import sys
 from blast import Blast
 
@@ -29,7 +29,7 @@ class Cluster:
         Create a new group
 
         :param record: dict, blast record for a subj-query edge
-        :return: int, size of group list
+        :return: int, the new group
         -----------------------------------------------------------------------------------------"""
         group = len(self.group)
         self.group.append([record])
@@ -43,7 +43,7 @@ class Cluster:
         check the subject and query and see if they are in a group
 
         :param record: dict, blast record for a subj-query edge
-        :return: tuple of int, group indices
+        :return: int, group indices
         -----------------------------------------------------------------------------------------"""
         sgroup = None
         if record['sname'] in self.seqlist:
@@ -53,13 +53,13 @@ class Cluster:
         if record['qname'] in self.seqlist:
             qgroup = self.seqlist[record['qname']]
 
-        return (sgroup, qgroup)
+        return sgroup, qgroup
 
     def add(self, group, record):
         """-----------------------------------------------------------------------------------------
         Add a new query to an existing group
 
-        :param sgroup: number of subject group
+        :param group: int, number of group
         :param record: dict, blast record for a subj-query edge
         :return: int, edges in group
         -----------------------------------------------------------------------------------------"""
@@ -95,8 +95,8 @@ if __name__ == '__main__':
     sys.stderr.write('Blast search: {}\n'.format(infile))
     blast = Blast(file=sys.argv[1])
 
-    format = 'qname qlen qbegin qend sname slen sbegin send alignlen score evalue stitle'
-    nfields = blast.setFormat(format)
+    fmt = 'qname qlen qbegin qend sname slen sbegin send alignlen score evalue stitle'
+    nfields = blast.setFormat(fmt)
 
     record = []
     record_n = 0
