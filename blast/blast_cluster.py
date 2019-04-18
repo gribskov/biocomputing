@@ -21,8 +21,7 @@ class Cluster:
         """-----------------------------------------------------------------------------------------
 
         -----------------------------------------------------------------------------------------"""
-        self.slist = {}
-        self.qlist = {}
+        self.seqlist = {}
         self.group = []
 
     def group_new(self, record):
@@ -34,8 +33,8 @@ class Cluster:
         -----------------------------------------------------------------------------------------"""
         group = len(self.group)
         self.group.append([record])
-        self.slist[record['sname']] = group
-        self.qlist[record['qname']] = group
+        self.seqlist[record['sname']] = group
+        self.seqlist[record['qname']] = group
 
         return group
 
@@ -47,12 +46,12 @@ class Cluster:
         :return: tuple of int, group indices
         -----------------------------------------------------------------------------------------"""
         sgroup = None
-        if record['sname'] in self.slist:
-            sgroup = self.slist[record['sname']]
+        if record['sname'] in self.seqlist:
+            sgroup = self.seqlist[record['sname']]
 
         qgroup = None
-        if record['qname'] in self.qlist:
-            qgroup = self.qlist[record['qname']]
+        if record['qname'] in self.seqlist:
+            qgroup = self.seqlist[record['qname']]
 
         return (sgroup, qgroup)
 
@@ -65,8 +64,8 @@ class Cluster:
         :return: int, edges in group
         -----------------------------------------------------------------------------------------"""
         self.group[group].append(record)
-        self.qlist[record['qname']] = group
-        self.slist[record['sname']] = group
+        self.seqlist[record['qname']] = group
+        self.seqlist[record['sname']] = group
 
         return len(self.group[group])
 
@@ -80,8 +79,8 @@ class Cluster:
         -----------------------------------------------------------------------------------------"""
         for edge in self.group[discard]:
             self.group[keep].append(edge)
-            self.slist[edge['sname']] = keep
-            self.qlist[edge['qname']] = keep
+            self.seqlist[edge['sname']] = keep
+            self.seqlist[edge['qname']] = keep
 
         self.group[discard] = None
         return len(self.group[sgroup])
