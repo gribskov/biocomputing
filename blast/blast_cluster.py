@@ -33,11 +33,11 @@ class Cluster:
         :return: int, size of group list
         -----------------------------------------------------------------------------------------"""
         group = len(self.group)
-        self.group.append(record)
-        self.slist[record.sname] = group
-        self.qlist[record.name] = group
+        self.group.append([record])
+        self.slist[record['sname']] = group
+        self.qlist[record['qname']] = group
 
-        return len(group)
+        return group
 
     def group_num(self, record):
         """-----------------------------------------------------------------------------------------
@@ -47,16 +47,16 @@ class Cluster:
         :return: tuple of int, group indices
         -----------------------------------------------------------------------------------------"""
         sgroup = None
-        if record.sname in self.slist:
-            sgroup = self.slist[record.sname]
+        if record['sname'] in self.slist:
+            sgroup = self.slist[record['sname']]
 
         qgroup = None
-        if record.qname in self.qlist:
-            qgroup = self.qlist[record.qname]
+        if record['qname'] in self.qlist:
+            qgroup = self.qlist[record['qname']]
 
         return (sgroup, qgroup)
 
-    def add(self, sgroup, record):
+    def add(self, group, record):
         """-----------------------------------------------------------------------------------------
         Add a new query to an existing group
 
@@ -64,10 +64,11 @@ class Cluster:
         :param record: dict, blast record for a subj-query edge
         :return: int, edges in group
         -----------------------------------------------------------------------------------------"""
-        self.group[sgroup].append(record)
-        self.qlist[record.qname] = sgroup
+        self.group[group].append(record)
+        self.qlist[record['qname']] = group
+        self.slist[record['sname']] = group
 
-        return len(self.group[sgroup])
+        return len(self.group[group])
 
     def group_merge(self, keep, discard):
         """-----------------------------------------------------------------------------------------
@@ -79,8 +80,8 @@ class Cluster:
         -----------------------------------------------------------------------------------------"""
         for edge in self.group[discard]:
             self.group[keep].append(edge)
-            self.slist[edge.sname] = keep
-            self.qlist[edge.qname] = keep
+            self.slist[edge['sname']] = keep
+            self.qlist[edge['qname']] = keep
 
         self.group[discard] = None
         return len(self.group[sgroup])
@@ -134,29 +135,36 @@ if __name__ == '__main__':
 
     for subj in sorted(sidx, key=lambda x: len(sidx[x]), reverse=True):
         print(subj)
-        for edge in record[subj]:
+        for edge in sidx[subj]:
             (sgroup, qgroup) = cluster.group_num(edge)
 
             if sgroup is None:
-                sgroup = cluster.group_new(edge)
+                if qgroup is None:
+                    # both unknown, start new group
+                    sgroup = cluster.group_new(edge)
+                    qgroup = sgroup
+                    continue
+
+                else:
+                    # sgroup unknown, qgroup known, add s to q group
+                    cluster.add(qgroup,edge)
+                    continue
 
             if qgroup is None:
+                # sgroup is known, qgroup is unknown
                 cluster.add(sgroup, edge)
+                qgroup = sgroup
+                continue
 
             if sgroup != qgroup:
                 # merge groups
                 cluster.group_merge(sgroup, qgroup)
 
-#     for subj in sidx:
-#         r = record[sidx[subj][0]]['stitle']
-#         l = record[sidx[subj][0]]['slen']
-#         print('{}\tlen={}\t{}'.format(subj, l, r))
-#         for i in sorted(sidx[subj], key=lambda x: record[x]['qname']):
-#             q = record[i]
-#             qcov = (q['qend'] - q['qbegin'] + 1) / q['qlen']
-#             scov = (q['send'] - q['sbegin'] + 1) / q['slen']
-#             print('\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
-#                 scov, q['sbegin'], q['send'], q['slen'],
-#                 q['qname'], qcov, q['qbegin'], q['qend'], q['qlen'], q['evalue']))
+    for group in cluster.group:
+        if group is None:
+            continue
 
+        print(group[0]['qname'])
+        for edge in group:
+            print("\t", edge['stitle'])
 exit(0)
