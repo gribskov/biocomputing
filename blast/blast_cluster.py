@@ -11,6 +11,81 @@ alignlen score evalue stitle
 import sys
 from blast import Blast
 
+
+class Cluster:
+    """---------------------------------------------------------------------------------------------
+    groups of pairs of sequences with blast edges
+    ---------------------------------------------------------------------------------------------"""
+
+    def __init__(self):
+        """-----------------------------------------------------------------------------------------
+
+        -----------------------------------------------------------------------------------------"""
+        self.slist = {}
+        self.qlist = {}
+        self.group = []
+
+    def group_new(self, record):
+        """-----------------------------------------------------------------------------------------
+        Create a new group
+
+        :param record: dict, blast record for a subj-query edge
+        :return: int, size of group list
+        -----------------------------------------------------------------------------------------"""
+        group = len(self.group)
+        self.group.append(record)
+        self.slist[record.sname] = group
+        self.qlist[record.name] = group
+
+        return len(group)
+
+    def group_num(self, record):
+        """-----------------------------------------------------------------------------------------
+        check the subject and query and see if they are in a group
+
+        :param record: dict, blast record for a subj-query edge
+        :return: tuple of int, group indices
+        -----------------------------------------------------------------------------------------"""
+        sgroup = None
+        if record.sname in self.slist:
+            sgroup = self.slist[record.sname]
+
+        qgroup = None
+        if record.qname in self.qlist:
+            qgroup = self.qlist[record.qname]
+
+        return (sgroup, qgroup)
+
+    def add(self, sgroup, record):
+        """-----------------------------------------------------------------------------------------
+        Add a new query to an existing group
+
+        :param sgroup: number of subject group
+        :param record: dict, blast record for a subj-query edge
+        :return: int, edges in group
+        -----------------------------------------------------------------------------------------"""
+        self.group[sgroup].append(record)
+        self.qlist[record.qname] = sgroup
+
+        return len(self.group[sgroup])
+
+    def group_merge(self, keep, discard):
+        """-----------------------------------------------------------------------------------------
+        merge 2 existing groups.  The discard group is merged into the keep group
+
+        :param keep:
+        :param discard:
+        :return: int, edges in merged group
+        -----------------------------------------------------------------------------------------"""
+        for edge in self.group[discard]:
+            self.group[keep].append(edge)
+            self.slist[edge.sname] = keep
+            self.qlist[edge.qname] = keep
+
+        self.group[discard] = None
+        return len(self.group[sgroup])
+
+
 # ==================================================================================================
 # main/test
 # ==================================================================================================
@@ -55,12 +130,22 @@ if __name__ == '__main__':
     sys.stderr.write('{} records read from blast file\n'.format(record_n))
 
     # the subjects are the reference sequences, sort by number of matches
-    cluster = {}
+    cluster = Cluster()
+
     for subj in sorted(sidx, key=lambda x: len(sidx[x]), reverse=True):
         print(subj)
-        for hit in sidx[subj]:
-            # print('\t{}'.format(hit))
+        for edge in record[subj]:
+            (sgroup, qgroup) = cluster.group_num(edge)
 
+            if sgroup is None:
+                sgroup = cluster.group_new(edge)
+
+            if qgroup is None:
+                cluster.add(sgroup, edge)
+
+            if sgroup != qgroup:
+                # merge groups
+                cluster.group_merge(sgroup, qgroup)
 
 #     for subj in sidx:
 #         r = record[sidx[subj][0]]['stitle']
