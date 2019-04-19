@@ -3,6 +3,8 @@ merge salmon output at the cluster, component, and gene, and isoform levels
 works on multiple files to produce a counts file for DESeq2
 ================================================================================================="""
 import sys
+import os
+import glob
 import re
 
 # regex for splitting Trinity IDs
@@ -42,37 +44,56 @@ def combine(id, data, count):
 
 if __name__ == '__main__':
 
-    filename = '../data/salmon.quant.sf'
-    salmon = open(filename, 'r')
-    # title line
-    salmon.readline()
+    pathtarget = '../data'
+    filetarget = 'salmon*'
+    target = pathtarget + '/' + filetarget
 
-    # read and store the data
-    isoform = {}
-    gene = {}
-    component = {}
-    cluster = {}
-    n_isoform = n_gene = n_component = n_cluster = 0
-    for line in salmon:
-        n_isoform += 1
-        (raw_id, effective, length, TPM, count) = line.rstrip().split()
-        count = float(count)
+    for filename in glob.glob(target):
 
-        # generate names at each hierarchical level
-        (cl, co, g, i) = id_split(raw_id)
-        isoform_id = '{}_c{}_g{}_i{}'.format(cl, co, g, i)
-        gene_id = '{}_c{}_g{}'.format(cl, co, g)
-        component_id = '{}_c{}'.format(cl, co)
-        cluster_id = '{}'.format(cl)
+        try:
+            salmon = open(filename, 'r')
+        except IOError:
+            sys.stderr.write('unable to open salmon file ({})\n'.format(filename))
+            exit(1)
 
-        isoform[isoform_id] = count
-        n_gene = combine(gene_id, gene, count)
-        n_component = combine(component_id, component, count)
-        n_cluster = combine(cluster_id, cluster, count)
+        # get the column name from the directory name.  the assumption is the directory is named
+        # something like sample.salmon
+        # path = os.path.split(filename)
+        # dir = os.path.split(path[0])
+        # column = dir[-1]
+        column = os.path.split(os.path.split(filename)[0])[-1]
+        sys.stdout.write('\nfile: {}\tcolumn: {}\n'.format(filename, column))
 
-    sys.stdout.write('{} isoforms read from {}\n'.format(n_isoform, filename))
-    sys.stdout.write('{} genes\n'.format(n_gene))
-    sys.stdout.write('{} components\n'.format(n_component))
-    sys.stdout.write('{} clusters\n'.format(n_cluster))
+        salmon = open(filename, 'r')
+        # title line
+        salmon.readline()
+
+        # read and store the data
+        isoform = {}
+        gene = {}
+        component = {}
+        cluster = {}
+        n_isoform = n_gene = n_component = n_cluster = 0
+        for line in salmon:
+            n_isoform += 1
+            (raw_id, effective, length, TPM, count) = line.rstrip().split()
+            count = float(count)
+
+            # generate names at each hierarchical level
+            (cl, co, g, i) = id_split(raw_id)
+            isoform_id = '{}_c{}_g{}_i{}'.format(cl, co, g, i)
+            gene_id = '{}_c{}_g{}'.format(cl, co, g)
+            component_id = '{}_c{}'.format(cl, co)
+            cluster_id = '{}'.format(cl)
+
+            isoform[isoform_id] = count
+            n_gene = combine(gene_id, gene, count)
+            n_component = combine(component_id, component, count)
+            n_cluster = combine(cluster_id, cluster, count)
+
+        sys.stdout.write('\t{} isoforms\n'.format(n_isoform))
+        sys.stdout.write('\t{} genes\n'.format(n_gene))
+        sys.stdout.write('\t{} components\n'.format(n_component))
+        sys.stdout.write('\t{} clusters\n'.format(n_cluster))
 
     exit(0)
