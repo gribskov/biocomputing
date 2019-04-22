@@ -19,9 +19,11 @@ def id_split(id):
     :param id: str
     :return: cluster, component, group, isoform
     ---------------------------------------------------------------------------------------------"""
-    match = idre.match(id)
-
-    return match.groups()
+    # match = idre.match(id)
+    #
+    # return match.groups()
+    token = id.split('_')
+    return token[1:5]
 
 
 def combine(id, data, count):
@@ -68,15 +70,20 @@ def read_and_split(salmon_file_name):
         # if n_isoform > 1000:
         #     break
 
-        (raw_id, effective, length, TPM, count) = line.rstrip().split()
+        (raw_id, effective, length, TPM, count) = line.split()
         count = float(count)
 
         # generate names at each hierarchical level
         (cl, co, g, i) = id_split(raw_id)
-        isoform_id = '{}_c{}_g{}_i{}'.format(cl, co, g, i)
-        gene_id = '{}_c{}_g{}'.format(cl, co, g)
-        component_id = '{}_c{}'.format(cl, co)
-        cluster_id = '{}'.format(cl)
+        # isoform_id = '{}_c{}_g{}_i{}'.format(cl, co, g, i)
+        # gene_id = '{}_c{}_g{}'.format(cl, co, g)
+        # component_id = '{}_c{}'.format(cl, co)
+        # cluster_id = '{}'.format(cl)
+        # the following is much faster
+        cluster_id = cl
+        component_id = cluster_id + '_c' + co
+        gene_id = component_id + '_g' + g
+        isoform_id = gene_id + '_i' + i
 
         isoform[isoform_id] = count
         n_gene = combine(gene_id, gene, count)
@@ -92,15 +99,11 @@ def write_counts(all, prefix, threshold):
     Apply threshold and writeout merged counts
 
     :param all: dict of dicts, each dict is one hierarchical level
-    :param threshold:
+    :param threshold: int, sum of counts must be > threshold
     :return: dict of counts at each level
     ---------------------------------------------------------------------------------------------"""
-
-    prefix = "merge_salmon_"
     outstr = ''
-    threshold = 50
-
-    # couns of transcripts that pass threshold
+    # counts of transcripts that pass threshold
     passed = {'isoform': 0, 'gene': 0, 'component': 0, 'cluster': 0}
 
     for level in ['isoform', 'gene', 'component', 'cluster']:
@@ -157,19 +160,14 @@ if __name__ == '__main__':
         sys.stdout.write('\t{} components\n'.format(len(component)))
         sys.stdout.write('\t{} clusters\n'.format(len(cluster)))
 
-        # threshold counts and write to files
-        # the sum of counts must be > threshold
-        prefix = "merge_salmon_"
-        threshold = 50
-        passed = write_counts(all, prefix, threshold)
+    # threshold counts and write to files, the sum of counts must be > threshold
+    prefix = "merge_salmon_"
+    threshold = 50
+    passed = write_counts(all, prefix, threshold)
 
-        all[column_name] = {'isoform': isoform, 'gene': gene, 'component': component,
-                            'cluster': cluster}
-        # end of loop over count files
-
+    # report number that pass threshold at each level
     sys.stdout.write('\npassed threhold={}\n'.format(threshold))
     for level in ['isoform', 'gene', 'component', 'cluster']:
         sys.stdout.write('\t{1}\t{0}s\n'.format(level, passed[level]))
-
 
     exit(0)
