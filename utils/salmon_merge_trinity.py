@@ -5,10 +5,11 @@ works on multiple files to produce a counts file for DESeq2
 import sys
 import os
 import glob
-import re
+# import re
+import collections
 
 # regex for splitting Trinity IDs
-idre = re.compile(r'>*TRINITY_([^_]+)_c(\d+)_g(\d+)_i(\d+)')
+# idre = re.compile(r'>*TRINITY_([^_]+)_c(\d+)_g(\d+)_i(\d+)')
 
 
 def id_split(id):
@@ -61,12 +62,16 @@ def read_and_split(salmon_file_name):
 
     # read and store the data
     isoform = {}
-    gene = {}
-    component = {}
-    cluster = {}
-    n_isoform = n_gene = n_component = n_cluster = 0
+    gene = collections.defaultdict(float)
+    component = collections.defaultdict(float)
+    cluster = collections.defaultdict(float)
+    # isoform = {}
+    # gene = {}
+    # component = {}
+    # cluster = {}
+    # n_isoform = n_gene = n_component = n_cluster = 0
     for line in salmon:
-        n_isoform += 1
+        # n_isoform += 1
         # if n_isoform > 1000:
         #     break
 
@@ -74,21 +79,26 @@ def read_and_split(salmon_file_name):
         count = float(count)
 
         # generate names at each hierarchical level
-        (cl, co, g, i) = id_split(raw_id)
+        # (cl, co, g, i) = id_split(raw_id)
+        token = raw_id.split('_')
         # isoform_id = '{}_c{}_g{}_i{}'.format(cl, co, g, i)
         # gene_id = '{}_c{}_g{}'.format(cl, co, g)
         # component_id = '{}_c{}'.format(cl, co)
         # cluster_id = '{}'.format(cl)
         # the following is much faster
-        cluster_id = cl
-        component_id = cluster_id + '_c' + co
-        gene_id = component_id + '_g' + g
-        isoform_id = gene_id + '_i' + i
+        cluster_id = token[1]
+        component_id = '_'.join(token[1:3])
+        gene_id = '_'.join(token[1:4])
+        isoform_id ='_'. join(token[1:4])
 
         isoform[isoform_id] = count
-        n_gene = combine(gene_id, gene, count)
-        n_component = combine(component_id, component, count)
-        n_cluster = combine(cluster_id, cluster, count)
+        gene[gene_id] += count
+        component[component_id] += count
+        cluster[cluster_id] += count
+
+        # n_gene = combine(gene_id, gene, count)
+        # n_component = combine(component_id, component, count)
+        # n_cluster = combine(cluster_id, cluster, count)
 
     salmon.close()
     return cluster, component, gene, isoform
@@ -109,6 +119,7 @@ def write_counts(all, prefix, threshold):
     for level in ['isoform', 'gene', 'component', 'cluster']:
         fname = '{}{}.tsv'.format(prefix, level)
         output = open(fname, 'w')
+
 
         # column headings
         for column in sorted(all):
@@ -134,7 +145,7 @@ def write_counts(all, prefix, threshold):
 
 if __name__ == '__main__':
 
-    pathtarget = '/scratch/snyder/m/mgribsko/avocado/trinity/salmon/*.salmon'
+    pathtarget = '/scratch/snyder/m/mgribsko/gonza/salmon/salmon.all.*'
     filetarget = 'quant.sf'
     target = pathtarget + '/' + filetarget
 
@@ -144,6 +155,7 @@ if __name__ == '__main__':
         # get the column name from the directory name.  the assumption is the directory is named
         # something like sample.salmon
         column_name = os.path.split(os.path.split(filename)[0])[-1]
+        column_name = column_name.replace('salmon.all.','')
         sys.stdout.write('\nfile: {}\tcolumn: {}\n'.format(filename, column_name))
 
         # read in all counts and store in all{}
@@ -166,7 +178,7 @@ if __name__ == '__main__':
     passed = write_counts(all, prefix, threshold)
 
     # report number that pass threshold at each level
-    sys.stdout.write('\npassed threhold={}\n'.format(threshold))
+    sys.stdout.write('\npassed threshold={}\n'.format(threshold))
     for level in ['isoform', 'gene', 'component', 'cluster']:
         sys.stdout.write('\t{1}\t{0}s\n'.format(level, passed[level]))
 
