@@ -56,7 +56,7 @@ def batch_process(jobs_pending, n_sequence, batch_limit, batch_wait):
 
     :param jobs_pending: list of Interpro objects
     :param n_sequence: int, total number of sequences submitted
-    :param batch_limit: int, number of sequences per batch
+    :param batch_limit: int, number of sequences per batchself.log_fh.
     :return: list of string, output
     ---------------------------------------------------------------------------------------------"""
     if (n_sequence % batch_limit):
@@ -114,13 +114,14 @@ while fasta.next():
         ips.title = 'ORF{}'.format(n_sequence)
         ips.sequence = fasta.format(linelen=60)
         if not ips.run():
-            sys.stderr.write('Error - sequence={}\n'.format(fasta.id),flush=True)
+            sys.stderr.write('Error - sequence={}\n'.format(fasta.id))
+            sys.stderr.flush()
             continue
         jobs_pending.append(ips)
     else:
         continue
 
-    outputlist = batch_process(jobs_pending, n_sequence, batch_limit, batch_wait)
+    outputlist = batch_process(jobs_pending, n_sequence, args.batch_limit, args.batch_wait)
     for line in outputlist:
         sys.stdout.write('{}\n'.format(line))
         jobs_pending = []
