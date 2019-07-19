@@ -44,9 +44,10 @@ def combine(id, data, count):
 
 if __name__ == '__main__':
 
-    pathtarget = '../data'
-    filetarget = 'salmon*'
+    pathtarget = './'
+    filetarget = 'salmon.all.*'
     target = pathtarget + '/' + filetarget
+    print('target:', target)
 
     for filename in glob.glob(target):
 
@@ -57,11 +58,11 @@ if __name__ == '__main__':
             exit(1)
 
         # get the column name from the directory name.  the assumption is the directory is named
-        # something like sample.salmon
-        # path = os.path.split(filename)
+        # something on_merge_trin   path = os.path.split(filename)
         # dir = os.path.split(path[0])
         # column = dir[-1]
         column = os.path.split(os.path.split(filename)[0])[-1]
+        column = column.replace('salmon.', '')
         sys.stdout.write('\nfile: {}\tcolumn: {}\n'.format(filename, column))
 
         salmon = open(filename, 'r')
