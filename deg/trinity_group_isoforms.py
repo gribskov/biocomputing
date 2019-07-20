@@ -10,3 +10,11 @@ cluster to identify disjoint sets
     kmeans ? how to do it with distances
         test for best number of groups
 ================================================================================================="""
+import sys
+
+trinityfile = sys.argv[1]
+try:
+    open('r', trinityfile)
+except OSError:
+    sys.stderr.write('Unable to open trinity file ({}'.format(trinityfile))
+    exit(1)
