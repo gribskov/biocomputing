@@ -12,16 +12,62 @@ cluster to identify disjoint sets
 ================================================================================================="""
 import sys
 
-blastfile = sys.argv[1]
-try:
-    blast = open(blastfile, 'r')
-except OSError:
-    sys.stderr.write('Unable to open blast search file ({}'.format(blastfile))
-    exit(1)
+def distance(cluster):
+    """---------------------------------------------------------------------------------------------
+    calculate distance between members of the cluster
 
-nline = 0
-for line in blast:
-    nline += 1
-    piece = line.split()
+    :param cluster:
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    return True
 
-sys.stdout.write('{} lines read from {}'.format(nline, blastfile))
+# --------------------------------------------------------------------------------------------------
+# main
+# --------------------------------------------------------------------------------------------------
+if __name__ == '__main__':
+
+    blastfile = sys.argv[1]
+    try:
+        blast = open(blastfile, 'r')
+    except OSError:
+        sys.stderr.write('Unable to open blast search file ({}'.format(blastfile))
+        exit(1)
+
+    ecutoff = 1e-40
+    clusters = {}
+    ncluster = 0
+    nline = 0
+    for line in blast:
+        line = line.rstrip()
+        nline += 1
+        piece = line.split()
+        tag, cluster, component, gene, isoform = piece[0].split('_')
+        info = {'id': piece[0],
+                'qlen':int(piece[1]),
+                'qbegin': int(piece[2]),
+                'qend': int(piece[3]),
+                'sid': piece[4],
+                'slen': int(piece[5]),
+                'sbegin': int(piece[6]),
+                'send': int(piece[7]),
+                'evalue':float(piece[10]),
+                'descrip': ' '.join(piece[12:])
+                }
+        if info['evalue'] > ecutoff:
+            continue
+
+        if cluster in clusters:
+            clusters[cluster].append(info)
+        else:
+            clusters[cluster] = [info]
+            ncluster += 1
+
+        if ncluster > 1:
+            break
+
+    for cluster in clusters:
+        dist = distance(cluster)
+
+    sys.stdout.write('{} lines read from {}'.format(nline, blastfile))
+
+    exit(0)
