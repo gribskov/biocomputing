@@ -56,7 +56,7 @@ def batch_process(jobs_pending, n_sequence, batch_limit, batch_wait):
 
     :param jobs_pending: list of Interpro objects
     :param n_sequence: int, total number of sequences submitted
-    :param batch_limit: int, number of sequences per batch
+    :param batch_limit: int, number of sequences per batchself.log_fh.
     :return: list of string, output
     ---------------------------------------------------------------------------------------------"""
     if (n_sequence % batch_limit):
@@ -89,13 +89,17 @@ def batch_process(jobs_pending, n_sequence, batch_limit, batch_wait):
 
 
 # ==================================================================================================
-# Main
+# Main%
 # ==================================================================================================
+now = time.strftime('%Y-%b-%d %H:%M:%S', time.localtime())
 
 args = arguments_get()
-args.logfile.write('\ninterpro_batch - interproscan of ORF sequences\n')
+args.logfile.write('\ninterpro_batch - interproscan of ORF sequences {}\n'.format(now))
 args.logfile.write('\tinput ORF file: {}\n'.format(args.fasta_in.name))
-args.logfile.write('\tminimum ORF length: {}\n\n'.format(args.minlen))
+args.logfile.write('\tminimum ORF length: {}\n'.format(args.minlen))
+args.logfile.write('\tBatch limit: {}\n'.format(args.batch_limit))
+args.logfile.write('\tBatch polling interval: {}\n'.format(args.batch_wait))
+args.logfile.write('\tLog level: {}\n\n'.format(args.loglevel))
 
 fasta = Fasta(fh=args.fasta_in)
 n_sequence = 0
@@ -114,13 +118,14 @@ while fasta.next():
         ips.title = 'ORF{}'.format(n_sequence)
         ips.sequence = fasta.format(linelen=60)
         if not ips.run():
-            sys.stderr.write('Error - sequence={}\n'.format(fasta.id),flush=True)
+            sys.stderr.write('Error - sequence={}\n'.format(fasta.id))
+            sys.stderr.flush()
             continue
         jobs_pending.append(ips)
     else:
         continue
 
-    outputlist = batch_process(jobs_pending, n_sequence, batch_limit, batch_wait)
+    outputlist = batch_process(jobs_pending, n_sequence, args.batch_limit, args.batch_wait)
     for line in outputlist:
         sys.stdout.write('{}\n'.format(line))
         jobs_pending = []
@@ -130,7 +135,7 @@ while fasta.next():
 
 # end of loop over all sequences
 
-outputlist = batch_process(jobs_pending, n_sequence, 1, batch_wait)
+outputlist = batch_process(jobs_pending, n_sequence, 1, args.batch_wait)
 for line in outputlist:
     sys.stdout.write('{}\n'.format(line))
     jobs_pending = []
