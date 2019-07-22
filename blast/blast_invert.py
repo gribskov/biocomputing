@@ -48,9 +48,9 @@ if __name__ == '__main__':
         print('{}\tlen={}\t{}'.format(subj, l, r))
         for i in sorted(sidx[subj], key=lambda x: record[x]['qname']):
             q = record[i]
-            qcov = (q['qend'] - q['qbegin'] + 1) / q['qlen']
-            scov = (q['send'] - q['sbegin'] + 1) / q['slen']
-            print('\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
+            qcov = (int(q['qend']) - int(q['qbegin']) + 1) / int(q['qlen'])
+            scov = (int(q['send']) - int(q['sbegin']) + 1) / int(q['slen'])
+            print('\t{:5.3f}\t{}\t{}\t{}\t{}\t{:5.3f}\t{}\t{}\t{}\t{}'.format(
                 scov, q['sbegin'], q['send'], q['slen'],
                 q['qname'], qcov, q['qbegin'], q['qend'], q['qlen'], q['evalue']))
 
