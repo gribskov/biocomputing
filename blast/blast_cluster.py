@@ -102,7 +102,7 @@ if __name__ == '__main__':
     record_n = 0
     sidx = {}
     qidx = {}
-    threshold = 1e-25
+    threshold = 1e-5
 
     # read the search and store all matches over a threshold
     while blast.next():
@@ -124,7 +124,7 @@ if __name__ == '__main__':
                 qidx[blast.qname] = [d]
 
             record_n += 1
-            if record_n > 1000000:
+            if record_n > 1000:
                 break
 
     sys.stderr.write('{} records read from blast file\n'.format(record_n))
@@ -184,7 +184,7 @@ if __name__ == '__main__':
         print(group[0]['qname'])
         for edge in group:
             # print('\t{qname}\t{int(qbegin):6d}\t{qend}\t{evalue}\t{sbegin}\t{send}\t{slen}\t{stitle}'.format(**edge))
-            print('\t{:32s}{:6d}{:6d}{:9.2g}{:6d}{:6d}{:6d}\t{}'.format(edge['qname'],
+            print('\t{}{:6d}{:6d}{:9.2g}{:6d}{:6d}{:6d}\t{}'.format(edge['qname'],
                                                                     int(edge['qbegin']),
                                                                     int(edge['qend']),
                                                                     float(edge['evalue']),
