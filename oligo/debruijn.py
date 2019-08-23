@@ -100,6 +100,18 @@ class KmerSet():
 
         return left, right
 
+    def list_by_alpha(self):
+        """-----------------------------------------------------------------------------------------
+        return a string listing the words alphabetically
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        set = self.set
+        words = ''
+        for kmer in sorted(set):
+            words += '{}\t{}\n'.format(kmer, set[kmer]['count'])
+
+        return words
+
 
 def clean_text(text):
     """---------------------------------------------------------------------------------------------
@@ -136,6 +148,7 @@ if __name__ == '__main__':
     left, right = kmer.tips()
     print('left tips: {}'.format(left))
     print('right tips: {}'.format(right))
+    print(kmer.list_by_alpha())
 
     set = kmer.set
     keys = list(set.keys())
@@ -147,6 +160,7 @@ if __name__ == '__main__':
         for kmer in left:
             stack.append([kmer, indent])
     else:
+        # no tips, start at the first word
         stack.append([keys[0], indent])
 
     indent_current = 0
