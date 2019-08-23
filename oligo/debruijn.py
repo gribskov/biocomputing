@@ -3,6 +3,7 @@
 ####################################################################################################
 import sys
 import re
+import random
 
 
 class KmerSet():
@@ -42,6 +43,20 @@ class KmerSet():
 
         for i in range(0, len(text) - k + 1):
             kmer = text[i:i + k]
+            self.add(kmer)
+
+        return len(self.set.keys())
+
+    def from_text_random(self, k, n):
+        """-----------------------------------------------------------------------------------------
+        Randomly sample nword kmer words from the text and
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        self.k = k
+        text = self.text
+        for _ in range(n):
+            pos = random.randrange(len(text) - k)
+            kmer = text[pos:pos + k]
             self.add(kmer)
 
         return len(self.set.keys())
@@ -136,13 +151,14 @@ if __name__ == '__main__':
         Or to take arms against a sea of troubles
         And by opposing end them.'''
 
-    text1 = 'To be, or not to be or to be or not'
-    text = clean_text(text)
+    text1 = 'To be, or not to be--that is the question: Whether tis nobler in the mind to suffer'
+    text = clean_text(text1)
     print(text)
 
     kmer = KmerSet()
     kmer.text = text
-    kmer.from_text(5)
+    # kmer.from_text(4)
+    kmer.from_text_random(4, int(len(text) * 3))
     kmer.link()
 
     left, right = kmer.tips()
