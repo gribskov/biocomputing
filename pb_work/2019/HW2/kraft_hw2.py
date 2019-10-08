@@ -35,10 +35,12 @@ print('Number of sequences =', length, '\n', 'Number of bases =', len(base_strin
 def quality(quality_string):
     for i in quality_string:
         return ord(i) - 33
+
 """takes ASCII character value and uses this to find the integer value. Adding 33 to integer value gives the
 Q value. Example: print (quality('A') prints out 33 """
 # Creates an empty list to store quality score output
 q_output = []
+
 # Iterate through quality score string to find corresponding Q value, stores values in the empty list q_ouput
 for i in q_string:
     q_output.append([quality([i])])
@@ -46,6 +48,7 @@ base = []
 for i in base_string:
         base.extend([i])
         # function to calculate A,C,G,T content of each sequence
+
 def composition(sequence_string):
     bases = dict()
     base_total = 0
