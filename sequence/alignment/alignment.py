@@ -45,16 +45,19 @@ class Alignment:
         :param width: int, field width of columns
         :return: string
         -----------------------------------------------------------------------------------------"""
-        s = 'score\n\n    '
+        # pad the sequences with a gap at the ends
+        p1 = '.' + align.s1.seq + '.'
+        p2 = '.' + align.s2.seq + '.'
 
-        for j in range(0, len(align.s2.seq) ):
-            s += "{} ".format(align.s2.seq[j])
+        s = 'score\n\n  '
+
+        for j in range(0, len(p2)):
+            s += "{} ".format(p2[j])
         s += '\n'
 
-        for r in range(0, len(align.i1) + 1):
+        for r in range(0, len(align.i1) + 2):
             j = 0
-            if r < len(align.s2.seq):
-                s += '{} '.format(align.s1.seq[r-1])
+            s += '{} '.format(p1[r])
 
             for c in range(0, len(align.i2) + 2):
                 s += "{} ".format(align.smat[r][c])
@@ -147,12 +150,12 @@ if __name__ == '__main__':
     r = len(align.i1) + 1
     end = len(align.i2)
     for c in range(1, len(align.i2) + 2):
-        smat[r][c] = smat[r - 1][c - 1] + gi + (end - c) * gd
+        smat[r][c] = smat[r - 1][c - 1] + gi + (end - c + 1) * gd
         pmat[r][c] = d
     c = len(align.i2) + 1
     end = len(align.i1)
     for r in range(1, len(align.i1) + 2):
-        smat[r][c] = smat[r - 1][c - 1] + gi + (end - r) * gd
+        smat[r][c] = smat[r - 1][c - 1] + gi + (end - r + 1) * gd
         pmat[r][c] = d
 
     print(align.matString())
