@@ -11,13 +11,32 @@ class KmerSet():
     a single kmer
     ============================================================================================="""
 
-    def __init__(self):
+    def __init__(self, text=""):
         """-----------------------------------------------------------------------------------------
 
         -----------------------------------------------------------------------------------------"""
-        self.text = ''
+        self.text = text
+        self.reads = []
         k = 0
         self.set = {}
+
+    def sample_reads(self, readlen, coverage):
+        """-----------------------------------------------------------------------------------------
+        sample a list of words of the specified length with at least the specified coverage
+        :param readlen: int, length of read to sample
+        :param coverage: float, mnimum coverage
+        :retur: float, actual coverage
+        -----------------------------------------------------------------------------------------"""
+        self.reads = []
+        text = self.text
+        letters = 0
+        textlen = len(text)
+        while letters / textlen < coverage:
+            pos = random.randrange(textlen - readlen)
+            self.reads.append(text[pos:pos + readlen])
+            letters += readlen
+
+        return letters / textlen
 
     def add(self, kmer):
         """-----------------------------------------------------------------------------------------
@@ -38,12 +57,14 @@ class KmerSet():
 
         :param k: int, length of kmer
         -----------------------------------------------------------------------------------------"""
-        text = self.text
+        if len(self.reads) == 0:
+            self.reads.append(self.text)
         self.k = k
 
-        for i in range(0, len(text) - k + 1):
-            kmer = text[i:i + k]
-            self.add(kmer)
+        for text in self.reads:
+            for i in range(0, len(text) - k + 1):
+                kmer = text[i:i + k]
+                self.add(kmer)
 
         return len(self.set.keys())
 
@@ -52,12 +73,15 @@ class KmerSet():
         Randomly sample nword kmer words from the text and
         :return:
         -----------------------------------------------------------------------------------------"""
+        if len(self.reads) == 0:
+            self.reads.append(self.text)
         self.k = k
-        text = self.text
-        for _ in range(n):
-            pos = random.randrange(len(text) - k)
-            kmer = text[pos:pos + k]
-            self.add(kmer)
+
+        for text in self.reads:
+            for _ in range(n):
+                pos = random.randrange(len(text) - k)
+                kmer = text[pos:pos + k]
+                self.add(kmer)
 
         return len(self.set.keys())
 
@@ -98,7 +122,7 @@ class KmerSet():
 
     def tips(self):
         """-----------------------------------------------------------------------------------------
-        find the left and right tips.  these are the kmers with no befor and after words,
+        find the left and right tips.  these are the kmers with no before and after words,
         respectively
         :return:
         -----------------------------------------------------------------------------------------"""
@@ -127,18 +151,17 @@ class KmerSet():
 
         return words
 
+    def clean_text(self):
+        """---------------------------------------------------------------------------------------------
+        remove punctuation and spaces, force to lower case
+        :param text: string
+        :return: int, length of text
+        ---------------------------------------------------------------------------------------------"""
+        text = self.text.lower()
+        punc = re.compile(r'[^a-z]+')
+        self.text = punc.sub('', text)
 
-def clean_text(text):
-    """---------------------------------------------------------------------------------------------
-    remove punction and spaces, force to lower case
-    :param text: string
-    :return: string, text
-    ---------------------------------------------------------------------------------------------"""
-    text = text.lower()
-    punc = re.compile(r'[^a-z]+')
-    text = punc.sub('', text)
-
-    return text
+        return len(self.text)
 
 
 ####################################################################################################
@@ -152,19 +175,30 @@ if __name__ == '__main__':
         And by opposing end them.'''
 
     text1 = 'To be, or not to be--that is the question: Whether tis nobler in the mind to suffer'
-    text = clean_text(text1)
-    print(text)
+    text2 = 'A A T G C G C T A C G T A G G G T A A T A T A A G A C C A'
 
-    kmer = KmerSet()
-    kmer.text = text
-    # kmer.from_text(4)
-    kmer.from_text_random(4, int(len(text) * 3))
+
+    kmer = KmerSet(text=text2)
+    print("original text\n", kmer.text)
+    textlen = kmer.clean_text()
+    print("\ncleaned text\n", kmer.text)
+    print("\n{} letters".format(textlen))
+
+    # actual_coverage = kmer.sample_reads(8, 4)
+    # print("coverage: {:.2f}".format(actual_coverage))
+    # for read in kmer.reads:
+    #     print("\t {}".format(read))
+
+    k = 4
+    # kmer.from_text_random(k, int(coverage * textlen / k))
+    kmer.from_text(k)
+    print("\nkmer words")
+    print(kmer.list_by_alpha())
     kmer.link()
 
     left, right = kmer.tips()
     print('left tips: {}'.format(left))
     print('right tips: {}'.format(right))
-    print(kmer.list_by_alpha())
 
     set = kmer.set
     keys = list(set.keys())
@@ -172,44 +206,54 @@ if __name__ == '__main__':
     used = {}
     indent = 0
     space = '  '
-    if left:
-        for kmer in left:
-            stack.append([kmer, indent])
-    else:
-        # no tips, start at the first word
-        stack.append([keys[0], indent])
+    # if left:
+    #     for kmer in left:
+    #         stack.append([kmer, indent])
+    # else:
+    #     # no tips, start at the first word
+    #     stack.append([keys[0], indent])
 
-    indent_current = 0
-    while stack:
-        kmer, indent = stack.pop()
+    while len(used) < len(set):
 
-        if indent_current != indent:
-            print('\n{}'.format(space * indent), end='')
-            indent_current = indent
+        indent = 0
+        for start in sorted(set, key=lambda k: (len(set[k]['before']),set[k]['count'])):
+            if start in used:
+                continue
+            stack.append([start,indent])
+            break
 
-        if kmer in used:
-            print('{}->'.format(kmer), end='')
-            indent_current += 1
-            continue
-        else:
-            print('{}'.format(kmer), end='')
-            used[kmer] = True
+        indent_current = 0
+        while stack:
+            kmer, indent = stack.pop()
 
-        nafter = len(set[kmer]['after'])
-        if nafter == 0:
-            # end of chain, outdent
-            print('.', end='')
-            indent_current -= 1
-            continue
-        elif nafter == 1:
-            # chain continues, don't change indent
-            print('-', end='')
-        else:
-            # fork, indent
-            print('-', end='')
-            indent = indent_current + 1
+            if indent_current != indent:
+                print('\n{}'.format(space * indent), end='')
+                indent_current = indent
 
-        for k in set[kmer]['after']:
-            stack.append([k, indent])
+            if kmer in used:
+                print('{}->'.format(kmer), end='')
+                indent_current += 1
+                continue
+            else:
+                print('{}'.format(kmer), end='')
+                used[kmer] = True
+
+            nafter = len(set[kmer]['after'])
+            if nafter == 0:
+                # end of chain, outdent
+                print('.\n', end='')
+                indent_current -= 1
+                continue
+            elif nafter == 1:
+                # chain continues, don't change indent
+                print('-', end='')
+            else:
+                # fork, indent
+                print('-', end='')
+                indent = indent_current + 1
+
+            for k in set[kmer]['after']:
+                stack.append([k, indent])
+
 
     exit(0)
