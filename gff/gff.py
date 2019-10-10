@@ -135,24 +135,24 @@ if __name__ == '__main__':
 
     sys.stdout.write('{} lines read\n'.format(line))
 
-    flist = list(gff.get_by_feature('transcript'))
-    (tnum, transcript) = flist[0]
-    begin = tnum
+    # transcripts is a generator function
+    transcripts = gff.get_by_feature('transcript')
+    (begin, transcript) = next(transcripts)
 
-    for tnum in range(1, len(flist)):
+    for (end, transcript) in transcripts:
         sys.stdout.write('{}\t{}\n'.format(transcript['gene_id'], transcript['transcript_id']))
-        (end, transcript) = flist[tnum]
 
-        for (exon_n,exon) in gff.get_by_value('feature', 'exon', begin, end):
+        for (exon_n, exon) in gff.get_by_value('feature', 'exon', begin, end):
             print('\t{}\t{}\t{}\t{}'.
                   format(exon['exon_number'], exon['begin'], exon['end'], exon['strand']))
 
         begin = end
 
+    # the final transcript
     sys.stdout.write('{}\t{}\n'.format(transcript['gene_id'], transcript['transcript_id']))
-    for (exon_n,exon) in gff.get_by_value('feature', 'exon', begin, len(gff.data)):
+    for (exon_n, exon) in gff.get_by_value('feature', 'exon', begin, len(gff.data)):
         print('\t{}\t{}\t{}\t{}'.
-                  format(exon['exon_number'], exon['begin'], exon['end'], exon['strand']))
+              format(exon['exon_number'], exon['begin'], exon['end'], exon['strand']))
 
     # print(flist)
 
