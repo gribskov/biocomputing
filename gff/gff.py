@@ -144,7 +144,8 @@ class Gff:
 if __name__ == '__main__':
     import sys
 
-    gff = Gff(file='stringtie.gff')
+    # gff = Gff(file='stringtie.gff')
+    gff = Gff(file='genome.gff')
 
     line = 0
     while gff.read():
