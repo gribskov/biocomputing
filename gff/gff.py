@@ -39,7 +39,7 @@ class Gff:
 
         :return:
         -----------------------------------------------------------------------------------------"""
-        self.line = self.gff_in.readline()
+        self.line = self.gff_in.readline().rstrip()
 
         if self.line:
             if self.line.startswith('#'):
@@ -69,12 +69,9 @@ class Gff:
         field = parsed['attribute'].rstrip().split(';')
         # attribute ends in; so last field is blank
         field.pop()
-        attr = {}
         for f in field:
             (key, value) = f.strip().split(' ', maxsplit=1)
-            attr[key] = value.replace('"', '')
-
-        parsed['attribute'] = attr
+            parsed[key] = value.replace('"', '')
 
         self.data.append(parsed)
 
@@ -99,6 +96,30 @@ class Gff:
 
         raise StopIteration
 
+    def get_by_value(self, column, key, start=0, stop=0):
+        """-----------------------------------------------------------------------------------------
+        A generator that returns rows where the speicified column matches the specified value.
+        Rows missing columns, e.g., those generated from attributes, are skipped
+
+        :param column: str, predefined or attribute column
+        :param key: str, column value to match
+        :param start: int, beginning row
+        :param stop: int, ending row + 1
+        :return: row, content_hash
+        -----------------------------------------------------------------------------------------"""
+        data = self.data
+        if stop == 0:
+            stop = len(data)
+
+        for n in range(start, stop):
+            if column not in data[n]:
+                continue
+
+            if data[n][column] == key:
+                yield n, data[n]
+
+        raise StopIteration
+
 
 # ==================================================================================================
 # test
@@ -112,9 +133,27 @@ if __name__ == '__main__':
     while gff.read():
         line += 1
 
-    sys.stdout.write('{} lines read'.format(line))
+    sys.stdout.write('{} lines read\n'.format(line))
 
-    for (line, entry) in gff.get_by_feature('transcript'):
-        print(line, entry)
+    flist = list(gff.get_by_feature('transcript'))
+    (tnum, transcript) = flist[0]
+    begin = tnum
+
+    for tnum in range(1, len(flist)):
+        sys.stdout.write('{}\t{}\n'.format(transcript['gene_id'], transcript['transcript_id']))
+        (end, transcript) = flist[tnum]
+
+        for (exon_n,exon) in gff.get_by_value('feature', 'exon', begin, end):
+            print('\t{}\t{}\t{}\t{}'.
+                  format(exon['exon_number'], exon['begin'], exon['end'], exon['strand']))
+
+        begin = end
+
+    sys.stdout.write('{}\t{}\n'.format(transcript['gene_id'], transcript['transcript_id']))
+    for (exon_n,exon) in gff.get_by_value('feature', 'exon', begin, len(gff.data)):
+        print('\t{}\t{}\t{}\t{}'.
+                  format(exon['exon_number'], exon['begin'], exon['end'], exon['strand']))
+
+    # print(flist)
 
     exit(0)
