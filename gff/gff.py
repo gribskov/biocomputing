@@ -120,6 +120,23 @@ class Gff:
 
         raise StopIteration
 
+    def replace_by_column(self, column, find, replace):
+        """-----------------------------------------------------------------------------------------
+        Replace all of find by replace in column
+
+        :param column: str, name of a predifined or attribute column
+        :param find: str, string to replace
+        :param replace: string to substitute for find
+        :return: int, rows examined
+        -----------------------------------------------------------------------------------------"""
+        data = self.data
+        n = 0
+        for d in data:
+            d[column] = d[column].replace(find, replace)
+            n += 1
+
+        return n
+
 
 # ==================================================================================================
 # test
@@ -135,12 +152,18 @@ if __name__ == '__main__':
 
     sys.stdout.write('{} lines read\n'.format(line))
 
+    # remove the string 'lcl|' in the sequence names
+    gff.replace_by_column('sequence', 'lcl|', '')
+
     # transcripts is a generator function
     transcripts = gff.get_by_feature('transcript')
     (begin, transcript) = next(transcripts)
 
     for (end, transcript) in transcripts:
-        sys.stdout.write('{}\t{}\n'.format(transcript['gene_id'], transcript['transcript_id']))
+        sys.stdout.write('{}\t{}\t{}\n'.format(transcript['gene_id'],
+                                               transcript['transcript_id'],
+                                               transcript['sequence']
+                                               ))
 
         for (exon_n, exon) in gff.get_by_value('feature', 'exon', begin, end):
             print('\t{}\t{}\t{}\t{}'.
@@ -149,7 +172,10 @@ if __name__ == '__main__':
         begin = end
 
     # the final transcript
-    sys.stdout.write('{}\t{}\n'.format(transcript['gene_id'], transcript['transcript_id']))
+    sys.stdout.write('{}\t{}\t{}\n'.format(transcript['gene_id'],
+                                           transcript['transcript_id'],
+                                           transcript['sequence']
+                                           ))
     for (exon_n, exon) in gff.get_by_value('feature', 'exon', begin, len(gff.data)):
         print('\t{}\t{}\t{}\t{}'.
               format(exon['exon_number'], exon['begin'], exon['end'], exon['strand']))
