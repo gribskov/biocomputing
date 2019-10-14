@@ -182,10 +182,11 @@ if __name__ == '__main__':
     gff = Gff(file='genome.gff')
     gff.attr_sep = '='
 
-    line = 0
-    while gff.read():
-        line += 1
+    # line = 0
+    # while gff.read():
+    #     line += 1
 
+    line = gff.read_all()
     sys.stdout.write('{} lines read\n'.format(line))
 
     # remove the string 'lcl|' in the sequence names
