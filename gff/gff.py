@@ -67,6 +67,26 @@ class Gff:
 
         return line
 
+    def read_feature(self, feature_list):
+        """-----------------------------------------------------------------------------------------
+        Read the whole file and store only features in feature_list
+
+        :param feature_list:
+        :return: int, number of reatures read
+        -----------------------------------------------------------------------------------------"""
+        count = 0
+        for self.line  in self.gff_in:
+            if self.line:
+                if self.line.startswith('#'):
+                    self.comment_parse()
+                else:
+                    parsed = self.feature_parse()
+                    if parsed['feature'] in feature_list:
+                        self.data.append(parsed)
+                        count += 1
+        return count
+
+
     def feature_parse(self):
         """-----------------------------------------------------------------------------------------
         parse a feature line
@@ -186,7 +206,8 @@ if __name__ == '__main__':
     # while gff.read():
     #     line += 1
 
-    line = gff.read_all()
+    # line = gff.read_all()
+    line = transcripts = gff.read_feature(['mRNA'])
     sys.stdout.write('{} lines read\n'.format(line))
 
     # remove the string 'lcl|' in the sequence names
