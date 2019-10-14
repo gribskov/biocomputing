@@ -47,13 +47,25 @@ class Gff:
             if self.line.startswith('#'):
                 self.comment_parse()
             else:
-                self.feature_parse()
+                self.data.append(self.feature_parse())
 
             return True
 
         else:
             # EOF
             return False
+
+    def read_all(self):
+        """-----------------------------------------------------------------------------------------
+        read the entire file into memory
+
+        :return: int, number of lines read
+        -----------------------------------------------------------------------------------------"""
+        line = 0
+        while gff.read():
+            line += 1
+
+        return line
 
     def feature_parse(self):
         """-----------------------------------------------------------------------------------------
@@ -77,9 +89,9 @@ class Gff:
             (key, value) = f.strip().split(self.attr_sep, maxsplit=1)
             parsed[key] = value.replace('"', '')
 
-        self.data.append(parsed)
+        # self.data.append(parsed)
 
-        return
+        return parsed
 
     def comment_parse(self):
         pass
@@ -157,6 +169,7 @@ class Gff:
                     n += 1
 
         return n
+
 
 # ==================================================================================================
 # test
