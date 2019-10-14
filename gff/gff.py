@@ -1,11 +1,13 @@
+import sys
+import re
+
+
 class Gff:
     ####################################################################################################
     # gff.py
     #
     # 9 October 2019    Michael Gribskov
     ####################################################################################################
-    import sys
-    import re
 
     column = ['sequence', 'method', 'feature', 'begin', 'end', 'score', 'strand', 'frame',
               'attribute']
@@ -13,7 +15,7 @@ class Gff:
     def __init__(self, file=""):
         self.data = []
         self.gff_in = None
-        attr_sep = ' '
+        self.attr_sep = ' '
 
         if file:
             fh = self.open(file)
@@ -75,7 +77,7 @@ class Gff:
         :return: int, number of reatures read
         -----------------------------------------------------------------------------------------"""
         count = 0
-        for self.line  in self.gff_in:
+        for self.line in self.gff_in:
             if self.line:
                 if self.line.startswith('#'):
                     self.comment_parse()
@@ -85,7 +87,6 @@ class Gff:
                         self.data.append(parsed)
                         count += 1
         return count
-
 
     def feature_parse(self):
         """-----------------------------------------------------------------------------------------
@@ -195,8 +196,6 @@ class Gff:
 # test
 # ==================================================================================================
 if __name__ == '__main__':
-    import sys
-    import re
 
     # gff = Gff(file='stringtie.gff')
     gff = Gff(file='genome.gff')
