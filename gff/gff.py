@@ -5,6 +5,7 @@ class Gff:
     # 9 October 2019    Michael Gribskov
     ####################################################################################################
     import sys
+    import re
 
     column = ['sequence', 'method', 'feature', 'begin', 'end', 'score', 'strand', 'frame',
               'attribute']
@@ -12,6 +13,7 @@ class Gff:
     def __init__(self, file=""):
         self.data = []
         self.gff_in = None
+        attr_sep = ' '
 
         if file:
             fh = self.open(file)
@@ -67,10 +69,12 @@ class Gff:
         # split the attributs on ; and restore as a hash
 
         field = parsed['attribute'].rstrip().split(';')
-        # attribute ends in; so last field is blank
-        field.pop()
+        # attribute may end in; so last field may be blank
+        if not field[-1]:
+            field.pop()
+
         for f in field:
-            (key, value) = f.strip().split(' ', maxsplit=1)
+            (key, value) = f.strip().split(self.attr_sep, maxsplit=1)
             parsed[key] = value.replace('"', '')
 
         self.data.append(parsed)
@@ -132,20 +136,38 @@ class Gff:
         data = self.data
         n = 0
         for d in data:
-            d[column] = d[column].replace(find, replace)
-            n += 1
+            if column in d:
+                d[column] = d[column].replace(find, replace)
+                n += 1
 
         return n
 
+    def replace_columns_re(self, column_list, search, replace=''):
+        """-----------------------------------------------------------------------------------------
+        replace strings in a list of columns using a regular expression
+        -----------------------------------------------------------------------------------------"""
+        data = self.data
+        n = 0
+
+        query = re.compile(search)
+        for d in data:
+            for column in column_list:
+                if column in d:
+                    d[column] = query.sub(replace, d[column])
+                    n += 1
+
+        return n
 
 # ==================================================================================================
 # test
 # ==================================================================================================
 if __name__ == '__main__':
     import sys
+    import re
 
     # gff = Gff(file='stringtie.gff')
     gff = Gff(file='genome.gff')
+    gff.attr_sep = '='
 
     line = 0
     while gff.read():
@@ -154,32 +176,41 @@ if __name__ == '__main__':
     sys.stdout.write('{} lines read\n'.format(line))
 
     # remove the string 'lcl|' in the sequence names
-    gff.replace_by_column('sequence', 'lcl|', '')
+    # gff.replace_by_column('sequence', 'lcl|', '')
+    query = r'(maker|augustus|masked|processed|gene)(-|_)'
+    gff.replace_columns_re(['Parent', 'ID'], query, r'')
 
     # transcripts is a generator function
-    transcripts = gff.get_by_feature('transcript')
+    # transcripts = gff.get_by_feature('transcript')
+    transcripts = gff.get_by_feature('mRNA')
     (begin, transcript) = next(transcripts)
 
     for (end, transcript) in transcripts:
-        sys.stdout.write('{}\t{}\t{}\n'.format(transcript['gene_id'],
-                                               transcript['transcript_id'],
+        # sys.stdout.write('{}\t{}\t{}\n'.format(transcript['gene_id'],
+        #                                        transcript['transcript_id'],
+        #                                        transcript['sequence']
+        #                                        ))
+        sys.stdout.write('{}\t{}\t{}\n'.format(transcript['Parent'],
+                                               transcript['ID'],
                                                transcript['sequence']
                                                ))
 
         for (exon_n, exon) in gff.get_by_value('feature', 'exon', begin, end):
             print('\t{}\t{}\t{}\t{}'.
-                  format(exon['exon_number'], exon['begin'], exon['end'], exon['strand']))
+                  # format(exon['exon_number'], exon['begin'], exon['end'], exon['strand']))
+                  format(exon['ID'], exon['begin'], exon['end'], exon['strand']))
 
         begin = end
 
     # the final transcript
-    sys.stdout.write('{}\t{}\t{}\n'.format(transcript['gene_id'],
-                                           transcript['transcript_id'],
+    sys.stdout.write('{}\t{}\t{}\n'.format(transcript['Parent'],
+                                           transcript['ID'],
                                            transcript['sequence']
                                            ))
     for (exon_n, exon) in gff.get_by_value('feature', 'exon', begin, len(gff.data)):
         print('\t{}\t{}\t{}\t{}'.
-              format(exon['exon_number'], exon['begin'], exon['end'], exon['strand']))
+              # format(exon['exon_number'], exon['begin'], exon['end'], exon['strand']))
+              format(exon['ID'], exon['begin'], exon['end'], exon['strand']))
 
     # print(flist)
 
