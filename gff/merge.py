@@ -5,6 +5,7 @@ if __name__ == '__main__':
     gff = Gff(file="stringtie.gff")
     transcript_n = gff.read_feature('transcript')
     print('{} features read'.format(transcript_n))
+    gff.replace_columns_re(['sequence'], 'lcl\|', r'')
 
     bundle_n = 0
     bundle = []
@@ -14,6 +15,7 @@ if __name__ == '__main__':
         id = t['transcript_id']
         begin = int(t['begin'])
         end = int(t['end'])
+        sequence = t['sequence']
         strand = t['strand']
 
         if begin > b_stop:
@@ -30,6 +32,6 @@ if __name__ == '__main__':
             b_stop = end
             bundle[-1].append([t])
 
-        print('\t{}\t{}\t{}\t{}'.format(id, begin, end, strand))
+        print('\t{}\t{}\t{}\t{}\t{}'.format(id, sequence, begin, end, strand))
 
     exit(0)
