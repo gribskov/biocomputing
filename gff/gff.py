@@ -191,6 +191,25 @@ class Gff:
 
         return n
 
+    def rename_key(self, old_key, new_key):
+        """-----------------------------------------------------------------------------------------
+        changes old_key to new_key in data hash.  Does nothing if old_key does not exist.  Useful
+        for changing names of attribute columns when comparing GFF files from different sources.
+
+        :param old_key: str, current key
+        :param new_key: str, new _key
+        :return: True if old_key exists
+        -----------------------------------------------------------------------------------------"""
+        data = self.data
+        if old_key in data[0]:
+            for d in data:
+                d[new_key] = d.pop(old_key)
+
+            return True
+
+        return False
+
+
 
 # ==================================================================================================
 # test
