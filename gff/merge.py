@@ -47,7 +47,7 @@ def make_bundle(gff,id_column='transcript_id'):
 
     return bundle_list
 
-def overlap(t1, t2):
+def overlap2(t1, t2):
     """-----------------------------------------------------------------------------------------
     left = t2['begin'] -t1['begin']
     right = t2['end'] - t1['end']
@@ -78,6 +78,47 @@ def overlap(t1, t2):
         print('Error unknown overlap status ({}'.format(test))
 
     return left, right, status
+
+def overlap(t1, t2):
+    """-----------------------------------------------------------------------------------------
+    left = t2['begin'] -t1['begin']
+    right = t2['end'] - t1['end']
+
+    :param t1:
+    :param t2:
+    :return:
+    -----------------------------------------------------------------------------------------"""
+    lextend = 0
+    rextend = 0
+    type = 'no_overlap'
+
+    left = t1
+    right = t2
+    if left['begin'] > right['begin']:
+        # make sure the left wequence begins with the lower coordinate
+        left, right = right, left
+
+    if right['begin'] < left['end']:
+        # there is an overlap
+        if right['end'] <= left['end']:
+            # right range is entirely inside left
+            if left is t1:
+                type = 'merge_t2inside'
+            else:
+                type = 'merge_t1inside'
+        else:
+            # right range extends to the right
+            if left is t1:
+                type = 'merge_extright'
+            else:
+                type = 'merge_extleft'
+
+        # extensions are given with respdet to t1
+        lextend = left['begin] - t1['begin']
+        rextend = max(left['end'], right['end']) - t1['end']
+
+    return lextend, rextend, type
+
 
 if __name__ == '__main__':
 
