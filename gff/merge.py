@@ -49,26 +49,29 @@ def make_bundle(gff,id_column='transcript_id'):
 
 if __name__ == '__main__':
 
-    ugff = Gff(file="stringtie.gff")
+    sgff = Gff(file="stranded.merged.stringtie.gff")
+    transcript_n = sgff.read_feature('transcript')
+    print('{} stranded features read'.format(transcript_n))
+    sgff.replace_columns_re(['sequence'], 'lcl\|', r'')
+    # sgff.attr_sep = '='
+    # transcript_n = sgff.read_feature('mRNA')
+    query = r'(maker|augustus|masked|processed|gene|trnascan)(-|_)'
+    sgff.replace_columns_re(['gene_id', 'transcript_id'], query, r'')
+    sgff.replace_columns_re(['gene_id', 'transcript_id'], r'-tRNA-', r'.tRNA')
+    # sgff.rename_key('ID', 'transcript_id')
+
+    sbundle = make_bundle(sgff)
+
+    ugff = Gff(file="unstranded.merged.stringtie.gff")
     transcript_n = ugff.read_feature('transcript')
     print('{} unstranded features read'.format(transcript_n))
     ugff.replace_columns_re(['sequence'], 'lcl\|', r'')
-    ubundle = make_bundle(ugff)
-
-    sgff = Gff(file="genome.gff")
-    sgff.attr_sep = '='
-    transcript_n = sgff.read_feature('mRNA')
-    print('{} stranded features read'.format(transcript_n))
-
-    # query = r'(maker|augustus|masked|processed|gene)(-|_)'
     query = r'(maker|augustus|masked|processed|gene|trnascan)(-|_)'
+    ugff.replace_columns_re(['gene_id', 'transcript_id'], query, r'')
+    ugff.replace_columns_re(['gene_id', 'transcript_id'], r'-tRNA-', r'.tRNA')
+    # ugff.rename_key('ID', 'transcript_id')
 
-    sgff.replace_columns_re(['Parent', 'ID'], query, r'')
-    sgff.replace_columns_re(['Parent', 'ID'], r'-tRNA-', r'.tRNA')
-    sgff.rename_key('ID', 'transcript_id')
-    sbundle = make_bundle(sgff)
-    # sbundle = make_bundle(sgff, id_column='ID')
-
+    ubundle = make_bundle(ugff)
 
     set = []
     set_end = 0
