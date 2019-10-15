@@ -47,6 +47,38 @@ def make_bundle(gff,id_column='transcript_id'):
 
     return bundle_list
 
+def overlap(t1, t2):
+    """-----------------------------------------------------------------------------------------
+    left = t2['begin'] -t1['begin']
+    right = t2['end'] - t1['end']
+
+    :param t1:
+    :param t2:
+    :return:
+    -----------------------------------------------------------------------------------------"""
+    left = int(t2['begin']) - int(t1['begin'])
+    right = int(t2['end']) - int(t1['end'])
+    x1 = int(t2['end']) - int(t1['begin'])
+    x2 = int(t2['begin']) - int(t1['end'])
+
+    test = ((left<0)<<3) + ((right<=0)<<2) + ((x1<0)<<1) + (x2<0)
+    if test == 15:
+        status = 'None'
+    elif test == 13:
+        status = 'merge-right'
+    elif test == 9:
+        status = 'merge-include'
+    elif test == 5:
+        status = 'merge-extend'
+    elif test == 1:
+        status = 'merge-left'
+    elif test == 0:
+        status = 'None'
+    else:
+        print('Error unknown overlap status ({}'.format(test))
+
+    return left, right, status
+
 if __name__ == '__main__':
 
     sgff = Gff(file="stranded.merged.stringtie.gff")
@@ -94,30 +126,55 @@ if __name__ == '__main__':
             set_end = set[-1]['end']
 
     s_n = 0
-    for s in set:
-        print('set {}'.format(s_n))
-        s_n += 1
-        for b in s['member']:
-            print('\t{}\t{}\t{}'.format(b.sequence, b.begin, b.end))
-            for transcript in b.transcript:
-                    id = transcript['transcript_id']
-                    begin = int(transcript['begin'])
-                    end = int(transcript['end'])
-                    sequence = transcript['sequence']
-                    strand = transcript['strand']
-                    print('\t \t{}\t{}\t{}\t{}\t{}'.format(id, transcript['sequence'], transcript['begin'], transcript['end'], transcript['strand']))
+    # for s in set:
+    #     print('set {}'.format(s_n))
+    #     s_n += 1
+    #     for b in s['member']:
+    #         print('\t{}\t{}\t{}'.format(b.sequence, b.begin, b.end))
+    #         for transcript in b.transcript:
+    #                 id = transcript['transcript_id']
+    #                 begin = int(transcript['begin'])
+    #                 end = int(transcript['end'])
+    #                 sequence = transcript['sequence']
+    #                 strand = transcript['strand']
+    #                 print('\t \t{}\t{}\t{}\t{}\t{}'.format(id, transcript['sequence'], transcript['begin'], transcript['end'], transcript['strand']))
 
-    # bundle_n = 0
-    # print('{} bundles found'.format(len(bundle)))
-    # for b in bundle:
-    #     print('\nbundle {}'.format(bundle_n))
-    #     bundle_n += 1
-    #     for transcript in b.transcript:
-    #         id = transcript['transcript_id']
-    #         begin = int(transcript['begin'])
-    #         end = int(transcript['end'])
-    #         sequence = transcript['sequence']
-    #         strand = transcript['strand']
-    #         print('\t{}\t{}\t{}\t{}\t{}'.format(id, transcript['sequence'], transcript['begin'], transcript['end'], transcript['strand']))
+    def rank(s):
+        if s.startswith('C'):
+            return 0
+        elif s.startswith('S'):
+            return 1
+        return 2
+
+    for s in set:
+        print('set {}\t{}'.format(s_n, s['sequence']))
+        s_n += 1
+        trans = []
+        for b in s['member']:
+            for transcript in b.transcript:
+                trans.append(transcript)
+
+        for t1 in sorted(trans, key=lambda k: (k['transcript_id'][0]=='C',k['transcript_id'][0]=='S'), reverse=True):
+            print('{}\t{}\t{}'.format(t1['transcript_id'], t1['begin'], t1['end']))
+            for t2 in sorted(trans, key=lambda k: (k['transcript_id'][0]=='C',k['transcript_id'][0]=='S'), reverse=True):
+                a, b, c = overlap(t1,t2)
+                print('\t{}\t{}\t{}\t{}\t{}\t{}'.format(t2['transcript_id'], t2['begin'], t2['end'], a, b, c))
+
+        # for transcript in sorted(trans, key=lambda k: rank(k['transcript_id'])):
+        # for transcript in sorted(trans, key=lambda k: (k['transcript_id'][0]=='C',k['transcript_id'][0]=='S'), reverse=True):
+        #     range = {}
+        #     while transcript['transcript_id'][0] == 'C':
+        #
+        #
+        #     id = transcript['transcript_id']
+        #     begin = int(transcript['begin'])
+        #     end = int(transcript['end'])
+        #     sequence = transcript['sequence']
+        #     strand = transcript['strand']
+        #     print('\t \t{}\t{}\t{}\t{}\t{}'.format(id, transcript['sequence'], transcript['begin'],
+        #                                            transcript['end'], transcript['strand']))
+        if s['sequence'] == 'Ctg0003':
+            break
+        # break
 
     exit(0)
