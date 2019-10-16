@@ -81,12 +81,19 @@ def overlap2(t1, t2):
 
 def overlap(t1, t2):
     """-----------------------------------------------------------------------------------------
-    left = t2['begin'] -t1['begin']
-    right = t2['end'] - t1['end']
+    Check if t2 overlaps t1.  if t2 is exactly the same as t1, the status will be 'merge-t2inside".
+    Retur:
+        left_extension: t1['begin'] - t2['begin']
+        right_extension: t1['end'] - t2['end']
+        status: no_overlpa
+                merge_t1inside
+                merge_t2inside
+                merge_extleft
+                merge_extright
 
     :param t1:
     :param t2:
-    :return:
+    :return:int, int, str, left extension, right extension, type
     -----------------------------------------------------------------------------------------"""
     lextend = 0
     rextend = 0
@@ -113,8 +120,8 @@ def overlap(t1, t2):
             else:
                 type = 'merge_extleft'
 
-        # extensions are given with respdet to t1
-        lextend = left['begin] - t1['begin']
+        # extensions are given with respect to t1
+        lextend = left['begin'] - t1['begin']
         rextend = max(left['end'], right['end']) - t1['end']
 
     return lextend, rextend, type
@@ -131,6 +138,7 @@ if __name__ == '__main__':
     query = r'(maker|augustus|masked|processed|gene|trnascan)(-|_)'
     sgff.replace_columns_re(['gene_id', 'transcript_id'], query, r'')
     sgff.replace_columns_re(['gene_id', 'transcript_id'], r'-tRNA-', r'.tRNA')
+    sgff.position_to_int()
     # sgff.rename_key('ID', 'transcript_id')
 
     sbundle = make_bundle(sgff)
@@ -142,6 +150,7 @@ if __name__ == '__main__':
     query = r'(maker|augustus|masked|processed|gene|trnascan)(-|_)'
     ugff.replace_columns_re(['gene_id', 'transcript_id'], query, r'')
     ugff.replace_columns_re(['gene_id', 'transcript_id'], r'-tRNA-', r'.tRNA')
+    ugff.position_to_int()
     # ugff.rename_key('ID', 'transcript_id')
 
     ubundle = make_bundle(ugff)
