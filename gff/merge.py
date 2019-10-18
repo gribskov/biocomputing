@@ -126,7 +126,22 @@ def overlap(t1, t2):
 
     return lextend, rextend, type
 
-
+def merge(merge, t):
+    """
+    
+    :param merge: 
+    :param t: 
+    :return: 
+    """
+    print('C {}\t{}\t{}'.format(t['transcript_id'], t['begin'], t['end']))
+    if t['transcript_id'] not in merge['names']:
+        if merge['strand'] != t['strand']:
+            print('warning different strands {}'.format(t['transcript_id']))
+        merge['begin'] = min(merge['begin'], t['begin'])
+        merge['end'] = min(merge['end'], t['end'])
+        merge['member'].append(t)
+        merge['names'].append(t['transcript_id'])
+    
 if __name__ == '__main__':
 
     sgff = Gff(file="stranded.merged.stringtie.gff")
@@ -176,53 +191,49 @@ if __name__ == '__main__':
             set_end = set[-1]['end']
 
     s_n = 0
-    # for s in set:
-    #     print('set {}'.format(s_n))
-    #     s_n += 1
-    #     for b in s['member']:
-    #         print('\t{}\t{}\t{}'.format(b.sequence, b.begin, b.end))
-    #         for transcript in b.transcript:
-    #                 id = transcript['transcript_id']
-    #                 begin = int(transcript['begin'])
-    #                 end = int(transcript['end'])
-    #                 sequence = transcript['sequence']
-    #                 strand = transcript['strand']
-    #                 print('\t \t{}\t{}\t{}\t{}\t{}'.format(id, transcript['sequence'], transcript['begin'], transcript['end'], transcript['strand']))
-
-    def rank(s):
-        if s.startswith('C'):
-            return 0
-        elif s.startswith('S'):
-            return 1
-        return 2
 
     for s in set:
-        print('set {}\t{}'.format(s_n, s['sequence']))
+        print('\nset {}\t{}'.format(s_n, s['sequence']))
         s_n += 1
         trans = []
         for b in s['member']:
+            # get all members of the set in one list and sort
             for transcript in b.transcript:
                 trans.append(transcript)
 
-        for t1 in sorted(trans, key=lambda k: (k['transcript_id'][0]=='C',k['transcript_id'][0]=='S'), reverse=True):
-            print('{}\t{}\t{}'.format(t1['transcript_id'], t1['begin'], t1['end']))
-            for t2 in sorted(trans, key=lambda k: (k['transcript_id'][0]=='C',k['transcript_id'][0]=='S'), reverse=True):
-                a, b, c = overlap(t1,t2)
-                print('\t{}\t{}\t{}\t{}\t{}\t{}'.format(t2['transcript_id'], t2['begin'], t2['end'], a, b, c))
+        trans.sort(key=lambda k: (k['transcript_id'][0]=='C',k['transcript_id'][0]=='S'))
 
-        # for transcript in sorted(trans, key=lambda k: rank(k['transcript_id'])):
-        # for transcript in sorted(trans, key=lambda k: (k['transcript_id'][0]=='C',k['transcript_id'][0]=='S'), reverse=True):
-        #     range = {}
-        #     while transcript['transcript_id'][0] == 'C':
-        #
-        #
-        #     id = transcript['transcript_id']
-        #     begin = int(transcript['begin'])
-        #     end = int(transcript['end'])
-        #     sequence = transcript['sequence']
-        #     strand = transcript['strand']
-        #     print('\t \t{}\t{}\t{}\t{}\t{}'.format(id, transcript['sequence'], transcript['begin'],
-        #                                            transcript['end'], transcript['strand']))
+        # if the C (genome) and S (stranded RNA) agree on the strand, the unstranded reads need to
+        # be merged on to the known strand
+
+        # The first sorted transcript is the founder of the merge
+        names = []
+        dir = ''
+        t = trans.pop()
+        names.append(t['transcript_id'])
+        if t['transcript_id'][0] in ('C', 'S'):
+            # only set strand for C and S
+            dir += t['strand']
+
+        while trans:
+            t = trans.pop()
+            if t['transcript_id'] in names:
+                continue
+
+            if t['transcript_id'][0] in ('C', 'S') and t['strand'] not in dir:
+                # only set strand for C and S
+                dir += t['strand']
+            elif t['strand'] not in dir:
+                continue
+
+            names.append(t['transcript_id'])
+
+
+        print( 'mergetype: {}'.format(dir))
+        for name in names:
+            print('\t{}'.format(name))
+
+
         if s['sequence'] == 'Ctg0003':
             break
         # break
