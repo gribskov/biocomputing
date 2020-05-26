@@ -244,7 +244,9 @@ class Fasta:
         """-----------------------------------------------------------------------------------------
         Returns a dictionary with the composition of the sequence
         If uppercase is true, characters are converted to uppercase
-        :return: dict, keys are letters in the sequence
+
+        :param uppercase: boolean
+        :return: dict, int; keys are sequence letters, values are counts
         -----------------------------------------------------------------------------------------"""
         seq = fasta.seq
         if uppercase:
@@ -256,6 +258,25 @@ class Fasta:
                 count[ch] += 1
             else:
                 count[ch] = 1
+
+        return count
+
+    def frequency(fasta, uppercase=False):
+        """-----------------------------------------------------------------------------------------
+        Returns a dictionary with the composition of the sequence as frequencies (probabilities).
+        Simply calls fasta.composition and divides the values by the character count. If uppercase
+        is true, characters are converted to uppercase
+
+        :param uppercase: boolean
+        :return: dict, float; keys are sequence letters , values are frequencies
+        -----------------------------------------------------------------------------------------"""
+
+        count = fasta.composition, uppercase=uppercase)
+        sum = 0
+        for a in count:
+            sum += count[a]
+        for a in count:
+            count[a] /= sum
 
         return count
 
