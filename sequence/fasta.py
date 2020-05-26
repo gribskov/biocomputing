@@ -300,11 +300,10 @@ class Fasta:
                 # ignore missing bases
                 continue
 
-        if acgt / total > threshold:
+        if acgt / total >= threshold:
             return True
 
         return False
-
 
 # --------------------------------------------------------------------------------------------------
 # testing
