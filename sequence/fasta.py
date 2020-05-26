@@ -271,7 +271,7 @@ class Fasta:
         :return: dict, float; keys are sequence letters , values are frequencies
         -----------------------------------------------------------------------------------------"""
 
-        count = fasta.composition, uppercase=uppercase)
+        count = fasta.composition( uppercase=uppercase)
         sum = 0
         for a in count:
             sum += count[a]
@@ -325,6 +325,11 @@ if __name__ == '__main__':
     print('Uppercase')
     for ch in comp:
         print('\t{}\t{}'.format(ch, comp[ch]))
+
+    print('\nFrequencies (without uppercasing)')
+    freq = fasta.frequency()
+    for ch in freq:
+        print('\t{}\t{}'.format(ch, freq[ch]))
 
     # test isACGT
     print('\nACGT should be true')
