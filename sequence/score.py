@@ -1,3 +1,5 @@
+import sys
+
 class Score:
     """=============================================================================================
     sequence scoring table object
@@ -8,12 +10,14 @@ class Score:
         """-----------------------------------------------------------------------------------------
         score constructor
         -----------------------------------------------------------------------------------------"""
-        self.alphabet = alphabet
-        self.a2i = {}
-        self.i2a = []
-        self.table = []
+        self.alphabetSet(alphabet=alphabet)
 
-        self.alphabetIndex()
+        # self.alphabet = alphabet
+        # self.a2i = {}
+        # self.i2a = []
+        # self.table = []
+        #
+        # self.alphabetIndex()
 
     def __str__(self):
         return self.format(decimal=0)
@@ -62,7 +66,7 @@ class Score:
             if char in self.a2i:
                 # duplicate character
                 sys.stderr.write(
-                    'Score:alphabetIndex - duplicate alphabet character in {}\n'.format(alphabet))
+                    'Score:alphabetIndex - duplicate alphabet character in {}\n'.format(char))
 
             self.a2i[char] = i
             self.i2a.append(char)
@@ -109,6 +113,34 @@ class Score:
         return istring
 
 
+    def randomFromFrequency(self, freq):
+        """-----------------------------------------------------------------------------------------
+        Given a frequency probability vector, represented as a dict or list, construct a transition
+        matrix that represents the probability of random transitions between letters.  Assuming the
+        frequency vector is a row vector, this is the matrix with the transpose of the frequency
+        vector as columns.
+
+        :param freq: dict/list of float, frequencies of alphabet letters
+        :return: True/False
+        -----------------------------------------------------------------------------------------"""
+        if isinstance(freq, dict):
+            n = len(self.alphabet)
+            for a in self.alphabet:
+                i = self.a2i[a]
+                for b in self.alphabet:
+                    j=self.a2i[b]
+                    self.table[i][j] = freq[a]
+        elif isinstance(freq, list):
+            for i in range(len(freq)):
+                for j in range(len(freq)):
+                    self.table[i][j] = freq[i]
+        else:
+            sys.stderr.write('Score:randFromFrequency - unknown type of frequency vector\n')
+            sys.stderr.write('frequency vector must be list or dict, found {}\n'.format(type(freq)))
+            return False
+
+        return True
+
 # ==================================================================================================
 # Testing
 # ==================================================================================================
@@ -140,5 +172,25 @@ if __name__ == '__main__':
     print('    sequence:', sequence)
     iseq = score.strToIndex(sequence)
     print('    iseq:', iseq)
+
+    # transition matrices
+
+    print('Transition matrix from dictionary')
+    score = Score()
+    freq = { 'A':0.4, 'C':0.3, 'G':0.2, 'T':0.1 }
+    score.randomFromFrequency( freq )
+    print(score.format(decimal=2))
+
+    print('Transition matrix from list')
+    score = Score()
+    freq = [0.4, 0.3, 0.2,0.1]
+    score.randomFromFrequency(freq)
+    print(score.format(decimal=2))
+
+    print('Transition from string - should fail')
+    score = Score()
+    freq = 'GATCGATC'
+    score.randomFromFrequency(freq)
+    print(score.format(decimal=2))
 
     exit(0)
