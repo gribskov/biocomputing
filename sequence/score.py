@@ -1,5 +1,6 @@
 import sys
 
+
 class Score:
     """=============================================================================================
     sequence scoring table object
@@ -112,7 +113,6 @@ class Score:
 
         return istring
 
-
     def randomFromFrequency(self, freq):
         """-----------------------------------------------------------------------------------------
         Given a frequency probability vector, represented as a dict or list, construct a transition
@@ -128,18 +128,77 @@ class Score:
             for a in self.alphabet:
                 i = self.a2i[a]
                 for b in self.alphabet:
-                    j=self.a2i[b]
+                    j = self.a2i[b]
                     self.table[i][j] = freq[a]
         elif isinstance(freq, list):
             for i in range(len(freq)):
                 for j in range(len(freq)):
                     self.table[i][j] = freq[i]
         else:
-            sys.stderr.write('Score:randFromFrequency - unknown type of frequency vector\n')
+            sys.stderr.write('Score:randomFromFrequency - unknown type of frequency vector\n')
             sys.stderr.write('frequency vector must be list or dict, found {}\n'.format(type(freq)))
             return False
 
         return True
+
+    def conservedFromFrequency(self, freq, identity=1.0):
+        """-----------------------------------------------------------------------------------------
+        For a frequency probability vector and a conservation fraction construct a transition matrix
+        in which identity fractionof letters are unchanged and 1-identity are randomly changed.
+
+        This matrix is nether symmetric nor stationary
+
+        :param freq: dict/list of float, frequencies of alphabet letters
+        :param identity: float
+        :return: True/False
+        -----------------------------------------------------------------------------------------"""
+        rfrac = (1.0 - identity)
+
+        if isinstance(freq, dict):
+            n = len(self.alphabet)
+
+            for a in self.alphabet:
+                i = self.a2i[a]
+                self.table[i][i] = identity
+                changed = 1.0 - freq[i]
+                for b in self.alphabet:
+                    j = self.a2i[b]
+                    if i == j:
+                        continue
+
+                    self.table[j][i] = rfrac * freq[j] / changed
+
+        elif isinstance(freq, list):
+            for i in range(len(freq)):
+                self.table[i][i] = identity
+                changed = 1.0 - freq[i]
+                for j in range(len(freq)):
+                    if i == j:
+                        continue
+
+                    self.table[j][i] = rfrac * freq[j] / changed
+
+        else:
+            sys.stderr.write('Score:conservedFromFrequency - unknown type of frequency vector\n')
+            sys.stderr.write('frequency vector must be list or dict, found {}\n'.format(type(freq)))
+            return False
+
+        return True
+
+    def transition(self, freq):
+        """-----------------------------------------------------------------------------------------
+        Multiply the current transition matrix times the row vector, freq
+
+        :param freq:
+        :return: list, float; new frequencies
+        -----------------------------------------------------------------------------------------"""
+        new = [0 for _ in range(len(freq))]
+        for i in range(len(freq)):
+            for j in range(len(freq)):
+                new[i] += freq[j] * self.table[j][i]
+
+        return new
+
 
 # ==================================================================================================
 # Testing
@@ -177,20 +236,29 @@ if __name__ == '__main__':
 
     print('Transition matrix from dictionary')
     score = Score()
-    freq = { 'A':0.4, 'C':0.3, 'G':0.2, 'T':0.1 }
-    score.randomFromFrequency( freq )
+    freq = {'A': 0.4, 'C': 0.3, 'G': 0.2, 'T': 0.1}
+    score.randomFromFrequency(freq)
     print(score.format(decimal=2))
 
     print('Transition matrix from list')
     score = Score()
-    freq = [0.4, 0.3, 0.2,0.1]
+    freq = [0.4, 0.3, 0.2, 0.1]
     score.randomFromFrequency(freq)
     print(score.format(decimal=2))
 
-    print('Transition from string - should fail')
+    # print('Transition from string - should fail')
+    # score = Score()
+    # freq = 'GATCGATC'
+    # score.randomFromFrequency(freq)
+    # print(score.format(decimal=2))
+
+    print('90% conservation matrix')
     score = Score()
-    freq = 'GATCGATC'
-    score.randomFromFrequency(freq)
+    freq = [0.4, 0.3, 0.2, 0.1]
+    score.conservedFromFrequency(freq, 0.9)
     print(score.format(decimal=2))
+
+    new = score.transition(freq)
+    print('new frequencies: {}'.format(new))
 
     exit(0)
