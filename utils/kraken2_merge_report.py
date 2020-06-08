@@ -127,6 +127,44 @@ class Taxonomy():
 
         return n
 
+    def writeFormatted(self, min_percent, min_count, space=4, ):
+        """-----------------------------------------------------------------------------------------
+        Write out the tree in the order of the index.
+        This should regenerate the original kraken2 output in better aligned format
+
+        :param space: integer, number of spaces between columns
+        :return: integer, number of lines
+        printed
+        -----------------------------------------------------------------------------------------"""
+        # find the widths of the numeric columns
+        width = {}
+        width['n_mapped'] = 0
+        width['n_taxon'] = 0
+        for taxon in self.index:
+            node = self.index[taxon]
+            width['n_mapped'] = max(width['n_mapped'], len(node.n_mapped))
+            width['n_taxon'] = max(width['n_taxon'], len(node.n_taxon))
+
+        fmt = '{{:>{}}}\t{{:>{}}}\t{{:>{}}}\t{{:>{}}}\t{{}}{{}}'. \
+            format(5 + space, width['n_mapped'] + space, width['n_taxon'] + space, 2 + space)
+
+        n = 0
+        for taxon in self.index:
+            node = self.index[taxon]
+
+            if min_count > int(node.n_taxon) and min_percent > float(node.pct_mapped):
+                continue
+
+            # space = '  ' * node.level
+            level = Taxonomy.r2i[node.rank[0]]
+            indent = ' ' * (space + level)
+
+            print(fmt.format(node.pct_mapped, node.n_mapped,
+                             node.n_taxon, node.rank, indent, node.text))
+            n += 1
+
+        return n
+
     # def rankLT(self, node):
     #     """-----------------------------------------------------------------------------------------
     #     Test if the current node has rank less than node
@@ -252,6 +290,7 @@ if __name__ == '__main__':
         tax.current.child.append(node)
         tax.current = node
 
-    tax.dumpFromIndex()
+    # tax.dumpFromIndex()
+    tax.writeFormatted(0.05, 50, 4)
 
     exit(0)
