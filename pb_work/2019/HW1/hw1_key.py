@@ -19,19 +19,29 @@ try:
 except (IOError, OSError):
     print('Error opening file {}'.format(fastqname))
     exit(1)
-
+content = list(fastq)
 # read each line and count lines, entries, and bases
 n_line = 0
 n_entry = 0
 n_base = 0
+pos = 0
 for line in fastq:
-    n_line += 1
-    if n_line % 4 == 2:
-        # a seqeunce line
-        n_entry += 1
-        n_base += len(line.rstrip())
+
+    if pos ==1:
+        # sequence line
+        for base in line:
+            try:
+                count[base] += 1
+            except KeyError:
+                count[base] = 1
+
+    pos += 1
+    if pos == 4:
+        pos = 0
 
 # end of loop over lines of file
+
+
 
 # report
 print('lines read: {}'.format(n_line))
