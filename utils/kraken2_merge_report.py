@@ -43,13 +43,6 @@ class Node:
     Single node in the multifurcating tree holding the taxonomy
     ============================================================================================="""
 
-    # global variables to translate ranks to levels
-    i2r = ['U', 'U1', 'R', 'R1', 'D', 'D1', 'P', 'P1', 'C', 'C1',
-           'O', 'O1', 'F', 'F1', 'G', 'G1', 'S', 'S1']
-    r2i = {}
-    for i in range(len(i2r)):
-        r2i[i2r[i]] = i
-
     def __init__(self):
         """-----------------------------------------------------------------------------------------
 
@@ -77,16 +70,21 @@ class Node:
         node.n_mapped = n_mapped
         node.n_taxon = n_taxon
         node.rank = rank
-        node.level = Node.r2i[rank]
-        node.text = text
+        node.text = text.lstrip()
 
         return node
 
 
 class Taxonomy():
     """=============================================================================================
-    Single node in the multifurcating tree holding the taxonomy
+    The taxonomy tree
     ============================================================================================="""
+
+    # global variables to translate ranks to numeric levels
+    i2r = ['U', 'R', 'D', 'K', 'P', 'C', 'O', 'F', 'G', 'S']
+    r2i = {}
+    for i in range(len(i2r)):
+        r2i[i2r[i]] = i
 
     def __init__(self):
         """-----------------------------------------------------------------------------------------
@@ -102,13 +100,116 @@ class Taxonomy():
         This node will be the parent of the one at the provided level.
         Has no effect if level is greater than current.level
 
-        :param level: integer, taxonomic level
+        :param node: Node, child node for which a parent is sought
         :return: Node, matching parent node
         -----------------------------------------------------------------------------------------"""
-        while self.current.level >= node.level:
+        while self.rankGE(node):
             self.current = self.current.parent
 
         return self.current
+
+    def dumpFromIndex(self):
+        """-----------------------------------------------------------------------------------------
+        Write out the tree in the order of the index.
+        This should regenerate the original kraken2 output
+
+        :return: integer, number of lines printed
+        -----------------------------------------------------------------------------------------"""
+        n = 0
+        for taxon in self.index:
+            node = self.index[taxon]
+            # space = ' ' * node.level
+            level = Taxonomy.r2i[node.rank[0]]
+            space = ' ' * level
+            print('{}\t{}\t{}\t{}\t{}{}'.format(node.pct_mapped, node.n_mapped,
+                                                node.n_taxon, node.rank, space, node.text))
+            n += 1
+
+        return n
+
+    # def rankLT(self, node):
+    #     """-----------------------------------------------------------------------------------------
+    #     Test if the current node has rank less than node
+    #
+    #     :param node: Node
+    #     :return: Boolean
+    #     -----------------------------------------------------------------------------------------"""
+    #     crank = self.current.rank[0]
+    #     cbaselevel = Taxonomy.r2i[crank]
+    #
+    #     nrank = node.rank[0]
+    #     nbaselevel = Taxonomy.r2i[nrank]
+    #
+    #     if cbaselevel < nbaselevel:
+    #         return True
+    #
+    #     elif cbaselevel == nbaselevel:
+    #         if len(crank) < len(nrank):
+    #             # only possibly when comparing a rank with suffix to one without
+    #             return True
+    #         elif len(nrank) == len(crank):
+    #             # both are subranks of the same base level
+    #             if int(crank[1:]) < int(nrank[1:]):
+    #                 return True
+    #
+    #     return False
+
+    def rankGE(self, node):
+        """-----------------------------------------------------------------------------------------
+        Test if the current node has rank greater or equal to node
+
+        :param node: Node
+        :return: Boolean
+        -----------------------------------------------------------------------------------------"""
+        crank = self.current.rank[0]
+        cbaselevel = Taxonomy.r2i[crank]
+
+        nrank = node.rank[0]
+        nbaselevel = Taxonomy.r2i[nrank]
+
+        if crank == nrank:
+            return True
+
+        if cbaselevel > nbaselevel:
+            return True
+
+        elif cbaselevel == nbaselevel:
+            if len(crank) > len(nrank):
+                # only possibly when comparing a rank with suffix to one without
+                return True
+
+            elif len(nrank) == len(crank):
+                # both are subranks of the same base level
+                if int(crank[1:]) >= int(nrank[1:]):
+                    return True
+
+        return False
+
+    @staticmethod
+    def parentRank(rank):
+        """-----------------------------------------------------------------------------------------
+        Apparently, there can be an unlimited number of sub levels to any taxonomic rank, indicated
+        by numeric suffices: D > D1 > D2 ...
+        This makes it nearly impossible to predfine a complete ordered list of levels. This method
+        assumes if the rank is only one letter it can be looked up in r2i.  If the rank longer, the
+        parent level will be the same rank letter with the suffix decremented by 1.  When the suffix
+        is zero, it is dropped.
+
+        :param rank: string, taxonomic rank
+        :return: string, taxonmic rank of parent
+        -----------------------------------------------------------------------------------------"""
+        if len(rank) == 1:
+            parent_rank = Taxonomy.i2r[Taxonomy.r2i[rank] - 1]
+            return parent_rank
+
+        # suffix = int(rank[1:]) - 1
+        suffix = rank[1:]
+        rank = rank[0]
+
+        parent_rank = rank + suffix
+        parent_rank.replace('0', '')
+
+        return parent_rank
 
 
 # ==================================================================================================
@@ -150,5 +251,7 @@ if __name__ == '__main__':
         node.parent = tax.current
         tax.current.child.append(node)
         tax.current = node
+
+    tax.dumpFromIndex()
 
     exit(0)
