@@ -37,9 +37,83 @@ Michael Gribskov     07 June 2020
 ================================================================================================="""
 import sys
 
-# --------------------------------------------------------------------------------------------------
+
+class Node:
+    """=============================================================================================
+    Single node in the multifurcating tree holding the taxonomy
+    ============================================================================================="""
+
+    # global variables to translate ranks to levels
+    i2r = ['U', 'U1', 'R', 'R1', 'D', 'D1', 'P', 'P1', 'C', 'C1',
+           'O', 'O1', 'F', 'F1', 'G', 'G1', 'S', 'S1']
+    r2i = {}
+    for i in range(len(i2r)):
+        r2i[i2r[i]] = i
+
+    def __init__(self):
+        """-----------------------------------------------------------------------------------------
+
+        -----------------------------------------------------------------------------------------"""
+        self.pct_mapped = 0.0
+        self.n_mapped = 0
+        self.n_taxon = 0
+        self.rank = 'U'
+        self.text = ''
+
+        self.parent = []
+        self.child = []
+
+    @staticmethod
+    def parse(line):
+        """-----------------------------------------------------------------------------------------
+
+        :param line: string, one line from taxonomy file
+        :return: Node, new node in taxonomy
+        -----------------------------------------------------------------------------------------"""
+        (pct_mapped, n_mapped, n_taxon, rank, taxid, text) = line.rstrip().split('\t')
+
+        node = Node()
+        node.pct_mapped = pct_mapped
+        node.n_mapped = n_mapped
+        node.n_taxon = n_taxon
+        node.rank = rank
+        node.level = Node.r2i[rank]
+        node.text = text
+
+        return node
+
+
+class Taxonomy():
+    """=============================================================================================
+    Single node in the multifurcating tree holding the taxonomy
+    ============================================================================================="""
+
+    def __init__(self):
+        """-----------------------------------------------------------------------------------------
+
+        -----------------------------------------------------------------------------------------"""
+        self.index = {}
+        self.root = None
+        self.current = None
+
+    def backtrack(self, node):
+        """-----------------------------------------------------------------------------------------
+        search backward through parents to find the first node with a smaller level (higher rank)
+        This node will be the parent of the one at the provided level.
+        Has no effect if level is greater than current.level
+
+        :param level: integer, taxonomic level
+        :return: Node, matching parent node
+        -----------------------------------------------------------------------------------------"""
+        while self.current.level >= node.level:
+            self.current = self.current.parent
+
+        return self.current
+
+
+# ==================================================================================================
 # main
-# --------------------------------------------------------------------------------------------------
+# ==================================================================================================
 if __name__ == '__main__':
 
     # open file
@@ -53,20 +127,28 @@ if __name__ == '__main__':
         exit(1)
 
     # define rank order for taxonomic ranks
-    i2r = ['U', 'D', 'P', 'C', 'O', 'F', 'G', 'S' ]
-    for i in range(len(i2r)):
-        r2i[i2r[i]] = i
 
-    # read and store in array of hashes
-    taxonomy = []
+    # read and store in taxonomy object
+    tax = Taxonomy()
+
+    # root
+    line = report.readline()
+    node = Node.parse(line)
+    tax.root = node
+    tax.current = node
+    tax.index[node.text] = node
+
     for line in report:
-        ( pct_mapped, n_mapped, n_taxon, rank, taxid, text ) = line.rstrip().split('\t')
-        print('{}: {}'.format(pct_mapped, text))
-        taxonomy.append(    {   'pct_mapped':pct_mapped,
-                                'n_mapped':n_mapped,
-                                'n_taxon':n_taxon,
-                                'rank':rank,
-                                'text':text
-        })
+        # create node and add to index
+        node = Node.parse(line)
+        tax.index[node.text] = node
+
+        # set up parent child relationships. backtrack will set tax.current to the parent of the
+        # new node
+
+        tax.backtrack(node)
+        node.parent = tax.current
+        tax.current.child.append(node)
+        tax.current = node
 
     exit(0)
