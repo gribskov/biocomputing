@@ -232,6 +232,75 @@ class Taxonomy():
 
         return False
 
+    def merge(self, tax):
+        """-----------------------------------------------------------------------------------------
+        Merge the taxonomy, tax, into this one.
+        Method:
+            Look up taxonomy names of tax in self.index
+            If present:
+                copy children from tax into self (no duplicates)
+            else
+                create a new node and add it as child of parent, and to index
+
+        :param tax: Taxonomy
+        :return: integer, number of nodes after merging
+        -----------------------------------------------------------------------------------------"""
+
+        # if this taxonomy is empty, copy the root node from tax
+        if not self.index:
+            self.root = Node()
+            self.root.pct_mapped = tax.root.pct_mapped
+            self.root.n_mapped = tax.root.n_mapped
+            self.root.n_taxon = tax.root.n_taxon
+            self.root.rank = tax.root.rank
+            self.root.text = tax.root.text
+
+            self.current = self.root
+            self.index[self.root.text] = self.root
+
+        for taxon in tax.index:
+            node = tax.index[taxon]
+            if taxon in self.index:
+                # node exists in current taxonomy
+                # print('{} exists'.format(taxon))
+                new = self.index[taxon]
+                new.pct_mapped += node.pct_mapped
+                new.n_mapped += node.n_mapped
+                new.n_taxon += node.n_taxon
+                if not new.rank == node.rank:
+                    sys.stderr.write('{}({}) : {}({})\t node ranks do not agree\n'. \
+                                     format(new.text, new.rank, node.text, node.rank))
+                new.text = node.text
+                if new.parent:
+                    # avoids error when the root is reached
+                    if not new.parent.text == node.parent.text:
+                        sys.stderr.write('{}({}) : {}({})\t parents do not agree\n'. \
+                                         format(new.text, new.parent.text,
+                                                node.text, node.parent.text))
+                    if new not in new.parent.child:
+                        new.parent.child.append(new)
+
+            else:
+                # this node is not in the existing taxonomy so create it
+                # sys.stderr.write('creating {} \n'.format(taxon))
+                new = Node()
+                new.pct_mapped = node.pct_mapped
+                new.n_mapped = node.n_mapped
+                new.n_taxon = node.n_taxon
+                new.rank = node.rank
+                new.text = node.text
+                if node.parent:
+                    try:
+                        new.parent = self.index[node.parent.text]
+                    except:
+                        sys.stderr.write('parent of {} ({}) is unknown\n'.format(
+                            node.text, node.parent.text))
+                    new.parent.child.append(new)
+                self.index[node.text] = new
+                # don't create children, this will be done when they are found
+
+        return len(self.index)
+
     @staticmethod
     def parentRank(rank):
         """-----------------------------------------------------------------------------------------
