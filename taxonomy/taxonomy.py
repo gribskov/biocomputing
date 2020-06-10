@@ -79,6 +79,7 @@ class Node:
         node.n_mapped = n_mapped
         node.n_taxon = n_taxon
         node.rank = rank
+        node.taxid = taxid
         node.text = text.lstrip()
 
         return node
@@ -203,32 +204,49 @@ class Taxonomy():
 
     def rankGE(self, node):
         """-----------------------------------------------------------------------------------------
-        Test if the current node has rank greater or equal to node
+        Test if the current node has rank greater or equal to node.
 
         :param node: Node
         :return: Boolean
         -----------------------------------------------------------------------------------------"""
-        crank = self.current.rank[0]
-        cbaselevel = Taxonomy.r2i[crank]
+        c0 = self.current.rank[0]
+        c1 = self.current.rank[1:] or "0"
+        # crank = self.current.rank[0]
+        # clen = len(self.current.rank)
+        # cbaselevel = Taxonomy.r2i[crank]
 
-        nrank = node.rank[0]
-        nbaselevel = Taxonomy.r2i[nrank]
+        n0 = node.rank[0]
+        n1 = node.rank[1:] or "0"
+        # nrank = node.rank[0]
+        # nlen = len(node.rank)
+        # nbaselevel = Taxonomy.r2i[nrank]
 
-        if crank == nrank:
-            return True
-
-        if cbaselevel > nbaselevel:
-            return True
-
-        elif cbaselevel == nbaselevel:
-            if len(crank) > len(nrank):
-                # only possibly when comparing a rank with suffix to one without
+        if c0 == n0:
+            if int(c1) < int(n1):
+                return False
+            else:
                 return True
 
-            elif len(nrank) == len(crank):
-                # both are subranks of the same base level
-                if int(crank[1:]) >= int(nrank[1:]):
-                    return True
+        else:
+            return Taxonomy.r2i[n0] < Taxonomy.r2i[c0]
+
+        # if self.current.rank == node.rank:
+        #     return True
+        #
+        # if cbaselevel > nbaselevel:
+        #     return True
+        #
+        # elif cbaselevel < nbaselevel:
+        #     return False
+        #
+        # # both are subranks of the same base level
+        # elif clen > nlen:
+        #     # only possibly when comparing a rank with suffix to one without
+        #     return True
+        #
+        # elif int(self.current.rank[1:]) >= int(node.rank[1:]):
+        #
+        #     return True
 
         return False
 
@@ -270,13 +288,13 @@ class Taxonomy():
                 if not new.rank == node.rank:
                     sys.stderr.write('{}({}) : {}({})\t node ranks do not agree\n'. \
                                      format(new.text, new.rank, node.text, node.rank))
-                new.text = node.text
+                # new.text = node.text
                 if new.parent:
                     # avoids error when the root is reached
-                    if not new.parent.text == node.parent.text:
+                    if not new.parent.taxid == node.parent.taxid:
                         sys.stderr.write('{}({}) : {}({})\t parents do not agree\n'. \
-                                         format(new.text, new.parent.text,
-                                                node.text, node.parent.text))
+                                         format(new.text, new.parent.taxid,
+                                                node.text, node.parent.taxid))
                     if new not in new.parent.child:
                         new.parent.child.append(new)
 
@@ -289,14 +307,15 @@ class Taxonomy():
                 new.n_taxon = node.n_taxon
                 new.rank = node.rank
                 new.text = node.text
+                new.taxid = node.taxid
                 if node.parent:
                     try:
-                        new.parent = self.index[node.parent.text]
+                        new.parent = self.index[node.parent.taxid]
                     except:
                         sys.stderr.write('parent of {} ({}) is unknown\n'.format(
-                            node.text, node.parent.text))
+                            node.text, node.parent.taxid))
                     new.parent.child.append(new)
-                self.index[node.text] = new
+                self.index[node.taxid] = new
                 # don't create children, this will be done when they are found
 
         return len(self.index)
@@ -344,7 +363,7 @@ class Taxonomy():
         node = Node.parseKraken(line)
         tax.root = node
         tax.current = node
-        tax.index[node.text] = node
+        tax.index[node.taxid] = node
 
         for line in report:
             # create node and add to index
