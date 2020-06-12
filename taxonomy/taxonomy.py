@@ -58,7 +58,7 @@ class Node:
         self.rank = 'U'
         self.text = ''
 
-        self.parent = []
+        self.parent = None
         self.child = []
 
     @staticmethod
@@ -272,9 +272,10 @@ class Taxonomy():
             self.root.n_taxon = tax.root.n_taxon
             self.root.rank = tax.root.rank
             self.root.text = tax.root.text
+            self.root.taxid = tax.root.taxid
 
             self.current = self.root
-            self.index[self.root.text] = self.root
+            self.index[self.root.taxid] = self.root
 
         for taxon in tax.index:
             node = tax.index[taxon]
@@ -286,15 +287,18 @@ class Taxonomy():
                 new.n_mapped += node.n_mapped
                 new.n_taxon += node.n_taxon
                 if not new.rank == node.rank:
-                    sys.stderr.write('{}({}) : {}({})\t node ranks do not agree\n'. \
+                    sys.stderr.write('\n{}({}) : {}({})\t node ranks do not agree\n'. \
                                      format(new.text, new.rank, node.text, node.rank))
                 # new.text = node.text
                 if new.parent:
                     # avoids error when the root is reached
                     if not new.parent.taxid == node.parent.taxid:
-                        sys.stderr.write('{}({}) : {}({})\t parents do not agree\n'. \
-                                         format(new.text, new.parent.taxid,
-                                                node.text, node.parent.taxid))
+                        sys.stderr.write('\nparents do not agree\n')
+                        sys.stderr.write('\texisting node: {}({})\t incoming node: {}({})\n'. \
+                                         format(new.text, new.taxid, node.text, node.taxid))
+                        sys.stderr.write('\texisting parent: {}({})\t incoming parent: {}({})\n'. \
+                                         format(new.parent.text, new.parent.taxid,
+                                                node.parent.text, node.parent.taxid))
                     if new not in new.parent.child:
                         new.parent.child.append(new)
 
@@ -315,6 +319,7 @@ class Taxonomy():
                         sys.stderr.write('parent of {} ({}) is unknown\n'.format(
                             node.text, node.parent.taxid))
                     new.parent.child.append(new)
+
                 self.index[node.taxid] = new
                 # don't create children, this will be done when they are found
 
@@ -368,7 +373,7 @@ class Taxonomy():
         for line in report:
             # create node and add to index
             node = Node.parseKraken(line)
-            tax.index[node.text] = node
+            tax.index[node.taxid] = node
 
             # set up parent child relationships. backtrack will set tax.current to the parent of the
             # new node
