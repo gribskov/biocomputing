@@ -146,7 +146,7 @@ class Taxonomy():
         -----------------------------------------------------------------------------------------"""
         nnode = 0
         stack = []
-        stack.append( self.root )
+        stack.append(self.root)
         while stack:
             node = stack.pop()
             nnode += 1
@@ -154,15 +154,14 @@ class Taxonomy():
             level = Taxonomy.r2i[node.rank[0]]
             space = ' ' * level
             print('{:.2f}\t{}\t{}\t{}\t{}{}'.format(node.pct_mapped, node.n_mapped,
-                                                node.n_taxon, node.rank, space, node.text))
+                                                    node.n_taxon, node.rank, space, node.text))
 
             # push the children on stack in reverse alphabetic order
             if node.child:
-                for child in sorted(node.child,reverse=True,key=lambda k:k.text):
-                    stack.append( child )
+                for child in sorted(node.child, reverse=True, key=lambda k: k.text):
+                    stack.append(child)
 
         return nnode
-
 
     def writeFormatted(self, min_percent, min_count, space=4, ):
         """-----------------------------------------------------------------------------------------
@@ -174,33 +173,53 @@ class Taxonomy():
         printed
         -----------------------------------------------------------------------------------------"""
         # find the widths of the numeric columns
-        width = {}
-        width['n_mapped'] = 0
-        width['n_taxon'] = 0
-        for taxon in self.index:
-            node = self.index[taxon]
-            width['n_mapped'] = max(width['n_mapped'], len(str(node.n_mapped)))
-            width['n_taxon'] = max(width['n_taxon'], len(str(node.n_taxon)))
-
-        fmt = '{{:>{}}}\t{{:>{}}}\t{{:>{}}}\t{{:>{}}}\t{{}}{{}}'. \
-            format(5 + space, width['n_mapped'] + space, width['n_taxon'] + space, 2 + space)
+        fmt = self.formatString()
 
         n = 0
         for taxon in self.index:
             node = self.index[taxon]
 
-            if min_count > int(node.n_taxon) and min_percent > float(node.pct_mapped):
-                continue
-
-            # space = '  ' * node.level
             level = Taxonomy.r2i[node.rank[0]]
-            indent = ' ' * (space + level)
+            indent = ' ' * level
 
             print(fmt.format(node.pct_mapped, node.n_mapped,
                              node.n_taxon, node.rank, indent, node.text))
             n += 1
 
         return n
+
+    def formatString(self, space=2):
+        """-----------------------------------------------------------------------------------------
+        examine the widths of the fields in the taxonomy and return a format string
+
+        :param space: int, minimum space between columns
+        :return: string, format sting for print/write
+        -----------------------------------------------------------------------------------------"""
+        # find the widths of the numeric columns
+        width = {}
+        width['pct_mapped'] = 0
+        width['n_mapped'] = 0
+        width['n_taxon'] = 0
+        width['taxid'] = 0
+        width['rank'] = 0
+        for taxon in self.index:
+            node = self.index[taxon]
+            pct = '{:.2f}'.format(node.pct_mapped)
+            width['pct_mapped'] = max(width['pct_mapped'], len(pct))
+            width['n_mapped'] = max(width['n_mapped'], len(str(node.n_mapped)))
+            width['n_taxon'] = max(width['n_taxon'], len(str(node.n_taxon)))
+            width['taxid'] = max(width['taxid'], len(str(node.taxid)))
+            width['rank'] = max(width['rank'], len(node.rank))
+
+            # ugly, but {{}} needed to produce {} in result
+            fmt = '{{:>{}.2f}}\t{{:>{}}}\t{{:>{}}}\t{{:>{}}}\t{{}}{{}}'. \
+                format(width['pct_mapped'] + space,
+                       width['n_mapped'] + space,
+                       width['n_taxon'] + space,
+                       width['taxid'] + space,
+                       width['rank'] + space)
+
+        return fmt
 
     # def rankLT(self, node):
     #     """-----------------------------------------------------------------------------------------
