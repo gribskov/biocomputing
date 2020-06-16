@@ -137,6 +137,33 @@ class Taxonomy():
 
         return n
 
+    def dumpFromTree(self):
+        """-----------------------------------------------------------------------------------------
+        After merging or totherwise adding nodes, the index may not precisely reflect the tree
+        structure.  Print the tree in depth first search order.
+
+        :return: integer, number of nodes
+        -----------------------------------------------------------------------------------------"""
+        nnode = 0
+        stack = []
+        stack.append( self.root )
+        while stack:
+            node = stack.pop()
+            nnode += 1
+
+            level = Taxonomy.r2i[node.rank[0]]
+            space = ' ' * level
+            print('{}\t{}\t{}\t{}\t{}{}'.format(node.pct_mapped, node.n_mapped,
+                                                node.n_taxon, node.rank, space, node.text))
+
+            # push the children on stack in reverse alphabetic order
+            if node.child:
+                for child in sorted(node.child,reverse=True,key=lambda k:k.text):
+                    stack.append( child )
+
+        return nnode
+
+
     def writeFormatted(self, min_percent, min_count, space=4, ):
         """-----------------------------------------------------------------------------------------
         Write out the tree in the order of the index.
