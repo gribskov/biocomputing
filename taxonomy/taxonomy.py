@@ -104,6 +104,12 @@ class Taxonomy():
         self.root = None
         self.current = None
 
+    def __iter__(self):
+        return self.next()
+
+    # def __next__(self):
+    #     return self.next()
+
     def backtrack(self, node):
         """-----------------------------------------------------------------------------------------
         search backward through parents to find the first node with a smaller level (higher rank)
@@ -117,6 +123,52 @@ class Taxonomy():
             self.current = self.current.parent
 
         return self.current
+
+    def next(self):
+        """-----------------------------------------------------------------------------------------
+        generator to traverse the tree in depth first order
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        stack = []
+        stack.append(self.root)
+        while stack:
+            node = stack.pop()
+
+            # push the children on stack in reverse alphabetic order
+            if node.child:
+                for child in sorted(node.child, reverse=True, key=lambda k: k.text):
+                    stack.append(child)
+
+            yield node
+
+        # raise StopIteration
+
+    def recalcPercent(self, weight=True):
+        """-----------------------------------------------------------------------------------------
+        Recalculate the the pct_mapped and n_mapped columns from the n_taxon column
+
+        :return: float, total of mapped taxa in the original data
+        -----------------------------------------------------------------------------------------"""
+        Taxonomy.sumNTaxon(self.root)
+        print('total={}'.format(self.root.n_taxon))
+
+        return
+
+    @staticmethod
+    def sumNTaxon(node):
+        """-----------------------------------------------------------------------------------------
+        Recursively recalculate n_mapped by summing n_taxon for all descendent nodes
+
+        :param nodes: node, root node at which to begin
+        :return: integer, sum of nodes mapped to descendent taxa
+        -----------------------------------------------------------------------------------------"""
+        if node.child:
+            node.n_mapped = node.n_taxon
+            for child in node.child:
+                node.n_mapped += Taxonomy.sumNTaxon(child)
+
+        return node.n_mapped
 
     def dumpFromIndex(self, indent=2, file=None, fmt=None, min_percent=0, min_count=0):
         """-----------------------------------------------------------------------------------------
@@ -182,7 +234,6 @@ class Taxonomy():
             # filtering for counts and percent
             if node.pct_mapped < min_percent and node.n_mapped < min_count:
                 continue
-
 
             nnode += 1
 
