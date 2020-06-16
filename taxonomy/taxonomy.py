@@ -137,13 +137,21 @@ class Taxonomy():
 
         return n
 
-    def dumpFromTree(self):
+    def dumpFromTree(self, file=None, fmt=None):
         """-----------------------------------------------------------------------------------------
         After merging or totherwise adding nodes, the index may not precisely reflect the tree
         structure.  Print the tree in depth first search order.
 
         :return: integer, number of nodes
         -----------------------------------------------------------------------------------------"""
+        fmt_default = '{:.2f}\t{}\t{}\t{}\t{}{}'
+        if not fmt:
+            fmt = fmt_default
+        fmt += '\n'
+
+        if not file:
+            file = sys.stdout
+
         nnode = 0
         stack = []
         stack.append(self.root)
@@ -153,7 +161,7 @@ class Taxonomy():
 
             level = Taxonomy.r2i[node.rank[0]]
             space = ' ' * level
-            print('{:.2f}\t{}\t{}\t{}\t{}{}'.format(node.pct_mapped, node.n_mapped,
+            file.write(fmt.format(node.pct_mapped, node.n_mapped,
                                                     node.n_taxon, node.rank, space, node.text))
 
             # push the children on stack in reverse alphabetic order
