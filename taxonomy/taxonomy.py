@@ -75,11 +75,11 @@ class Node:
         (pct_mapped, n_mapped, n_taxon, rank, taxid, text) = line.rstrip().split('\t')
 
         node = Node()
-        node.pct_mapped = pct_mapped
-        node.n_mapped = n_mapped
-        node.n_taxon = n_taxon
+        node.pct_mapped = float(pct_mapped)
+        node.n_mapped = int(n_mapped)
+        node.n_taxon = int(n_taxon)
         node.rank = rank
-        node.taxid = taxid
+        node.taxid = int(taxid)
         node.text = text.lstrip()
 
         return node
@@ -153,7 +153,7 @@ class Taxonomy():
 
             level = Taxonomy.r2i[node.rank[0]]
             space = ' ' * level
-            print('{}\t{}\t{}\t{}\t{}{}'.format(node.pct_mapped, node.n_mapped,
+            print('{:.2f}\t{}\t{}\t{}\t{}{}'.format(node.pct_mapped, node.n_mapped,
                                                 node.n_taxon, node.rank, space, node.text))
 
             # push the children on stack in reverse alphabetic order
@@ -179,8 +179,8 @@ class Taxonomy():
         width['n_taxon'] = 0
         for taxon in self.index:
             node = self.index[taxon]
-            width['n_mapped'] = max(width['n_mapped'], len(node.n_mapped))
-            width['n_taxon'] = max(width['n_taxon'], len(node.n_taxon))
+            width['n_mapped'] = max(width['n_mapped'], len(str(node.n_mapped)))
+            width['n_taxon'] = max(width['n_taxon'], len(str(node.n_taxon)))
 
         fmt = '{{:>{}}}\t{{:>{}}}\t{{:>{}}}\t{{:>{}}}\t{{}}{{}}'. \
             format(5 + space, width['n_mapped'] + space, width['n_taxon'] + space, 2 + space)
