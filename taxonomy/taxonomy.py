@@ -148,12 +148,16 @@ class Taxonomy():
         """-----------------------------------------------------------------------------------------
         Recalculate the the pct_mapped and n_mapped columns from the n_taxon column
 
-        :return: float, total of mapped taxa in the original data
+        :return: int, total of mapped taxa in the original data
         -----------------------------------------------------------------------------------------"""
         Taxonomy.sumNTaxon(self.root)
         print('total={}'.format(self.root.n_taxon))
 
-        return
+        total = self.root.n_mapped
+        for node in self:
+            node.pct_mapped = 100 * node.n_mapped / total
+
+        return total
 
     @staticmethod
     def sumNTaxon(node):
