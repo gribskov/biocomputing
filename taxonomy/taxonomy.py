@@ -118,30 +118,51 @@ class Taxonomy():
 
         return self.current
 
-    def dumpFromIndex(self):
+    def dumpFromIndex(self, indent=2, file=None, fmt=None, min_percent=0, min_count=0):
         """-----------------------------------------------------------------------------------------
         Write out the tree in the order of the index.
         This should regenerate the original kraken2 output
 
+        :param file: filehandle, where to write the result
+        :param fmt: string, format string for writing, see Taxonomy.stringFormat()
         :return: integer, number of lines printed
         -----------------------------------------------------------------------------------------"""
+        if not file:
+            file = sys.stdout
+
+        if not fmt:
+            fmt = '{:.2f}\t{}\t{}\t{}\t{}{}'
+        fmt += '\n'
+
         n = 0
         for taxon in self.index:
             node = self.index[taxon]
-            # space = ' ' * node.level
+
+            # filtering for counts and percent
+            if node.pct_mapped < min_percent and node.n_taxon < min_count:
+                continue
+
+            # indentation for taxonomy text
             level = Taxonomy.r2i[node.rank[0]]
-            space = ' ' * level
-            print('{}\t{}\t{}\t{}\t{}{}'.format(node.pct_mapped, node.n_mapped,
-                                                node.n_taxon, node.rank, space, node.text))
+            space = ' ' * level * indent
+
+            file.write(fmt.format(node.pct_mapped, node.n_mapped,
+                                  node.n_taxon, node.rank, space, node.text))
             n += 1
+
+        # reset defaults
+        file = None
+        fmt = None
 
         return n
 
-    def dumpFromTree(self, file=None, fmt=None):
+    def dumpFromTree(self, file=None, fmt=None, min_percent=0, min_count=0):
         """-----------------------------------------------------------------------------------------
         After merging or totherwise adding nodes, the index may not precisely reflect the tree
         structure.  Print the tree in depth first search order.
 
+        :param file: filehandle, where to write the result
+        :param fmt: string, format string for writing, see Taxonomy.stringFormat()
         :return: integer, number of nodes
         -----------------------------------------------------------------------------------------"""
         fmt_default = '{:.2f}\t{}\t{}\t{}\t{}{}'
@@ -157,44 +178,29 @@ class Taxonomy():
         stack.append(self.root)
         while stack:
             node = stack.pop()
+
+            # filtering for counts and percent
+            if node.pct_mapped < min_percent and node.n_mapped < min_count:
+                continue
+
+
             nnode += 1
 
             level = Taxonomy.r2i[node.rank[0]]
             space = ' ' * level
             file.write(fmt.format(node.pct_mapped, node.n_mapped,
-                                                    node.n_taxon, node.rank, space, node.text))
+                                  node.n_taxon, node.rank, space, node.text))
 
             # push the children on stack in reverse alphabetic order
             if node.child:
                 for child in sorted(node.child, reverse=True, key=lambda k: k.text):
                     stack.append(child)
 
+        # reset defaults
+        file = None
+        fmt = None
+
         return nnode
-
-    def writeFormatted(self, min_percent, min_count, space=4, ):
-        """-----------------------------------------------------------------------------------------
-        Write out the tree in the order of the index.
-        This should regenerate the original kraken2 output in better aligned format
-
-        :param space: integer, number of spaces between columns
-        :return: integer, number of lines
-        printed
-        -----------------------------------------------------------------------------------------"""
-        # find the widths of the numeric columns
-        fmt = self.formatString()
-
-        n = 0
-        for taxon in self.index:
-            node = self.index[taxon]
-
-            level = Taxonomy.r2i[node.rank[0]]
-            indent = ' ' * level
-
-            print(fmt.format(node.pct_mapped, node.n_mapped,
-                             node.n_taxon, node.rank, indent, node.text))
-            n += 1
-
-        return n
 
     def formatString(self, space=2):
         """-----------------------------------------------------------------------------------------
