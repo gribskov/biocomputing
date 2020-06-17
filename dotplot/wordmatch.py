@@ -25,7 +25,7 @@ class Match():
         -----------------------------------------------------------------------------------------"""
         self.diagonal = []
 
-    def identity(self, s1, s2):
+    def identityPos(self, s1, s2):
         """-----------------------------------------------------------------------------------------
 
         :param s1: Fasta, sequence 1
@@ -51,9 +51,41 @@ class Match():
 
         return nmatch
 
-    # --------------------------------------------------------------------------------------------------
+    def identity(self, s1, s2):
+        """-----------------------------------------------------------------------------------------
 
+        :param s1: Fasta, sequence 1
+        :param s2: Fasta, sequence 2
+        :return: int, number of matches
+        -----------------------------------------------------------------------------------------"""
+        l1 = len(s1.seq)
+        l2 = len(s2.seq)
 
+        nmatch = 0
+        for diag in range(l1 + l2 - 1):
+            pos1 = max(diag - l2 + 1, 0)
+            pos2 = max(l2 - diag - 1, 0)
+            n = min(l1 - pos1, l2 - pos2)
+            self.diagonal.append([])
+            run = 0
+            for offset in range(n):
+                # print('s1:{}     s2:{}     diag: {}    n: {}'.format(pos1, pos2, diag, n))
+                if s1.seq[pos1] == s2.seq[pos2]:
+                    run += 1
+                    nmatch += 1
+                elif run:
+                    self.diagonal[diag].append([offset,run])
+                    run = 0
+
+                pos1 += 1
+                pos2 += 1
+
+            if run:
+                self.diagonal[diag].append([offset, run])
+
+        return nmatch
+
+# --------------------------------------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
@@ -67,7 +99,7 @@ if __name__ == '__main__':
     print('{}\n'.format(fasta.format()))
 
     match = Match()
-    nmatch = match.identity(fasta, fasta)
+    nmatch = match.identityPos(fasta, fasta)
     print('matches: {}'.format(nmatch))
 
     print('\ntest 1: identity matching, unequal length sequences')
