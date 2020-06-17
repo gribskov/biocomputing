@@ -6,6 +6,9 @@ word related matching for sequences
 identities in window
 total score withing window using scoring table
 
+TODO: conversion between diaganl, offset and sequence coordinates
+
+
 Michael Gribskov     17 June 2020
 ================================================================================================="""
 from sequence.fasta import Fasta
@@ -68,21 +71,21 @@ if __name__ == '__main__':
     print('matches: {}'.format(nmatch))
 
     print('\ntest 1: identity matching, unequal length sequences')
-    print('\texpect 19 matches\n')
-    fasta = Fasta()
-    fasta.id = 'test1.1'
-    fasta.doc = '5 letter DNA test'
-    fasta.seq = 'ACAGT'
-    print('{}\n'.format(fasta.format()))
+    print('\texpect 11 matches\n')
+    fasta1 = Fasta()
+    fasta1.id = 'test1.1'
+    fasta1.doc = '5 letter DNA test'
+    fasta1.seq = 'ACAGT'
+    print('{}\n'.format(fasta1.format()))
 
-    fasta = Fasta()
-    fasta.id = 'test1.2'
-    fasta.doc = '7 letter DNA test'
-    fasta.seq = 'ACAGTAA'
-    print('{}\n'.format(fasta.format()))
+    fasta2 = Fasta()
+    fasta2.id = 'test1.2'
+    fasta2.doc = '7 letter DNA test'
+    fasta2.seq = 'ACAGTAA'
+    print('{}\n'.format(fasta2.format()))
 
     match = Match()
-    nmatch = match.identity(fasta, fasta)
+    nmatch = match.identity(fasta1, fasta2)
     print('matches: {}'.format(nmatch))
 
     exit(0)
