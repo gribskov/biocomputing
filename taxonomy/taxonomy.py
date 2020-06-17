@@ -151,7 +151,6 @@ class Taxonomy():
         :return: int, total of mapped taxa in the original data
         -----------------------------------------------------------------------------------------"""
         Taxonomy.sumNTaxon(self.root)
-        print('total={}'.format(self.root.n_taxon))
 
         total = self.root.n_mapped
         for node in self:
@@ -382,9 +381,15 @@ class Taxonomy():
         # if this taxonomy is empty, copy the root node from tax
         if not self.index:
             self.root = Node()
-            self.root.pct_mapped = tax.root.pct_mapped
-            self.root.n_mapped = tax.root.n_mapped
-            self.root.n_taxon = tax.root.n_taxon
+            # self.root.pct_mapped = tax.root.pct_mapped
+            # self.root.n_mapped = tax.root.n_mapped
+            # self.root.n_taxon = tax.root.n_taxon
+            # self.root.rank = tax.root.rank
+            # self.root.text = tax.root.text
+            # self.root.taxid = tax.root.taxid
+            self.root.pct_mapped = 0
+            self.root.n_mapped = 0
+            self.root.n_taxon = 0
             self.root.rank = tax.root.rank
             self.root.text = tax.root.text
             self.root.taxid = tax.root.taxid
