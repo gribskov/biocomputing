@@ -24,16 +24,19 @@ class Match():
 
         -----------------------------------------------------------------------------------------"""
         self.diagonal = []
+        self.s1 = None
+        self.s2 = None
 
-    def identityPos(self, s1, s2):
+    def identityPos(self):
         """-----------------------------------------------------------------------------------------
+        MAach identical characters and return as a list of diagonals with matching positions
 
-        :param s1: Fasta, sequence 1
-        :param s2: Fasta, sequence 2
         :return: int, number of matches
         -----------------------------------------------------------------------------------------"""
-        l1 = len(s1.seq)
-        l2 = len(s2.seq)
+        s1 = self.s1.seq
+        s2 = self.s2.seq
+        l1 = len(s1)
+        l2 = len(s2)
 
         nmatch = 0
         for diag in range(l1 + l2 - 1):
@@ -43,7 +46,7 @@ class Match():
             self.diagonal.append([])
             for offset in range(n):
                 # print('s1:{}     s2:{}     diag: {}    n: {}'.format(pos1, pos2, diag, n))
-                if s1.seq[pos1] == s2.seq[pos2]:
+                if s1[pos1] == s2[pos2]:
                     self.diagonal[diag].append(offset)
                     nmatch += 1
                 pos1 += 1
@@ -51,15 +54,16 @@ class Match():
 
         return nmatch
 
-    def identity(self, s1, s2):
+    def identity(self):
         """-----------------------------------------------------------------------------------------
+        Identify matching regions on diagonals with run length encoding.
 
-        :param s1: Fasta, sequence 1
-        :param s2: Fasta, sequence 2
         :return: int, number of matches
         -----------------------------------------------------------------------------------------"""
-        l1 = len(s1.seq)
-        l2 = len(s2.seq)
+        s1 = self.s1.seq
+        s2 = self.s2.seq
+        l1 = len(s1)
+        l2 = len(s2)
 
         nmatch = 0
         for diag in range(l1 + l2 - 1):
@@ -70,11 +74,11 @@ class Match():
             run = 0
             for offset in range(n):
                 # print('s1:{}     s2:{}     diag: {}    n: {}'.format(pos1, pos2, diag, n))
-                if s1.seq[pos1] == s2.seq[pos2]:
+                if s1[pos1] == s2[pos2]:
                     run += 1
                     nmatch += 1
                 elif run:
-                    self.diagonal[diag].append([offset,run])
+                    self.diagonal[diag].append([offset, run])
                     run = 0
 
                 pos1 += 1
@@ -85,11 +89,11 @@ class Match():
 
         return nmatch
 
+
 # --------------------------------------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-
     print('\ntest 0: identity matching')
     print('\texpect 7 matches\n')
     fasta = Fasta()
@@ -99,25 +103,30 @@ if __name__ == '__main__':
     print('{}\n'.format(fasta.format()))
 
     match = Match()
-    nmatch = match.identityPos(fasta, fasta)
+    match.s1 = fasta
+    match.s2 = fasta
+    nmatch = match.identityPos()
     print('matches: {}'.format(nmatch))
 
     print('\ntest 1: identity matching, unequal length sequences')
     print('\texpect 11 matches\n')
+    match = Match()
+
     fasta1 = Fasta()
     fasta1.id = 'test1.1'
     fasta1.doc = '5 letter DNA test'
     fasta1.seq = 'ACAGT'
-    print('{}\n'.format(fasta1.format()))
+    match.s1 = fasta1
+    print('{}\n'.format(match.s1.format()))
 
     fasta2 = Fasta()
     fasta2.id = 'test1.2'
     fasta2.doc = '7 letter DNA test'
     fasta2.seq = 'ACAGTAA'
-    print('{}\n'.format(fasta2.format()))
+    match.s2 = fasta2
+    print('{}\n'.format(match.s2.format()))
 
-    match = Match()
-    nmatch = match.identity(fasta1, fasta2)
+    nmatch = match.identity()
     print('matches: {}'.format(nmatch))
 
     exit(0)
