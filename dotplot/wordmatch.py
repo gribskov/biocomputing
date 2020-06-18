@@ -29,7 +29,7 @@ class Match():
 
     def identityPos(self):
         """-----------------------------------------------------------------------------------------
-        MAach identical characters and return as a list of diagonals with matching positions
+        Match identical characters and return as a list of diagonals with matching positions
 
         :return: int, number of matches
         -----------------------------------------------------------------------------------------"""
@@ -71,23 +71,51 @@ class Match():
             pos2 = max(l2 - diag - 1, 0)
             n = min(l1 - pos1, l2 - pos2)
             self.diagonal.append([])
-            run = 0
+            runlen = 0
             for offset in range(n):
                 # print('s1:{}     s2:{}     diag: {}    n: {}'.format(pos1, pos2, diag, n))
                 if s1[pos1] == s2[pos2]:
-                    run += 1
+                    runlen += 1
                     nmatch += 1
-                elif run:
-                    self.diagonal[diag].append([offset, run])
-                    run = 0
+                elif runlen:
+                    # no match, end of run. this offset is one past the end of the run
+                    self.diagonal[diag].append([offset-1, runlen])
+                    runlen = 0
 
                 pos1 += 1
                 pos2 += 1
 
-            if run:
-                self.diagonal[diag].append([offset, run])
+            if runlen:
+                # end of a run at end of diagonal (do not subtract because the end position is
+                # the true end)
+                self.diagonal[diag].append([offset, runlen])
 
         return nmatch
+
+    def rle2coord(self):
+        """-----------------------------------------------------------------------------------------
+        Return a list of beginning and ending positions of each run.  List is a list of four
+        coordinates for each run [s1begin, s1end, s2begin, s2end]
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        coord = []
+
+        s1 = self.s1.seq
+        s2 = self.s2.seq
+        l1 = len(s1)
+        l2 = len(s2)
+
+        for diag in range(len(self.diagonal)):
+
+            for offset,length in self.diagonal[diag]:
+                end1 = max(diag - l2 + 1, 0) + offset
+                end2 = max(l2 - diag - 1, 0) + offset
+                beg1 = end1 - length + 1
+                beg2 = end2 - length + 1
+                coord.append([beg1, end1, beg2, end2])
+
+        return coord
 
 
 # --------------------------------------------------------------------------------------------------
@@ -128,5 +156,6 @@ if __name__ == '__main__':
 
     nmatch = match.identity()
     print('matches: {}'.format(nmatch))
+    coord = match.rle2coord()
 
     exit(0)
