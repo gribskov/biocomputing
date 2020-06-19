@@ -117,6 +117,29 @@ class Match():
 
         return coord
 
+    def filterByLen(self, n):
+        """-----------------------------------------------------------------------------------------
+        remove runs shorter than n
+
+        :param n: int, minimum run length
+        :return: int, number of runs
+        -----------------------------------------------------------------------------------------"""
+        nrun = 0
+        for d in self.diagonal:
+
+            l = len(d)
+            while l > 0:
+                # work from end to beginning because deleting elements changes the length of the
+                # list
+                l -= 1
+                if d[l][1] < n:
+                    del(d[l])
+                else:
+                    nrun +=1
+
+        return nrun
+
+
 
 # --------------------------------------------------------------------------------------------------
 # Testing
