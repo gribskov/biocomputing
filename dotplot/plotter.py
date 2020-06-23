@@ -50,6 +50,8 @@ class Plotter():
         self.title()
         ax = self.fig.add_subplot(1, 1, 1)
 
+        ax.set_aspect(1.0)
+
         ax.set_xlim(0, len(self.match.s1.seq) + 1)
         ax.set_ylim(0, len(self.match.s2.seq) + 1)
 
@@ -85,15 +87,16 @@ class Plotter():
         for line in coord:
             # print(line)
             if line[0] == line[1]:
-                plt.plot(line[0] + 1, line[1] + 1, 'ko')
+                plt.plot(line[0] + 1, line[1] + 1, 'ko', markersize=1.0)
 
             y = line[2]
-            for x in range(line[0],line[1]+1):
-                plt.plot(x + 1, y + 1, 'ko')
+            for x in range(line[0], line[1] + 1):
+                plt.plot(x + 1, y + 1, 'ko', markersize=1.0)
                 y += 1
 
-
         return True
+
+
 # --------------------------------------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------------------------------------
