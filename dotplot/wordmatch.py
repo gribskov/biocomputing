@@ -1,13 +1,13 @@
 """=================================================================================================
 wordmatch
 
-word related matching for sequences
+word related matching for sequences based on exact matching of letters.
 
-identities in window
-total score withing window using scoring table
+identities in a window of defined length
+filters by run length
+filters by presence in window of minimum score
 
-TODO: conversion between diaganl, offset and sequence coordinates
-
+use dotplot.plotter to display
 
 Michael Gribskov     17 June 2020
 ================================================================================================="""
@@ -16,6 +16,9 @@ from sequence.fasta import Fasta
 
 class Match():
     """=============================================================================================
+    A container for the sequences and the match between them.  The match is stored in diagonal as
+    run length encoded pairs of [offser, length] where offset is the position of the end of the
+    run along the diagona (zero origin)
 
     ============================================================================================="""
 
@@ -67,19 +70,20 @@ class Match():
 
         nmatch = 0
         for diag in range(l1 + l2 - 1):
-            pos1 = max(diag - l2 + 1, 0)
-            pos2 = max(l2 - diag - 1, 0)
-            n = min(l1 - pos1, l2 - pos2)
+            diaglen, pos1, pos2 = Match.diagLenBegin(diag, l1, l2)
+            # pos1 = max(diag - l2 + 1, 0)
+            # pos2 = max(l2 - diag - 1, 0)
+            # n = min(l1 - pos1, l2 - pos2)
             self.diagonal.append([])
             runlen = 0
-            for offset in range(n):
+            for offset in range(diaglen):
                 # print('s1:{}     s2:{}     diag: {}    n: {}'.format(pos1, pos2, diag, n))
                 if s1[pos1] == s2[pos2]:
                     runlen += 1
                     nmatch += 1
                 elif runlen:
                     # no match, end of run. this offset is one past the end of the run
-                    self.diagonal[diag].append([offset-1, runlen])
+                    self.diagonal[diag].append([offset - 1, runlen])
                     runlen = 0
 
                 pos1 += 1
@@ -108,7 +112,7 @@ class Match():
 
         for diag in range(len(self.diagonal)):
 
-            for offset,length in self.diagonal[diag]:
+            for offset, length in self.diagonal[diag]:
                 end1 = max(diag - l2 + 1, 0) + offset
                 end2 = max(l2 - diag - 1, 0) + offset
                 beg1 = end1 - length + 1
@@ -133,12 +137,116 @@ class Match():
                 # list
                 l -= 1
                 if d[l][1] < n:
-                    del(d[l])
+                    del (d[l])
                 else:
-                    nrun +=1
+                    nrun += 1
 
         return nrun
 
+    def filterByWindowCount(self, window, count):
+        """-----------------------------------------------------------------------------------------
+        For a window of length w, keep the match if the window contains at least count matches.
+        This is different that the conventional practice of just marking a single position at the
+        center of the window.
+
+        :param window: int, window length
+        :param count: int, minimum count to keep
+        :return: int, number of runs
+        -----------------------------------------------------------------------------------------"""
+        l1 = len(self.s1.seq)
+        l2 = len(self.s2.seq)
+
+        diagonal = self.diagonal
+        for d in range(len(diagonal)):
+            diaglen, begin1, begin2 = Match.diagLenBegin(d, l1, l2)
+
+            if diaglen < window:
+                # skip  and filter diagonals shorter than window length
+                diagonal[d] = []
+                continue
+            if not len(diagonal[d]):
+                # skip diagonals with no runs at all
+                continue
+
+            tmpdiag = [0 for i in range(diaglen)]
+            for rend, rlen in diagonal[d]:
+
+                # copy runs into temporary diagonal
+                for pos in range(rend - rlen + 1, rend + 1):
+                    tmpdiag[pos] = 1
+
+            # count the first window
+            sum = 0
+            for pos in range(window):
+                sum += tmpdiag[pos]
+
+            wend = 0
+            if sum >= count:
+                wend = window
+
+            for pos in range(diaglen - window):
+
+                if sum >= count:
+                    wend = pos + window
+
+                olddiag = tmpdiag[pos]
+                if pos < wend:
+                    tmpdiag[pos] += 1
+
+                sum += tmpdiag[pos + window]
+                sum -= olddiag
+
+            # add one to positions in the last positive window
+            if sum >= count:
+                wend = pos + window + 1
+
+            for pos in range(diaglen - window, diaglen):
+                if pos < wend:
+                    tmpdiag[pos] += 1
+                else:
+                    break
+
+            # now find the runs, all matches in a sufficiently high scoring window have been
+            # incremented so test for > 1 instead of >=
+
+            runlen = 0
+            nmatch = 0
+            filtered = []
+            for pos in range(diaglen):
+                # print('s1:{}     s2:{}     diag: {}    n: {}'.format(pos1, pos2, diag, n))
+                if tmpdiag[pos] > 1:
+                    runlen += 1
+                    nmatch += 1
+                elif runlen:
+                    # no match, end of run. this offset is one past the end of the run
+                    filtered.append([pos - 1, runlen])
+                    runlen = 0
+
+            if runlen:
+                # end of a run at end of diagonal (do not subtract because the end position is
+                # the true end)
+                filtered.append([pos, runlen])
+
+            diagonal[d] = filtered
+
+        return nmatch
+
+    @staticmethod
+    def diagLenBegin(diag, l1, l2):
+        """-----------------------------------------------------------------------------------------
+        Calculates the length of diagonal diag and the beginning position of the diagonal in
+        each sequence
+
+        :param diag: int, diagonal number
+        :param l1: int, length of sequence 1
+        :param l2: int, lenght of sequence 2
+        :return: int (diagonal length), int (seq1 begin), int (seq2 begin)
+        -----------------------------------------------------------------------------------------"""
+        pos1 = max(diag - l2 + 1, 0)
+        pos2 = max(l2 - diag - 1, 0)
+        diaglen = min(l1 - pos1, l2 - pos2)
+
+        return diaglen, pos1, pos2
 
 
 # --------------------------------------------------------------------------------------------------
