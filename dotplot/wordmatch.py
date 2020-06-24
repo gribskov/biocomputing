@@ -14,7 +14,64 @@ Michael Gribskov     17 June 2020
 from sequence.fasta import Fasta
 
 
-class Match():
+class Base():
+    """=============================================================================================
+    Base class for matching codes.  Contains methods useful for all classes
+
+    ============================================================================================="""
+
+    def __init__(self):
+        """-----------------------------------------------------------------------------------------
+        Constructor for Base object.  All match classes require sequences.
+        -----------------------------------------------------------------------------------------"""
+        self.s1 = None
+        self.s2 = None
+
+
+    def rle2coord(self):
+        """-----------------------------------------------------------------------------------------
+        Return a list of beginning and ending positions of each run.  List is a list of four
+        coordinates for each run [s1begin, s1end, s2begin, s2end]
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        coord = []
+
+        s1 = self.s1.seq
+        s2 = self.s2.seq
+        l1 = len(s1)
+        l2 = len(s2)
+
+        for diag in range(len(self.diagonal)):
+
+            for offset, length in self.diagonal[diag]:
+                end1 = max(diag - l2 + 1, 0) + offset
+                end2 = max(l2 - diag - 1, 0) + offset
+                beg1 = end1 - length + 1
+                beg2 = end2 - length + 1
+                coord.append([beg1, end1, beg2, end2])
+
+        return coord
+
+    @staticmethod
+    def diagLenBegin(diag, l1, l2):
+        """-----------------------------------------------------------------------------------------
+        Calculates the length of diagonal diag and the beginning position of the diagonal in
+        each sequence
+
+        :param diag: int, diagonal number
+        :param l1: int, length of sequence 1
+        :param l2: int, lenght of sequence 2
+        :return: int (diagonal length), int (seq1 begin), int (seq2 begin)
+        -----------------------------------------------------------------------------------------"""
+        pos1 = max(diag - l2 + 1, 0)
+        pos2 = max(l2 - diag - 1, 0)
+        diaglen = min(l1 - pos1, l2 - pos2)
+
+        return diaglen, pos1, pos2
+
+
+class Match(Base):
     """=============================================================================================
     A container for the sequences and the match between them.  The match is stored in diagonal as
     run length encoded pairs of [offser, length] where offset is the position of the end of the
@@ -24,11 +81,11 @@ class Match():
 
     def __init__(self):
         """-----------------------------------------------------------------------------------------
+        Constructor for Match object.  Match object is an RLE list of diagonals with mtching areas.
+        each run of matches is encoded as [offset, length] in self.diagonal
 
         -----------------------------------------------------------------------------------------"""
         self.diagonal = []
-        self.s1 = None
-        self.s2 = None
 
     def identityPos(self):
         """-----------------------------------------------------------------------------------------
@@ -95,31 +152,6 @@ class Match():
                 self.diagonal[diag].append([offset, runlen])
 
         return nmatch
-
-    def rle2coord(self):
-        """-----------------------------------------------------------------------------------------
-        Return a list of beginning and ending positions of each run.  List is a list of four
-        coordinates for each run [s1begin, s1end, s2begin, s2end]
-
-        :return:
-        -----------------------------------------------------------------------------------------"""
-        coord = []
-
-        s1 = self.s1.seq
-        s2 = self.s2.seq
-        l1 = len(s1)
-        l2 = len(s2)
-
-        for diag in range(len(self.diagonal)):
-
-            for offset, length in self.diagonal[diag]:
-                end1 = max(diag - l2 + 1, 0) + offset
-                end2 = max(l2 - diag - 1, 0) + offset
-                beg1 = end1 - length + 1
-                beg2 = end2 - length + 1
-                coord.append([beg1, end1, beg2, end2])
-
-        return coord
 
     def filterByLen(self, n):
         """-----------------------------------------------------------------------------------------
@@ -230,23 +262,6 @@ class Match():
             diagonal[d] = filtered
 
         return nmatch
-
-    @staticmethod
-    def diagLenBegin(diag, l1, l2):
-        """-----------------------------------------------------------------------------------------
-        Calculates the length of diagonal diag and the beginning position of the diagonal in
-        each sequence
-
-        :param diag: int, diagonal number
-        :param l1: int, length of sequence 1
-        :param l2: int, lenght of sequence 2
-        :return: int (diagonal length), int (seq1 begin), int (seq2 begin)
-        -----------------------------------------------------------------------------------------"""
-        pos1 = max(diag - l2 + 1, 0)
-        pos2 = max(l2 - diag - 1, 0)
-        diaglen = min(l1 - pos1, l2 - pos2)
-
-        return diaglen, pos1, pos2
 
 
 # --------------------------------------------------------------------------------------------------
