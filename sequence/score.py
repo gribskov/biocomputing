@@ -5,7 +5,8 @@ class Score:
     """=============================================================================================
     sequence scoring table object
     ============================================================================================="""
-    import sys
+
+    # import sys
 
     def __init__(self, alphabet='ACGT'):
         """-----------------------------------------------------------------------------------------
@@ -80,7 +81,8 @@ class Score:
         change the alphabet.
         1. rebulid a2i and i2f
         2. reset table to identity
-        :return: alphabet size
+
+        :return: int, alphabet size
         -----------------------------------------------------------------------------------------"""
         self.alphabet = alphabet
         self.alphabetIndex()
@@ -198,6 +200,80 @@ class Score:
                 new[i] += freq[j] * self.table[j][i]
 
         return new
+
+    def open(self, filename):
+        """-----------------------------------------------------------------------------------------
+        safe open method.  Failure generates warning but not fatal error.
+
+        :param name: string, name of file
+        :return: filehandle
+        -----------------------------------------------------------------------------------------"""
+        fh = None
+
+        try:
+            fh = open(filename, 'r')
+        except (OSError, IOError):
+            print('Score::open - file open error ({})', format(filename))
+
+        return fh
+
+    def readNCBI(self, name):
+        """-----------------------------------------------------------------------------------------
+        Read a scoring matrix in the format used by NCBI, see
+        https://ftp.ncbi.nlm.nih.gov/blast/matrices/
+
+        example:NUC4.4 matrix
+
+        # This matrix was created by Todd Lowe   12/10/92
+        #
+        # Uses ambiguous nucleotide codes, probabilities rounded to
+        #  nearest integer
+        #
+        # Lowest score = -4, Highest score = 5
+        #
+            A   T   G   C   S   W   R   Y   K   M   B   V   H   D   N
+        A   5  -4  -4  -4  -4   1   1  -4  -4   1  -4  -1  -1  -1  -2
+        T  -4   5  -4  -4  -4   1  -4   1   1  -4  -1  -4  -1  -1  -2
+        G  -4  -4   5  -4   1  -4   1  -4   1  -4  -1  -1  -4  -1  -2
+        C  -4  -4  -4   5   1  -4  -4   1  -4   1  -1  -1  -1  -4  -2
+        S  -4  -4   1   1  -1  -4  -2  -2  -2  -2  -1  -1  -3  -3  -1
+        W   1   1  -4  -4  -4  -1  -2  -2  -2  -2  -3  -3  -1  -1  -1
+        R   1  -4   1  -4  -2  -2  -1  -4  -2  -2  -3  -1  -3  -1  -1
+        Y  -4   1  -4   1  -2  -2  -4  -1  -2  -2  -1  -3  -1  -3  -1
+        K  -4   1   1  -4  -2  -2  -2  -2  -1  -4  -1  -3  -3  -1  -1
+        M   1  -4  -4   1  -2  -2  -2  -2  -4  -1  -3  -1  -1  -3  -1
+        B  -4  -1  -1  -1  -1  -3  -3  -1  -1  -3  -1  -2  -2  -2  -1
+        V  -1  -4  -1  -1  -1  -3  -1  -3  -3  -1  -2  -1  -2  -2  -1
+        H  -1  -1  -4  -1  -3  -1  -3  -1  -3  -1  -2  -2  -1  -2  -1
+        D  -1  -1  -1  -4  -3  -1  -1  -3  -1  -3  -2  -2  -2  -1  -1
+        N  -2  -2  -2  -2  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1  -1
+
+        :param name: string path to scoring table file
+        :return: int, alphabet size
+        -----------------------------------------------------------------------------------------"""
+        cmp = self.open(name)
+
+        first = True
+        for line in cmp:
+            if line.startswith('#') or not line:
+                continue
+
+            if first:
+                # first line has the alphabet
+                alphabet = line.rstrip().replace(' ', '')
+                print(alphabet)
+                alen = self.alphabetSet(alphabet)
+                self.table = [[0 for i in range(alen)] for j in range(alen)]
+                first = False
+                continue
+
+            token = line.split()
+            i = self.a2i[token[0]]
+
+            for j in range(1, len(token)):
+                self.table[i][j-1] = float(token[j])
+
+        return alen
 
 
 # ==================================================================================================
