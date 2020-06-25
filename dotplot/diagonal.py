@@ -4,6 +4,8 @@ positions in the matching windows.  As an alternative calculate and plot one dia
 
 Michael Gribskov     25 June 2020
 ================================================================================================="""
+import sys
+from datetime import date
 import matplotlib.pyplot as plt
 from sequence.score import Score
 from sequence.fasta import Fasta
@@ -23,10 +25,12 @@ class Diagonal(Score, Fasta):
 
         -----------------------------------------------------------------------------------------"""
         Score.__init__(self)
-        self.fig = plt.figure()
+
         self.diagonal = None
-        self.window = 0
+        self.fig = plt.figure()
+        self.title = ''
         self.threshold = 0
+        self.window = 0
 
         self.s1 = Fasta()
         self.s2 = Fasta()
@@ -34,6 +38,39 @@ class Diagonal(Score, Fasta):
         self.i2 = None
         self.l1 = 0
         self.l2 = 0
+
+    def setup(self, seq1, seq2 ):
+        """-----------------------------------------------------------------------------------------
+        Load the sequences and do some basic setup for score calculations and plotting. Sequences
+        are passed as Fasta object to make it easier to use multi fasta files.
+
+        :param seq1: Fasta object
+        :param seq2: Fasta object
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+        # sequence setup
+        self.s1 = seq1
+        self.s2 = seq2
+        self.l1, self.l2 = self.seqToInt()
+
+
+        # plot setup
+        if self.title:
+            titlestr = self.title
+        else:
+            now = date.today()
+            titlestr = 'Dotplot of {} and {} - {}'.format(self.s1.id, self.s2.id, now)
+
+        self.fig.suptitle(titlestr)
+        ax = self.fig.add_subplot(1, 1, 1)
+
+        ax.set_aspect(1.0)
+
+        ax.set_xlim(0, self.l1 + 1)
+        ax.set_ylim(0, self.l2 + 1)
+
+        ax.set_xlabel('\n'.join([self.s1.id, self.s1.doc]))
+        ax.set_ylabel('\n'.join([self.s2.doc, self.s2.id]))
 
     def seqToInt(self):
         """-----------------------------------------------------------------------------------------
@@ -98,8 +135,7 @@ class Diagonal(Score, Fasta):
         :return: int, length of diagonal
         -----------------------------------------------------------------------------------------"""
         diaglen, pos1, pos2 = Diagonal.diagLenBegin(d)
-        # l1, l2 = self.seqToInt()
-        # TODO move to sequence setup
+
         i1 = self.i1
         i2 = self.i2
 
@@ -147,4 +183,19 @@ class Diagonal(Score, Fasta):
 # Testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    exit(0)
+
+    match = Diagonal()
+
+    fasta1 = Fasta(filename=sys.argv[1])
+    fasta1.read()
+
+    fasta2 = Fasta()
+    fasta2.id = 'seq2'
+    fasta2.doc = ' bases 1:50'
+    fasta2.seq = fasta1.seq[:50]
+
+    fasta1.seq = fasta1.seq[:200]
+
+    match.setup(fasta1, fasta2)
+    match.fig.show()
+    pass
