@@ -234,7 +234,7 @@ class Diagonal(Score, Fasta):
         diagonal = self.diagonal
 
         cc = plt.cm.get_cmap(cmap, window + 1)
-        if reversed:
+        if reverse:
             cc = cc.reversed()
         plt.colorbar(cm.ScalarMappable(cmap=cc), shrink=0.4)
         self.ax.set_facecolor(cc(0.0))
@@ -331,10 +331,10 @@ if __name__ == '__main__':
     fasta1.seq = fasta1.seq[:200]
 
     # match.setup(fasta1, fasta2)
-    match.setup(fasta1, fasta2, window=12, threshold=4)
+    match.setup(fasta1, fasta2, window=20, threshold=4)
 
-    # match.diagonalDrawDotColor(cmap='viridis', reverse=False)
-    match.diagonalDrawDotColor(cmap='gray', reverse=False)
+    match.diagonalDrawDotColor(cmap='viridis', reverse=False)
+    # match.diagonalDrawDotColor(cmap='gray', reverse=False)
     # match.diagonalDrawLine()
     match.show()
 
