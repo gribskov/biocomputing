@@ -26,7 +26,7 @@ class Diagonal(Score, Fasta):
         -----------------------------------------------------------------------------------------"""
         Score.__init__(self)
 
-        self.diagonal = None
+        self.diagonal = []
         self.fig = plt.figure()
         self.title = ''
         self.threshold = 0
@@ -34,12 +34,12 @@ class Diagonal(Score, Fasta):
 
         self.s1 = Fasta()
         self.s2 = Fasta()
-        self.i1 = None              # integer array representation of sequences
+        self.i1 = None  # integer array representation of sequences
         self.i2 = None
         self.l1 = 0
         self.l2 = 0
 
-    def setup(self, seq1, seq2 ):
+    def setup(self, seq1, seq2, window=5,threshold=3):
         """-----------------------------------------------------------------------------------------
         Load the sequences and do some basic setup for score calculations and plotting. Sequences
         are passed as Fasta object to make it easier to use multi fasta files.
@@ -52,7 +52,9 @@ class Diagonal(Score, Fasta):
         self.s1 = seq1
         self.s2 = seq2
         self.l1, self.l2 = self.seqToInt()
-
+        self.diagonal = [0 for _ in range(min(self.l1,self.l2))]
+        self.window = window
+        self.threshold = 3
 
         # plot setup
         if self.title:
@@ -125,16 +127,15 @@ class Diagonal(Score, Fasta):
 
         return diaglen, pos1, pos2
 
-
     def diagonalScore(self, d):
         """-----------------------------------------------------------------------------------------
         Calculate the moving window sum of comparison score along one diagonal and store in the
         object.
 
         :param d: int, diagonal number
-        :return: int, length of diagonal
+        :return: list, scores along diagonal
         -----------------------------------------------------------------------------------------"""
-        diaglen, pos1, pos2 = Diagonal.diagLenBegin(d)
+        diaglen, pos1, pos2 = self.diagLenBegin(d)
 
         i1 = self.i1
         i2 = self.i2
@@ -142,7 +143,6 @@ class Diagonal(Score, Fasta):
         window = self.window
         cmp = self.table
         diagonal = self.diagonal
-        map( lambda i: 0, diagonal)     # lambda much faster to set all alues to zero
 
         nmatch = 0
         old1 = pos1
@@ -152,8 +152,9 @@ class Diagonal(Score, Fasta):
             # skip   diagonals shorter than window length
             return nmatch
 
+        diagonal[:] = map(lambda i: 0, diagonal)  # lambda much faster to set all values
+        # to zero
         score = 0
-
 
         # first window
         for offset in range(window):
@@ -177,13 +178,50 @@ class Diagonal(Score, Fasta):
             pos1 += 1
             pos2 += 1
 
-        return diaglen
+        return diagonal
+
+    def diagonalDrawDots(self):
+        """-----------------------------------------------------------------------------------------
+        Drawe one diagonal of dots.  the score is reported in the first position of the window so
+        the position of the dot must be offset to lie in the middle of the window.  Zero origin
+        coordinates must also be incremented by 1
+
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+        window = self.window
+        halfwindow = window / 2.0 + 1
+        threshold = self.threshold
+        diagonal = self.diagonal
+
+        for d in range(self.l1 + self.l2 - 1):
+            dscore = self.diagonalScore(d)
+            diaglen, xpos, ypos = self.diagLenBegin(d)
+            xpos += halfwindow
+            ypos += halfwindow
+            for pos in range(diaglen-window):
+                if dscore[pos] >= threshold:
+                    plt.plot(xpos, ypos, 'ko', markersize=1.0)
+
+                xpos += 1
+                ypos += 1
+
+        return True
+
+    def show(self, *args, **kwargs):
+        """-----------------------------------------------------------------------------------------
+        Delegate to plt.show().  Makes syntax a little easier in application since the object is
+        used instead of the matplotlib class (application doesn't have to know matplotlib).
+
+        :param args:
+        :param kwargs:
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+        plt.show(*args, **kwargs)
 
 # --------------------------------------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-
     match = Diagonal()
 
     fasta1 = Fasta(filename=sys.argv[1])
@@ -197,5 +235,7 @@ if __name__ == '__main__':
     fasta1.seq = fasta1.seq[:200]
 
     match.setup(fasta1, fasta2)
-    match.fig.show()
-    pass
+    match.diagonalDrawDots()
+    match.show()
+
+    exit(0)
