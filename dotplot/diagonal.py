@@ -207,6 +207,34 @@ class Diagonal(Score, Fasta):
 
         return True
 
+    def diagonalDrawDotColor(self):
+        """-----------------------------------------------------------------------------------------
+        Draw all diagonals as dots.  the score is reported in the first position of the window so
+        the position of the dot must be offset to lie in the middle of the window.  Zero origin
+        coordinates must also be incremented by 1
+
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+        window = self.window
+        halfwindow = window / 2.0 + 1
+        threshold = self.threshold
+        diagonal = self.diagonal
+
+        for d in range(self.l1 + self.l2 - 1):
+            dscore = self.diagonalScore(d)
+            diaglen, xpos, ypos = self.diagLenBegin(d)
+            xpos += halfwindow
+            ypos += halfwindow
+            for pos in range(diaglen - window + 1):
+                if dscore[pos] >= threshold:
+                    f=str(1.0-dscore[pos]/window)
+                    plt.plot(xpos, ypos, 'o', markersize=2.0, c=f)
+
+                xpos += 1
+                ypos += 1
+
+        return True
+
     def diagonalDrawLine(self, dither=0.05):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as lines.  the score is reported in the first position of the window so
@@ -250,7 +278,6 @@ class Diagonal(Score, Fasta):
 
             if line:
                 # ended in a line, draw the last one
-                # TODO: check if dither should be subtracted from end, i think yes
                 plt.plot([begin[0], xpos-1], [begin[1], ypos-1], color='k')
 
         return True
@@ -284,9 +311,9 @@ if __name__ == '__main__':
     fasta1.seq = fasta1.seq[:200]
 
     # match.setup(fasta1, fasta2)
-    match.setup(fasta1, fasta2, window=1, threshold=1)
+    match.setup(fasta1, fasta2, window=12, threshold=6)
     match.diagonalDrawDot()
-    match.diagonalDrawLine()
+    # match.diagonalDrawLine()
     match.show()
 
     exit(0)
