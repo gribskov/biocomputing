@@ -2,11 +2,20 @@
 Even though RLE provides a sparse matrix representation, it is difficult to save scores for
 positions in the matching windows.  As an alternative calculate and plot one diagonal at a time
 
+TODO: color lines by score
+TODO: indicate score by dots size
+TODO: indicate score by linewidth
+TODO: ploat score distribution
+TODO: plot run length distribution (filtered)
+TODO: Add plotting of reversed sequences
+TODO: add overlay of forward and reversed
+
 Michael Gribskov     25 June 2020
 ================================================================================================="""
 import sys
 from datetime import date
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 from sequence.score import Score
 from sequence.fasta import Fasta
 
@@ -27,7 +36,8 @@ class Diagonal(Score, Fasta):
         Score.__init__(self)
 
         self.diagonal = []
-        self.fig = plt.figure(figsize=[11.0,8.5])
+        self.fig = plt.figure(figsize=[11.0, 8.5])
+        self.ax = None
         self.title = ''
         self.threshold = 0
         self.window = 0
@@ -73,6 +83,9 @@ class Diagonal(Score, Fasta):
 
         ax.set_xlabel('\n'.join([self.s1.id, self.s1.doc]))
         ax.set_ylabel('\n'.join([self.s2.doc, self.s2.id]))
+        self.ax = ax
+
+        return True
 
     def seqToInt(self):
         """-----------------------------------------------------------------------------------------
@@ -207,7 +220,7 @@ class Diagonal(Score, Fasta):
 
         return True
 
-    def diagonalDrawDotColor(self):
+    def diagonalDrawDotColor(self, cmap='gray', reverse=True):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
@@ -220,6 +233,12 @@ class Diagonal(Score, Fasta):
         threshold = self.threshold
         diagonal = self.diagonal
 
+        cc = plt.cm.get_cmap(cmap, window + 1)
+        if reversed:
+            cc = cc.reversed()
+        plt.colorbar(cm.ScalarMappable(cmap=cc), shrink=0.4)
+        self.ax.set_facecolor(cc(0.0))
+
         for d in range(self.l1 + self.l2 - 1):
             dscore = self.diagonalScore(d)
             diaglen, xpos, ypos = self.diagLenBegin(d)
@@ -227,8 +246,9 @@ class Diagonal(Score, Fasta):
             ypos += halfwindow
             for pos in range(diaglen - window + 1):
                 if dscore[pos] >= threshold:
-                    f=str(1.0-dscore[pos]/window)
-                    plt.plot(xpos, ypos, 'o', markersize=2.0, c=f)
+                    # f=str(1.0-dscore[pos]/window)
+                    f = dscore[pos] / window
+                    plt.plot(xpos, ypos, 'o', markersize=2.0, c=cc(f))
 
                 xpos += 1
                 ypos += 1
@@ -270,7 +290,7 @@ class Diagonal(Score, Fasta):
                 else:
                     # this window is not part of line, draw the line
                     if line:
-                        plt.plot([begin[0], xpos-1], [begin[1], ypos-1], color='k')
+                        plt.plot([begin[0], xpos - 1], [begin[1], ypos - 1], color='k')
                         line = 0
 
                 xpos += 1
@@ -278,7 +298,7 @@ class Diagonal(Score, Fasta):
 
             if line:
                 # ended in a line, draw the last one
-                plt.plot([begin[0], xpos-1], [begin[1], ypos-1], color='k')
+                plt.plot([begin[0], xpos - 1], [begin[1], ypos - 1], color='k')
 
         return True
 
@@ -311,8 +331,10 @@ if __name__ == '__main__':
     fasta1.seq = fasta1.seq[:200]
 
     # match.setup(fasta1, fasta2)
-    match.setup(fasta1, fasta2, window=12, threshold=6)
-    match.diagonalDrawDot()
+    match.setup(fasta1, fasta2, window=12, threshold=4)
+
+    # match.diagonalDrawDotColor(cmap='viridis', reverse=False)
+    match.diagonalDrawDotColor(cmap='gray', reverse=False)
     # match.diagonalDrawLine()
     match.show()
 
