@@ -27,7 +27,7 @@ class Diagonal(Score, Fasta):
         Score.__init__(self)
 
         self.diagonal = []
-        self.fig = plt.figure()
+        self.fig = plt.figure(figsize=[11.0,8.5])
         self.title = ''
         self.threshold = 0
         self.window = 0
@@ -39,7 +39,7 @@ class Diagonal(Score, Fasta):
         self.l1 = 0
         self.l2 = 0
 
-    def setup(self, seq1, seq2, window=5,threshold=3):
+    def setup(self, seq1, seq2, window=5, threshold=3):
         """-----------------------------------------------------------------------------------------
         Load the sequences and do some basic setup for score calculations and plotting. Sequences
         are passed as Fasta object to make it easier to use multi fasta files.
@@ -52,9 +52,9 @@ class Diagonal(Score, Fasta):
         self.s1 = seq1
         self.s2 = seq2
         self.l1, self.l2 = self.seqToInt()
-        self.diagonal = [0 for _ in range(min(self.l1,self.l2))]
+        self.diagonal = [0 for _ in range(min(self.l1, self.l2))]
         self.window = window
-        self.threshold = 3
+        self.threshold = threshold
 
         # plot setup
         if self.title:
@@ -180,9 +180,9 @@ class Diagonal(Score, Fasta):
 
         return diagonal
 
-    def diagonalDrawDots(self):
+    def diagonalDrawDot(self):
         """-----------------------------------------------------------------------------------------
-        Drawe one diagonal of dots.  the score is reported in the first position of the window so
+        Draw all diagonals as dots.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
         coordinates must also be incremented by 1
 
@@ -198,12 +198,60 @@ class Diagonal(Score, Fasta):
             diaglen, xpos, ypos = self.diagLenBegin(d)
             xpos += halfwindow
             ypos += halfwindow
-            for pos in range(diaglen-window):
+            for pos in range(diaglen - window + 1):
                 if dscore[pos] >= threshold:
-                    plt.plot(xpos, ypos, 'ko', markersize=1.0)
+                    plt.plot(xpos, ypos, 'ko', markersize=2.0)
 
                 xpos += 1
                 ypos += 1
+
+        return True
+
+    def diagonalDrawLine(self, dither=0.05):
+        """-----------------------------------------------------------------------------------------
+        Draw all diagonals as lines.  the score is reported in the first position of the window so
+        the position of the dot must be offset to lie in the middle of the window.  Zero origin
+        coordinates must also be incremented by 1
+
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+        window = self.window
+        threshold = self.threshold
+        diagonal = self.diagonal
+        halfwindow = window / 2.0 + 1
+        dither2 = dither * 2
+
+        for d in range(self.l1 + self.l2 - 1):
+            dscore = self.diagonalScore(d)
+            diaglen, xpos, ypos = self.diagLenBegin(d)
+            xpos += halfwindow + dither
+            ypos += halfwindow + dither
+
+            line = 0
+            begin = []
+            for pos in range(diaglen - window + 1):
+                if dscore[pos] >= threshold:
+                    # this window is on a line
+                    # if already on a line, do nothing until end of line
+                    if not line:
+                        # not in a line, start a new line
+                        begin[0:1] = [xpos - dither2, ypos - dither2]
+
+                    line += 1
+
+                else:
+                    # this window is not part of line, draw the line
+                    if line:
+                        plt.plot([begin[0], xpos-1], [begin[1], ypos-1], color='k')
+                        line = 0
+
+                xpos += 1
+                ypos += 1
+
+            if line:
+                # ended in a line, draw the last one
+                # TODO: check if dither should be subtracted from end, i think yes
+                plt.plot([begin[0], xpos-1], [begin[1], ypos-1], color='k')
 
         return True
 
@@ -217,6 +265,7 @@ class Diagonal(Score, Fasta):
         :return: True
         -----------------------------------------------------------------------------------------"""
         plt.show(*args, **kwargs)
+
 
 # --------------------------------------------------------------------------------------------------
 # Testing
@@ -234,8 +283,10 @@ if __name__ == '__main__':
 
     fasta1.seq = fasta1.seq[:200]
 
-    match.setup(fasta1, fasta2)
-    match.diagonalDrawDots()
+    # match.setup(fasta1, fasta2)
+    match.setup(fasta1, fasta2, window=1, threshold=1)
+    match.diagonalDrawDot()
+    match.diagonalDrawLine()
     match.show()
 
     exit(0)
