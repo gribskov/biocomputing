@@ -2,9 +2,7 @@
 Even though RLE provides a sparse matrix representation, it is difficult to save scores for
 positions in the matching windows.  As an alternative calculate and plot one diagonal at a time
 
-TODO: indicate score by dots size
-TODO: indicate score by linewidth
-TODO: ploat score distribution
+TODO: plot score distribution
 TODO: plot run length distribution (filtered)
 TODO: Add plotting of reversed sequences
 TODO: add overlay of forward and reversed
@@ -219,6 +217,39 @@ class Diagonal(Score, Fasta):
 
         return True
 
+    def drawDotWidth(self):
+        """-----------------------------------------------------------------------------------------
+        Draw all diagonals as dots.  the score is reported in the first position of the window so
+        the position of the dot must be offset to lie in the middle of the window.  Zero origin
+        coordinates must also be incremented by 1
+
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+
+        minmarker = 0.5
+        maxmarker = 6.0
+
+        window = self.window
+        halfwindow = window / 2.0 + 1
+        threshold = self.threshold
+        diagonal = self.diagonal
+
+        for d in range(self.l1 + self.l2 - 1):
+            dscore = self.diagonalScore(d)
+            diaglen, xpos, ypos = self.diagLenBegin(d)
+            xpos += halfwindow
+            ypos += halfwindow
+            for pos in range(diaglen - window + 1):
+                if dscore[pos] >= threshold:
+                    size = (dscore[pos]-threshold+1)/(window-threshold+1)*(maxmarker-minmarker)
+                    print('{}:{}'.format(dscore[pos], size))
+                    plt.plot(xpos, ypos, 'ko', markersize=size, lw=2)
+
+                xpos += 1
+                ypos += 1
+
+        return True
+
     def drawDotColor(self, cmap='gray', reverse=True):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
@@ -301,6 +332,41 @@ class Diagonal(Score, Fasta):
 
         return True
 
+    def drawLineWidth(self):
+        """-----------------------------------------------------------------------------------------
+        Draw all diagonals as dots.  the score is reported in the first position of the window so
+        the position of the dot must be offset to lie in the middle of the window.  Zero origin
+        coordinates must also be incremented by 1
+
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+
+        minmarker = 0.5
+        maxmarker = 6.0
+
+        window = self.window
+        halfwindow = window / 2.0 + 1
+        threshold = self.threshold
+        diagonal = self.diagonal
+
+        for d in range(self.l1 + self.l2 - 1):
+            dscore = self.diagonalScore(d)
+            diaglen, xpos, ypos = self.diagLenBegin(d)
+            xpos += halfwindow
+            ypos += halfwindow
+            for pos in range(diaglen - window + 1):
+                if dscore[pos] >= threshold:
+                    size = (dscore[pos] - threshold + 1) / (window - threshold + 1) * (
+                                maxmarker - minmarker)
+                    # f = (dscore[pos] - threshold) / (window - threshold)
+                    plt.plot([xpos - 0.5, xpos + 0.5], [ypos - 0.5, ypos + 0.5], color='k', lw=size,
+                             solid_capstyle='round')
+
+                xpos += 1
+                ypos += 1
+
+        return True
+
     def drawLineColor(self, cmap='gray', reverse=True):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
@@ -367,12 +433,14 @@ if __name__ == '__main__':
     fasta1.seq = fasta1.seq[:200]
 
     # match.setup(fasta1, fasta2)
-    match.setup(fasta1, fasta2, window=10, threshold=5)
+    match.setup(fasta1, fasta2, window=20, threshold=10)
 
+    # match.drawDotWidth()
+    match.drawLineWidth()
     # match.drawDotColor(cmap='viridis', reverse=False)
     # match.drawDotColor(cmap='gray', reverse=False)
     # match.drawLine()
-    match.drawLineColor(cmap='hot', reverse=True)
+    # match.drawLineColor(cmap='hot', reverse=True)
     match.show()
 
     exit(0)
