@@ -192,7 +192,7 @@ class Diagonal(Score, Fasta):
 
         return diagonal
 
-    def diagonalDrawDot(self):
+    def drawDot(self):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
@@ -219,7 +219,7 @@ class Diagonal(Score, Fasta):
 
         return True
 
-    def diagonalDrawDotColor(self, cmap='gray', reverse=True):
+    def drawDotColor(self, cmap='gray', reverse=True):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
@@ -254,7 +254,7 @@ class Diagonal(Score, Fasta):
 
         return True
 
-    def diagonalDrawLine(self, dither=0.05):
+    def drawLine(self, dither=0.05):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as lines.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
@@ -301,7 +301,7 @@ class Diagonal(Score, Fasta):
 
         return True
 
-    def diagonalDrawLineColor(self, cmap='gray', reverse=True):
+    def drawLineColor(self, cmap='gray', reverse=True):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
@@ -369,10 +369,10 @@ if __name__ == '__main__':
     # match.setup(fasta1, fasta2)
     match.setup(fasta1, fasta2, window=10, threshold=5)
 
-    # match.diagonalDrawDotColor(cmap='viridis', reverse=False)
-    # match.diagonalDrawDotColor(cmap='gray', reverse=False)
-    # match.diagonalDrawLine()
-    match.diagonalDrawLineColor(cmap='hot', reverse=True)
+    # match.drawDotColor(cmap='viridis', reverse=False)
+    # match.drawDotColor(cmap='gray', reverse=False)
+    # match.drawLine()
+    match.drawLineColor(cmap='hot', reverse=True)
     match.show()
 
     exit(0)
