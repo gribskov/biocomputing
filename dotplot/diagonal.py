@@ -2,7 +2,6 @@
 Even though RLE provides a sparse matrix representation, it is difficult to save scores for
 positions in the matching windows.  As an alternative calculate and plot one diagonal at a time
 
-TODO: color lines by score
 TODO: indicate score by dots size
 TODO: indicate score by linewidth
 TODO: ploat score distribution
@@ -302,6 +301,43 @@ class Diagonal(Score, Fasta):
 
         return True
 
+    def diagonalDrawLineColor(self, cmap='gray', reverse=True):
+        """-----------------------------------------------------------------------------------------
+        Draw all diagonals as dots.  the score is reported in the first position of the window so
+        the position of the dot must be offset to lie in the middle of the window.  Zero origin
+        coordinates must also be incremented by 1
+
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+        window = self.window
+        halfwindow = window / 2.0 + 1
+        threshold = self.threshold
+        diagonal = self.diagonal
+
+        cc = plt.cm.get_cmap(cmap, window + 1 - threshold)
+        if reverse:
+            cc = cc.reversed()
+        plt.colorbar(cm.ScalarMappable(cmap=cc), fraction=0.1, shrink=0.4, values=range(
+            threshold, window+1))
+        self.ax.set_facecolor(cc(0.0))
+
+        for d in range(self.l1 + self.l2 - 1):
+            dscore = self.diagonalScore(d)
+            diaglen, xpos, ypos = self.diagLenBegin(d)
+            xpos += halfwindow
+            ypos += halfwindow
+            for pos in range(diaglen - window + 1):
+                if dscore[pos] >= threshold:
+                    # f=str(1.0-dscore[pos]/window)
+                    f = (dscore[pos] - threshold) / (window - threshold)
+                    plt.plot([xpos - 0.5, xpos + 0.5], [ypos - 0.5, ypos + 0.5], c=cc(f), lw=2,
+                             solid_capstyle='round')
+
+                xpos += 1
+                ypos += 1
+
+        return True
+
     def show(self, *args, **kwargs):
         """-----------------------------------------------------------------------------------------
         Delegate to plt.show().  Makes syntax a little easier in application since the object is
@@ -331,11 +367,12 @@ if __name__ == '__main__':
     fasta1.seq = fasta1.seq[:200]
 
     # match.setup(fasta1, fasta2)
-    match.setup(fasta1, fasta2, window=20, threshold=4)
+    match.setup(fasta1, fasta2, window=10, threshold=5)
 
-    match.diagonalDrawDotColor(cmap='viridis', reverse=False)
+    # match.diagonalDrawDotColor(cmap='viridis', reverse=False)
     # match.diagonalDrawDotColor(cmap='gray', reverse=False)
     # match.diagonalDrawLine()
+    match.diagonalDrawLineColor(cmap='hot', reverse=True)
     match.show()
 
     exit(0)
