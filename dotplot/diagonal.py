@@ -4,8 +4,7 @@ positions in the matching windows.  As an alternative calculate and plot one dia
 
 TODO: plot score distribution
 TODO: plot run length distribution (filtered)
-TODO: Add plotting of reversed sequences
-TODO: add overlay of forward and reversed
+
 
 Michael Gribskov     25 June 2020
 ================================================================================================="""
@@ -71,8 +70,10 @@ class Diagonal(Score, Fasta):
             titlestr = 'Dotplot of {} and {} - {}'.format(self.s1.id, self.s2.id, now)
 
         self.fig.suptitle(titlestr)
-        ax = self.fig.add_subplot(1, 1, 1)
+        if not self.ax:
+            self.ax = self.fig.add_subplot(1, 1, 1)
 
+        ax = self.ax
         ax.set_aspect(1.0)
 
         ax.set_xlim(0, self.l1 + 1)
@@ -80,7 +81,6 @@ class Diagonal(Score, Fasta):
 
         ax.set_xlabel('\n'.join([self.s1.id, self.s1.doc]))
         ax.set_ylabel('\n'.join([self.s2.doc, self.s2.id]))
-        self.ax = ax
 
         return True
 
@@ -190,7 +190,7 @@ class Diagonal(Score, Fasta):
 
         return diagonal
 
-    def drawDot(self):
+    def drawDot(self, rev=False):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
@@ -199,21 +199,37 @@ class Diagonal(Score, Fasta):
         :return: True
         -----------------------------------------------------------------------------------------"""
         window = self.window
-        halfwindow = window / 2.0 + 1
+        halfwindow = (window - 1) / 2.0
         threshold = self.threshold
         diagonal = self.diagonal
+        symbol = 'ko'
+        l2 = self.l2
+
+        # for reversed plot, invert the diagonal
+        # if rev:
+        #     diagonal = diagonal[::-1]
+        #     symbol = 'r.'
+
+        yinc = 1
+        if rev:
+            yinc = -1
+            symbol = 'r.'
 
         for d in range(self.l1 + self.l2 - 1):
             dscore = self.diagonalScore(d)
             diaglen, xpos, ypos = self.diagLenBegin(d)
             xpos += halfwindow
-            ypos += halfwindow
+            if rev:
+                ypos = l2 - ypos - halfwindow - 1
+            else:
+                ypos += halfwindow
+
             for pos in range(diaglen - window + 1):
                 if dscore[pos] >= threshold:
-                    plt.plot(xpos, ypos, 'ko', markersize=2.0)
+                    plt.plot(xpos, ypos, symbol, markersize=2.0)
 
                 xpos += 1
-                ypos += 1
+                ypos += yinc
 
         return True
 
@@ -241,7 +257,8 @@ class Diagonal(Score, Fasta):
             ypos += halfwindow
             for pos in range(diaglen - window + 1):
                 if dscore[pos] >= threshold:
-                    size = (dscore[pos]-threshold+1)/(window-threshold+1)*(maxmarker-minmarker)
+                    size = (dscore[pos] - threshold + 1) / (window - threshold + 1) * (
+                                maxmarker - minmarker)
                     print('{}:{}'.format(dscore[pos], size))
                     plt.plot(xpos, ypos, 'ko', markersize=size, lw=2)
 
@@ -357,7 +374,7 @@ class Diagonal(Score, Fasta):
             for pos in range(diaglen - window + 1):
                 if dscore[pos] >= threshold:
                     size = (dscore[pos] - threshold + 1) / (window - threshold + 1) * (
-                                maxmarker - minmarker)
+                            maxmarker - minmarker)
                     # f = (dscore[pos] - threshold) / (window - threshold)
                     plt.plot([xpos - 0.5, xpos + 0.5], [ypos - 0.5, ypos + 0.5], color='k', lw=size,
                              solid_capstyle='round')
@@ -384,7 +401,7 @@ class Diagonal(Score, Fasta):
         if reverse:
             cc = cc.reversed()
         plt.colorbar(cm.ScalarMappable(cmap=cc), fraction=0.1, shrink=0.4, values=range(
-            threshold, window+1))
+            threshold, window + 1))
         self.ax.set_facecolor(cc(0.0))
 
         for d in range(self.l1 + self.l2 - 1):
@@ -434,9 +451,13 @@ if __name__ == '__main__':
 
     # match.setup(fasta1, fasta2)
     match.setup(fasta1, fasta2, window=20, threshold=10)
+    match.drawDot()
+    fasta2.seq = fasta2.reverseComplement()
+    match.setup(fasta1, fasta2, window=20, threshold=10)
+    match.drawDot(rev=True)
 
     # match.drawDotWidth()
-    match.drawLineWidth()
+    # match.drawLineWidth()
     # match.drawDotColor(cmap='viridis', reverse=False)
     # match.drawDotColor(cmap='gray', reverse=False)
     # match.drawLine()
