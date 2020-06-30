@@ -4,6 +4,7 @@ positions in the matching windows.  As an alternative calculate and plot one dia
 
 TODO: plot score distribution
 TODO: plot run length distribution (filtered)
+TODO: add correct units to cmap display
 
 
 Michael Gribskov     25 June 2020
@@ -190,7 +191,7 @@ class Diagonal(Score, Fasta):
 
         return diagonal
 
-    def drawDot(self, rev=False, width=False):
+    def drawDot(self, rev=False, width=False, color=False):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
@@ -205,7 +206,7 @@ class Diagonal(Score, Fasta):
         symbol = 'ko'
         l2 = self.l2
 
-        # for plot with markersize scaled to score
+        # markersize scaled to score
         minmarker = 0.1
         maxmarker = 6.0
         defmarker = 2.0
@@ -215,16 +216,12 @@ class Diagonal(Score, Fasta):
             wscale = (maxmarker - minmarker) / (window - threshold)
             woff = 1 - wscale * threshold
 
-            # wscale = (maxmarker - minmarker) / (window - threshold + 1)
-            # woff = (maxmarker - minmarker) * (threshold + 1) / (window - threshold + 1)
-            # size = (dscore[pos] - threshold + 1) / (window - threshold + 1) * (
-            #         maxmarker - minmarker)
-
-        # for reversed plot, invert the direction and change color
+        # reversed plot: invert the direction and change color
         yinc = 1
         if rev:
             yinc = -1
             symbol = 'r.'
+
 
         for d in range(self.l1 + self.l2 - 1):
             dscore = self.diagonalScore(d)
@@ -257,15 +254,20 @@ class Diagonal(Score, Fasta):
         :return: True
         -----------------------------------------------------------------------------------------"""
         window = self.window
-        halfwindow = window / 2.0 + 1
+        halfwindow = window / 2.0
         threshold = self.threshold
         diagonal = self.diagonal
 
-        cc = plt.cm.get_cmap(cmap, window + 1)
+        cc = plt.cm.get_cmap(cmap, window -threshold + 1)
         if colreverse:
             cc = cc.reversed()
         plt.colorbar(cm.ScalarMappable(cmap=cc), shrink=0.4)
         self.ax.set_facecolor(cc(0.0))
+
+        maxmarker = 1
+        minmarker = 0
+        wscale = 1.0/ (window - threshold)
+        woff = (1/(window-threshold) - wscale * threshold)
 
         for d in range(self.l1 + self.l2 - 1):
             dscore = self.diagonalScore(d)
@@ -275,7 +277,7 @@ class Diagonal(Score, Fasta):
             for pos in range(diaglen - window + 1):
                 if dscore[pos] >= threshold:
                     # f=str(1.0-dscore[pos]/window)
-                    f = dscore[pos] / window
+                    f = dscore[pos] * wscale + woff
                     plt.plot(xpos, ypos, 'o', markersize=2.0, c=cc(f))
 
                 xpos += 1
@@ -432,17 +434,17 @@ if __name__ == '__main__':
 
     # match.setup(fasta1, fasta2)
     match.setup(fasta1, fasta2, window=10, threshold=6)
-    match.drawDot(width=True)
-    fasta2.seq = fasta2.reverseComplement()
-    match.setup(fasta1, fasta2, window=10, threshold=6)
-    match.drawDot(rev=True, width=True)
+    # match.drawDot(width=True)
+    # fasta2.seq = fasta2.reverseComplement()
+    # match.setup(fasta1, fasta2, window=10, threshold=6)
     # match.drawDot(rev=True, width=True)
+    # # match.drawDot(rev=True, width=True)
 
     # match.drawLineWidth()
-    # match.drawDotColor(cmap='viridis', reverse=False)
-    # match.drawDotColor(cmap='gray', reverse=False)
+    # match.drawDotColor(cmap='viridis', colreverse=False)
+    match.drawDotColor(cmap='gray', colreverse=True)
     # match.drawLine()
-    # match.drawLineColor(cmap='hot', reverse=True)
+    # match.drawLineColor(cmap='hot', colreverse=True)
     match.show()
 
     exit(0)
