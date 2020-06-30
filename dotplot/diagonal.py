@@ -191,7 +191,60 @@ class Diagonal(Score, Fasta):
 
         return diagonal
 
-    def drawDot(self, rev=False, width=False, color=False):
+    # def drawDot(self, rev=False, width=False, color=False):
+    #     """-----------------------------------------------------------------------------------------
+    #     Draw all diagonals as dots.  the score is reported in the first position of the window so
+    #     the position of the dot must be offset to lie in the middle of the window.  Zero origin
+    #     coordinates must also be incremented by 1
+    # 
+    #     :return: True
+    #     -----------------------------------------------------------------------------------------"""
+    #     window = self.window
+    #     halfwindow = (window - 1) / 2.0
+    #     threshold = self.threshold
+    #     diagonal = self.diagonal
+    #     symbol = 'ko'
+    #     l2 = self.l2
+    # 
+    #     # markersize scaled to score
+    #     minmarker = 0.1
+    #     maxmarker = 6.0
+    #     defmarker = 2.0
+    #     woff = 0
+    #     wscale = 1
+    #     if width:
+    #         wscale = (maxmarker - minmarker) / (window - threshold)
+    #         woff = 1 - wscale * threshold
+    # 
+    #     # reversed plot: invert the direction and change color
+    #     yinc = 1
+    #     if rev:
+    #         yinc = -1
+    #         symbol = 'r.'
+    # 
+    #     for d in range(self.l1 + self.l2 - 1):
+    #         dscore = self.diagonalScore(d)
+    #         diaglen, xpos, ypos = self.diagLenBegin(d)
+    #         xpos += halfwindow
+    #         if rev:
+    #             ypos = l2 - ypos - halfwindow - 1
+    #         else:
+    #             ypos += halfwindow
+    # 
+    #         for pos in range(diaglen - window + 1):
+    #             size = defmarker
+    #             if dscore[pos] >= threshold:
+    #                 if width:
+    #                     size = dscore[pos] * wscale + woff
+    # 
+    #                 plt.plot(xpos, ypos, symbol, markersize=size)
+    # 
+    #             xpos += 1
+    #             ypos += yinc
+    # 
+    #     return True
+
+    def drawDot(self, rev=False, cmap='gray', colreverse=True, width=False, color=False):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
@@ -202,26 +255,29 @@ class Diagonal(Score, Fasta):
         window = self.window
         halfwindow = (window - 1) / 2.0
         threshold = self.threshold
+        msize = 4.0
         diagonal = self.diagonal
-        symbol = 'ko'
         l2 = self.l2
 
-        # markersize scaled to score
-        minmarker = 0.1
-        maxmarker = 6.0
-        defmarker = 2.0
-        woff = 0
-        wscale = 1
-        if width:
-            wscale = (maxmarker - minmarker) / (window - threshold)
-            woff = 1 - wscale * threshold
+        cc = plt.cm.get_cmap(cmap, window - threshold)
+        if colreverse:
+            cc = cc.reversed()
+        plt.colorbar(cm.ScalarMappable(cmap=cc), shrink=0.4, fraction=0.05)
+        self.ax.set_facecolor('w')
+        # self.ax.set_facecolor(cc(0.0))
 
         # reversed plot: invert the direction and change color
+        # markers are slightly smaller on reversed plot
         yinc = 1
         if rev:
             yinc = -1
-            symbol = 'r.'
+            msize /= 1.5
+            # symbol = 'r.'
 
+        maxmarker = 1
+        minmarker = 0
+        wscale = 1.0 / (window - threshold)
+        woff = (1 / (window - threshold) - wscale * threshold)
 
         for d in range(self.l1 + self.l2 - 1):
             dscore = self.diagonalScore(d)
@@ -233,55 +289,18 @@ class Diagonal(Score, Fasta):
                 ypos += halfwindow
 
             for pos in range(diaglen - window + 1):
-                size = defmarker
-                if dscore[pos] >= threshold:
-                    if width:
-                        size = dscore[pos] * wscale + woff
-
-                    plt.plot(xpos, ypos, symbol, markersize=size)
-
-                xpos += 1
-                ypos += yinc
-
-        return True
-
-    def drawDotColor(self, cmap='gray', colreverse=True):
-        """-----------------------------------------------------------------------------------------
-        Draw all diagonals as dots.  the score is reported in the first position of the window so
-        the position of the dot must be offset to lie in the middle of the window.  Zero origin
-        coordinates must also be incremented by 1
-
-        :return: True
-        -----------------------------------------------------------------------------------------"""
-        window = self.window
-        halfwindow = window / 2.0
-        threshold = self.threshold
-        diagonal = self.diagonal
-
-        cc = plt.cm.get_cmap(cmap, window -threshold + 1)
-        if colreverse:
-            cc = cc.reversed()
-        plt.colorbar(cm.ScalarMappable(cmap=cc), shrink=0.4)
-        self.ax.set_facecolor(cc(0.0))
-
-        maxmarker = 1
-        minmarker = 0
-        wscale = 1.0/ (window - threshold)
-        woff = (1/(window-threshold) - wscale * threshold)
-
-        for d in range(self.l1 + self.l2 - 1):
-            dscore = self.diagonalScore(d)
-            diaglen, xpos, ypos = self.diagLenBegin(d)
-            xpos += halfwindow
-            ypos += halfwindow
-            for pos in range(diaglen - window + 1):
                 if dscore[pos] >= threshold:
                     # f=str(1.0-dscore[pos]/window)
                     f = dscore[pos] * wscale + woff
-                    plt.plot(xpos, ypos, 'o', markersize=2.0, c=cc(f))
+                    size = msize
+                    if width:
+                        size *= f
+                    if not color:
+                        f = 1.0
+                    plt.plot(xpos, ypos, 'o', markersize=size, c=cc(f), alpha=0.75)
 
                 xpos += 1
-                ypos += 1
+                ypos += yinc
 
         return True
 
@@ -433,16 +452,21 @@ if __name__ == '__main__':
     fasta1.seq = fasta1.seq[:200]
 
     # match.setup(fasta1, fasta2)
-    match.setup(fasta1, fasta2, window=10, threshold=6)
+    match.setup(fasta1, fasta2, window=20, threshold=8)
     # match.drawDot(width=True)
     # fasta2.seq = fasta2.reverseComplement()
     # match.setup(fasta1, fasta2, window=10, threshold=6)
     # match.drawDot(rev=True, width=True)
     # # match.drawDot(rev=True, width=True)
+    match.drawDot(cmap='hot', colreverse=True, color=True)
 
     # match.drawLineWidth()
-    # match.drawDotColor(cmap='viridis', colreverse=False)
-    match.drawDotColor(cmap='gray', colreverse=True)
+    # match.drawDot(cmap='viridis', colreverse=False)
+    # match.drawDot(cmap='Blues', colreverse=False, color=True, width=True)
+    # fasta2.seq = fasta2.reverseComplement()
+    # match.setup(fasta1, fasta2, window=9, threshold=6)
+    # match.drawDot(cmap='Reds', rev=True, colreverse=False, width=True)
+
     # match.drawLine()
     # match.drawLineColor(cmap='hot', colreverse=True)
     match.show()
