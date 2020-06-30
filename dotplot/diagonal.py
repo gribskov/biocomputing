@@ -191,59 +191,6 @@ class Diagonal(Score, Fasta):
 
         return diagonal
 
-    # def drawDot(self, rev=False, width=False, color=False):
-    #     """-----------------------------------------------------------------------------------------
-    #     Draw all diagonals as dots.  the score is reported in the first position of the window so
-    #     the position of the dot must be offset to lie in the middle of the window.  Zero origin
-    #     coordinates must also be incremented by 1
-    # 
-    #     :return: True
-    #     -----------------------------------------------------------------------------------------"""
-    #     window = self.window
-    #     halfwindow = (window - 1) / 2.0
-    #     threshold = self.threshold
-    #     diagonal = self.diagonal
-    #     symbol = 'ko'
-    #     l2 = self.l2
-    # 
-    #     # markersize scaled to score
-    #     minmarker = 0.1
-    #     maxmarker = 6.0
-    #     defmarker = 2.0
-    #     woff = 0
-    #     wscale = 1
-    #     if width:
-    #         wscale = (maxmarker - minmarker) / (window - threshold)
-    #         woff = 1 - wscale * threshold
-    # 
-    #     # reversed plot: invert the direction and change color
-    #     yinc = 1
-    #     if rev:
-    #         yinc = -1
-    #         symbol = 'r.'
-    # 
-    #     for d in range(self.l1 + self.l2 - 1):
-    #         dscore = self.diagonalScore(d)
-    #         diaglen, xpos, ypos = self.diagLenBegin(d)
-    #         xpos += halfwindow
-    #         if rev:
-    #             ypos = l2 - ypos - halfwindow - 1
-    #         else:
-    #             ypos += halfwindow
-    # 
-    #         for pos in range(diaglen - window + 1):
-    #             size = defmarker
-    #             if dscore[pos] >= threshold:
-    #                 if width:
-    #                     size = dscore[pos] * wscale + woff
-    # 
-    #                 plt.plot(xpos, ypos, symbol, markersize=size)
-    # 
-    #             xpos += 1
-    #             ypos += yinc
-    # 
-    #     return True
-
     def drawDot(self, rev=False, cmap='gray', colreverse=True, width=False, color=False):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
