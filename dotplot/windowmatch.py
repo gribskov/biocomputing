@@ -30,7 +30,7 @@ class Windowmatch(Base, Score):
         Convert sequence strings to an integer arrays and stores in object.  An integer array is
         more convenient for direct lookups in the scoring table than a string
 
-        :return: int, int length of sequence listss
+        :return: int, int length of sequence lists
         -----------------------------------------------------------------------------------------"""
         a2i = self.a2i
 
