@@ -13,6 +13,8 @@ class Score:
         score constructor
         -----------------------------------------------------------------------------------------"""
         self.alphabetSet(alphabet=alphabet)
+        self.max = 0
+        self.min = 0
 
         # self.alphabet = alphabet
         # self.a2i = {}
@@ -96,6 +98,9 @@ class Score:
         :return: True
         -----------------------------------------------------------------------------------------"""
         n = len(self.alphabet)
+        self.max = pos
+        self.min = neg
+
         self.table = [[neg for i in range(n)] for j in range(n)]
         for i in range(len(self.alphabet)):
             self.table[i][i] = pos
@@ -271,7 +276,10 @@ class Score:
             i = self.a2i[token[0]]
 
             for j in range(1, len(token)):
-                self.table[i][j-1] = float(token[j])
+                jval = float(token[j])
+                self.table[i][j - 1] = jval
+                self.max = max(jval, self.max)
+                self.min = min(jval, self.min)
 
         return alen
 
