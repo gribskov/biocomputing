@@ -81,7 +81,7 @@ class Match(Base):
 
     def __init__(self):
         """-----------------------------------------------------------------------------------------
-        Constructor for Match object.  Match object is an RLE list of diagonals with mtching areas.
+        Constructor for Match object.  Match object is an RLE list of diagonals with matching areas.
         each run of matches is encoded as [offset, length] in self.diagonal
 
         -----------------------------------------------------------------------------------------"""
