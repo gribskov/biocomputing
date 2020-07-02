@@ -277,7 +277,18 @@ class Diagonal(Score, Fasta):
 
         x = [i for i in range(self.window+1)]
         # ax.bar(self.score, bins=self.window, histtype='stepfilled', lw=2, color='k')
-        ax.bar(x, self.score, edgecolor='k', linewidth=1)
+        # ax.bar(x, self.score, edgecolor='k', linewidth=1)
+
+        # run distribution
+
+        run = self.run
+        maxrun = 0
+        for i in range(len(run)):
+            if run[i] > 0:
+                maxrun = i
+
+        x = [i for i in range(1,maxrun+1)]
+        ax.bar(x, run[1:maxrun+1], edgecolor='k', linewidth=1)
 
         return True
 
