@@ -13,6 +13,7 @@ import sys
 from datetime import date
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import matplotlib.gridspec as gridspec
 from sequence.score import Score
 from sequence.fasta import Fasta
 
@@ -33,11 +34,18 @@ class Diagonal(Score, Fasta):
         Score.__init__(self)
 
         self.diagonal = []
-        self.fig = plt.figure(figsize=[11.0, 8.5])
+        self.fig = plt.figure(figsize=[11.0, 8.5], constrained_layout=True)
         self.ax = None
         self.title = ''
         self.threshold = 0
         self.window = 0
+
+        # sizes of histograms defined in setup
+        self.run = None
+        self.score = None
+        self.soff = 0  # offset so thatall scores are >= zero
+        self.nrun = 0
+        self.nscore = 0
 
         self.s1 = Fasta()
         self.s2 = Fasta()
@@ -46,9 +54,9 @@ class Diagonal(Score, Fasta):
         self.l1 = 0
         self.l2 = 0
 
-    def setup(self, seq1, seq2, window=5, threshold=3):
+    def setupCalculation(self, seq1, seq2, window=5, threshold=3, resetstat=True):
         """-----------------------------------------------------------------------------------------
-        Load the sequences and do some basic setup for score calculations and plotting. Sequences
+        Load the sequences and do some basic setup for score calculations. Sequences
         are passed as Fasta object to make it easier to use multi fasta files.
 
         :param seq1: Fasta object
@@ -63,7 +71,33 @@ class Diagonal(Score, Fasta):
         self.window = window
         self.threshold = threshold
 
-        # plot setup
+        # stat() histograms.  nrun is always positive and in the range 0 .. window
+        # maximum and minimum scores would be self.max*window amd self.max.window
+        # max and min are inherited from Score
+        # self.run = [0 for _ in range(window + 1)]
+        if resetstat:
+            self.run = [0 for _ in range(min(self.l1, self.l2) - window + 2)]
+            score_range = int(self.max * window) - int(self.min * window) + 1
+            self.soff = int(self.min * window)
+            self.score = [0 for _ in range(score_range)]
+
+        return True
+
+    def setupPlot(self):
+        """-----------------------------------------------------------------------------------------
+        Set up plots, subplots, and plotting parameters
+
+        :param seq1: Fasta object
+        :param seq2: Fasta object
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+
+        s = gridspec.GridSpec(ncols=1, nrows=2, figure=self.fig)
+        self.ax = self.fig.add_subplot(s[0, 0])
+        self.axstat = self.fig.add_subplot(s[1, 0])
+        ax = self.ax
+
+        # title
         if self.title:
             titlestr = self.title
         else:
@@ -71,10 +105,10 @@ class Diagonal(Score, Fasta):
             titlestr = 'Dotplot of {} and {} - {}'.format(self.s1.id, self.s2.id, now)
 
         self.fig.suptitle(titlestr)
-        if not self.ax:
-            self.ax = self.fig.add_subplot(1, 1, 1)
+        # if not self.ax:
+        #     self.ax = self.fig.add_subplot(1, 1, 1)
 
-        ax = self.ax
+        # ax = self.ax
         ax.set_aspect(1.0)
 
         ax.set_xlim(0, self.l1 + 1)
@@ -191,6 +225,62 @@ class Diagonal(Score, Fasta):
 
         return diagonal
 
+    def stat(self, diaglen):
+        """-----------------------------------------------------------------------------------------
+        Save histograms of  scores and run lengths for the current diagonal
+
+        Poaram diagonal: int, length of diagonal
+        :return: int, int, number of runs, number of scores
+        -----------------------------------------------------------------------------------------"""
+        if diaglen < self.window:
+            return self.nrun, self.nscore
+
+        window = self.window
+        threshold = self.threshold
+        score = self.score
+        nscore = self.nscore
+        soff = self.soff
+        run = self.run
+        nrun = self.nrun
+        diagonal = self.diagonal
+
+        runlen = 0
+        for offset in range(diaglen - window + 1):
+            score[int(diagonal[offset]) + soff] += 1
+            nscore += 1
+            if diagonal[offset] >= threshold:
+                runlen += 1
+
+            else:
+                run[runlen] += 1
+                runlen = 0
+                nrun += 1
+
+        if runlen:
+            print(runlen)
+            run[runlen] += 1
+            nrun += 1
+
+        return nrun, nscore
+
+    def statPlot(self):
+        """-----------------------------------------------------------------------------------------
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        # fig, ax = plt.subplots(2,1)
+        # self.axstat.set_title(r'$\sigma=1 \/ \dots \/ \sigma=2$', fontsize=16)
+        ax = self.axstat
+        # ax.set_xlim(0,  1)
+        # ax.set_ylim(0,  1)
+        # ax.set_aspect(1.0)
+
+        x = [i for i in range(self.window+1)]
+        # ax.bar(self.score, bins=self.window, histtype='stepfilled', lw=2, color='k')
+        ax.bar(x, self.score, edgecolor='k', linewidth=1)
+
+        return True
+
     def drawDot(self, rev=False, cmap='gray', colreverse=True, width=False, color=False):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
@@ -199,6 +289,7 @@ class Diagonal(Score, Fasta):
 
         :return: True
         -----------------------------------------------------------------------------------------"""
+        ax = self.ax
         window = self.window
         halfwindow = (window - 1) / 2.0
         threshold = self.threshold
@@ -244,7 +335,7 @@ class Diagonal(Score, Fasta):
                         size *= f
                     if not color:
                         f = 1.0
-                    plt.plot(xpos, ypos, 'o', markersize=size, c=cc(f), alpha=0.75)
+                    ax.plot(xpos, ypos, 'o', markersize=size, c=cc(f), alpha=0.75)
 
                 xpos += 1
                 ypos += yinc
@@ -252,7 +343,7 @@ class Diagonal(Score, Fasta):
         return True
 
     def drawLine(self, rev=False, cmap='gray', colreverse=True, width=False, color=False,
-                  dither=0.05):
+                 dither=0.05):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
@@ -265,6 +356,7 @@ class Diagonal(Score, Fasta):
         maxmarker = 5.0
         msize = 6.0
 
+        axdiag = self.ax
         window = self.window
         halfwindow = (window - 1) / 2.0
         threshold = self.threshold
@@ -274,8 +366,14 @@ class Diagonal(Score, Fasta):
         cc = plt.cm.get_cmap(cmap, window - threshold)
         if colreverse:
             cc = cc.reversed()
-        plt.colorbar(cm.ScalarMappable(cmap=cc), shrink=0.4, fraction=0.05)
-        self.ax.set_facecolor('w')
+        pad=0.0
+        loc = 'right'
+        if rev:
+            pad = 0.05
+            loc = 'left'
+        self.fig.colorbar(cm.ScalarMappable(cmap=cc), ax=axdiag,shrink=0.4, fraction=0.05,
+                          use_gridspec=True, location=loc)
+        axdiag.set_facecolor('w')
         # self.ax.set_facecolor(cc(0.0))
 
         # reversed plot: invert the direction and change color
@@ -292,6 +390,8 @@ class Diagonal(Score, Fasta):
         for d in range(self.l1 + self.l2 - 1):
             dscore = self.diagonalScore(d)
             diaglen, xpos, ypos = self.diagLenBegin(d)
+            self.stat(diaglen)
+
             xpos += halfwindow
             if rev:
                 ypos = l2 - ypos - halfwindow - 1
@@ -305,7 +405,7 @@ class Diagonal(Score, Fasta):
                         size *= f
                     if not color:
                         f = 1.0
-                    plt.plot([xpos - 0.5, xpos + 0.5], [ypos + ydither[0], ypos + ydither[1]],
+                    axdiag.plot([xpos - 0.5, xpos + 0.5], [ypos + ydither[0], ypos + ydither[1]],
                              color=cc(f), lw=size, solid_capstyle='butt', alpha=0.75)
                     inwindow = True
 
@@ -343,7 +443,8 @@ if __name__ == '__main__':
     fasta1.seq = fasta1.seq[:200]
 
     # match.setup(fasta1, fasta2)
-    match.setup(fasta1, fasta2, window=20, threshold=8)
+    match.setupCalculation(fasta1, fasta2, window=20, threshold=8)
+    match.setupPlot()
     # match.drawDot(width=True)
     # fasta2.seq = fasta2.reverseComplement()
     # match.setup(fasta1, fasta2, window=10, threshold=6)
@@ -361,8 +462,9 @@ if __name__ == '__main__':
     # match.drawLine()
     match.drawLine(color=True, cmap='Blues', colreverse=False, width=True)
     fasta2.seq = fasta2.reverseComplement()
-    match.setup(fasta1, fasta2, window=20, threshold=8)
+    match.setupCalculation(fasta1, fasta2, window=20, threshold=8, resetstat=False)
     match.drawLine(color=True, cmap='Reds', colreverse=False, rev=True, width=True)
+    match.statPlot()
 
     # match.drawLineColor(cmap='hot', colreverse=True)
     match.show()
