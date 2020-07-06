@@ -2,18 +2,16 @@
 Even though RLE provides a sparse matrix representation, it is difficult to save scores for
 positions in the matching windows.  As an alternative calculate and plot one diagonal at a time
 
-TODO: plot score distribution
-TODO: plot run length distribution (filtered)
-TODO: add correct units to cmap display
-
-
 Michael Gribskov     25 June 2020
 ================================================================================================="""
 import sys
 from datetime import date
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import matplotlib.gridspec as gridspec
+
+from bokeh.plotting import figure, output_file, show
+from bokeh.layouts import grid, gridplot, layout
+from bokeh.transform import transform, linear_cmap
+from bokeh.models import ColorBar, LinearColorMapper, ColumnDataSource
+
 from sequence.score import Score
 from sequence.fasta import Fasta
 
@@ -34,15 +32,16 @@ class Diagonal(Score, Fasta):
         Score.__init__(self)
 
         self.diagonal = []
-        self.fig = plt.figure(figsize=[11.0, 8.5], constrained_layout=True)
         self.ax = None
         self.title = ''
         self.threshold = 0
         self.window = 0
 
         # sizes of histograms defined in setup
-        self.run = None
-        self.score = None
+        self.mainplot = None
+        self.runplot = None
+        self.scoreplot = None
+        self.grid = None
         self.soff = 0  # offset so thatall scores are >= zero
         self.nrun = 0
         self.nscore = 0
@@ -83,39 +82,39 @@ class Diagonal(Score, Fasta):
 
         return True
 
-    def setupPlot(self):
+    def setupBokeh(self):
         """-----------------------------------------------------------------------------------------
-        Set up plots, subplots, and plotting parameters
+        SEt up four plot in 2 x 2 grid, but with differing sized
+            mainplot is the dotplot itself, upper right
+            legend shows the colorbar legend
+            scoreplot shows the window score distribution
+            runploot shows the log of the run length distribution
 
-        :param seq1: Fasta object
-        :param seq2: Fasta object
         :return: True
         -----------------------------------------------------------------------------------------"""
-
-        s = gridspec.GridSpec(ncols=1, nrows=2, figure=self.fig)
-        self.ax = self.fig.add_subplot(s[0, 0])
-        self.axstat = self.fig.add_subplot(s[1, 0])
-        ax = self.ax
-
-        # title
         if self.title:
             titlestr = self.title
         else:
             now = date.today()
             titlestr = 'Dotplot of {} and {} - {}'.format(self.s1.id, self.s2.id, now)
 
-        self.fig.suptitle(titlestr)
-        # if not self.ax:
-        #     self.ax = self.fig.add_subplot(1, 1, 1)
+        xlabel = '\n'.join([self.s1.id, self.s1.doc])
+        ylabel = '\n'.join([self.s2.doc, self.s2.id])
 
-        # ax = self.ax
-        ax.set_aspect(1.0)
+        # TODO need to set up the plot size to account for sequnce lengths
 
-        ax.set_xlim(0, self.l1 + 1)
-        ax.set_ylim(0, self.l2 + 1)
+        self.mainplot = figure(title=titlestr, x_axis_label=xlabel, y_axis_label=ylabel,
+                               height=800, width=800)
+        self.legend = figure(height=800, width=200)
 
-        ax.set_xlabel('\n'.join([self.s1.id, self.s1.doc]))
-        ax.set_ylabel('\n'.join([self.s2.doc, self.s2.id]))
+        # background_fill_color='#bbbbff',
+        # aspect_ratio='auto', x_range=(1, 10))
+
+        self.scoreplot = figure(height=300, width=500)
+        self.runplot = figure(height=300, width=500, y_axis_type='log')
+        # self.runplot = figure(height=300, width=500)
+
+        self.grid = layout([[self.mainplot, self.legend], [self.scoreplot, self.runplot]])
 
         return True
 
@@ -257,7 +256,7 @@ class Diagonal(Score, Fasta):
                 nrun += 1
 
         if runlen:
-            print(runlen)
+            # print(runlen)
             run[runlen] += 1
             nrun += 1
 
@@ -265,30 +264,30 @@ class Diagonal(Score, Fasta):
 
     def statPlot(self):
         """-----------------------------------------------------------------------------------------
+        Plot the score distribution and the log of the run lengths (with +1 prior)
 
         :return:
         -----------------------------------------------------------------------------------------"""
-        # fig, ax = plt.subplots(2,1)
-        # self.axstat.set_title(r'$\sigma=1 \/ \dots \/ \sigma=2$', fontsize=16)
-        ax = self.axstat
-        # ax.set_xlim(0,  1)
-        # ax.set_ylim(0,  1)
-        # ax.set_aspect(1.0)
+        scoreplot = self.scoreplot
+        runplot = self.runplot
 
-        x = [i for i in range(self.window+1)]
-        # ax.bar(self.score, bins=self.window, histtype='stepfilled', lw=2, color='k')
-        # ax.bar(x, self.score, edgecolor='k', linewidth=1)
+        # score distribution
+        x = [i for i in range(self.window + 1)]
+        scoreplot.vbar(x=x, top=self.score, width=0.8, color='#AAAAFF', line_color='black')
 
         # run distribution
-
         run = self.run
         maxrun = 0
         for i in range(len(run)):
             if run[i] > 0:
                 maxrun = i
+            # run[i] = log10(run[i]+1)
+            run[i] += 1
 
-        x = [i for i in range(1,maxrun+1)]
-        ax.bar(x, run[1:maxrun+1], edgecolor='k', linewidth=1)
+        x = [i for i in range(1, maxrun + 1)]
+        # need bottom=1 becasue of log axis
+        runplot.vbar(x=x, top=run[1:maxrun + 1], width=0.8, color='#FF5555',
+                     line_color='black', line_width=0.5, bottom=1)
 
         return True
 
@@ -298,9 +297,10 @@ class Diagonal(Score, Fasta):
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
         coordinates must also be incremented by 1
 
+        TODO: convert to Bokeh
+
         :return: True
         -----------------------------------------------------------------------------------------"""
-        ax = self.ax
         window = self.window
         halfwindow = (window - 1) / 2.0
         threshold = self.threshold
@@ -308,11 +308,11 @@ class Diagonal(Score, Fasta):
         diagonal = self.diagonal
         l2 = self.l2
 
-        cc = plt.cm.get_cmap(cmap, window - threshold)
-        if colreverse:
-            cc = cc.reversed()
-        plt.colorbar(cm.ScalarMappable(cmap=cc), shrink=0.4, fraction=0.05)
-        self.ax.set_facecolor('w')
+        # cc = plt.cm.get_cmap(cmap, window - threshold)
+        # if colreverse:
+        #     cc = cc.reversed()
+        # plt.colorbar(cm.ScalarMappable(cmap=cc), shrink=0.4, fraction=0.05)
+        # self.ax.set_facecolor('w')
         # self.ax.set_facecolor(cc(0.0))
 
         # reversed plot: invert the direction and change color
@@ -346,15 +346,16 @@ class Diagonal(Score, Fasta):
                         size *= f
                     if not color:
                         f = 1.0
-                    ax.plot(xpos, ypos, 'o', markersize=size, c=cc(f), alpha=0.75)
+                    # ax.plot(xpos, ypos, 'o', markersize=size, c=cc(f), alpha=0.75)
 
                 xpos += 1
                 ypos += yinc
 
         return True
 
-    def drawLine(self, rev=False, cmap='gray', colreverse=True, width=False, color=False,
-                 dither=0.05):
+    def drawSegment(self, rev=False, cbase='Greys', clevel=256, crev='True', width=False,
+                    color=False,
+                    dither=0.05):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
@@ -365,30 +366,26 @@ class Diagonal(Score, Fasta):
 
         minmarker = 0.5
         maxmarker = 5.0
-        msize = 6.0
+        msize = 5.0
 
-        axdiag = self.ax
+        plot = self.mainplot
         window = self.window
         halfwindow = (window - 1) / 2.0
         threshold = self.threshold
         diagonal = self.diagonal
         l2 = self.l2
 
-        cc = plt.cm.get_cmap(cmap, window - threshold)
-        if colreverse:
-            cc = cc.reversed()
-        pad=0.0
-        loc = 'right'
-        if rev:
-            pad = 0.05
-            loc = 'left'
-        self.fig.colorbar(cm.ScalarMappable(cmap=cc), ax=axdiag,shrink=0.4, fraction=0.05,
-                          use_gridspec=True, location=loc)
-        axdiag.set_facecolor('w')
-        # self.ax.set_facecolor(cc(0.0))
+        # from bokeh.palettes import Blues256
+        # Blues256=Blues256[::-1]
 
-        # reversed plot: invert the direction and change color
-        # markers are slightly smaller on reversed plot
+        from bokeh.palettes import all_palettes
+        # TODO, add error check
+        palette = all_palettes[cbase][clevel]
+        if crev:
+            palette = palette[::-1]
+        cmap = LinearColorMapper(palette=palette, low=0, high=window)
+
+        # reversed plot: invert the direction
         yinc = 1
         ydither = [-0.5, +0.5]
         if rev:
@@ -408,6 +405,11 @@ class Diagonal(Score, Fasta):
                 ypos = l2 - ypos - halfwindow - 1
             else:
                 ypos += halfwindow
+
+            # plot one diagonal at a time, less memor?
+            segment = {'x0': [], 'y0': [], 'x1': [], 'y1': [], 'size': [], 'score': []}
+            source = ColumnDataSource(data=segment)
+
             for pos in range(diaglen - window + 1):
                 if dscore[pos] >= threshold:
                     f = dscore[pos] * wscale + woff
@@ -416,12 +418,28 @@ class Diagonal(Score, Fasta):
                         size *= f
                     if not color:
                         f = 1.0
-                    axdiag.plot([xpos - 0.5, xpos + 0.5], [ypos + ydither[0], ypos + ydither[1]],
-                             color=cc(f), lw=size, solid_capstyle='butt', alpha=0.75)
+
+                    segment['x0'].append(xpos - 0.5)
+                    segment['y0'].append(ypos + ydither[0])
+                    segment['x1'].append(xpos + 0.5)
+                    segment['y1'].append(ypos + ydither[1])
+                    segment['size'].append(size)
+                    segment['score'].append(dscore[pos])
                     inwindow = True
 
                 xpos += 1
                 ypos += yinc
+
+            self.mainplot.segment(x0='x0', x1='x1', y0='y0', y1='y1', source=source,
+                                  line_width='size', line_color=transform('score', cmap))
+
+            # color bar is in a separate window, self.legend, so it doesn't disturb the
+            # aspect ratio
+            color_bar = ColorBar(color_mapper=cmap, label_standoff=3, bar_line_color='black',
+                                 width=20, margin=0, location=(0, 0),
+                                 major_tick_in=20, major_tick_out=5, major_tick_line_color='black')
+
+        self.legend.add_layout(color_bar, 'right')
 
         return True
 
@@ -434,7 +452,7 @@ class Diagonal(Score, Fasta):
         :param kwargs:
         :return: True
         -----------------------------------------------------------------------------------------"""
-        plt.show(*args, **kwargs)
+        show(self.grid)
 
 
 # --------------------------------------------------------------------------------------------------
@@ -454,8 +472,8 @@ if __name__ == '__main__':
     fasta1.seq = fasta1.seq[:200]
 
     # match.setup(fasta1, fasta2)
-    match.setupCalculation(fasta1, fasta2, window=20, threshold=8)
-    match.setupPlot()
+    match.setupCalculation(fasta1, fasta1, window=20, threshold=8)
+    match.setupBokeh()
     # match.drawDot(width=True)
     # fasta2.seq = fasta2.reverseComplement()
     # match.setup(fasta1, fasta2, window=10, threshold=6)
@@ -471,10 +489,10 @@ if __name__ == '__main__':
     # match.drawDot(cmap='Reds', rev=True, colreverse=False, width=True)
 
     # match.drawLine()
-    match.drawLine(color=True, cmap='Blues', colreverse=False, width=True)
-    fasta2.seq = fasta2.reverseComplement()
+    match.drawSegment(color=True, cbase='Blues', clevel=256, crev=True, width=True)
+    fasta2.seq = fasta1.reverseComplement()
     match.setupCalculation(fasta1, fasta2, window=20, threshold=8, resetstat=False)
-    match.drawLine(color=True, cmap='Reds', colreverse=False, rev=True, width=True)
+    match.drawSegment(color=True, cbase='Reds', clevel=256, crev=True, rev=True, width=True)
     match.statPlot()
 
     # match.drawLineColor(cmap='hot', colreverse=True)
