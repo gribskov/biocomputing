@@ -11,6 +11,8 @@ from bokeh.plotting import figure, output_file, show
 from bokeh.layouts import grid, gridplot, layout
 from bokeh.transform import transform, linear_cmap
 from bokeh.models import ColorBar, LinearColorMapper, ColumnDataSource
+from bokeh.core.validation import silence
+from bokeh.core.validation.warnings import MISSING_RENDERERS
 
 from sequence.score import Score
 from sequence.fasta import Fasta
@@ -92,6 +94,10 @@ class Diagonal(Score, Fasta):
 
         :return: True
         -----------------------------------------------------------------------------------------"""
+
+        # turn of MISSING_RENDERERS warning caused by plotting colorbars in empty plot
+        silence(MISSING_RENDERERS, True)
+
         if self.title:
             titlestr = self.title
         else:
