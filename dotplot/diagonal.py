@@ -124,6 +124,36 @@ class Diagonal(Score, Fasta):
 
         return True
 
+    def setupPalette(self, base, levels, color_reverse):
+        """-----------------------------------------------------------------------------------------
+        Colormaps are used in multiple methods so this utility provides a unified safe method for
+        setup.  Bokeh handles colormaps a little differently than other plotting programs
+
+        :param base: string, e.g. Greys, Blues, Reds, Viridis, etc
+        :param levels: int, usually 0-9 or 256
+        :param color_reverse: boolean, if True highest color is dark
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        from bokeh.palettes import all_palettes
+
+        default_base = 'Greys'
+        default_level = 256
+        default_reverse = True
+
+        try:
+            palette = all_palettes[base][levels]
+        except (KeyError, IndexError) as error:
+            palette = all_palettes[default_base][default_level]
+            sys.stderr.write(
+                'Diagonal::setupPalettes - color {} levels {} is undefined.\n'. \
+                    format(base, levels))
+            sys.stderr.write('\tUsing default {}{}\n'.format(default_base, default_level))
+
+        if color_reverse:
+            palette = palette[::-1]
+
+        return palette
+
     def seqToInt(self):
         """-----------------------------------------------------------------------------------------
         Convert sequence strings to an integer arrays and stores in object.  An integer array is
@@ -381,15 +411,7 @@ class Diagonal(Score, Fasta):
         diagonal = self.diagonal
         l2 = self.l2
 
-        # from bokeh.palettes import Blues256
-        # Blues256=Blues256[::-1]
-
-        from bokeh.palettes import all_palettes
-        # TODO, add error check
-        palette = all_palettes[cbase][clevel]
-        if crev:
-            palette = palette[::-1]
-        cmap = LinearColorMapper(palette=palette, low=0, high=window)
+        cmap = LinearColorMapper(palette=self.setupPalette(cbase, clevel, crev), low=0, high=window)
 
         # reversed plot: invert the direction
         yinc = 1
