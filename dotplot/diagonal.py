@@ -2,7 +2,8 @@
 Even though RLE provides a sparse matrix representation, it is difficult to save scores for
 positions in the matching windows.  As an alternative calculate and plot one diagonal at a time
 
-TODO: need to deal with non-identity scoring matrices
+TODO: Need to deal with non-identity scoring matrices
+TODO: Need to ensure the shorter sequence is in the y dimension (setupCalculation)
 
 Michael Gribskov     25 June 2020
 ================================================================================================="""
@@ -109,11 +110,18 @@ class Diagonal(Score, Fasta):
         xlabel = '\n'.join([self.s1.id, self.s1.doc])
         ylabel = '\n'.join([self.s2.doc, self.s2.id])
 
-        # TODO need to set up the plot size to account for sequnce lengths
+        # Taccount for sequence length
+        xlen = 800
+        ylen = 800
+        if self.l1 > self.l2:
+            ylen *= self.l2 / self.l1
+
+        else:
+            xlen *= self.l1 / self.l2
 
         self.mainplot = figure(title=titlestr, x_axis_label=xlabel, y_axis_label=ylabel,
-                               height=800, width=800)
-        self.legend = figure(height=800, width=200)
+                               height=int(ylen), width=int(xlen), align='center' )
+        self.legend = figure(height=int(ylen), width=200)
 
         # background_fill_color='#bbbbff',
         # aspect_ratio='auto', x_range=(1, 10))
@@ -528,7 +536,7 @@ if __name__ == '__main__':
     w = 12
     t = 7
 
-    test = 4
+    test = 5
 
     if test == 0:
         match.title = 'test 0 - forward dotplot'
@@ -570,6 +578,14 @@ if __name__ == '__main__':
     elif test == 4:
         match.title = 'test4 - self dotplot without window'
         match.setupCalculation(fasta1, fasta1, window=1, threshold=1)
+        match.setupBokeh()
+        match.drawDot(width=False, color=False)
+        match.statPlot()
+
+    elif test == 5:
+        match.title = 'test5 - different length sequences'
+        fasta2.seq = fasta1.seq[:50]
+        match.setupCalculation(fasta1, fasta2, window=1, threshold=1)
         match.setupBokeh()
         match.drawDot(width=False, color=False)
         match.statPlot()
