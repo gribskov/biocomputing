@@ -2,19 +2,24 @@
 Even though RLE provides a sparse matrix representation, it is difficult to save scores for
 positions in the matching windows.  As an alternative calculate and plot one diagonal at a time
 
-TODO: Need to deal with non-identity scoring matrices
-TODO: Need to ensure the shorter sequence is in the y dimension (setupCalculation)
+For usage examples see testing section at end
+
+TODO: Need to deal with non-identity scoring matrices, affects scaling of scoring in drawDot() and
+drawSegment()
+TODO: add documentation of scoring table, window, threshold
+TODO: better legend for dots
 
 Michael Gribskov     25 June 2020
 ================================================================================================="""
 import sys
 from datetime import date
 
-from bokeh.plotting import figure, output_file, show
-from bokeh.layouts import grid, gridplot, layout
-from bokeh.transform import transform, linear_cmap
+from bokeh.plotting import figure, show  # , output_file
+from bokeh.layouts import layout
+from bokeh.transform import transform
 from bokeh.models import ColorBar, LinearColorMapper, ColumnDataSource
 from bokeh.core.validation import silence
+# noinspection PyUnresolvedReferences
 from bokeh.core.validation.warnings import MISSING_RENDERERS
 
 from sequence.score import Score
@@ -37,20 +42,24 @@ class Diagonal(Score, Fasta):
         Score.__init__(self)
 
         self.diagonal = []
-        self.ax = None
-        self.title = ''
         self.threshold = 0
         self.window = 0
 
-        # sizes of histograms defined in setup
+        # sizes of plots defined in setupBokeh()
+        self.title = ''
         self.mainplot = None
         self.runplot = None
         self.scoreplot = None
-        self.grid = None
-        self.soff = 0  # offset so thatall scores are >= zero
-        self.nrun = 0
-        self.nscore = 0
+        self.legend = None
 
+        self.grid = None
+        self.score = None
+        self.soff = 0  # offset so that all scores are >= zero
+        self.nscore = 0
+        self.run = None
+        self.nrun = 0
+
+        # sequences, s1 is horizontal, s2 is vertical
         self.s1 = Fasta()
         self.s2 = Fasta()
         self.i1 = None  # integer array representation of sequences
@@ -65,12 +74,21 @@ class Diagonal(Score, Fasta):
 
         :param seq1: Fasta object
         :param seq2: Fasta object
+        :param window: int, length of window for calculation
+        :param threshold: float, minimum score in window to plot
+        :param resetstat: boolean, if False, reset score and run counts to zero
         :return: True
         -----------------------------------------------------------------------------------------"""
         # sequence setup
         self.s1 = seq1
         self.s2 = seq2
         self.l1, self.l2 = self.seqToInt()
+        if self.l1 < self.l2:
+            # shorter sequence is always s2
+            self.s1, self.s2 = self.s2, self.s1
+            self.l1, self.l2 = self.l2, self.l1
+            self.i1, self.i2 = self.i2, self.i1
+
         self.diagonal = [0 for _ in range(min(self.l1, self.l2))]
         self.window = window
         self.threshold = threshold
@@ -98,7 +116,7 @@ class Diagonal(Score, Fasta):
         :return: True
         -----------------------------------------------------------------------------------------"""
 
-        # turn of MISSING_RENDERERS warning caused by plotting colorbars in empty plot
+        # turn off MISSING_RENDERERS warning caused by plotting colorbars in empty plot
         silence(MISSING_RENDERERS, True)
 
         if self.title:
@@ -110,26 +128,15 @@ class Diagonal(Score, Fasta):
         xlabel = '\n'.join([self.s1.id, self.s1.doc])
         ylabel = '\n'.join([self.s2.doc, self.s2.id])
 
-        # Taccount for sequence length
+        # account for sequence length difference
         xlen = 800
-        ylen = 800
-        if self.l1 > self.l2:
-            ylen *= self.l2 / self.l1
-
-        else:
-            xlen *= self.l1 / self.l2
+        ylen = xlen * self.l2 / self.l1
 
         self.mainplot = figure(title=titlestr, x_axis_label=xlabel, y_axis_label=ylabel,
-                               height=int(ylen), width=int(xlen), align='center' )
+                               height=int(ylen), width=int(xlen), align='center')
         self.legend = figure(height=int(ylen), width=200)
-
-        # background_fill_color='#bbbbff',
-        # aspect_ratio='auto', x_range=(1, 10))
-
         self.scoreplot = figure(height=300, width=500)
         self.runplot = figure(height=300, width=500, y_axis_type='log')
-        # self.runplot = figure(height=300, width=500)
-
         self.grid = layout([[self.mainplot, self.legend], [self.scoreplot, self.runplot]])
 
         return True
@@ -146,6 +153,7 @@ class Diagonal(Score, Fasta):
         -----------------------------------------------------------------------------------------"""
         from bokeh.palettes import all_palettes
 
+        # the defaults are here instead of in definition so that they never change
         default_base = 'Greys'
         default_level = 256
         default_reverse = True
@@ -153,10 +161,11 @@ class Diagonal(Score, Fasta):
         try:
             palette = all_palettes[base][levels]
         except (KeyError, IndexError) as error:
+            # if lookup fails, use default
             palette = all_palettes[default_base][default_level]
-            sys.stderr.write(
-                'Diagonal::setupPalettes - color {} levels {} is undefined.\n'. \
-                    format(base, levels))
+            color_reverse = default_reverse
+            sys.stderr.write('Diagonal::setupPalettes - {}, color {} levels {} is undefined.\n'.
+                             format(error, base, levels))
             sys.stderr.write('\tUsing default {}{}\n'.format(default_base, default_level))
 
         if color_reverse:
@@ -186,10 +195,6 @@ class Diagonal(Score, Fasta):
         :return:
         -----------------------------------------------------------------------------------------"""
         coord = []
-
-        s1 = self.s1.seq
-        s2 = self.s2.seq
-        l1 = self.l1
         l2 = self.l2
 
         for diag in range(len(self.diagonal)):
@@ -311,6 +316,8 @@ class Diagonal(Score, Fasta):
     def statPlot(self):
         """-----------------------------------------------------------------------------------------
         Plot the score distribution and the log of the run lengths (with +1 prior)
+        TODO: scale score to fraction of windoes (observed Probability)
+        TODO: hover to get exact values?
 
         :return:
         -----------------------------------------------------------------------------------------"""
@@ -320,7 +327,6 @@ class Diagonal(Score, Fasta):
         # score distribution
         x = [i for i in range(self.window + 1)]
         scoreplot.vbar(x=x, top=self.score, width=0.8, color='#AAAAFF', line_color='black')
-
 
         # run distribution
         run = self.run
@@ -338,8 +344,8 @@ class Diagonal(Score, Fasta):
 
         return True
 
-    def drawDot(self, rev=False, cbase='Greys', clevel=256, crev='True', width=False,
-                color=False, alpha=0.5):
+    def drawDot(self, rev=False, cbase='Greys', clevel=256, crev=True, width=True,
+                color=True, alpha=0.5):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
@@ -353,9 +359,9 @@ class Diagonal(Score, Fasta):
         threshold = self.threshold
         l2 = self.l2
 
-
         cmap = LinearColorMapper(palette=self.setupPalette(cbase, clevel, crev),
-                                 low=max(threshold-1,0), high=window)
+                                 low=max(threshold - 1, 0), high=window)
+        col_max = window
 
         # reversed plot: invert the direction and change color
         # markers are slightly smaller on reversed plot so they show ujp when superimposed
@@ -368,12 +374,11 @@ class Diagonal(Score, Fasta):
         size_max = 8
 
         try:
-            wscale = (size_max-size_min) / (window - threshold)
+            wscale = (size_max - size_min) / (window - threshold)
             woff = size_min - threshold * wscale
         except ZeroDivisionError:
             wscale = 1
             woff = size_min
-
 
         for d in range(self.l1 + self.l2 - 1):
             dscore = self.diagonalScore(d)
@@ -392,16 +397,18 @@ class Diagonal(Score, Fasta):
 
             for pos in range(diaglen - window + 1):
                 if dscore[pos] >= threshold:
-                    f = dscore[pos] * wscale + woff
                     size = size_min
                     if width:
-                        size = f
-                    if not color:
-                        f = 1.0
+                        size = dscore[pos] * wscale + woff
+
+                    col = col_max
+                    if color:
+                        col = dscore[pos]
+
                     dot['x'].append(xpos)
                     dot['y'].append(ypos)
                     dot['size'].append(size)
-                    dot['score'].append(dscore[pos])
+                    dot['score'].append(col)
 
                 xpos += 1
                 ypos += yinc
@@ -421,8 +428,8 @@ class Diagonal(Score, Fasta):
 
         return True
 
-    def drawSegment(self, rev=False, cbase='Greys', clevel=256, crev='True', width=False,
-                    color=False, dither=0.5, alpha=0.5):
+    def drawSegment(self, rev=False, cbase='Greys', clevel=256, crev=True, width=True,
+                    color=True, dither=0.5, alpha=0.5):
         """-----------------------------------------------------------------------------------------
         Draw all diagonals as dots.  the score is reported in the first position of the window so
         the position of the dot must be offset to lie in the middle of the window.  Zero origin
@@ -437,7 +444,8 @@ class Diagonal(Score, Fasta):
         l2 = self.l2
 
         cmap = LinearColorMapper(palette=self.setupPalette(cbase, clevel, crev),
-                                 low=max(threshold-1,0), high=window)
+                                 low=max(threshold - 1, 0), high=window)
+        col_max = window
 
         # reversed plot: invert the direction
         # dither sets up the segments to run from halfawy between character positions
@@ -474,20 +482,20 @@ class Diagonal(Score, Fasta):
 
             for pos in range(diaglen - window + 1):
                 if dscore[pos] >= threshold:
-                    f = dscore[pos] * wscale + woff
                     size = size_min
                     if width:
-                        size = f
-                    if not color:
-                        f = dscore[pos] = window
+                        size = dscore[pos] * wscale + woff
+
+                    col = col_max
+                    if color:
+                        col = dscore[pos]
 
                     segment['x0'].append(xpos - dither)
                     segment['y0'].append(ypos + ydither[0])
                     segment['x1'].append(xpos + dither)
                     segment['y1'].append(ypos + ydither[1])
                     segment['size'].append(size)
-                    segment['score'].append(dscore[pos])
-                    inwindow = True
+                    segment['score'].append(col)
 
                 xpos += 1
                 ypos += yinc
@@ -498,7 +506,7 @@ class Diagonal(Score, Fasta):
         # color bar is in a separate window, self.legend, so it doesn't disturb the
         # aspect ratio
         color_bar = ColorBar(color_mapper=cmap, label_standoff=3, bar_line_color='black',
-                             scale_alpha = alpha, width=20, margin=0, location=(0, 0),
+                             scale_alpha=alpha, width=20, margin=0, location=(0, 0),
                              major_tick_in=20, major_tick_out=5, major_tick_line_color='black')
 
         self.legend.add_layout(color_bar, 'right')
@@ -514,7 +522,7 @@ class Diagonal(Score, Fasta):
         :param kwargs:
         :return: True
         -----------------------------------------------------------------------------------------"""
-        show(self.grid)
+        show(self.grid, *args, **kwargs)
 
 
 # --------------------------------------------------------------------------------------------------
@@ -527,70 +535,101 @@ if __name__ == '__main__':
     fasta1.read()
 
     fasta2 = Fasta()
+    fasta2.seq = fasta1.seq
     fasta2.id = 'seq2'
-    fasta2.doc = ' bases 1:50'
-    fasta2.seq = fasta1.seq[:50]
-
-    fasta1.seq = fasta1.seq[:200]
+    fasta2.doc = 'Sequence 2'
 
     w = 12
     t = 7
 
-    test = 5
+    # select list of tests to run, one plot in browser for each
+    # tests = [0,1,2,3]
+    # tests = range(8)
+    tests = [2]
 
-    if test == 0:
-        match.title = 'test 0 - forward dotplot'
-        match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
-        match.setupBokeh()
-        match.drawDot(width=True)
-        match.statPlot()
+    for test in tests:
 
-    elif test == 1:
-        match.title = 'test1 - forward/reverse dotplot'
-        match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
-        match.setupBokeh()
-        match.drawDot(cbase='Blues', clevel=256, crev=True, width=True)
-        fasta2.seq = fasta1.reverseComplement()
-        match.setupCalculation(fasta1, fasta2, window=w, threshold=t, resetstat=False)
-        match.drawDot(color=True, cbase='Reds', clevel=256, crev=True, rev=True, width=True)
-        match.statPlot()
+        if test == 0:
+            match.title = 'test {} - forward dotplot size cueing only, w={} t={}'.\
+                format(test, 1, 1)
+            match.setupCalculation(fasta1, fasta1, window=1, threshold=1)
+            match.setupBokeh()
+            match.drawDot(width=True, color=False, alpha=1)
+            match.statPlot()
 
-    elif test == 2:
-        match.title = 'test 2 - reverse dotplot with lines'
-        fasta2.seq = fasta1.reverseComplement()
-        match.setupCalculation(fasta1, fasta2, window=w, threshold=t)
-        match.setupBokeh()
-        match.drawSegment(cbase='Blues', clevel=256, crev=True, rev=True, width=False,
-                          color=False)
-        match.statPlot()
+        elif test == 1:
+            match.title = 'test {} - forward dotplot size cueing only, w={} t={}'.\
+                format(test, 3, 1)
+            match.setupCalculation(fasta1, fasta1, window=3, threshold=1)
+            match.setupBokeh()
+            match.drawDot(width=True, color=False, alpha=1)
+            match.statPlot()
 
-    elif test == 3:
-        match.title = 'test 3 - forward/reverse with lines'
-        match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
-        match.setupBokeh()
-        match.drawSegment(color=True, cbase='Blues', clevel=256, crev=True, width=True)
-        fasta2.seq = fasta1.reverseComplement()
-        match.setupCalculation(fasta1, fasta2, window=w, threshold=t, resetstat=False)
-        match.drawSegment(color=True, cbase='Reds', clevel=256, crev=True, rev=True, width=True,
-                          alpha=0.8)
-        match.statPlot()
+        elif test == 2:
+            match.title = 'test {} - forward dotplot color cueing only, w={} t={}'.\
+                format(test, 10, 6)
+            match.setupCalculation(fasta1, fasta1, window=10, threshold=6)
+            match.setupBokeh()
+            match.drawDot(cbase='Viridis', clevel=256, crev=True, width=False, color=True, alpha=1)
+            match.statPlot()
 
-    elif test == 4:
-        match.title = 'test4 - self dotplot without window'
-        match.setupCalculation(fasta1, fasta1, window=1, threshold=1)
-        match.setupBokeh()
-        match.drawDot(width=False, color=False)
-        match.statPlot()
+        elif test == 3:
+            match.title = 'test {} - forward/reverse dotplot, w={} t={}'. \
+                format(test, w, t)
+            match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
+            match.setupBokeh()
+            match.drawDot(cbase='Blues', clevel=256, crev=True, width=True)
+            fasta2.seq = fasta1.reverseComplement()
+            match.setupCalculation(fasta1, fasta2, window=w, threshold=t, resetstat=False)
+            match.drawDot(color=True, cbase='Reds', clevel=256, crev=True, rev=True, width=True)
+            match.statPlot()
 
-    elif test == 5:
-        match.title = 'test5 - different length sequences'
-        fasta2.seq = fasta1.seq[:50]
-        match.setupCalculation(fasta1, fasta2, window=1, threshold=1)
-        match.setupBokeh()
-        match.drawDot(width=False, color=False)
-        match.statPlot()
+        elif test == 4:
+            match.title = 'test {} - forward/reverse lines, width only, w={} t={}'. \
+                format(test, w, t)
+            fasta2.seq = fasta1.reverseComplement()
+            match.setupCalculation(fasta1, fasta2, window=w, threshold=t)
+            match.setupBokeh()
+            match.drawSegment(cbase='Blues', clevel=256, crev=True, rev=True, width=False,
+                              color=False)
+            match.statPlot()
 
+        elif test == 5:
+            match.title = 'test {} - forward/reverse lines, width and color, w={} t={}'. \
+                format(test, w, t)
+            match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
+            match.setupBokeh()
+            match.drawSegment(color=True, cbase='Blues', clevel=256, crev=True, width=True)
+            fasta2.seq = fasta1.reverseComplement()
+            match.setupCalculation(fasta1, fasta2, window=w, threshold=t, resetstat=False)
+            match.drawSegment(color=True, cbase='Reds', clevel=256, crev=True, rev=True, width=True,
+                              alpha=0.8)
+            match.statPlot()
 
-    match.show()
+        elif test == 6:
+            match.title = 'test {} - different lengths, forward dots, no cueing, w={} t={}'. \
+                format(test, 1, 1)
+            fasta1.seq = fasta1.seq[:200]
+            fasta2.seq = fasta1.seq[:50]
+            fasta2.doc = 'bases 1 to 50'
+            fasta2.doc = 'bases 1 to 200'
+            match.setupCalculation(fasta1, fasta2, window=1, threshold=1)
+            match.setupBokeh()
+            match.drawDot(width=False, color=False)
+            match.statPlot()
 
-    exit(0)
+        elif test == 7:
+            match.title = 'test {} - different lengths, short on  axis, w={} t={}'. \
+                format(test, 1, 1)
+            fasta2.seq = fasta1.seq[:200]
+            fasta1.seq = fasta1.seq[:50]
+            fasta1.doc = 'bases 1 to 50'
+            fasta2.doc = 'bases 1 to 200'
+            match.setupCalculation(fasta2, fasta1, window=1, threshold=1)
+            match.setupBokeh()
+            match.drawDot(width=False, color=False)
+            match.statPlot()
+
+        match.show()
+
+exit(0)
