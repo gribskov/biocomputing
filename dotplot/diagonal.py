@@ -4,10 +4,8 @@ positions in the matching windows.  As an alternative calculate and plot one dia
 
 For usage examples see testing section at end
 
-TODO: Need to deal with non-identity scoring matrices, affects scaling of scoring in drawDot() and
-drawSegment()
 TODO: add documentation of scoring table, window, threshold
-TODO: better legend for dots
+TODO: better legend for dots, e.g., colored sized dots
 
 Michael Gribskov     25 June 2020
 ================================================================================================="""
@@ -17,7 +15,8 @@ from datetime import date
 from bokeh.plotting import figure, show  # , output_file
 from bokeh.layouts import layout
 from bokeh.transform import transform
-from bokeh.models import ColorBar, LinearColorMapper, ColumnDataSource
+from bokeh.models import ColorBar, LinearColorMapper, ColumnDataSource, LinearAxis, Range1d, \
+    BoxAnnotation
 from bokeh.core.validation import silence
 # noinspection PyUnresolvedReferences
 from bokeh.core.validation.warnings import MISSING_RENDERERS
@@ -44,6 +43,8 @@ class Diagonal(Score, Fasta):
         self.diagonal = []
         self.threshold = 0
         self.window = 0
+        self.window_max = 1
+        self.window_min = 0
 
         # sizes of plots defined in setupBokeh()
         self.title = ''
@@ -102,6 +103,18 @@ class Diagonal(Score, Fasta):
             score_range = int(self.max * window) - int(self.min * window) + 1
             self.soff = int(self.min * window)
             self.score = [0 for _ in range(score_range)]
+            self.nscore = 0
+            self.nrun = 0
+
+        # score scaling
+        if seq1.isACGT() and seq2.isACGT():
+            # DNA sequences, range is max and min scores from table times window size
+            self.window_max = window * self.max
+            self.window_min = max(self.threshold - 1, 0)
+        else:
+            factor = 1.5
+            self.window_max = factor * self.max
+            self.window_min = max(self.threshold - 1, self.min)
 
         return True
 
@@ -296,7 +309,7 @@ class Diagonal(Score, Fasta):
 
         runlen = 0
         for offset in range(diaglen - window + 1):
-            score[int(diagonal[offset]) + soff] += 1
+            score[int(diagonal[offset]) - soff] += 1
             nscore += 1
             if diagonal[offset] >= threshold:
                 runlen += 1
@@ -311,24 +324,61 @@ class Diagonal(Score, Fasta):
             run[runlen] += 1
             nrun += 1
 
+        self.nscore = nscore
+        self.nrun = nrun
         return nrun, nscore
 
     def statPlot(self):
         """-----------------------------------------------------------------------------------------
         Plot the score distribution and the log of the run lengths (with +1 prior)
-        TODO: scale score to fraction of windoes (observed Probability)
         TODO: hover to get exact values?
 
-        :return:
+        :return: True
         -----------------------------------------------------------------------------------------"""
         scoreplot = self.scoreplot
         runplot = self.runplot
 
+        # ------------------------
         # score distribution
-        x = [i for i in range(self.window + 1)]
-        scoreplot.vbar(x=x, top=self.score, width=0.8, color='#AAAAFF', line_color='black')
+        # -----------------------
 
+        # find the first and last non-zero index in the score frequency data
+        score = self.score
+        soff = self.soff
+        nscore = self.nscore
+        scoremin = None
+        scoremax = None
+        sum = 0
+        cumulative = []
+        for i in range(len(score)):
+            if score[i] > 0:
+                if scoremin is None:
+                    scoremin = i
+                scoremax = i
+            # score[i] /=nscore # this would convert the bars to probability
+            sum += score[i] / nscore
+            cumulative.append(sum)
+
+        x = [i + soff for i in range(scoremin, scoremax + 1)]
+        scoreplot.vbar(x=x, top=score[scoremin:scoremax + 1], width=0.8, color='#AAAAFF',
+                       line_color='black')
+
+        # cumulative distribution on right side axis
+        scoreplot.extra_y_ranges = {"cumulative": Range1d(start=-0.05, end=1.0)}
+        axis2 = LinearAxis(y_range_name="cumulative")
+        axis2.ticker.num_minor_ticks = 10
+        scoreplot.add_layout(axis2, 'right')
+        scoreplot.line(x=x, y=cumulative[scoremin:scoremax + 1], y_range_name='cumulative',
+                       line_width=2, color='#1122cc')
+
+        # shaded box showing 95% level
+        box = BoxAnnotation(bottom=0.95, top=1.0, y_range_name='cumulative',
+                            fill_color='#FFBBBB', line_width=3, line_dash='dashed')
+        scoreplot.add_layout(box)
+
+        # ------------------------
         # run distribution
+        # ------------------------
         run = self.run
         maxrun = 0
         for i in range(len(run)):
@@ -360,7 +410,7 @@ class Diagonal(Score, Fasta):
         l2 = self.l2
 
         cmap = LinearColorMapper(palette=self.setupPalette(cbase, clevel, crev),
-                                 low=max(threshold - 1, 0), high=window)
+                                 low=self.window_min, high=self.window_max)
         col_max = window
 
         # reversed plot: invert the direction and change color
@@ -371,11 +421,14 @@ class Diagonal(Score, Fasta):
             # size_max /= 1.25
 
         size_min = 2
-        size_max = 8
+        size_max = 10
+
+        score_min = self.window_min
+        score_max = self.window_max
 
         try:
-            wscale = (size_max - size_min) / (window - threshold)
-            woff = size_min - threshold * wscale
+            wscale = (size_max - size_min) / (score_max - score_min)
+            woff = size_min - score_min * wscale
         except ZeroDivisionError:
             wscale = 1
             woff = size_min
@@ -399,7 +452,7 @@ class Diagonal(Score, Fasta):
                 if dscore[pos] >= threshold:
                     size = size_min
                     if width:
-                        size = dscore[pos] * wscale + woff
+                        size = min(dscore[pos] * wscale + woff, size_max)
 
                     col = col_max
                     if color:
@@ -443,8 +496,9 @@ class Diagonal(Score, Fasta):
         threshold = self.threshold
         l2 = self.l2
 
+        col_max = window
         cmap = LinearColorMapper(palette=self.setupPalette(cbase, clevel, crev),
-                                 low=max(threshold - 1, 0), high=window)
+                                 low=self.window_min, high=self.window_max)
         col_max = window
 
         # reversed plot: invert the direction
@@ -455,12 +509,15 @@ class Diagonal(Score, Fasta):
             yinc = -1
             ydither = [dither, -dither]
 
-        size_min = 2
-        size_max = 6
+        size_min = 1
+        size_max = 8
+
+        score_min = self.window_min
+        score_max = self.window_max
 
         try:
-            wscale = (size_max - size_min) / (window - threshold)
-            woff = size_min - threshold * wscale
+            wscale = (size_max - size_min) / (score_max - score_min)
+            woff = size_min - score_min * wscale
         except ZeroDivisionError:
             wscale = 1
             woff = size_min
@@ -484,7 +541,7 @@ class Diagonal(Score, Fasta):
                 if dscore[pos] >= threshold:
                     size = size_min
                     if width:
-                        size = dscore[pos] * wscale + woff
+                        size = min(dscore[pos] * wscale + woff, size_max)
 
                     col = col_max
                     if color:
@@ -524,6 +581,8 @@ class Diagonal(Score, Fasta):
         -----------------------------------------------------------------------------------------"""
         show(self.grid, *args, **kwargs)
 
+        return True
+
 
 # --------------------------------------------------------------------------------------------------
 # Testing
@@ -544,36 +603,44 @@ if __name__ == '__main__':
 
     # select list of tests to run, one plot in browser for each
     # tests = [0,1,2,3]
-    # tests = range(8)
-    tests = [2]
+    tests = range(10)
+    # tests = [0, 1]
 
     for test in tests:
 
         if test == 0:
-            match.title = 'test {} - forward dotplot size cueing only, w={} t={}'.\
-                format(test, 1, 1)
-            match.setupCalculation(fasta1, fasta1, window=1, threshold=1)
+            w = 1
+            t = 1
+            match.title = 'test {} - forward dotplot size cueing only, w={} t={}'. \
+                format(test, w, t)
+            match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
             match.setupBokeh()
             match.drawDot(width=True, color=False, alpha=1)
             match.statPlot()
 
         elif test == 1:
-            match.title = 'test {} - forward dotplot size cueing only, w={} t={}'.\
-                format(test, 3, 1)
-            match.setupCalculation(fasta1, fasta1, window=3, threshold=1)
+            w = 3
+            t = 1
+            match.title = 'test {} - forward dotplot size cueing only, w={} t={}'. \
+                format(test, w, t)
+            match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
             match.setupBokeh()
             match.drawDot(width=True, color=False, alpha=1)
             match.statPlot()
 
         elif test == 2:
-            match.title = 'test {} - forward dotplot color cueing only, w={} t={}'.\
-                format(test, 10, 6)
-            match.setupCalculation(fasta1, fasta1, window=10, threshold=6)
+            w = 10
+            t = 6
+            match.title = 'test {} - forward dotplot color cueing only, w={} t={}'. \
+                format(test, w, t)
+            match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
             match.setupBokeh()
             match.drawDot(cbase='Viridis', clevel=256, crev=True, width=False, color=True, alpha=1)
             match.statPlot()
 
         elif test == 3:
+            w = 12
+            t = 8
             match.title = 'test {} - forward/reverse dotplot, w={} t={}'. \
                 format(test, w, t)
             match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
@@ -585,6 +652,8 @@ if __name__ == '__main__':
             match.statPlot()
 
         elif test == 4:
+            w = 12
+            t = 8
             match.title = 'test {} - forward/reverse lines, width only, w={} t={}'. \
                 format(test, w, t)
             fasta2.seq = fasta1.reverseComplement()
@@ -595,6 +664,8 @@ if __name__ == '__main__':
             match.statPlot()
 
         elif test == 5:
+            w = 12
+            t = 8
             match.title = 'test {} - forward/reverse lines, width and color, w={} t={}'. \
                 format(test, w, t)
             match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
@@ -607,6 +678,8 @@ if __name__ == '__main__':
             match.statPlot()
 
         elif test == 6:
+            w = 12
+            t = 8
             match.title = 'test {} - different lengths, forward dots, no cueing, w={} t={}'. \
                 format(test, 1, 1)
             fasta1.seq = fasta1.seq[:200]
@@ -619,6 +692,8 @@ if __name__ == '__main__':
             match.statPlot()
 
         elif test == 7:
+            w = 12
+            t = 8
             match.title = 'test {} - different lengths, short on  axis, w={} t={}'. \
                 format(test, 1, 1)
             fasta2.seq = fasta1.seq[:200]
@@ -630,6 +705,41 @@ if __name__ == '__main__':
             match.drawDot(width=False, color=False)
             match.statPlot()
 
+        elif test == 8:
+            w = 12
+            t = 5
+            match.title = 'test {} - protein dot with blosum, w={} t={}'. \
+                format(test, w, t)
+            match.readNCBI('table/BLOSUM62.matrix')
+
+            fasta = Fasta(filename='../data/globin.pfa')
+            fasta.read()
+            fasta1 = fasta.copy()
+            fasta.read()
+            fasta2 = fasta.copy()
+
+            match.setupCalculation(fasta2, fasta1, window=w, threshold=t)
+            match.setupBokeh()
+            match.drawDot(cbase='Viridis', clevel=256, crev=True)
+            match.statPlot()
+
+        elif test == 9:
+            w = 14
+            t = 12
+            match.title = 'test {} - protein line with blosum, w={} t={}'. \
+                format(test, w, t)
+            match.readNCBI('table/BLOSUM62.matrix')
+
+            fasta = Fasta(filename='../data/globin.pfa')
+            fasta.read()
+            fasta1 = fasta.copy()
+            fasta.read()
+            fasta2 = fasta.copy()
+
+            match.setupCalculation(fasta2, fasta1, window=w, threshold=t)
+            match.setupBokeh()
+            match.drawSegment(cbase='Viridis', clevel=256, crev=True)
+            match.statPlot()
         match.show()
 
 exit(0)
