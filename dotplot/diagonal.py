@@ -4,7 +4,7 @@ positions in the matching windows.  As an alternative calculate and plot one dia
 
 For usage examples see testing section at end
 
-TODO: add documentation of scoring table, window, threshold
+TODO: add documentation of scoring table, window, threshold, to plot and output
 TODO: better legend for dots, e.g., colored sized dots
 
 Michael Gribskov     25 June 2020
@@ -112,7 +112,7 @@ class Diagonal(Score, Fasta):
             self.window_max = window * self.max
             self.window_min = max(self.threshold - 1, 0)
         else:
-            factor = 1.5
+            factor = 3.0
             self.window_max = factor * self.max
             self.window_min = max(self.threshold - 1, self.min)
 
@@ -328,11 +328,13 @@ class Diagonal(Score, Fasta):
         self.nrun = nrun
         return nrun, nscore
 
-    def statPlot(self):
+    def statPlot(self, write_cumulative=True):
         """-----------------------------------------------------------------------------------------
         Plot the score distribution and the log of the run lengths (with +1 prior)
         TODO: hover to get exact values?
 
+        :param write_cumulative: boolean, if true (default) cumulative distribution is written to
+        STDOUT
         :return: True
         -----------------------------------------------------------------------------------------"""
         scoreplot = self.scoreplot
@@ -341,6 +343,9 @@ class Diagonal(Score, Fasta):
         # ------------------------
         # score distribution
         # -----------------------
+
+        if write_cumulative:
+            sys.stdout.write('Cumulative score distribution\n\tScore\t\tProb\t\tCount\n')
 
         # find the first and last non-zero index in the score frequency data
         score = self.score
@@ -360,6 +365,12 @@ class Diagonal(Score, Fasta):
             cumulative.append(sum)
 
         x = [i + soff for i in range(scoremin, scoremax + 1)]
+
+        if write_cumulative:
+            for i in range(len(x)):
+                j = i + scoremin
+                sys.stdout.write('\t{}\t\t\t{:.4f}\t\t{}\n'.format(x[i], cumulative[j], score[j]))
+
         scoreplot.vbar(x=x, top=score[scoremin:scoremax + 1], width=0.8, color='#AAAAFF',
                        line_color='black')
 
@@ -595,16 +606,13 @@ if __name__ == '__main__':
 
     fasta2 = Fasta()
     fasta2.seq = fasta1.seq
-    fasta2.id = 'seq2'
+    fasta2.id = 'seq 2'
     fasta2.doc = 'Sequence 2'
 
-    w = 12
-    t = 7
-
-    # select list of tests to run, one plot in browser for each
+# select list of tests to run, one plot in browser for each
     # tests = [0,1,2,3]
-    tests = range(10)
-    # tests = [0, 1]
+    # tests = range(10)
+    tests = [8,9]
 
     for test in tests:
 
@@ -707,7 +715,7 @@ if __name__ == '__main__':
 
         elif test == 8:
             w = 12
-            t = 5
+            t = 9
             match.title = 'test {} - protein dot with blosum, w={} t={}'. \
                 format(test, w, t)
             match.readNCBI('table/BLOSUM62.matrix')
@@ -724,8 +732,8 @@ if __name__ == '__main__':
             match.statPlot()
 
         elif test == 9:
-            w = 14
-            t = 12
+            w = 18
+            t = 9
             match.title = 'test {} - protein line with blosum, w={} t={}'. \
                 format(test, w, t)
             match.readNCBI('table/BLOSUM62.matrix')
