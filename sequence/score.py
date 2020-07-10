@@ -12,9 +12,9 @@ class Score:
         """-----------------------------------------------------------------------------------------
         score constructor
         -----------------------------------------------------------------------------------------"""
-        self.alphabetSet(alphabet=alphabet)
         self.max = 0
         self.min = 0
+        self.alphabetSet(alphabet=alphabet)
 
         # self.alphabet = alphabet
         # self.a2i = {}
@@ -210,7 +210,7 @@ class Score:
         """-----------------------------------------------------------------------------------------
         safe open method.  Failure generates warning but not fatal error.
 
-        :param name: string, name of file
+        :param filename: string, name of file
         :return: filehandle
         -----------------------------------------------------------------------------------------"""
         fh = None
@@ -266,7 +266,7 @@ class Score:
             if first:
                 # first line has the alphabet
                 alphabet = line.rstrip().replace(' ', '')
-                print(alphabet)
+                # print(alphabet)
                 alen = self.alphabetSet(alphabet)
                 self.table = [[0 for i in range(alen)] for j in range(alen)]
                 first = False
