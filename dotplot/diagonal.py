@@ -668,7 +668,7 @@ class Diagonal(Score, Fasta):
     def show(self, *args, **kwargs):
         """-----------------------------------------------------------------------------------------
         Delegate to plt.show().  Makes syntax a little easier in application since the object is
-        used instead of the matplotlib class (application doesn't have to know matplotlib).
+        used instead of the plotting class
 
         :param args:
         :param kwargs:
@@ -681,7 +681,7 @@ class Diagonal(Score, Fasta):
     @staticmethod
     def cumulative(score, total):
         """-----------------------------------------------------------------------------------------
-        Return cumulative score probability distribution as a list
+        Return cumulative score probability distribution as a list.
 
         :param score: list
         :param total: int, number of observations
@@ -746,8 +746,8 @@ if __name__ == '__main__':
 
     # select list of tests to run, one plot in browser for each
     # tests = [0,1,2,3]
-    # tests = range(4,10)
-    tests = [8, 9]
+    tests = range(10)
+    # tests = [8, 9]
 
     for test in tests:
 
@@ -776,11 +776,13 @@ if __name__ == '__main__':
             t = 8
             match.title = 'test {} - different lengths, forward dots, no cueing, w={} t={}'. \
                 format(test, 1, 1)
-            fasta1.seq = fasta1.seq[:200]
-            fasta2.seq = fasta1.seq[:50]
-            fasta2.doc = 'bases 1 to 50'
-            fasta2.doc = 'bases 1 to 200'
-            match.setupCalculation(fasta1, fasta2, window=1, threshold=1)
+            f1 = fasta1.copy()
+            f1.seq = f1.seq[:200]
+            f2 = f1.copy()
+            f2.seq = f2.seq[:50]
+            f2.doc = 'bases 1 to 50'
+            f1.doc = 'bases 1 to 200'
+            match.setupCalculation(f1, f2, window=1, threshold=1)
             match.setupBokeh()
             match.drawDot(width=False, color=False)
             match.statPlot()
@@ -790,11 +792,13 @@ if __name__ == '__main__':
             t = 8
             match.title = 'test {} - different lengths, short on  axis, w={} t={}'. \
                 format(test, 1, 1)
-            fasta2.seq = fasta1.seq[:200]
-            fasta1.seq = fasta1.seq[:50]
-            fasta1.doc = 'bases 1 to 50'
-            fasta2.doc = 'bases 1 to 200'
-            match.setupCalculation(fasta2, fasta1, window=1, threshold=1)
+            f1 = fasta1.copy()
+            f1.seq = f1.seq[:200]
+            f2 = f1.copy()
+            f1.seq = f1.seq[:50]
+            f1.doc = 'bases 1 to 50'
+            f2.doc = 'bases 1 to 200'
+            match.setupCalculation(f1, f2, window=1, threshold=1)
             match.setupBokeh()
             match.drawDot(width=False, color=False)
             match.statPlot()
@@ -804,6 +808,7 @@ if __name__ == '__main__':
             t = 8
             match.title = 'test {} - forward dotplot color cueing only, w={} t={}'. \
                 format(test, w, t)
+
             match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
             match.setupBokeh()
             match.drawDot(cbase='Viridis', clevel=256, crev=True, width=False, color=True, alpha=1)
@@ -883,6 +888,7 @@ if __name__ == '__main__':
             match.setupBokeh()
             match.drawSegment(cbase='Viridis', clevel=256, crev=True)
             match.statPlot()
+
         match.show()
 
 exit(0)
