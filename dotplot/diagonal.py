@@ -155,11 +155,17 @@ class Diagonal(Score, Fasta):
         xlen = 800
         ylen = xlen * self.l2 / self.l1
 
+        label = '({}, {})'.format(self.s1.id, self.s2.id)
+        TIPS = [(label, '($x{0},$y{0})')]
         self.mainplot = figure(title=titlestr, x_axis_label=xlabel, y_axis_label=ylabel,
-                               height=int(ylen), width=int(xlen), align='center')
+                               height=int(ylen), width=int(xlen), align='center', tooltips=TIPS)
         self.legend = figure(height=int(ylen), width=200)
-        self.scoreplot = figure(height=300, width=500)
-        self.runplot = figure(height=300, width=500, y_axis_type='log')
+
+        TIPS = [('score, density', '$x{0},$y{0.00}')]
+        self.scoreplot = figure(height=300, width=500, tooltips=TIPS)
+
+        TIPS = [('length,count+1', '$x{0},$y{0}')]
+        self.runplot = figure(height=300, width=500, y_axis_type='log', tooltips=TIPS)
         self.grid = layout([[self.mainplot, self.legend], [self.scoreplot, self.runplot]])
 
         return True
@@ -398,7 +404,6 @@ class Diagonal(Score, Fasta):
     def statPlot(self, write_cumulative=True):
         """-----------------------------------------------------------------------------------------
         Plot the score distribution and the log of the run lengths (with +1 prior)
-        TODO: hover to get exact values?
 
         :param write_cumulative: boolean, if true (default) cumulative distribution is written to
         STDOUT
@@ -746,8 +751,8 @@ if __name__ == '__main__':
 
     # select list of tests to run, one plot in browser for each
     # tests = [0,1,2,3]
-    tests = range(10)
-    # tests = [8, 9]
+    # tests = range(10)
+    tests = [8]
 
     for test in tests:
 
