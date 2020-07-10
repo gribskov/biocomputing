@@ -119,6 +119,19 @@ class Fasta:
         # fall through to false if nothing can be read
         return False
 
+    def copy(self):
+        """-----------------------------------------------------------------------------------------
+        Return a new Fasta object containing the current sequence
+
+        :return: Fasta object
+        -----------------------------------------------------------------------------------------"""
+        new = Fasta()
+        new.id = self.id
+        new.doc = self.doc
+        new.seq = self.seq
+
+        return new
+
     def getID(fasta):
         """-----------------------------------------------------------------------------------------
         intended to be used internally for sequence reading
@@ -271,7 +284,7 @@ class Fasta:
         :return: dict, float; keys are sequence letters , values are frequencies
         -----------------------------------------------------------------------------------------"""
 
-        count = fasta.composition( uppercase=uppercase)
+        count = fasta.composition(uppercase=uppercase)
         sum = 0
         for a in count:
             sum += count[a]
@@ -304,6 +317,7 @@ class Fasta:
             return True
 
         return False
+
 
 # --------------------------------------------------------------------------------------------------
 # testing
