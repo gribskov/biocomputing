@@ -17,6 +17,7 @@ Fasta sequence class.  Supports iteration over a multi-fasta file
 import sys
 
 
+# noinspection PyMethodParameters
 class Fasta:
     codon2aa = {"AAA": "K", "AAC": "N", "AAG": "K", "AAT": "N",
                 "ACA": "T", "ACC": "T", "ACG": "T", "ACT": "T",
@@ -285,11 +286,11 @@ class Fasta:
         -----------------------------------------------------------------------------------------"""
 
         count = fasta.composition(uppercase=uppercase)
-        sum = 0
+        total = 0
         for a in count:
-            sum += count[a]
+            total += count[a]
         for a in count:
-            count[a] /= sum
+            count[a] /= total
 
         return count
 
