@@ -47,14 +47,15 @@ class Diagonal(Score, Fasta):
         self.window_max = 1
         self.window_min = 0
 
+        self.frame = {}
+
         # sizes of plots defined in setupBokeh()
         self.title = ''
-        self.mainplot = None
-        self.runplot = None
-        self.scoreplot = None
-        self.legend = None
-
+        self.figure = {}
         self.grid = None
+        self.palette = None
+        self.alpha = 0.5
+
         self.soff = 0  # offset so that all scores are >= zero
         self.score = None
         self.nscore = 0
@@ -73,6 +74,10 @@ class Diagonal(Score, Fasta):
         self.i2 = None
         self.l1 = 0
         self.l2 = 0
+        self.seqreverse = False
+
+        self.mindotsize = 2
+        self.maxdotsize = 10
 
     def setupCalculation(self, seq1, seq2, window=5, threshold=3, resetstat=True):
         """-----------------------------------------------------------------------------------------
@@ -128,7 +133,7 @@ class Diagonal(Score, Fasta):
 
         return True
 
-    def setupBokeh(self):
+    def setupBokeh(self, cbase=None, clevels=None, creverse=None):
         """-----------------------------------------------------------------------------------------
         SEt up four plot in 2 x 2 grid, but with differing sizes
             mainplot is the dotplot itself, upper right
@@ -142,6 +147,8 @@ class Diagonal(Score, Fasta):
         # turn off MISSING_RENDERERS warning caused by plotting colorbars in empty plot
         silence(MISSING_RENDERERS, True)
 
+        self.palette = self.setupPalette(cbase=cbase, clevels=clevels, creverse=creverse)
+
         if self.title:
             titlestr = self.title
         else:
@@ -151,26 +158,30 @@ class Diagonal(Score, Fasta):
         xlabel = '\n'.join([self.s1.id, self.s1.doc])
         ylabel = '\n'.join([self.s2.doc, self.s2.id])
 
-        # account for sequence length difference
+        # account for sequence length difference, ylen scaling affects main and legend plots
         xlen = 800
         ylen = xlen * self.l2 / self.l1
 
+        # define each panel as a figure
         label = '({}, {})'.format(self.s1.id, self.s2.id)
         TIPS = [(label, '($x{0},$y{0})')]
-        self.mainplot = figure(title=titlestr, x_axis_label=xlabel, y_axis_label=ylabel,
+        self.figure['main'] = figure(title=titlestr, x_axis_label=xlabel, y_axis_label=ylabel,
                                height=int(ylen), width=int(xlen), align='center', tooltips=TIPS)
-        self.legend = figure(height=int(ylen), width=200)
+        self.figure['legend' = figure(height=int(ylen), width=200)
 
         TIPS = [('score, density', '$x{0},$y{0.00}')]
-        self.scoreplot = figure(height=300, width=500, tooltips=TIPS)
+        self.figure['scoredist'] = figure(height=300, width=500, tooltips=TIPS)
 
         TIPS = [('length,count+1', '$x{0},$y{0}')]
-        self.runplot = figure(height=300, width=500, y_axis_type='log', tooltips=TIPS)
-        self.grid = layout([[self.mainplot, self.legend], [self.scoreplot, self.runplot]])
+        self.figure['rundist'] = figure(height=300, width=500, y_axis_type='log', tooltips=TIPS)
+
+        # grid layout
+        self.grid = layout([[self.figure['main'], self.figure['legend']],
+                            [self.figure['scoredist'], self.figure['rundist']])
 
         return True
 
-    def setupPalette(self, base, levels, color_reverse):
+    def setupPalette(self, cbase, clevels, creverse):
         """-----------------------------------------------------------------------------------------
         Colormaps are used in multiple methods so this utility provides a unified safe method for
         setup.  Bokeh handles colormaps a little differently than other plotting programs
@@ -184,20 +195,20 @@ class Diagonal(Score, Fasta):
 
         # the defaults are here instead of in definition so that they never change
         default_base = 'Greys'
-        default_level = 256
+        default_levels = 256
         default_reverse = True
 
         try:
-            palette = all_palettes[base][levels]
+            palette = all_palettes[cbase][clevels]
         except (KeyError, IndexError) as error:
             # if lookup fails, use default
-            palette = all_palettes[default_base][default_level]
-            color_reverse = default_reverse
+            palette = all_palettes[default_base][default_levels]
+            creverse = default_reverse
             sys.stderr.write('Diagonal::setupPalettes - {}, color {} levels {} is undefined.\n'.
-                             format(error, base, levels))
-            sys.stderr.write('\tUsing default {}{}\n'.format(default_base, default_level))
+                             format(error, cbase, clevels))
+            sys.stderr.write('\tUsing default {}{}\n'.format(default_base, default_levels))
 
-        if color_reverse:
+        if creverse:
             palette = palette[::-1]
 
         return palette
@@ -249,6 +260,9 @@ class Diagonal(Score, Fasta):
         pos2 = max(self.l2 - diag - 1, 0)
         diaglen = min(self.l1 - pos1, self.l2 - pos2)
 
+        if self.seqreverse:
+            pos2 = self.l2 - pos2
+
         return diaglen, pos1, pos2
 
     def diagonalScore(self, d):
@@ -274,7 +288,7 @@ class Diagonal(Score, Fasta):
 
         if diaglen < window:
             # skip   diagonals shorter than window length
-            return nmatch
+            return []
 
         diagonal[:] = map(lambda i: 0, diagonal)  # lambda much faster to set all values
         # to zero
@@ -495,6 +509,114 @@ class Diagonal(Score, Fasta):
 
         return True
 
+    def allDiagonals(self, actions):
+        """-----------------------------------------------------------------------------------------
+        Iterate over all diagonals and apply specified actions to each diagonal.  Each action is
+        a tuple that specifies the name of the resulting data frame, and a function to process
+        the diagonal. The frames are usable as Bokeh sources for plotting.
+
+        :param framename: string, name of data frame
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        for action in actions:
+            self.frame[action[0]] = {'x': [], 'y': [], 'score': []}
+
+        for d in range(self.l1 + self.l2 - 1):
+            dscore = self.diagonalScore(d)
+            if not dscore:
+                continue
+
+            for action in actions:
+                action[1](action[0], d, dscore)
+
+        return
+
+    def windowThreshold(self, framename, d, dscore):
+        """-----------------------------------------------------------------------------------------
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        frame = self.frame[framename]
+        window = self.window
+        threshold = self.threshold
+
+        diaglen, xpos, ypos = self.diagLenBegin(d)
+
+        # reversed plot: invert the direction of sequence 2
+        yinc = 1
+        if self.seqreverse:
+            yinc = -1
+
+        for pos in range(diaglen - window + 1):
+            if dscore[pos] >= threshold:
+                frame['x'].append(xpos)
+                frame['y'].append(ypos)
+                frame['score'].append(dscore[pos])
+
+            xpos += 1
+            ypos += yinc
+
+        return
+
+    def scaleColumn(self, framename, column_source, column_dest, value, scale):
+        frame = self.frame[framename]
+        values = frame[column_source]
+        frame[column_dest] = []
+        width = frame[column_dest]
+
+        rangeval = value[1] - value[0]
+        rangesize = scale[1] - scale[0]
+        m = rangesize / rangeval
+
+        for v in values:
+            size = scale[0] + (v - value[0]) * m
+            frame[column_dest].append(size)
+
+        return
+
+    def bdot(self, framename, width=True, color=True):
+        """-----------------------------------------------------------------------------------------
+
+        :param width:
+        :param color:
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        frame = self.frame[framename]
+        window = self.window
+        threshold = self.threshold
+        alpha = self.alpha
+
+        scoremin, scoremax = self.valueMinMax( frame['score'])
+
+        if width:
+            self.scaleColumn('main', 'score', 'size',
+                        (threshold,window), (self.mindotsize, self.maxdotsize))
+        else:
+            frame['size'] = [self.mindotsize for _ in range(len(frame['score']))]
+
+        if color:
+            pass
+        else:
+            frame['score'] = [scoremax for _ in range(len(frame['score']))]
+
+        cmap = LinearColorMapper(self.palette, low=self.window_min, high=self.window_max)
+
+        self.mainplot.circle(x='x', y='y', source=frame,
+                             size='size',
+                             line_color=transform('score', cmap), line_alpha=alpha,
+                             fill_color=transform('score', cmap), fill_alpha=alpha)
+
+        # color bar is in a separate window, self.legend, so it doesn't disturb the
+        # aspect ratio
+        color_bar = ColorBar(color_mapper=cmap, label_standoff=3, bar_line_color='black',
+                             scale_alpha=alpha, width=20, margin=0, location=(0, 0),
+                             major_tick_in=20, major_tick_out=5, major_tick_line_color='black')
+
+        self.legend.add_layout(color_bar, 'left')
+
+        return True
+
+
     def drawDot(self, rev=False, cbase='Greys', clevel=256, crev=True, width=True,
                 color=True, alpha=0.5):
         """-----------------------------------------------------------------------------------------
@@ -515,7 +637,7 @@ class Diagonal(Score, Fasta):
         col_max = window
 
         # reversed plot: invert the direction and change color
-        # markers are slightly smaller on reversed plot so they show ujp when superimposed
+        # markers are slightly smaller on reversed plot so they show up when superimposed
         yinc = 1
         if rev:
             yinc = -1
@@ -581,6 +703,7 @@ class Diagonal(Score, Fasta):
         self.legend.add_layout(color_bar, 'left')
 
         return True
+
 
     def drawSegment(self, rev=False, cbase='Greys', clevel=256, crev=True, width=True,
                     color=True, dither=0.5, alpha=0.5):
@@ -670,6 +793,7 @@ class Diagonal(Score, Fasta):
 
         return True
 
+
     def show(self, *args, **kwargs):
         """-----------------------------------------------------------------------------------------
         Delegate to plt.show().  Makes syntax a little easier in application since the object is
@@ -682,6 +806,7 @@ class Diagonal(Score, Fasta):
         show(self.grid, *args, **kwargs)
 
         return True
+
 
     @staticmethod
     def cumulative(score, total):
@@ -700,6 +825,7 @@ class Diagonal(Score, Fasta):
 
         return cumulative
 
+
     @staticmethod
     def density(score, total):
         """-----------------------------------------------------------------------------------------
@@ -714,6 +840,7 @@ class Diagonal(Score, Fasta):
             maxp = max(maxp, score[i])
 
         return maxp
+
 
     @staticmethod
     def scoreMinMax(score):
@@ -734,6 +861,22 @@ class Diagonal(Score, Fasta):
 
         return scoremin, scoremax
 
+    @staticmethod
+    def valueMinMax(score):
+        """-----------------------------------------------------------------------------------------
+        Returns the minimum and maximum value in a list of values.
+
+        :param score: list
+        :return: float, float
+        -----------------------------------------------------------------------------------------"""
+        scoremin = score[0]
+        scoremax = score[0]
+        for s in score:
+            scoremin = min( scoremin, s)
+            scoremax = max( scoremax, s)
+
+        return scoremin, scoremax
+
 
 # --------------------------------------------------------------------------------------------------
 # Testing
@@ -748,6 +891,13 @@ if __name__ == '__main__':
     fasta2.seq = fasta1.seq
     fasta2.id = 'seq 2'
     fasta2.doc = 'Sequence 2'
+
+    actions = [('main', match.windowThreshold)]
+    match.setupCalculation(fasta1, fasta2, window=12, threshold=8)
+    match.allDiagonals(actions)
+    match.scaleColumn('main', 'score', 'size', (8, 12), (2, 6))
+
+    exit(1)
 
     # select list of tests to run, one plot in browser for each
     # tests = [0,1,2,3]
