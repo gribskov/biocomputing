@@ -857,18 +857,21 @@ class Diagonal(Score, Fasta):
 
         return True
 
-    def writeFrame(self, frame, key='x', out=sys.stdout):
+    def writeFrame(self, framename, key='x', out=sys.stdout):
         """-----------------------------------------------------------------------------------------
         Write the dataframe out as a table to the specified output file.  Output file should be
         opened for writing in advance.
 
-        :param frame: string, name of a dataframe in self.frame
+        TODO figure out how to format values more nicely
+
+        :param framename: string, name of a dataframe in self.frame
         :param key: string, name of column to use as key (first column in table)
         :param out: open output file
         :return: True
         -----------------------------------------------------------------------------------------"""
-        frame = self.frame[frame]
+        frame = self.frame[framename]
 
+        out.write('\n{} dataframe\n'.format(framename))
         out.write('\t{}'.format(key))
         for column in frame:
             if column == key:
@@ -1192,7 +1195,7 @@ if __name__ == '__main__':
     match.bdot('dots', 'main')
 
     match.sortFrame('scoredist', 'score')
-    match.addCumulative('scoredist', 'count', 'cumulative', match.nscore)
+    match.addCumulative('scoredist', 'count', 'cumulative')
     match.bscoreDist('scoredist', 'scoredist')
 
     match.brunDist('rundist', 'rundist')
