@@ -47,6 +47,7 @@ class Diagonal(Score, Fasta):
         Score.__init__(self)
 
         self.diagonal = []
+        self.single = False
         self.yinc = 1
         self.threshold = 0
         self.window = 0
@@ -101,12 +102,23 @@ class Diagonal(Score, Fasta):
         # sequence setup
         self.s1 = seq1
         self.s2 = seq2
-        self.l1, self.l2 = self.seqToInt()
+        self.l1 = len(seq1.seq)
+        self.l2 = len(seq2.seq)
+        yinc = 1
+
+        # move shorter sequence to s2 if necessary
         if self.l1 < self.l2:
             # shorter sequence is always s2
             self.s1, self.s2 = self.s2, self.s1
             self.l1, self.l2 = self.l2, self.l1
-            self.i1, self.i2 = self.i2, self.i1
+
+        # reverse sequence 2 if necessary
+        if self.seqreverse:
+            self.s2.seq = self.s2.reverseComplement()
+            self.yinc = -1
+
+        # setup integer array version of sequence
+        self.seqToInt()
 
         self.diagonal = [0 for _ in range(min(self.l1, self.l2))]
         self.window = window
@@ -117,16 +129,11 @@ class Diagonal(Score, Fasta):
         # max and min are inherited from Score
         # self.run = [0 for _ in range(window + 1)]
         if resetstat:
-            score_range = int(self.max * window) - int(self.min * window) + 1
             self.soff = int(self.min * window)
-            self.run = [0 for _ in range(min(self.l1, self.l2) - window + 2)]
-            self.rrun = [0 for _ in range(min(self.l1, self.l2) - window + 2)]
-            self.score = [0 for _ in range(score_range)]
-            self.rscore = [0 for _ in range(score_range)]
             self.nscore = 0
-            self.nrscore = 0
             self.nrun = 0
-            self.nrrun = 0
+            for frame in self.frame:
+                self.resetFrame(frame)
 
         # score scaling
         if seq1.isACGT() and seq2.isACGT():
@@ -192,7 +199,7 @@ class Diagonal(Score, Fasta):
 
     def setupFrame(self, defs):
         """-----------------------------------------------------------------------------------------
-        Seup data frames for the defined analyses.  Each def in defs defines
+        Setup data frames for the defined analyses.  Each def in defs defines
             name - name of data frame
             function - a callback function used to construct the data from a diagonal of scores
             variables - variables that will be populated
@@ -212,6 +219,19 @@ class Diagonal(Score, Fasta):
                 self.frame[defin['data']][v] = []
 
         return n
+
+    def resetFrame(self, framename):
+        """-----------------------------------------------------------------------------------------
+        reset the data in one frame.  Needed for reverse plots
+
+        :param framename:
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+        frame = self.frame[framename]
+        for var in frame:
+            frame[var] = []
+
+        return True
 
     def setupPalette(self, cbase, clevels, creverse):
         """-----------------------------------------------------------------------------------------
@@ -293,7 +313,7 @@ class Diagonal(Score, Fasta):
         diaglen = min(self.l1 - pos1, self.l2 - pos2)
 
         # if self.seqreverse:
-        #     pos2 = self.l2 - pos2
+        # pos2 = self.l2 - pos2
 
         return diaglen, pos1, pos2
 
@@ -364,7 +384,11 @@ class Diagonal(Score, Fasta):
         i1 = self.i1
         i2 = self.i2
 
-        dist = [0 for _ in range(n - window)]
+        if n == 0:
+            n = self.l1 * self.l2
+
+        self.diagonal = [0 for _ in range(n - window)]
+        dist = self.diagonal
         win = [0 for _ in range(window)]
 
         wsum = 0
@@ -399,168 +423,170 @@ class Diagonal(Score, Fasta):
 
         :return: True
         -----------------------------------------------------------------------------------------"""
-        self.seqreverse = not self.seqreverse
-        self.s2.seq = self.s2.reverseComplement()
-        self.yinc = -self.yinc
+        # self.seqreverse = not self.seqreverse
+        # self.s2.seq = self.s2.reverseComplement()
+        # self.yinc = -self.yinc
+        pass
 
         return True
 
-    def stat(self, diaglen, random=False, rdiagonal=None):
-        """-----------------------------------------------------------------------------------------
-        Save histograms of  scores and run lengths for the current diagonal. For random simulation
-        create one long diagonal using the random() method.
+    # def stat(self, diaglen, random=False, rdiagonal=None):
+    #     """-----------------------------------------------------------------------------------------
+    #     Save histograms of  scores and run lengths for the current diagonal. For random simulation
+    #     create one long diagonal using the random() method.
+    #
+    #     :param diaglen: int, length of diagonal
+    #     :param rdiagonal: int, length of diagonal
+    #     :param random: boolean, if True, stats are stored in random
+    #     :return: int, int, number of runs, number of scores
+    #     -----------------------------------------------------------------------------------------"""
+    #     if diaglen < self.window:
+    #         return self.nrun, self.nscore
+    #
+    #     window = self.window
+    #     threshold = self.threshold
+    #     soff = self.soff
+    #
+    #     if random:
+    #         score = self.rscore
+    #         nscore = self.nrscore
+    #         run = self.rrun
+    #         nrun = self.nrrun
+    #         diagonal = rdiagonal
+    #     else:
+    #         score = self.score
+    #         nscore = self.nscore
+    #         run = self.run
+    #         nrun = self.nrun
+    #         diagonal = self.diagonal
+    #
+    #     runlen = 0
+    #     for offset in range(diaglen - window):
+    #         score[int(diagonal[offset]) - soff] += 1
+    #         nscore += 1
+    #         if diagonal[offset] >= threshold:
+    #             runlen += 1
+    #
+    #         else:
+    #             run[runlen] += 1
+    #             runlen = 0
+    #             nrun += 1
+    #
+    #     if runlen:
+    #         # print(runlen)
+    #         run[runlen] += 1
+    #         nrun += 1
+    #
+    #     if random:
+    #         self.nrscore = nscore
+    #         self.nrrun = nrun
+    #     else:
+    #         self.nscore = nscore
+    #         self.nrun = nrun
+    #
+    #     return nrun, nscore
+    #
+    # def statPlot(self, write_cumulative=True):
+    #     """-----------------------------------------------------------------------------------------
+    #     Plot the score distribution and the log of the run lengths (with +1 prior)
+    #
+    #     :param write_cumulative: boolean, if true (default) cumulative distribution is written to
+    #     STDOUT
+    #     :return: True
+    #     -----------------------------------------------------------------------------------------"""
+    #     scoreplot = self.scoreplot
+    #     runplot = self.runplot
+    #
+    #     # ------------------------
+    #     # random simulation - approximately same size as real comparison
+    #     # ------------------------
+    #     nr = int((self.l1 - self.window) * (self.l2 - self.window))
+    #     random = self.random(n=nr)
+    #     self.stat(nr, random=True, rdiagonal=random)
+    #     self.density(self.rscore, self.nrscore)
+    #
+    #     # ------------------------
+    #     # score distribution
+    #     # ------------------------
+    #     score = self.score
+    #     soff = self.soff
+    #     nscore = self.nscore
+    #
+    #     # find the first and last non-zero index in the score frequency data
+    #     # make this the min and max for the x axis, adjust x values for the score offset
+    #     scoremin, scoremax = self.scoreMinMax(score)
+    #     maxp = self.density(score, nscore)
+    #     cumulative = self.cumulative(score, 1)
+    #     x = [i + soff for i in range(scoremin, scoremax + 1)]
+    #
+    #     if write_cumulative:
+    #         sys.stdout.write('Cumulative score distribution\n\tScore\t\tProb\t\tDensity\n')
+    #
+    #         for i in range(len(x)):
+    #             j = i + scoremin
+    #             sys.stdout.write('\t{}\t\t\t{:.4f}\t\t{:.4f}\n'.format(x[i], cumulative[j],
+    #                                                                    score[j]))
+    #
+    #     # observed score density (blue)
+    #     scoreplot.vbar(x=x, top=score[scoremin:scoremax + 1], width=0.8, color='#0000ff',
+    #                    line_color='black', alpha=0.5, bottom=0.0)
+    #     scoreplot.y_range = Range1d(0.0, maxp * 1.1)
+    #
+    #     # cumulative distribution, blue line on right side axis
+    #     scoreplot.extra_y_ranges = {"cumulative": Range1d(start=0.0, end=1.0)}
+    #     axis2 = LinearAxis(y_range_name="cumulative")
+    #     axis2.ticker.num_minor_ticks = 10
+    #     scoreplot.add_layout(axis2, 'right')
+    #     scoreplot.line(x=x, y=cumulative[scoremin:scoremax + 1], y_range_name='cumulative',
+    #                    line_width=2, color='#1122cc')
+    #
+    #     # shaded box showing 95% level
+    #     box = BoxAnnotation(bottom=0.95, top=1.0, y_range_name='cumulative',
+    #                         fill_color='#FFBBBB', line_width=3, line_dash='dashed')
+    #     scoreplot.add_layout(box)
+    #
+    #     # random score density (blue)
+    #     scoreplot.vbar(x=x, top=self.rscore[scoremin:scoremax + 1], width=0.8, color='#ff0000',
+    #                    line_color='black', alpha=0.5, bottom=0.0)
+    #
+    #     # alternative plot of random density as a line, i didn't like it
+    #     # scoreplot.line(x=x, y=self.rscore[scoremin:scoremax + 1], width=0.8, color='#FF3333',
+    #     #                line_width=2)
+    #
+    #     # ------------------------
+    #     # run distribution
+    #     # ------------------------
+    #     run = self.run
+    #     rrun = self.rrun
+    #     maxrun = 0
+    #     for i in range(max(len(run), len(rrun))):
+    #         if run[i] or rrun[i] > 0:
+    #             maxrun = i
+    #         # + 1 to prevent log errors
+    #         run[i] += 1
+    #         rrun[i] += 1
+    #
+    #     minrun = 1
+    #     x = [i for i in range(minrun, maxrun + 1)]
+    #     # observed and simulated run lengths,  need bottom=1 because of log axis
+    #
+    #     runplot.vbar(x=x, top=run[minrun:maxrun + 1], width=0.8,
+    #                  color='#0000ff', line_color='black', alpha=0.5,
+    #                  line_width=0.5, bottom=1.0)
+    #
+    #     runplot.vbar(x=x, top=rrun[minrun:maxrun + 1], width=0.8,
+    #                  color='#ff0000', line_color='black', alpha=0.5,
+    #                  line_width=0.5, bottom=1.0)
+    #
+    #     return True
 
-        :param diaglen: int, length of diagonal
-        :param rdiagonal: int, length of diagonal
-        :param random: boolean, if True, stats are stored in random
-        :return: int, int, number of runs, number of scores
-        -----------------------------------------------------------------------------------------"""
-        if diaglen < self.window:
-            return self.nrun, self.nscore
-
-        window = self.window
-        threshold = self.threshold
-        soff = self.soff
-
-        if random:
-            score = self.rscore
-            nscore = self.nrscore
-            run = self.rrun
-            nrun = self.nrrun
-            diagonal = rdiagonal
-        else:
-            score = self.score
-            nscore = self.nscore
-            run = self.run
-            nrun = self.nrun
-            diagonal = self.diagonal
-
-        runlen = 0
-        for offset in range(diaglen - window):
-            score[int(diagonal[offset]) - soff] += 1
-            nscore += 1
-            if diagonal[offset] >= threshold:
-                runlen += 1
-
-            else:
-                run[runlen] += 1
-                runlen = 0
-                nrun += 1
-
-        if runlen:
-            # print(runlen)
-            run[runlen] += 1
-            nrun += 1
-
-        if random:
-            self.nrscore = nscore
-            self.nrrun = nrun
-        else:
-            self.nscore = nscore
-            self.nrun = nrun
-
-        return nrun, nscore
-
-    def statPlot(self, write_cumulative=True):
-        """-----------------------------------------------------------------------------------------
-        Plot the score distribution and the log of the run lengths (with +1 prior)
-
-        :param write_cumulative: boolean, if true (default) cumulative distribution is written to
-        STDOUT
-        :return: True
-        -----------------------------------------------------------------------------------------"""
-        scoreplot = self.scoreplot
-        runplot = self.runplot
-
-        # ------------------------
-        # random simulation - approximately same size as real comparison
-        # ------------------------
-        nr = int((self.l1 - self.window) * (self.l2 - self.window))
-        random = self.random(n=nr)
-        self.stat(nr, random=True, rdiagonal=random)
-        self.density(self.rscore, self.nrscore)
-
-        # ------------------------
-        # score distribution
-        # ------------------------
-        score = self.score
-        soff = self.soff
-        nscore = self.nscore
-
-        # find the first and last non-zero index in the score frequency data
-        # make this the min and max for the x axis, adjust x values for the score offset
-        scoremin, scoremax = self.scoreMinMax(score)
-        maxp = self.density(score, nscore)
-        cumulative = self.cumulative(score, 1)
-        x = [i + soff for i in range(scoremin, scoremax + 1)]
-
-        if write_cumulative:
-            sys.stdout.write('Cumulative score distribution\n\tScore\t\tProb\t\tDensity\n')
-
-            for i in range(len(x)):
-                j = i + scoremin
-                sys.stdout.write('\t{}\t\t\t{:.4f}\t\t{:.4f}\n'.format(x[i], cumulative[j],
-                                                                       score[j]))
-
-        # observed score density (blue)
-        scoreplot.vbar(x=x, top=score[scoremin:scoremax + 1], width=0.8, color='#0000ff',
-                       line_color='black', alpha=0.5, bottom=0.0)
-        scoreplot.y_range = Range1d(0.0, maxp * 1.1)
-
-        # cumulative distribution, blue line on right side axis
-        scoreplot.extra_y_ranges = {"cumulative": Range1d(start=0.0, end=1.0)}
-        axis2 = LinearAxis(y_range_name="cumulative")
-        axis2.ticker.num_minor_ticks = 10
-        scoreplot.add_layout(axis2, 'right')
-        scoreplot.line(x=x, y=cumulative[scoremin:scoremax + 1], y_range_name='cumulative',
-                       line_width=2, color='#1122cc')
-
-        # shaded box showing 95% level
-        box = BoxAnnotation(bottom=0.95, top=1.0, y_range_name='cumulative',
-                            fill_color='#FFBBBB', line_width=3, line_dash='dashed')
-        scoreplot.add_layout(box)
-
-        # random score density (blue)
-        scoreplot.vbar(x=x, top=self.rscore[scoremin:scoremax + 1], width=0.8, color='#ff0000',
-                       line_color='black', alpha=0.5, bottom=0.0)
-
-        # alternative plot of random density as a line, i didn't like it
-        # scoreplot.line(x=x, y=self.rscore[scoremin:scoremax + 1], width=0.8, color='#FF3333',
-        #                line_width=2)
-
-        # ------------------------
-        # run distribution
-        # ------------------------
-        run = self.run
-        rrun = self.rrun
-        maxrun = 0
-        for i in range(max(len(run), len(rrun))):
-            if run[i] or rrun[i] > 0:
-                maxrun = i
-            # + 1 to prevent log errors
-            run[i] += 1
-            rrun[i] += 1
-
-        minrun = 1
-        x = [i for i in range(minrun, maxrun + 1)]
-        # observed and simulated run lengths,  need bottom=1 because of log axis
-
-        runplot.vbar(x=x, top=run[minrun:maxrun + 1], width=0.8,
-                     color='#0000ff', line_color='black', alpha=0.5,
-                     line_width=0.5, bottom=1.0)
-
-        runplot.vbar(x=x, top=rrun[minrun:maxrun + 1], width=0.8,
-                     color='#ff0000', line_color='black', alpha=0.5,
-                     line_width=0.5, bottom=1.0)
-
-        return True
-
-    def allDiagonals(self):
+    def allDiagonals(self, select):
         """-----------------------------------------------------------------------------------------
         Iterate over all diagonals and apply specified actions to each diagonal.  Each action is
         a tuple that specifies the name of the resulting data frame, and a function to process
         the diagonal. The frames are usable as Bokeh sources for plotting.
 
+        :param select: list, names of dataframes to calculate from each diagonal
         :return: True
         -----------------------------------------------------------------------------------------"""
         frame = self.frame
@@ -571,8 +597,10 @@ class Diagonal(Score, Fasta):
             if not dscore:
                 continue
 
-            for f in frame:
-                function[f](f, d)
+            for data in select:
+                f = frame[data]
+                fxn = function[data]
+                fxn(data, d)
 
         return True
 
@@ -593,8 +621,11 @@ class Diagonal(Score, Fasta):
         yinc = self.yinc
 
         diaglen, xpos, ypos = self.diagLenBegin(d)
+        if diaglen < window:
+            return False
+
         xpos += halfwindow
-        if self.seqreverse:
+        if self.yinc < 0:
             ypos = self.l2 - ypos - halfwindow - 1
         else:
             ypos += halfwindow
@@ -607,8 +638,9 @@ class Diagonal(Score, Fasta):
 
             xpos += 1
             ypos += yinc
+            self.nscore += 1
 
-        return
+        return True
 
     def scaleColumn(self, framename, column_source, column_dest, value, scale):
         """-----------------------------------------------------------------------------------------
@@ -649,11 +681,15 @@ class Diagonal(Score, Fasta):
         diagonal = self.diagonal
         window = self.window
 
-        diaglen, xpos, ypos = self.diagLenBegin(d)
+        if self.single:
+            diaglen = len(diagonal)
+        else:
+            diaglen, xpos, ypos = self.diagLenBegin(d)
+            diaglen -= window - 1
 
         nscore = 0
         score = {}
-        for s in diagonal[:diaglen - window + 1]:
+        for s in diagonal[:diaglen]:
             try:
                 score[s] += 1
             except KeyError:
@@ -688,12 +724,16 @@ class Diagonal(Score, Fasta):
         window = self.window
         threshold = self.threshold
 
-        diaglen, xpos, ypos = self.diagLenBegin(d)
+        if self.single:
+            diaglen = len(diagonal)
+        else:
+            diaglen, xpos, ypos = self.diagLenBegin(d)
+            diaglen -= window - 1
 
         run = {}
         nrun = 0
         runlen = 0
-        for offset in range(diaglen - window + 1):
+        for offset in range(diaglen):
             if diagonal[offset] >= threshold:
                 runlen += 1
 
@@ -715,7 +755,7 @@ class Diagonal(Score, Fasta):
                 run[runlen] = 1
             nrun += 1
 
-        # insert into data frame, the dateframe is randomly ordered
+        # insert into data frame, the dataframe is randomly ordered
         for r in run:
             try:
                 i = runframe['len'].index(r)
@@ -749,7 +789,7 @@ class Diagonal(Score, Fasta):
         self.frame[frame] = sorted_frame
         return True
 
-    def bdot(self, dataname, figurename, width=True, color=True):
+    def bdot(self, dataname, figurename, width=True, color=True, mode='dot'):
         """-----------------------------------------------------------------------------------------
         Bokeh plot of dots in the main panel, and colorbar in the legend panel
 
@@ -770,7 +810,7 @@ class Diagonal(Score, Fasta):
 
         if width:
             self.scaleColumn('dots', 'score', 'size',
-                             (threshold, window), (self.mindotsize, self.maxdotsize))
+                             (threshold - 1, scoremax), (self.mindotsize, self.maxdotsize))
         else:
             data['size'] = [self.mindotsize for _ in range(len(data['score']))]
 
@@ -782,21 +822,28 @@ class Diagonal(Score, Fasta):
         cmap = LinearColorMapper(self.palette, low=self.window_min, high=self.window_max)
 
         source = ColumnDataSource(data)
-        figure.circle(source=source, x='x', y='y', size='size',
-                      line_color=transform('score', cmap), line_alpha=alpha,
-                      fill_color=transform('score', cmap), fill_alpha=alpha)
+        if mode == 'dot':
+            figure.circle(source=source, x='x', y='y', size='size',
+                          line_color=transform('score', cmap), line_alpha=alpha,
+                          fill_color=transform('score', cmap), fill_alpha=alpha)
+
+        else:
+            # line mode
+            figure.segment(source=source, x0='x', x1='x1', y0='y', y1='y1', line_width='size',
+                           line_color=transform('score', cmap), alpha=alpha)
 
         # color bar is in a separate window, self.legend, so it doesn't disturb the
         # aspect ratio
-        color_bar = ColorBar(color_mapper=cmap, label_standoff=3, bar_line_color='black',
-                             scale_alpha=alpha, width=20, margin=0, location=(0, 0),
-                             major_tick_in=20, major_tick_out=5, major_tick_line_color='black')
+        if color:
+            color_bar = ColorBar(color_mapper=cmap, label_standoff=3, bar_line_color='black',
+                                 scale_alpha=alpha, width=20, margin=0, location=(0, 0),
+                                 major_tick_in=20, major_tick_out=5, major_tick_line_color='black')
 
-        legend.add_layout(color_bar, 'left')
+            legend.add_layout(color_bar, 'left')
 
         return True
 
-    def bscoreDist(self, figurename, dataname):
+    def bscoreDist(self, figurename, dataname, color):
         """-----------------------------------------------------------------------------------------
         Bokeh plot of score distribution and cumulative score distribution
 
@@ -811,27 +858,14 @@ class Diagonal(Score, Fasta):
 
         source = ColumnDataSource(data)
 
-        # observed score density (blue)
-        figure.vbar(source=source, x='score', top='count', width=0.8, color='#0000ff',
-                    line_color='black', alpha=0.5, bottom=0.0)
+        # observed score density
+        figure.vbar(source=source, x='score', top='count', width=0.8, color=color,
+                    line_color='black', alpha=self.alpha, bottom=0.0)
         figure.y_range = Range1d(0.0, maxp * 1.1)
-
-        # cumulative distribution, blue line on right side axis
-        figure.extra_y_ranges = {"cumulative": Range1d(start=0.0, end=1.0)}
-        axis2 = LinearAxis(y_range_name="cumulative")
-        axis2.ticker.num_minor_ticks = 10
-        figure.add_layout(axis2, 'right')
-        figure.line(source=source, x='score', y='cumulative', y_range_name='cumulative',
-                    line_width=2, color='#1122cc')
-
-        # shaded box showing 95% level
-        box = BoxAnnotation(bottom=0.95, top=1.0, y_range_name='cumulative',
-                            fill_color='#FFBBBB', line_width=3, line_dash='dashed')
-        figure.add_layout(box)
 
         return True
 
-    def brunDist(self, figurename, dataname):
+    def brunDist(self, figurename, dataname, color):
         """-----------------------------------------------------------------------------------------
         Bokeh plot of run length distribution
 
@@ -848,7 +882,7 @@ class Diagonal(Score, Fasta):
         # observed and simulated run lengths,  need bottom=1 because of log axis
 
         figure.vbar(source=source, x='len', top='count', width=0.8,
-                    color='#0000ff', line_color='black', alpha=0.5,
+                    color=color, line_color='black', alpha=self.alpha,
                     line_width=0.5, bottom=0.1)
 
         # runplot.vbar(x=x, top=rrun[minrun:maxrun + 1], width=0.8,
@@ -856,6 +890,31 @@ class Diagonal(Score, Fasta):
         #              line_width=0.5, bottom=1.0)
 
         return True
+
+    def bscoreCumulative(self, figurename, dataname):
+        """-----------------------------------------------------------------------------------------
+        Bokeh plot of cumulative distribution as a line on right hand axis
+
+        :param figurename: string, name of fiugures (stored in self.figure)
+        :param dataname: string, name of data frame (stored in self.frame)
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+        data = self.frame[dataname]
+        figure = self.figure[figurename]
+
+        source = ColumnDataSource(data)
+
+        figure.extra_y_ranges = {"cumulative": Range1d(start=0.0, end=1.0)}
+        axis2 = LinearAxis(y_range_name="cumulative")
+        axis2.ticker.num_minor_ticks = 10
+        figure.add_layout(axis2, 'right')
+        figure.line(source=source, x='score', y='cumulative', y_range_name='cumulative',
+                    line_width=2, color='#1122cc')
+
+        # shaded box showing 95% level
+        box = BoxAnnotation(bottom=0.95, top=1.0, y_range_name='cumulative',
+                            fill_color='#FFBBBB', line_width=3, line_dash='dashed')
+        figure.add_layout(box)
 
     def writeFrame(self, framename, key='x', out=sys.stdout):
         """-----------------------------------------------------------------------------------------
@@ -1119,6 +1178,33 @@ class Diagonal(Score, Fasta):
         data[destcol] = cum
         return True
 
+    def addSegment(self, framename, xcol='x', ycol='y', xnew='x1', ynew='y1'):
+        """-----------------------------------------------------------------------------------------
+        convert x, y dot positions to line segments,
+        
+        :param xcol: string, name of x column in data frame
+        :param ycol: string, name of y column in data frame
+        :param xnew: string, name of new x column in data frame (end of segment)
+        :param newy: string, name of new y column in data frame (end of segment)
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+        frame = self.frame[framename]
+        frame[xnew] = []
+        frame[ynew] = []
+
+        # correct the direction when sequence 2 is reversed
+        yinc = self.yinc
+        dither = 0.5
+        ydither = [-dither * yinc, dither * yinc]
+
+        for pos in range(len(frame[xcol])):
+            frame[xnew].append(frame[xcol][pos] + dither)
+            frame[ynew].append(frame[ycol][pos] + ydither[1])
+            frame[xcol][pos] -= dither
+            frame[ycol][pos] += ydither[0]
+
+        return True
+
     @staticmethod
     def density(score, total):
         """-----------------------------------------------------------------------------------------
@@ -1176,147 +1262,197 @@ class Diagonal(Score, Fasta):
 if __name__ == '__main__':
     match = Diagonal()
 
-    fasta1 = Fasta(filename=sys.argv[1])
-    fasta1.read()
+    fasta = Fasta(filename=sys.argv[1])
+    fasta.read()
+    fasta1 = fasta.copy()
 
-    fasta2 = fasta1.copy()
-    fasta2.seq = fasta1.seq
+    fasta2 = fasta.copy()
     fasta2.id = 'seq 2'
     fasta2.doc = 'Sequence 2'
 
-    match.setupFrame([{'data': 'dots', 'fn': match.windowThreshold, 'var': ['x', 'y', 'score']},
-                      {'data': 'scoredist', 'fn': match.histogramScore, 'var': ['score', 'count']},
-                      {'data': 'rundist', 'fn': match.histogramRun, 'var': ['len', 'count']}])
+    fasta1.seq = fasta1.seq[:200]
+    fasta2.seq = fasta2.seq[:400]
 
-    match.reverseSeq()
-    match.setupCalculation(fasta1, fasta2, window=12, threshold=8)
-    match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
-    match.allDiagonals()
-    match.bdot('dots', 'main')
+    dataframes = [{'data': 'dots', 'fn': match.windowThreshold, 'var': ['x', 'y', 'score']},
+                  {'data': 'scoredist', 'fn': match.histogramScore, 'var': ['score', 'count']},
+                  {'data': 'rundist', 'fn': match.histogramRun, 'var': ['len', 'count']},
+                  {'data': 'randomscore', 'fn': None, 'var': ['score', 'count']},
+                  {'data': 'randomrun', 'fn': None, 'var': ['len', 'count']}
+                  ]
 
-    match.sortFrame('scoredist', 'score')
-    match.addCumulative('scoredist', 'count', 'cumulative')
-    match.bscoreDist('scoredist', 'scoredist')
-
-    match.brunDist('rundist', 'rundist')
-
-    match.writeFrame('scoredist', key='score')
-    match.writeFrame('rundist', key='len')
-
-    match.show()
-
-    exit(1)
 
     # select list of tests to run, one plot in browser for each
     # tests = [0,1,2,3]
-    # tests = range(10)
-    tests = [8]
+    tests = range(8)
+    # tests = [4,5]
 
     for test in tests:
 
         if test == 0:
-            w = 1
+            w = 4
             t = 1
             match.title = 'test {} - forward dotplot size cueing only, w={} t={}'. \
                 format(test, w, t)
-            match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
-            match.setupBokeh()
-            match.drawDot(width=True, color=False, alpha=1)
-            match.statPlot()
+            match.setupFrame(dataframes)
+            match.setupCalculation(fasta1, fasta2, window=w, threshold=t)
+            match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+            match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+            match.bdot('dots', 'main', width=True, color=False)
 
         elif test == 1:
-            w = 3
+            w = 4
             t = 1
-            match.title = 'test {} - forward dotplot size cueing only, w={} t={}'. \
+            match.title = 'test {} - forward dotplot color cueing only, w={} t={}'. \
                 format(test, w, t)
-            match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
-            match.setupBokeh()
-            match.drawDot(width=True, color=False, alpha=1)
-            match.statPlot()
+            match.setupCalculation(fasta1, fasta2, window=w, threshold=t)
+            match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+            match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+            match.bdot('dots', 'main', width=False, color=True)
 
         elif test == 2:
             w = 12
             t = 8
-            match.title = 'test {} - different lengths, forward dots, no cueing, w={} t={}'. \
-                format(test, 1, 1)
-            f1 = fasta1.copy()
-            f1.seq = f1.seq[:200]
-            f2 = f1.copy()
-            f2.seq = f2.seq[:50]
-            f2.doc = 'bases 1 to 50'
-            f1.doc = 'bases 1 to 200'
-            match.setupCalculation(f1, f2, window=1, threshold=1)
-            match.setupBokeh()
-            match.drawDot(width=False, color=False)
-            match.statPlot()
+            match.title = 'test {} - forward dotplot size, color, stats, w={} t={}'. \
+                format(test, w, t)
+
+            fasta1 = fasta.copy()
+            fasta2 = fasta.copy()
+
+            match.setupFrame(dataframes)
+            match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
+            match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+            match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+            match.bdot('dots', 'main', width=True, color=True)
+
+            match.sortFrame('scoredist', 'score')
+            match.addCumulative('scoredist', 'count', 'cumulative')
+            match.bscoreDist('scoredist', 'scoredist', color='#0000ff')
+            match.bscoreCumulative('scoredist', 'scoredist')
+            match.brunDist('rundist', 'rundist', color='#0000ff')
 
         elif test == 3:
-            w = 12
-            t = 8
-            match.title = 'test {} - different lengths, short on  axis, w={} t={}'. \
-                format(test, 1, 1)
-            f1 = fasta1.copy()
-            f1.seq = f1.seq[:200]
-            f2 = f1.copy()
-            f1.seq = f1.seq[:50]
-            f1.doc = 'bases 1 to 50'
-            f2.doc = 'bases 1 to 200'
-            match.setupCalculation(f1, f2, window=1, threshold=1)
-            match.setupBokeh()
-            match.drawDot(width=False, color=False)
-            match.statPlot()
-
-        elif test == 4:
-            w = 10
-            t = 8
-            match.title = 'test {} - forward dotplot color cueing only, w={} t={}'. \
-                format(test, w, t)
-
-            match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
-            match.setupBokeh()
-            match.drawDot(cbase='Viridis', clevel=256, crev=True, width=False, color=True, alpha=1)
-            match.statPlot()
-
-        elif test == 5:
-            w = 12
-            t = 8
+            w = 14
+            t = 9
             match.title = 'test {} - forward/reverse dotplot, w={} t={}'. \
                 format(test, w, t)
-            match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
-            match.setupBokeh()
-            match.drawDot(cbase='Blues', clevel=256, crev=True, width=True)
-            fasta2.seq = fasta1.reverseComplement()
+
+            fasta1 = fasta.copy()
+            fasta2 = fasta.copy()
+
+            match.setupFrame(dataframes)
+            match.setupCalculation(fasta1, fasta2, window=w, threshold=t)
+            match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+            match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+            match.bdot('dots', 'main', width=True, color=True)
+
+            match.seqreverse = True
             match.setupCalculation(fasta1, fasta2, window=w, threshold=t, resetstat=False)
-            match.drawDot(color=True, cbase='Reds', clevel=256, crev=True, rev=True, width=True)
-            match.statPlot()
+            # match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+            match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+            match.bdot('dots', 'main', width=True, color=True)
+
+            match.sortFrame('scoredist', 'score')
+            match.addCumulative('scoredist', 'count', 'cumulative')
+            match.bscoreDist('scoredist', 'scoredist', color='#0000ff')
+            match.bscoreCumulative('scoredist', 'scoredist')
+            match.brunDist('rundist', 'rundist', color='#0000ff')
+
+            match.seqreverse = False  # for next plot
+            match.yinc = 1
+
+        elif test == 4:
+            w = 16
+            t = 9
+            match.title = 'test {} - forward/reverse dotplot with random , w={} t={}'. \
+                format(test, w, t)
+
+            fasta1 = fasta.copy()
+            fasta2 = fasta.copy()
+
+            match.setupFrame(dataframes)
+            match.setupCalculation(fasta1, fasta2, window=w, threshold=t)
+            match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+            match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+            match.bdot('dots', 'main', width=True, color=True)
+
+            match.seqreverse = True
+            match.resetFrame('dots')
+            match.setupCalculation(fasta1, fasta2, window=w, threshold=t, resetstat=False)
+            # match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+            match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+            match.bdot('dots', 'main', width=True, color=True)
+
+            match.sortFrame('scoredist', 'score')
+            match.addCumulative('scoredist', 'count', 'cumulative')
+            match.bscoreDist('scoredist', 'scoredist', color='#0000ff')
+            match.bscoreCumulative('scoredist', 'scoredist')
+            match.brunDist('rundist', 'rundist', color='#0000ff')
+
+            # random score distribution
+            match.single = True
+            match.random(n=match.nscore)
+            match.histogramScore('randomscore', 1)
+            match.sortFrame('randomscore', 'score')
+            match.bscoreDist('scoredist', 'randomscore', color='#ff0000')
+
+            match.histogramRun('randomrun', 1)
+            match.brunDist('rundist', 'randomrun', color='#ff0000')
+            match.single = False
+
+            match.writeFrame('scoredist', key='score')
+            match.writeFrame('rundist', key='len')
+
+            match.seqreverse = False    # for next plot
+            match.yinc = 1
+
+        elif test == 5:
+            w = 16
+            t = 9
+            match.title = 'test {} - forward/reverse lineplot with random , w={} t={}'. \
+                format(test, w, t)
+
+            fasta1 = fasta.copy()
+            fasta2 = fasta.copy()
+
+            match.setupFrame(dataframes)
+            match.setupCalculation(fasta1, fasta2, window=w, threshold=t)
+            match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+            match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+            match.addSegment('dots')
+            match.bdot('dots', 'main', width=True, color=True, mode='line')
+
+            match.seqreverse = True
+            match.resetFrame('dots')
+            match.setupCalculation(fasta1, fasta2, window=w, threshold=t, resetstat=False)
+            # match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+            match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+            match.addSegment('dots')
+            match.bdot('dots', 'main', width=True, color=True, mode='line')
+
+            match.sortFrame('scoredist', 'score')
+            match.addCumulative('scoredist', 'count', 'cumulative')
+            match.bscoreDist('scoredist', 'scoredist', color='#0000ff')
+            match.bscoreCumulative('scoredist', 'scoredist')
+            match.brunDist('rundist', 'rundist', color='#0000ff')
+
+            # random score distribution
+            match.single = True
+            match.random(n=match.nscore)
+            match.histogramScore('randomscore', 1)
+            match.sortFrame('randomscore', 'score')
+            match.bscoreDist('scoredist', 'randomscore', color='#ff0000')
+
+            match.histogramRun('randomrun', 1)
+            match.brunDist('rundist', 'randomrun', color='#ff0000')
+            match.single = False
+
+            match.writeFrame('scoredist', key='score')
+            match.writeFrame('rundist', key='len')
+
+            match.seqreverse = False  # for next plot
+            match.yinc = 1
 
         elif test == 6:
-            w = 12
-            t = 8
-            match.title = 'test {} - forward/reverse lines, width only, w={} t={}'. \
-                format(test, w, t)
-            fasta2.seq = fasta1.reverseComplement()
-            match.setupCalculation(fasta1, fasta2, window=w, threshold=t)
-            match.setupBokeh()
-            match.drawSegment(cbase='Blues', clevel=256, crev=True, rev=True, width=False,
-                              color=False)
-            match.statPlot()
-
-        elif test == 7:
-            w = 12
-            t = 8
-            match.title = 'test {} - forward/reverse lines, width and color, w={} t={}'. \
-                format(test, w, t)
-            match.setupCalculation(fasta1, fasta1, window=w, threshold=t)
-            match.setupBokeh()
-            match.drawSegment(color=True, cbase='Blues', clevel=256, crev=True, width=True)
-            fasta2.seq = fasta1.reverseComplement()
-            match.setupCalculation(fasta1, fasta2, window=w, threshold=t, resetstat=False)
-            match.drawSegment(color=True, cbase='Reds', clevel=256, crev=True, rev=True, width=True,
-                              alpha=0.8)
-            match.statPlot()
-
-        elif test == 8:
             w = 12
             t = 9
             match.title = 'test {} - protein dot with blosum, w={} t={}'. \
@@ -1329,15 +1465,36 @@ if __name__ == '__main__':
             fasta.read()
             fasta2 = fasta.copy()
 
-            match.setupCalculation(fasta2, fasta1, window=w, threshold=t)
-            match.setupBokeh()
-            match.drawDot(cbase='Viridis', clevel=256, crev=True)
-            match.statPlot()
+            match.setupFrame(dataframes)
+            match.setupCalculation(fasta1, fasta2, window=w, threshold=t)
+            match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+            match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+            match.bdot('dots', 'main', width=True, color=True)
 
-        elif test == 9:
-            w = 18
-            t = 12
-            match.title = 'test {} - protein line with blosum, w={} t={}'. \
+            match.sortFrame('scoredist', 'score')
+            match.addCumulative('scoredist', 'count', 'cumulative')
+            match.bscoreDist('scoredist', 'scoredist', color='#0000ff')
+            match.bscoreCumulative('scoredist', 'scoredist')
+            match.brunDist('rundist', 'rundist', color='#0000ff')
+
+            # random score distribution
+            match.single = True
+            match.random(n=match.nscore)
+            match.histogramScore('randomscore', 1)
+            match.sortFrame('randomscore', 'score')
+            match.bscoreDist('scoredist', 'randomscore', color='#ff0000')
+
+            match.histogramRun('randomrun', 1)
+            match.brunDist('rundist', 'randomrun', color='#ff0000')
+            match.single = False
+
+            match.writeFrame('scoredist', key='score')
+            match.writeFrame('rundist', key='len')
+
+        elif test == 7:
+            w = 16
+            t = 10
+            match.title = 'test {} - protein lineplot with blosum, w={} t={}'. \
                 format(test, w, t)
             match.readNCBI('table/BLOSUM62.matrix')
 
@@ -1347,10 +1504,33 @@ if __name__ == '__main__':
             fasta.read()
             fasta2 = fasta.copy()
 
-            match.setupCalculation(fasta2, fasta1, window=w, threshold=t)
-            match.setupBokeh()
-            match.drawSegment(cbase='Viridis', clevel=256, crev=True)
-            match.statPlot()
+            match.setupFrame(dataframes)
+            match.setupCalculation(fasta1, fasta2, window=w, threshold=t)
+            match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+            # match.resetFrame('scoredist')
+            match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+            match.addSegment('dots')
+            match.bdot('dots', 'main', width=True, color=True, mode='line')
+
+            match.sortFrame('scoredist', 'score')
+            match.addCumulative('scoredist', 'count', 'cumulative')
+            match.bscoreDist('scoredist', 'scoredist', color='#0000ff')
+            match.bscoreCumulative('scoredist', 'scoredist')
+            match.brunDist('rundist', 'rundist', color='#0000ff')
+
+            # random score distribution
+            match.single = True
+            match.random(n=match.nscore)
+            match.histogramScore('randomscore', 1)
+            match.sortFrame('randomscore', 'score')
+            match.bscoreDist('scoredist', 'randomscore', color='#ff0000')
+
+            match.histogramRun('randomrun', 1)
+            match.brunDist('rundist', 'randomrun', color='#ff0000')
+            match.single = False
+
+            match.writeFrame('scoredist', key='score')
+            match.writeFrame('rundist', key='len')
 
         match.show()
 
