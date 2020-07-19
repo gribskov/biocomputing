@@ -35,13 +35,14 @@
 </div>
 
 
-
+{% if state.seq.0.isloaded and state.seq.1.isloaded %}
 <form action="/dotplot" method="POST"
       style="margin-top: 10px;">
     <div class="controlpanel">
+        <h2>Scoring table</h2>
 
         {% if state.seqtype == 'DNA' %}
-            Scoring tables for {{state['seqtype']}} sequences<br/>
+            Scoring tables for {{state.seqtype}} sequences<br/>
 
             {% for table in state.dnacmp %}
                 <input type="radio" name="cmp" value="{{table.loc}}"
@@ -56,9 +57,19 @@
             {% endfor %}
         {% endif %}
         <br/>
+        <h2>Plot parameters</h2>
+        Window length <input type="number" id="window" name="window"
+                             min="1"  maxlength=4 value=10><br/>
+        Threshold <input type="number" id="threshold" name="threshold"
+                         maxlength=4 value=8><br/>
+        Mode <br/>
+        <input type="radio" name="mode" value='dot' checked> Display matching windows as dots<br/>
+        <input type="radio" name="mode" value='line'> Display matching windows as lines<br/><br/>
         <input type="submit"  value="Plot"/>
     </div>
 </form>
+
+{% endif %}
 
 
 <form action="/dotplot" method="POST"

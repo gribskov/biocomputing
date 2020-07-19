@@ -23,10 +23,10 @@ app = Flask(__name__)
 
 state = {'seq': [{'fasta': None, 'isloaded': False},
                  {'fasta': None, 'isloaded': False}],
-         'dnacmp': [{'name': 'identity', 'loc': '../table/NUCidentity.matrix'},
-                    {'name': 'NUC4.4', 'loc': '../table/NUC4.4.matrix'}],
-         'procmp': [{'name': 'identity', 'loc': '../table/PROidentity.matrix'},
-                    {'name': 'Blosum62', 'loc': '../table/BLOSUM62.matrix'}
+         'dnacmp': [{'name': 'identity', 'loc': 'table/NUCidentity.matrix'},
+                    {'name': 'NUC4.4', 'loc': 'table/NUC4.4.matrix'}],
+         'procmp': [{'name': 'identity', 'loc': 'table/PROidentity.matrix'},
+                    {'name': 'Blosum62', 'loc': 'table/BLOSUM62.matrix'}
                     ]}
 
 
@@ -76,10 +76,41 @@ def getSequence():
 
 @app.route('/dotplot', methods=['POST', 'GET'])
 def dotplot():
-    match = Diagonal()
+    for a in request.form:
+        print('{}: {}'.format(a, request.form[a]))
 
-    print('testing')
-    return 'testing'
+    window = int(request.form['window'])
+    threshold = float(request.form['threshold'])
+    fasta1 = state['seq'][0]['fasta']
+    fasta2 = state['seq'][1]['fasta']
+
+    match = Diagonal()
+    match.readNCBI(request.form['cmp'])
+    dataframes = [{'data': 'dots', 'fn': match.windowThreshold, 'var': ['x', 'y', 'score']},
+                  {'data': 'scoredist', 'fn': match.histogramScore, 'var': ['score', 'count']},
+                  {'data': 'rundist', 'fn': match.histogramRun, 'var': ['len', 'count']},
+                  {'data': 'randomscore', 'fn': None, 'var': ['score', 'count']},
+                  {'data': 'randomrun', 'fn': None, 'var': ['len', 'count']}
+                  ]
+    match.setupFrame(dataframes)
+    match.setupCalculation(fasta1, fasta2,
+                           window=window, threshold=threshold)
+    match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+    match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+    match.bdot('dots', 'main', width=True, color=True)
+
+    script, div = components(match.grid)
+    # grab the static resources
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    return render_template(
+        'dotplot.html',
+        plot_script=script,
+        plot_div=div,
+        js_resources=js_resources,
+        css_resources=css_resources
+        )
 
 
 @app.route('/bokeh')
