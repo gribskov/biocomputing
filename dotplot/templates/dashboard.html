@@ -6,51 +6,65 @@
 </head>
 
 <body>
-    <h1>Diagon</h1>
+<h1>Diagon</h1>
 
-    <div class="controlpanel"></div>
-        Sequence 1<br>
-        <form action="/getSequence" method="POST"
-              enctype="multipart/form-data"
-              style="margin-top: 10px;">
+<div class="controlpanel">
 
-            <input type="file" name="file1"/>
-            <input type="submit", value="Select"/>
-        </form>
-        {% if state["s1"]["isloaded"] %}
+    {% for file in state.seq %}
+        {% if file.isloaded %}
             <div class="sequence">
-                <h3> {{state["s1"]["fasta"].id}} - {{state['s1']['fasta'].doc}}</h3>
+                <h2>Sequence {{loop.index}}</h2>
+                <h3> {{file.fasta.id}} - {{file.fasta.doc}}</h3>
                 <pre>
-{{state["s1"]["fasta"].seq}}
+{{file.fasta.seq}}
                 </pre>
             </div>
-    {% endif %}
+        {% else %}
+
+            <h2>Sequence {{loop.index}}</h2>
+            <form action="/getSequence" method="POST"
+                  enctype="multipart/form-data"
+                  style="margin-top: 10px;">
+
+                FastA formatted sequence: <input type="file" name="file{{loop.index}}"/>
+                <br/>
+                <input type="submit"  value="Load"/>
+            </form>
+        {% endif %}
+    {% endfor %}
+</div>
+
+
+
+<form action="/dotplot" method="POST"
+      style="margin-top: 10px;">
+    <div class="controlpanel">
+
+        {% if state.seqtype == 'DNA' %}
+            Scoring tables for {{state['seqtype']}} sequences<br/>
+
+            {% for table in state.dnacmp %}
+                <input type="radio" name="cmp" value="{{table.loc}}"
+                       {% if loop.index0 == 0 %} checked {% endif %} > {{table.name}}<br/>
+            {% endfor %}
+        {% elif state.seqtype == 'protein' %}
+            Scoring tables for {{state['seqtype']}} sequences<br/>
+
+            {% for table in state.procmp %}
+                <input type="radio" name="cmp" value="{{table.loc}}"
+                       {% if loop.index0 == 0 %} checked {% endif %} > {{table.name}}<br/>
+            {% endfor %}
+        {% endif %}
+        <br/>
+        <input type="submit"  value="Plot"/>
     </div>
-
-    <div class="controlpanel"></div>
-        Sequence 2<br>
-        <form action="/getSequence" method="POST"
-              enctype="multipart/form-data"
-              style="margin-top: 10px;">
-
-            <input type="file" name="file2"/>
-            <input type="submit", value="Select"/>
-        </form>
-        {% if state["s2"]["isloaded"] %}
-            <div class="sequence">
-                <h3> {{state["s2"]["fasta"].id}} - {{state['s2']['fasta'].doc}}</h3>
-                <pre>
-{{state["s2"]["fasta"].seq}}
-                </pre>
-            </div>
-    {% endif %}
-    </div>
+</form>
 
 
-    <form action="/dotplot" method="POST"
-          style="margin-top: 10px;">
-        <input type="submit", value="Plot"/>
-    </form>
+<form action="/dotplot" method="POST"
+>
+
+</form>
 
 </body>
 </html>

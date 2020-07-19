@@ -21,8 +21,13 @@ cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None
 app = Flask(__name__)
 
-state = {'s1': {'fasta': None, 'isloaded': False},
-         's2': {'fasta': None, 'isloaded': False}}
+state = {'seq': [{'fasta': None, 'isloaded': False},
+                 {'fasta': None, 'isloaded': False}],
+         'dnacmp': [{'name': 'identity', 'loc': '../table/NUCidentity.matrix'},
+                    {'name': 'NUC4.4', 'loc': '../table/NUC4.4.matrix'}],
+         'procmp': [{'name': 'identity', 'loc': '../table/PROidentity.matrix'},
+                    {'name': 'Blosum62', 'loc': '../table/BLOSUM62.matrix'}
+                    ]}
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -46,18 +51,25 @@ def getSequence():
     if request.method == 'POST':
         if 'file1' in request.files:
             f = request.files['file1']
-            sequence = 's1'
+            sequence = 0
 
 
         elif 'file2' in request.files:
             f = request.files['file2']
-            sequence = 's2'
+            sequence = 1
 
+        seq = state['seq'][sequence]
         fasta = Fasta(fh=f)
         fasta.read()
         print(fasta.format())
-        state[sequence]['fasta'] = fasta
-        state[sequence]['isloaded'] =  True
+        seq['fasta'] = fasta
+        seq['isloaded'] = True
+
+        # if both sequences have been selected, check whether the sequences are DNA or protein
+        state['seqtype'] = 'protein'
+        if state['seq'][0]['isloaded'] and state['seq'][1]['isloaded']:
+            if state['seq'][0]['fasta'].isACGT() and state['seq'][1]['fasta'].isACGT():
+                state['seqtype'] = 'DNA'
 
     return render_template('dashboard.html', state=state)
 
