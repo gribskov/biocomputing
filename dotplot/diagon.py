@@ -21,8 +21,8 @@ cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None
 app = Flask(__name__)
 
-state = {'s1name': 'Select sequence 1', 's1': None,
-         's2name': 'Select sequence 2', 's2': None}
+state = {'s1': {'fasta': None, 'isloaded': False},
+         's2': {'fasta': None, 'isloaded': False}}
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -31,7 +31,8 @@ state = {'s1name': 'Select sequence 1', 's1': None,
 
 @app.route('/')
 def index():
-    return '<h1><a href=/bokeh>bokeh test</a></h1><a href=/dashboard>dashboard</a>'
+    return render_template('dashboard.html', state=state)
+    # return '<h1><a href=/bokeh>bokeh test</a></h1><a href=/dashboard>dashboard</a>'
 
 
 @app.route('/dashboard')
@@ -41,30 +42,33 @@ def dashboard():
 
 @app.route('/getSequence', methods=['POST', 'GET'])
 def getSequence():
+    sequence = None
     if request.method == 'POST':
         if 'file1' in request.files:
             f = request.files['file1']
-            id = 's1name'
-            seq = 's1'
+            sequence = 's1'
+
+
         elif 'file2' in request.files:
             f = request.files['file2']
-            id = 's2name'
-            seq = 's2'
+            sequence = 's2'
 
-        fasta = Fasta()
-        # fasta.open(f)
-        fasta.fh = f
+        fasta = Fasta(fh=f)
         fasta.read()
-        state[id] = fasta.id
-        # state['s1'] = fasta.format().replace('\n','<br/>')
-        state[seq] = fasta.format()
+        print(fasta.format())
+        state[sequence]['fasta'] = fasta
+        state[sequence]['isloaded'] =  True
 
     return render_template('dashboard.html', state=state)
 
+
 @app.route('/dotplot', methods=['POST', 'GET'])
 def dotplot():
+    match = Diagonal()
+
     print('testing')
     return 'testing'
+
 
 @app.route('/bokeh')
 def bokeh():

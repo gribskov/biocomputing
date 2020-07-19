@@ -6,39 +6,49 @@
 </head>
 
 <body>
-    <h2>{{state["s1name"]}}</h2>
-    <form action="/getSequence" method="POST"
-          enctype="multipart/form-data">
+    <h1>Diagon</h1>
 
-        <input type="file" name="file1"/>
-        <input type="submit", value="Select"/>
-    </form>
-    {% if not state['s1name'].startswith("Select") %}
-        <div>
-            <h3> Sequence 1:{{state['s1name']}}</h3>
-            <pre>
-{{state['s1']}}
-            </pre>
-        </div>
+    <div class="controlpanel"></div>
+        Sequence 1<br>
+        <form action="/getSequence" method="POST"
+              enctype="multipart/form-data"
+              style="margin-top: 10px;">
+
+            <input type="file" name="file1"/>
+            <input type="submit", value="Select"/>
+        </form>
+        {% if state["s1"]["isloaded"] %}
+            <div class="sequence">
+                <h3> {{state["s1"]["fasta"].id}} - {{state['s1']['fasta'].doc}}</h3>
+                <pre>
+{{state["s1"]["fasta"].seq}}
+                </pre>
+            </div>
     {% endif %}
+    </div>
 
-    <h2>{{state["s2name"]}}</h2>
-    <form action="/getSequence" method="POST"
-          enctype="multipart/form-data">
+    <div class="controlpanel"></div>
+        Sequence 2<br>
+        <form action="/getSequence" method="POST"
+              enctype="multipart/form-data"
+              style="margin-top: 10px;">
 
-        <input type="file" name="file2"/>
-        <input type="submit", value="Select"/>
-    </form>
-    {% if not state['s2name'].startswith("Select") %}
-        <div>
-            <h3> Sequence 2:{{state['s2name']}}</h3>
-            <pre>
-{{state['s2']}}
-            </pre>
-        </div>
+            <input type="file" name="file2"/>
+            <input type="submit", value="Select"/>
+        </form>
+        {% if state["s2"]["isloaded"] %}
+            <div class="sequence">
+                <h3> {{state["s2"]["fasta"].id}} - {{state['s2']['fasta'].doc}}</h3>
+                <pre>
+{{state["s2"]["fasta"].seq}}
+                </pre>
+            </div>
     {% endif %}
+    </div>
 
-    <form action="/dotplot" method="POST">
+
+    <form action="/dotplot" method="POST"
+          style="margin-top: 10px;">
         <input type="submit", value="Plot"/>
     </form>
 
