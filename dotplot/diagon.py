@@ -11,6 +11,8 @@ from diagonal import Diagonal
 from sequence.fasta import Fasta
 
 from flask import Flask, render_template, request
+import logging
+
 from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.resources import INLINE
@@ -20,9 +22,14 @@ from bokeh.resources import INLINE
 cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None
 app = Flask(__name__)
+# uncomment below to turn off server log
+# log = logging.getLogger('werkzeug')
+# log.setLevel(logging.ERROR)
 
-state = {'seq': [{'fasta': None, 'isloaded': False},
-                 {'fasta': None, 'isloaded': False}],
+# state is used to pass information to templates
+
+state = {'seq': [{'fasta': None, 'status': 'next'},
+                 {'fasta': None, 'status': 'later'}],
          'dnacmp': [{'name': 'identity', 'loc': 'table/NUCidentity.matrix'},
                     {'name': 'NUC4.4', 'loc': 'table/NUC4.4.matrix'}],
          'procmp': [{'name': 'identity', 'loc': 'table/PROidentity.matrix'},
@@ -40,10 +47,14 @@ def index():
     # return '<h1><a href=/bokeh>bokeh test</a></h1><a href=/dashboard>dashboard</a>'
 
 
+# ---------------------------------------------------------------------------------------------------
+
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html', state=state)
 
+
+# ---------------------------------------------------------------------------------------------------
 
 @app.route('/getSequence', methods=['POST', 'GET'])
 def getSequence():
@@ -52,35 +63,61 @@ def getSequence():
         if 'file1' in request.files:
             f = request.files['file1']
             sequence = 0
-
+            state['seq'][1]['status']='next'
 
         elif 'file2' in request.files:
             f = request.files['file2']
             sequence = 1
 
-        seq = state['seq'][sequence]
         fasta = Fasta(fh=f)
         fasta.read()
         print(fasta.format())
+        seq = state['seq'][sequence]
         seq['fasta'] = fasta
-        seq['isloaded'] = True
+        seq['status'] = 'loaded'
 
         # if both sequences have been selected, check whether the sequences are DNA or protein
         state['seqtype'] = 'protein'
-        if state['seq'][0]['isloaded'] and state['seq'][1]['isloaded']:
+        if state['seq'][0]['status'] is 'loaded' and state['seq'][1]['status'] is 'loaded':
             if state['seq'][0]['fasta'].isACGT() and state['seq'][1]['fasta'].isACGT():
                 state['seqtype'] = 'DNA'
 
     return render_template('dashboard.html', state=state)
 
+# --------------------------------------------------------------------------------------------------
+
+@app.route('/self', methods=['POST', 'GET'])
+def self():
+    """
+    for a self plot, sequence 1 should already be loaded, we just have to coipy it to sequence 2.
+    :return:
+    """
+    seq1 = state['seq'][0]
+    seq2 = state['seq'][1]
+    seq2['fasta'] = seq1['fasta'].copy()
+    seq2['status'] = 'loaded'
+
+
+    state['seqtype'] = 'protein'
+    if state['seq'][0]['status'] is 'loaded' and state['seq'][1]['status'] is 'loaded':
+        if state['seq'][0]['fasta'].isACGT() and state['seq'][1]['fasta'].isACGT():
+            state['seqtype'] = 'DNA'
+
+    return render_template('dashboard.html', state=state)
+
+# --------------------------------------------------------------------------------------------------
 
 @app.route('/dotplot', methods=['POST', 'GET'])
 def dotplot():
-    for a in request.form:
-        print('{}: {}'.format(a, request.form[a]))
 
     window = int(request.form['window'])
     threshold = float(request.form['threshold'])
+    mode = request.form['mode']
+    plot_type='forward'
+    if state['seqtype'] == 'DNA':
+        plot_type = request.form['type']
+
+
     fasta1 = state['seq'][0]['fasta']
     fasta2 = state['seq'][1]['fasta']
 
@@ -93,11 +130,46 @@ def dotplot():
                   {'data': 'randomrun', 'fn': None, 'var': ['len', 'count']}
                   ]
     match.setupFrame(dataframes)
+    if plot_type == "reverse":
+        match.seqreverse = True
     match.setupCalculation(fasta1, fasta2,
                            window=window, threshold=threshold)
     match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
     match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
-    match.bdot('dots', 'main', width=True, color=True)
+    if mode == 'line':
+        match.addSegment('dots')
+    match.bdot('dots', 'main', width=True, color=True, mode=mode)
+
+    if plot_type == "forward_backward":
+        match.seqreverse = True
+        match.resetFrame('dots')
+        match.setupCalculation(fasta1, fasta2, window=window, threshold=threshold, resetstat=False)
+        # match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+        match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
+        if mode == 'line':
+            match.addSegment('dots')
+        match.bdot('dots', 'main', width=True, color=True, mode=mode, set_colormap=False)
+
+    # score and run distributions
+    match.sortFrame('scoredist', 'score')
+    match.addCumulative('scoredist', 'count', 'cumulative')
+    match.bscoreDist('scoredist', 'scoredist', color='#0000ff')
+    match.bscoreCumulative('scoredist', 'scoredist')
+    match.brunDist('rundist', 'rundist', color='#0000ff')
+
+    # random score distribution
+    match.single = True
+    match.random(n=match.nscore)
+    match.histogramScore('randomscore', 1)
+    match.sortFrame('randomscore', 'score')
+    match.bscoreDist('scoredist', 'randomscore', color='#ff0000')
+
+    match.histogramRun('randomrun', 1)
+    match.brunDist('rundist', 'randomrun', color='#ff0000')
+    match.single = False
+
+    match.writeFrame('scoredist', key='score')
+    match.writeFrame('rundist', key='len')
 
     script, div = components(match.grid)
     # grab the static resources
@@ -110,44 +182,14 @@ def dotplot():
         plot_div=div,
         js_resources=js_resources,
         css_resources=css_resources
-        )
-
-
-@app.route('/bokeh')
-def bokeh():
-    # init a basic bar chart:
-    # http://bokeh.pydata.org/en/latest/docs/user_guide/plotting.html#bars
-    fig = figure(plot_width=600, plot_height=600)
-    fig.vbar(
-        x=[1, 2, 3, 4],
-        width=0.5,
-        bottom=0,
-        top=[1.7, 2.2, 4.6, 3.9],
-        color='navy'
     )
-
-    # grab the static resources
-    js_resources = INLINE.render_js()
-    css_resources = INLINE.render_css()
-
-    # render template
-    script, div = components(fig)
-    html = render_template(
-        'index.html',
-        plot_script=script,
-        plot_div=div,
-        js_resources=js_resources,
-        css_resources=css_resources,
-    )
-    return html
 
 
 # --------------------------------------------------------------------------------------------------
 # Main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    # state['seq1'] = None
-
+    # print('Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)')
     app.run(debug=True)
     # app.run()
 
