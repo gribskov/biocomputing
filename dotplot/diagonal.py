@@ -157,18 +157,18 @@ class Diagonal(Score, Fasta):
         ylen = xlen * self.l2 / self.l1
 
         # define each panel as a figure
-        label = '({}, {})'.format(self.s1.id, self.s2.id)
-        TIPS = [(label, '($x{0},$y{0})')]
+        label = '({}, {}, score)'.format(self.s1.id, self.s2.id)
+        TIPS = [(label, '($x{0}, $y{0}, @score)')]
         self.figure['main'] = figure(title=titlestr, x_axis_label=xlabel, y_axis_label=ylabel,
                                      height=int(ylen), width=int(xlen), align='center',
                                      tooltips=TIPS)
 
         self.figure['legend'] = figure(height=int(ylen), width=200)
 
-        TIPS = [('score, density', '$x{0},$y{0.00}')]
+        TIPS = [('score, number', '$x{0}, $y{0.00}')]
         self.figure['scoredist'] = figure(height=300, width=500, tooltips=TIPS)
 
-        TIPS = [('length,count', '$x{0},$y{0}')]
+        TIPS = [('length,count', '$x{0}, $y{0}')]
         self.figure['rundist'] = figure(height=300, width=500, y_axis_type='log', tooltips=TIPS)
 
         # grid layout
@@ -1191,4 +1191,4 @@ if __name__ == '__main__':
 
         match.show()
 
-exit(0)
+    exit(0)
