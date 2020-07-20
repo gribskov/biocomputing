@@ -11,17 +11,15 @@
 <div class="controlpanel">
 
     {% for file in state.seq %}
-        {% if file.isloaded %}
-            <div class="sequence">
-                <h2>Sequence {{loop.index}}</h2>
-                <h3> {{file.fasta.id}} - {{file.fasta.doc}}</h3>
-                <pre>
-{{file.fasta.seq}}
-                </pre>
-            </div>
-        {% else %}
+        {% if file.status == 'next' %}
+            {% if loop.index == 2 %}
+                <form action="/self" method="POST">
+                    <input type="submit" name="selfplot" value="Self plot">
+                </form>
+            {% endif %}
 
             <h2>Sequence {{loop.index}}</h2>
+
             <form action="/getSequence" method="POST"
                   enctype="multipart/form-data"
                   style="margin-top: 10px;">
@@ -30,15 +28,30 @@
                 <br/>
                 <input type="submit"  value="Load"/>
             </form>
+
+        {% elif file.status == 'loaded' %}
+            <div class="sequence">
+                <h2>Sequence {{loop.index}}</h2>
+                <h3> {{file.fasta.id}} - {{file.fasta.doc}}</h3>
+                <pre>
+{{file.fasta.format()}}
+                </pre>
+            </div>
+
         {% endif %}
     {% endfor %}
 </div>
 
 
-{% if state.seq.0.isloaded and state.seq.1.isloaded %}
+{% if state.seq.0.status=='loaded' and state.seq.1.status=='loaded' %}
 <form action="/dotplot" method="POST"
       style="margin-top: 10px;">
     <div class="controlpanel">
+        {% if state.seqtype == 'DNA' %}
+            <input type="radio" name="type" value="reverse"/> Reverse-complement sequence 2<br/>
+            <input type="radio" name="type" value="forward_backward"/> Forward + Backward plot
+        {% endif %}
+
         <h2>Scoring table</h2>
 
         {% if state.seqtype == 'DNA' %}
@@ -58,10 +71,10 @@
         {% endif %}
         <br/>
         <h2>Plot parameters</h2>
-        Window length <input type="number" id="window" name="window"
-                             min="1"  maxlength=4 value=10><br/>
-        Threshold <input type="number" id="threshold" name="threshold"
-                         maxlength=4 value=8><br/>
+        <input type="text"  size=4 id="window" name="window"
+                             pattern="\d*" min="1" value=10> Window length <br/>
+        <input type="text"   size=4 id="threshold" name="threshold"
+                         value=8> Threshold <br/><br/>
         Mode <br/>
         <input type="radio" name="mode" value='dot' checked> Display matching windows as dots<br/>
         <input type="radio" name="mode" value='line'> Display matching windows as lines<br/><br/>
