@@ -1,11 +1,9 @@
-#
-# This matrix was created by Todd Lowe   12/10/92
-#
-# Uses ambiguous nucleotide codes, probabilities rounded to
-#  nearest integer
-#
-# Lowest score = -4, Highest score = 5
-#
+#Title NUC4.4.matrix
+#Description
+#Range -4, 5
+#Comment does not include U or X
+#Comment This matrix was created by Todd Lowe   12/10/92
+#Comment Downloaded  June 2020 from ncbi.nlm.nih.gov/blast/matrices
     A   T   G   C   S   W   R   Y   K   M   B   V   H   D   N
 A   5  -4  -4  -4  -4   1   1  -4  -4   1  -4  -1  -1  -1  -2
 T  -4   5  -4  -4  -4   1  -4   1   1  -4  -1  -4  -1  -1  -2

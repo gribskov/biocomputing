@@ -1,0 +1,23 @@
+#Title NUCidentity.matrix
+#
+#Description 1,0 matching for DNA/RNA, including IUPAC ambiguity codes
+#Range 0,1
+#Comment any codes that overlap score 1
+#Comment T and U are identical so RNA sequences don't need conversion
+    A   C   G   T   U   S   W   R   Y   K   M   B   V   H   D   N
+A   1   0   0   0   0   0   1   1   0   0   1   0   1   1   1   1
+C   0   1   0   0   0   1   0   0   1   0   1   1   1   1   0   1
+G   0   0   1   0   0   1   0   1   0   1   0   1   1   0   1   1
+T   0   0   0   1   1   0   1   0   1   1   0   1   0   1   1   1
+U   0   0   0   1   1   0   1   0   1   1   0   1   0   1   1   1
+S   0   1   1   0   0   1   0   1   1   1   1   1   1   1   1   1
+W   1   0   0   1   1   0   1   1   1   1   1   1   1   1   1   1
+R   1   0   1   0   0   1   1   1   0   1   1   1   1   1   1   1
+Y   0   1   0   1   1   1   1   0   1   1   1   1   1   1   1   1
+K   0   0   1   1   1   1   1   1   1   1   0   1   1   1   1   1
+M   1   1   0   0   0   1   1   1   1   0   1   1   1   1   1   1
+B   0   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+V   1   1   1   0   0   1   1   1   1   1   1   1   1   1   1   1
+H   1   1   0   1   1   1   1   1   1   1   1   1   1   1   1   1
+D   1   0   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+N   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
