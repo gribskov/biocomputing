@@ -44,10 +44,11 @@
 
 
 {% if state.seq.0.status=='loaded' and state.seq.1.status=='loaded' %}
-<form action="/dotplot" method="POST"
-      style="margin-top: 10px;">
-    <div class="controlpanel">
+<div class="controlpanel">
+    <form action="/dotplot" method="POST" style="margin-top: 10px;">
+
         {% if state.seqtype == 'DNA' %}
+            <input type="radio" name="type" value="forward" checked/> Both sequences in forward orientation<br/>
             <input type="radio" name="type" value="reverse"/> Reverse-complement sequence 2<br/>
             <input type="radio" name="type" value="forward_backward"/> Forward + Backward plot
         {% endif %}
@@ -78,17 +79,33 @@
         Mode <br/>
         <input type="radio" name="mode" value='dot' checked> Display matching windows as dots<br/>
         <input type="radio" name="mode" value='line'> Display matching windows as lines<br/><br/>
-        <input type="submit"  value="Plot"/>
-    </div>
-</form>
+
+        <input type="submit"  value="Plot"/>&nbsp;<button type="submit" formaction="/dashboard">Reset</button><br/><br/>
+
+        <a name="advanced"></a>
+            {% if state.params.advanced %}
+
+            <h3> Advanced graphics parameters</h3>
+            <input type="submit" formaction={{url_for("advanced", _anchor="advanced")}} value="Hide"> advanced parameters<br/><br/>
+            <input type="radio" name="width" value=True checked> Use size-based score cueing<br/>
+            <input type="radio" name="width" value=False> Do not use size-based score cueing<br/><br/>
+
+            <input type="text"  size=1 id="mindotsize" name="mindotsize"
+                                 pattern="\d*" min="1" value=2> Minimum dot/line size (px) <br/>
+            <input type="text"  size=1 id="maxdotsize" name="maxdotsize"
+                                 pattern="\d*" min="1" value=8> Maximum dot/line size (px) <br/><br/>
+
+            <input type="radio" name="color" value=True checked> Use color-based score cueing<br/>
+            <input type="radio" name="color" value=False> Do not use color-based score cueing<br/><br/>
+        {% else %}
+            <input type="submit" formaction={{url_for("advanced", _anchor="advanced")}} value="Show"> advanced plotting parameters
+        {% endif %}
+
+    </form>
+</div>
 
 {% endif %}
 
-
-<form action="/dotplot" method="POST"
->
-
-</form>
 
 </body>
 </html>

@@ -33,13 +33,17 @@ app = Flask(__name__)
 # state is used to pass information to templates
 
 statedefault = {'seq': [{'fasta': None, 'status': 'next'},
-                 {'fasta': None, 'status': 'later'}],
-         'dnacmp': [{'name': 'identity', 'loc': 'table/NUCidentity.matrix'},
-                    {'name': 'NUC4.4', 'loc': 'table/NUC4.4.matrix'}],
-         'procmp': [{'name': 'identity', 'loc': 'table/PROidentity.matrix'},
-                    {'name': 'Blosum62', 'loc': 'table/BLOSUM62.matrix'}
-                    ]}
+                        {'fasta': None, 'status': 'later'}],
+                'dnacmp': [{'name': 'identity', 'loc': 'table/NUCidentity.matrix'},
+                           {'name': 'NUC4.4', 'loc': 'table/NUC4.4.matrix'}],
+                'procmp': [{'name': 'identity', 'loc': 'table/PROidentity.matrix'},
+                           {'name': 'Blosum62', 'loc': 'table/BLOSUM62.matrix'}
+                           ],
+                'params': { 'advanced': False }
+                }
+
 state = copy.deepcopy(statedefault)
+
 
 # --------------------------------------------------------------------------------------------------
 # Flask routes
@@ -48,7 +52,6 @@ state = copy.deepcopy(statedefault)
 @app.route('/')
 def index():
     return redirect('/dashboard', code=302)
-    # return '<h1><a href=/bokeh>bokeh test</a></h1><a href=/dashboard>dashboard</a>'
 
 
 # --------------------------------------------------------------------------------------------------
@@ -60,6 +63,18 @@ def dashboard():
 
 
 # --------------------------------------------------------------------------------------------------
+# advanced toggles showing of the advanced parameters and reloads the dashboard
+# --------------------------------------------------------------------------------------------------
+@app.route('/advanced', methods=['POST', 'GET'])
+def advanced():
+    if state['params']['advanced']:
+        state['params']['advanced'] = False
+    else:
+        state['params']['advanced'] = True
+
+    return render_template('dashboard.html', state=state)
+
+# --------------------------------------------------------------------------------------------------
 
 @app.route('/getSequence', methods=['POST', 'GET'])
 def getSequence():
@@ -68,7 +83,7 @@ def getSequence():
         if 'file1' in request.files:
             f = request.files['file1']
             sequence = 0
-            state['seq'][1]['status']='next'
+            state['seq'][1]['status'] = 'next'
 
         elif 'file2' in request.files:
             f = request.files['file2']
@@ -89,6 +104,7 @@ def getSequence():
 
     return render_template('dashboard.html', state=state)
 
+
 # --------------------------------------------------------------------------------------------------
 
 @app.route('/self', methods=['POST', 'GET'])
@@ -102,7 +118,6 @@ def self():
     seq2['fasta'] = seq1['fasta'].copy()
     seq2['status'] = 'loaded'
 
-
     state['seqtype'] = 'protein'
     if state['seq'][0]['status'] is 'loaded' and state['seq'][1]['status'] is 'loaded':
         if state['seq'][0]['fasta'].isACGT() and state['seq'][1]['fasta'].isACGT():
@@ -110,18 +125,17 @@ def self():
 
     return render_template('dashboard.html', state=state)
 
+
 # --------------------------------------------------------------------------------------------------
 
 @app.route('/dotplot', methods=['POST', 'GET'])
 def dotplot():
-
     window = int(request.form['window'])
     threshold = float(request.form['threshold'])
     mode = request.form['mode']
-    plot_type='forward'
+    plot_type = 'forward'
     if state['seqtype'] == 'DNA':
         plot_type = request.form['type']
-
 
     fasta1 = state['seq'][0]['fasta']
     fasta2 = state['seq'][1]['fasta']
