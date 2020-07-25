@@ -2,15 +2,19 @@
 Diagon
 
 Flask application for dotplots.
+TODO add dotsize control
+TODO turn random off
+
 
 Michael Gribskov     16 July 2020
 ================================================================================================="""
 import sys
+import copy
 
 from diagonal import Diagonal
 from sequence.fasta import Fasta
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 import logging
 
 from bokeh.embed import components
@@ -28,33 +32,34 @@ app = Flask(__name__)
 
 # state is used to pass information to templates
 
-state = {'seq': [{'fasta': None, 'status': 'next'},
+statedefault = {'seq': [{'fasta': None, 'status': 'next'},
                  {'fasta': None, 'status': 'later'}],
          'dnacmp': [{'name': 'identity', 'loc': 'table/NUCidentity.matrix'},
                     {'name': 'NUC4.4', 'loc': 'table/NUC4.4.matrix'}],
          'procmp': [{'name': 'identity', 'loc': 'table/PROidentity.matrix'},
                     {'name': 'Blosum62', 'loc': 'table/BLOSUM62.matrix'}
                     ]}
+state = copy.deepcopy(statedefault)
 
-
-# ---------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
 # Flask routes
-# ---------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
 
 @app.route('/')
 def index():
-    return render_template('dashboard.html', state=state)
+    return redirect('/dashboard', code=302)
     # return '<h1><a href=/bokeh>bokeh test</a></h1><a href=/dashboard>dashboard</a>'
 
 
-# ---------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['POST', 'GET'])
 def dashboard():
+    state = copy.deepcopy(statedefault)
     return render_template('dashboard.html', state=state)
 
 
-# ---------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
 
 @app.route('/getSequence', methods=['POST', 'GET'])
 def getSequence():
@@ -122,6 +127,7 @@ def dotplot():
     fasta2 = state['seq'][1]['fasta']
 
     match = Diagonal()
+    match.maxdotsize = 8
     match.readNCBI(request.form['cmp'])
     dataframes = [{'data': 'dots', 'fn': match.windowThreshold, 'var': ['x', 'y', 'score']},
                   {'data': 'scoredist', 'fn': match.histogramScore, 'var': ['score', 'count']},
