@@ -26,6 +26,8 @@ from bokeh.resources import INLINE
 cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None
 app = Flask(__name__)
+
+
 # uncomment below to turn off server log
 # log = logging.getLogger('werkzeug')
 # log.setLevel(logging.ERROR)
@@ -40,11 +42,10 @@ def tf(string):
 
 statedefault = {'seq': [{'fasta': None, 'status': 'next'},
                         {'fasta': None, 'status': 'later'}],
-                'dnacmp': [{'name': 'identity', 'loc': 'table/NUCidentity.matrix'},
-                           {'name': 'NUC4.4', 'loc': 'table/NUC4.4.matrix'}],
-                'procmp': [{'name': 'identity', 'loc': 'table/PROidentity.matrix'},
-                           {'name': 'Blosum62', 'loc': 'table/BLOSUM62.matrix'}
-                           ],
+                'dnacmp': {'identity': 'table/NUCidentity.matrix',
+                           'NUC4.4': 'table/NUC4.4.matrix'},
+                'procmp': {'identity': 'table/PROidentity.matrix',
+                           'Blosum62': 'table/BLOSUM62.matrix'},
                 'params': {'advanced': False,
                            'mindotsize': 2,
                            'maxdotsize': 8,
@@ -60,15 +61,15 @@ statedefault = {'seq': [{'fasta': None, 'status': 'next'},
                            'cbase': 'Viridis'}
                 }
 
-
 state = copy.deepcopy(statedefault)
 
 
 def getParams(res):
-    for v in  request.form:
+    for v in request.form:
         state['params'][v] = request.form[v]
 
     return
+
 
 # --------------------------------------------------------------------------------------------------
 # Flask routes
@@ -160,7 +161,6 @@ def dotplot():
     getParams(request)
     p = state['params']
 
-
     mode = request.form['mode']
     plot_type = 'forward'
     if state['seqtype'] == 'DNA':
@@ -175,10 +175,10 @@ def dotplot():
 
     cmpname = state['params']['cmp']
     if state['seqtype'] == 'DNA':
-        cmptable = state['dnacmp'][cmpname]['loc']
+        cmptable = state['dnacmp'][cmpname]
     else:
-
-    match.readNCBI(state['params']['cmp'])
+        cmptable = state['procmp'][cmpname]
+    match.readNCBI(cmptable)
 
     dataframes = [{'data': 'dots', 'fn': match.windowThreshold, 'var': ['x', 'y', 'score']},
                   {'data': 'scoredist', 'fn': match.histogramScore, 'var': ['score', 'count']},
@@ -196,19 +196,20 @@ def dotplot():
     match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
     if mode == 'line':
         match.addSegment('dots')
-    match.bdot('dots', 'main', width=p['width']=='True', color=p['color']=='True', mode=p['mode'])
+    match.bdot('dots', 'main', width=p['width'] == 'True', color=p['color'] == 'True',
+               mode=p['mode'])
 
     if plot_type == "forward_backward":
         match.seqreverse = True
         match.resetFrame('dots')
         match.setupCalculation(fasta1, fasta2, resetstat=False,
-                               window=int(p['window']), threshold=int(p['threshold']) )
+                               window=int(p['window']), threshold=int(p['threshold']))
         # match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
         match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
         if mode == 'line':
             match.addSegment('dots')
         match.bdot('dots', 'main', set_colormap=False,
-                   width=p['width'] == 'True', color=p['color']=='True', mode=p['mode'] )
+                   width=p['width'] == 'True', color=p['color'] == 'True', mode=p['mode'])
 
     # score and run distributions
     match.sortFrame('scoredist', 'score')

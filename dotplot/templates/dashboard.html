@@ -59,26 +59,29 @@
             Scoring tables for {{state.seqtype}} sequences<br/>
 
             {% for table in state.dnacmp %}
-                <input type="radio" name="cmp" value="{{table.loc}}"
-                       {% if loop.index0 == 0 %} checked {% endif %} > {{table.name}}<br/>
+                <input type="radio" name="cmp" value="{{table}}"
+                       {% if state.params.cmp == table %} checked {% endif %} > {{table}}<br/>
             {% endfor %}
         {% elif state.seqtype == 'protein' %}
             Scoring tables for {{state['seqtype']}} sequences<br/>
 
             {% for table in state.procmp %}
-                <input type="radio" name="cmp" value="{{table.loc}}"
-                       {% if loop.index0 == 0 %} checked {% endif %} > {{table.name}}<br/>
+                <input type="radio" name="cmp" value="{{table}}"
+                       {% if state.params.cmp == table %} checked {% endif %} > {{table}}<br/>
             {% endfor %}
         {% endif %}
         <br/>
         <h2>Plot parameters</h2>
         <input type="text"  size=4 id="window" name="window"
-                             pattern="\d*" min="1" value=10> Window length <br/>
+                             pattern="\d*" min="1" value={{state.params.window}}> Window length <br/>
         <input type="text"   size=4 id="threshold" name="threshold"
-                         value=8> Threshold <br/><br/>
-        Mode <br/>
-        <input type="radio" name="mode" value='dot' checked> Display matching windows as dots<br/>
-        <input type="radio" name="mode" value='line'> Display matching windows as lines<br/><br/>
+                         value={{state.params.threshold}}> Threshold <br/><br/>
+        
+        <input type="radio" name="mode" value='dot' {% if state.params.mode == 'dot' %}checked{% endif %}> Display matching windows as dots<br/>
+        <input type="radio" name="mode" value='line' {% if state.params.mode == 'line' %}checked{% endif %}> Display matching windows as lines<br/><br/>
+
+        <input type="radio" name="random" value='True' {% if state.params.random  == 'True' %}checked{% endif %}> Display random distribution<br/>
+        <input type="radio" name="random" value='False' {% if state.params.random == 'False' %}checked{% endif %}> Do not display random distribution<br/><br/>
 
         <input type="submit"  value="Plot"/>&nbsp;<button type="submit" formaction="/dashboard">Reset</button><br/><br/>
 
@@ -87,16 +90,24 @@
 
             <h3> Advanced graphics parameters</h3>
             <input type="submit" formaction={{url_for("advanced", _anchor="advanced")}} value="Hide"> advanced parameters<br/><br/>
-            <input type="radio" name="width" value=True checked> Use size-based score cueing<br/>
-            <input type="radio" name="width" value=False> Do not use size-based score cueing<br/><br/>
+            <input type="radio" name="width" value=1 {% if state.params.width == 'True' %} checked{% endif %}> Use size-based score cueing<br/>
+            <input type="radio" name="width" value=0 {% if state.params.width == 'False' %} checked{% endif %}> Do not use size-based score cueing<br/><br/>
 
             <input type="text"  size=1 id="mindotsize" name="mindotsize"
-                                 pattern="\d*" min="1" value=2> Minimum dot/line size (px) <br/>
+                                 pattern="\d*" min="1" value={{state.params.mindotsize}}> Minimum dot/line size (px) <br/>
             <input type="text"  size=1 id="maxdotsize" name="maxdotsize"
-                                 pattern="\d*" min="1" value=8> Maximum dot/line size (px) <br/><br/>
+                                 pattern="\d*" min="1" value={{state.params.maxdotsize}}> Maximum dot/line size (px) <br/><br/>
 
-            <input type="radio" name="color" value=True checked> Use color-based score cueing<br/>
-            <input type="radio" name="color" value=False> Do not use color-based score cueing<br/><br/>
+            <input type="radio" name="color" value=1 {% if state.params.color %}checked{% endif %}> Use color-based score cueing<br/>
+            <input type="radio" name="color" value=0 {% if state.params.color is false%} checked{% endif %}> Do not use color-based score cueing<br/><br/>
+            <select name="cbase", id="cbase">
+                <option value="Viridis" {% if state.params.cbase== 'Viridis'%}selected {% endif %}>Viridis</option>
+                <option value="Greys" {% if state.params.cbase== 'Greys'%}selected {% endif %}>Greys</option>
+                <option value="Inferno" {% if state.params.cbase== 'Inferno'%}selected {% endif %}>Inferno</option>
+                <option value="Magma" {% if state.params.cbase== 'Magma'%}selected {% endif %}>Magma</option>
+                <option value="Plasma" {% if state.params.cbase== 'Cividis'%}selected {% endif %}>Cividis</option>
+                <option value="Turbo" {% if state.params.cbase== 'Turbo'%}selected {% endif %}>Turbo</option>
+            </select> Select palette
         {% else %}
             <input type="submit" formaction={{url_for("advanced", _anchor="advanced")}} value="Show"> advanced plotting parameters
         {% endif %}
