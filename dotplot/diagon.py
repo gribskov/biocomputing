@@ -31,6 +31,12 @@ app = Flask(__name__)
 # log.setLevel(logging.ERROR)
 
 # state is used to pass information to templates
+def tf(string):
+    if string == 'True':
+        return True
+    else:
+        return False
+
 
 statedefault = {'seq': [{'fasta': None, 'status': 'next'},
                         {'fasta': None, 'status': 'later'}],
@@ -39,11 +45,30 @@ statedefault = {'seq': [{'fasta': None, 'status': 'next'},
                 'procmp': [{'name': 'identity', 'loc': 'table/PROidentity.matrix'},
                            {'name': 'Blosum62', 'loc': 'table/BLOSUM62.matrix'}
                            ],
-                'params': { 'advanced': False }
+                'params': {'advanced': False,
+                           'mindotsize': 2,
+                           'maxdotsize': 8,
+                           'mode': 'dot',
+                           'random': 'True',
+                           'cmp': 'identity',
+                           'width': 'True',
+                           'color': 'True',
+                           'window': 20,
+                           'threshold': 12,
+                           'seqtype': 'DNA',
+                           'plot_type': 'forward',
+                           'cbase': 'Viridis'}
                 }
+
 
 state = copy.deepcopy(statedefault)
 
+
+def getParams(res):
+    for v in  request.form:
+        state['params'][v] = request.form[v]
+
+    return
 
 # --------------------------------------------------------------------------------------------------
 # Flask routes
@@ -67,12 +92,14 @@ def dashboard():
 # --------------------------------------------------------------------------------------------------
 @app.route('/advanced', methods=['POST', 'GET'])
 def advanced():
+    getParams(request)
     if state['params']['advanced']:
         state['params']['advanced'] = False
     else:
         state['params']['advanced'] = True
 
     return render_template('dashboard.html', state=state)
+
 
 # --------------------------------------------------------------------------------------------------
 
@@ -110,7 +137,7 @@ def getSequence():
 @app.route('/self', methods=['POST', 'GET'])
 def self():
     """
-    for a self plot, sequence 1 should already be loaded, we just have to coipy it to sequence 2.
+    for a self plot, sequence 1 should already be loaded, we just have to copy it to sequence 2.
     :return:
     """
     seq1 = state['seq'][0]
@@ -130,8 +157,10 @@ def self():
 
 @app.route('/dotplot', methods=['POST', 'GET'])
 def dotplot():
-    window = int(request.form['window'])
-    threshold = float(request.form['threshold'])
+    getParams(request)
+    p = state['params']
+
+
     mode = request.form['mode']
     plot_type = 'forward'
     if state['seqtype'] == 'DNA':
@@ -141,8 +170,16 @@ def dotplot():
     fasta2 = state['seq'][1]['fasta']
 
     match = Diagonal()
-    match.maxdotsize = 8
-    match.readNCBI(request.form['cmp'])
+    match.mindotsize = int(state['params']['mindotsize'])
+    match.maxdotsize = int(state['params']['maxdotsize'])
+
+    cmpname = state['params']['cmp']
+    if state['seqtype'] == 'DNA':
+        cmptable = state['dnacmp'][cmpname]['loc']
+    else:
+
+    match.readNCBI(state['params']['cmp'])
+
     dataframes = [{'data': 'dots', 'fn': match.windowThreshold, 'var': ['x', 'y', 'score']},
                   {'data': 'scoredist', 'fn': match.histogramScore, 'var': ['score', 'count']},
                   {'data': 'rundist', 'fn': match.histogramRun, 'var': ['len', 'count']},
@@ -150,25 +187,28 @@ def dotplot():
                   {'data': 'randomrun', 'fn': None, 'var': ['len', 'count']}
                   ]
     match.setupFrame(dataframes)
+
     if plot_type == "reverse":
         match.seqreverse = True
     match.setupCalculation(fasta1, fasta2,
-                           window=window, threshold=threshold)
-    match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
+                           window=int(p['window']), threshold=int(p['threshold']))
+    match.setupBokeh(cbase=p['cbase'], clevels=256, creverse='True')
     match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
     if mode == 'line':
         match.addSegment('dots')
-    match.bdot('dots', 'main', width=True, color=True, mode=mode)
+    match.bdot('dots', 'main', width=p['width']=='True', color=p['color']=='True', mode=p['mode'])
 
     if plot_type == "forward_backward":
         match.seqreverse = True
         match.resetFrame('dots')
-        match.setupCalculation(fasta1, fasta2, window=window, threshold=threshold, resetstat=False)
+        match.setupCalculation(fasta1, fasta2, resetstat=False,
+                               window=int(p['window']), threshold=int(p['threshold']) )
         # match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
         match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
         if mode == 'line':
             match.addSegment('dots')
-        match.bdot('dots', 'main', width=True, color=True, mode=mode, set_colormap=False)
+        match.bdot('dots', 'main', set_colormap=False,
+                   width=p['width'] == 'True', color=p['color']=='True', mode=p['mode'] )
 
     # score and run distributions
     match.sortFrame('scoredist', 'score')
@@ -178,18 +218,19 @@ def dotplot():
     match.brunDist('rundist', 'rundist', color='#0000ff')
 
     # random score distribution
-    match.single = True
-    match.random(n=match.nscore)
-    match.histogramScore('randomscore', 1)
-    match.sortFrame('randomscore', 'score')
-    match.bscoreDist('scoredist', 'randomscore', color='#ff0000')
+    if p['random'] == 'True':
+        match.single = True
+        match.random(n=match.nscore)
+        match.histogramScore('randomscore', 1)
+        match.sortFrame('randomscore', 'score')
+        match.bscoreDist('scoredist', 'randomscore', color='#ff0000')
 
-    match.histogramRun('randomrun', 1)
-    match.brunDist('rundist', 'randomrun', color='#ff0000')
-    match.single = False
+        match.histogramRun('randomrun', 1)
+        match.brunDist('rundist', 'randomrun', color='#ff0000')
+        match.single = False
 
-    match.writeFrame('scoredist', key='score')
-    match.writeFrame('rundist', key='len')
+        match.writeFrame('scoredist', key='score')
+        match.writeFrame('rundist', key='len')
 
     script, div = components(match.grid)
     # grab the static resources
