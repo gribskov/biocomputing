@@ -45,31 +45,20 @@
 
 {% if state.seq.0.status=='loaded' and state.seq.1.status=='loaded' %}
 <div class="controlpanel">
-    <form action="/dotplot" method="POST" style="margin-top: 10px;">
+    <form action="/dotplot" method="POST" style="margin-top: 0px;">
 
         {% if state.seqtype == 'DNA' %}
-            <input type="radio" name="type" value="forward" checked/> Both sequences in forward orientation<br/>
-            <input type="radio" name="type" value="reverse"/> Reverse-complement sequence 2<br/>
-            <input type="radio" name="type" value="forward_backward"/> Forward + Backward plot
+            <input type="radio" name="plottype" value="forward" {% if state.params.plottype == 'forward' %}checked{% endif %}/> Both sequences in forward orientation<br/>
+            <input type="radio" name="plottype" value="reverse" {% if state.params.plottype == 'reverse' %}checked{% endif %}/> Reverse-complement sequence 2<br/>
+            <input type="radio" name="plottype" value="forward_backward" {% if state.params.plottype == 'forward_backward' %}checked{% endif %}/> Forward + Backward plot
         {% endif %}
 
-        <h2>Scoring table</h2>
+        <h2>Scoring tables for {{state.seqtype}}</h2>
+        {% for table in state[state.seqtype] %}
+            <input type="radio" name="cmp" value="{{table}}"
+                {% if state.params.cmp == table %} checked {% endif %} > {{table}}<br/>
+        {% endfor %}
 
-        {% if state.seqtype == 'DNA' %}
-            Scoring tables for {{state.seqtype}} sequences<br/>
-
-            {% for table in state.dnacmp %}
-                <input type="radio" name="cmp" value="{{table}}"
-                       {% if state.params.cmp == table %} checked {% endif %} > {{table}}<br/>
-            {% endfor %}
-        {% elif state.seqtype == 'protein' %}
-            Scoring tables for {{state['seqtype']}} sequences<br/>
-
-            {% for table in state.procmp %}
-                <input type="radio" name="cmp" value="{{table}}"
-                       {% if state.params.cmp == table %} checked {% endif %} > {{table}}<br/>
-            {% endfor %}
-        {% endif %}
         <br/>
         <h2>Plot parameters</h2>
         <input type="text"  size=4 id="window" name="window"
