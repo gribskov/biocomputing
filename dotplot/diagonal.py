@@ -157,18 +157,18 @@ class Diagonal(Score, Fasta):
         ylen = xlen * self.l2 / self.l1
 
         # define each panel as a figure
-        label = '({}, {})'.format(self.s1.id, self.s2.id)
-        TIPS = [(label, '($x{0},$y{0})')]
+        label = '({}, {}, score)'.format(self.s1.id, self.s2.id)
+        TIPS = [(label, '($x{0}, $y{0}, @score)')]
         self.figure['main'] = figure(title=titlestr, x_axis_label=xlabel, y_axis_label=ylabel,
                                      height=int(ylen), width=int(xlen), align='center',
                                      tooltips=TIPS)
 
         self.figure['legend'] = figure(height=int(ylen), width=200)
 
-        TIPS = [('score, density', '$x{0},$y{0.00}')]
+        TIPS = [('score, number', '$x{0}, $y{0.00}')]
         self.figure['scoredist'] = figure(height=300, width=500, tooltips=TIPS)
 
-        TIPS = [('length,count', '$x{0},$y{0}')]
+        TIPS = [('length,count', '$x{0}, $y{0}')]
         self.figure['rundist'] = figure(height=300, width=500, y_axis_type='log', tooltips=TIPS)
 
         # grid layout
@@ -617,9 +617,9 @@ class Diagonal(Score, Fasta):
         :param figurename: string, a figure defined in setupBokeh and stored in self.figure
         :param width: boolean, scale size of markers by the score
         :param color: boolean, scale the color of the markers by the score
-        :param mode: string, if dot use the circle renerer, otherwise segment renderer
+        :param mode: string, if dot use the circle renderer, otherwise segment renderer
         :param set_colormap: boolean, set the colormap based on score range, turn off for second
-        plot
+        plot to use the same scale
         :return: True
         -----------------------------------------------------------------------------------------"""
         data = self.frame[dataname]
@@ -631,7 +631,7 @@ class Diagonal(Score, Fasta):
 
         scoremin, scoremax = self.valueMinMax(data['score'])
 
-        if width:
+        if width == 1:
             self.scaleColumn('dots', 'score', 'size',
                              (threshold - 1, scoremax), (self.mindotsize, self.maxdotsize))
         else:
@@ -643,8 +643,12 @@ class Diagonal(Score, Fasta):
             data['score'] = [scoremax for _ in range(len(data['score']))]
 
         if set_colormap:
-            cmap = LinearColorMapper(self.palette,
-                                     low=max(threshold - 1.0, scoremin - 1), high=scoremax)
+            if color == 1:
+                cmap = LinearColorMapper(self.palette,
+                                         low=max(threshold - 1.0, scoremin - 1), high=scoremax)
+            else:
+                cmap = LinearColorMapper(self.palette,
+                                         low=threshold-0.1, high=threshold)
             self.cmap = cmap
         else:
             cmap = self.cmap
@@ -1191,4 +1195,4 @@ if __name__ == '__main__':
 
         match.show()
 
-exit(0)
+    exit(0)

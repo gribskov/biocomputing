@@ -101,11 +101,11 @@ class Fasta:
             if line.isspace():
                 continue
             try:
-                line = line.rstrip('\n')
+                line = line.rstrip('\n\r ')
             except TypeError:
                 # in case of a byte string
                 line = line.decode()
-                line = line.rstrip('\n')
+                line = line.rstrip('\n\r ')
 
             if line[0] == '>':
                 fasta.buffer = line
