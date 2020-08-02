@@ -2,8 +2,8 @@
 Diagon
 
 Flask application for dotplots.
-TODO add dotsize control
-TODO turn random off
+TODO sequence reverse currently acts like a toggle, if you make one reverse plot, and
+then another, the sequence is forward in the second
 
 
 Michael Gribskov     16 July 2020
@@ -42,9 +42,9 @@ def tf(string):
 
 statedefault = {'seq': [{'fasta': None, 'status': 'next'},
                         {'fasta': None, 'status': 'later'}],
-                'dnacmp': {'identity': 'table/NUCidentity.matrix',
+                'DNA': {'identity': 'table/NUCidentity.matrix',
                            'NUC4.4': 'table/NUC4.4.matrix'},
-                'procmp': {'identity': 'table/PROidentity.matrix',
+                'protein': {'identity': 'table/PROidentity.matrix',
                            'Blosum62': 'table/BLOSUM62.matrix'},
                 'params': {'advanced': False,
                            'mindotsize': 2,
@@ -57,7 +57,7 @@ statedefault = {'seq': [{'fasta': None, 'status': 'next'},
                            'window': 20,
                            'threshold': 12,
                            'seqtype': 'DNA',
-                           'plot_type': 'forward',
+                           'plottype': 'forward',
                            'cbase': 'Viridis'}
                 }
 
@@ -103,7 +103,8 @@ def advanced():
 
 
 # --------------------------------------------------------------------------------------------------
-
+# main dashboard for loading sequences, scoring table and setting parameters
+# --------------------------------------------------------------------------------------------------
 @app.route('/getSequence', methods=['POST', 'GET'])
 def getSequence():
     sequence = None
@@ -125,16 +126,18 @@ def getSequence():
         seq['status'] = 'loaded'
 
         # if both sequences have been selected, check whether the sequences are DNA or protein
-        state['seqtype'] = 'protein'
+        state['params']['seqtype'] = 'protein'
         if state['seq'][0]['status'] is 'loaded' and state['seq'][1]['status'] is 'loaded':
             if state['seq'][0]['fasta'].isACGT() and state['seq'][1]['fasta'].isACGT():
-                state['seqtype'] = 'DNA'
+                state['params']['seqtype'] = 'DNA'
 
     return render_template('dashboard.html', state=state)
 
 
 # --------------------------------------------------------------------------------------------------
-
+# when self dotplot is selected for the second sequence, this copies the first sequence into the
+# second and returns to the main dashboard
+# --------------------------------------------------------------------------------------------------
 @app.route('/self', methods=['POST', 'GET'])
 def self():
     """
@@ -155,29 +158,26 @@ def self():
 
 
 # --------------------------------------------------------------------------------------------------
-
+# create the plot
+# --------------------------------------------------------------------------------------------------
 @app.route('/dotplot', methods=['POST', 'GET'])
 def dotplot():
     getParams(request)
     p = state['params']
 
-    mode = request.form['mode']
-    plot_type = 'forward'
-    if state['seqtype'] == 'DNA':
-        plot_type = request.form['type']
+    mode = p['mode']
+    plottype = p['plottype']
+    seqtype = p['seqtype']
 
     fasta1 = state['seq'][0]['fasta']
     fasta2 = state['seq'][1]['fasta']
 
     match = Diagonal()
-    match.mindotsize = int(state['params']['mindotsize'])
-    match.maxdotsize = int(state['params']['maxdotsize'])
+    match.mindotsize = int(p['mindotsize'])
+    match.maxdotsize = int(p['maxdotsize'])
 
-    cmpname = state['params']['cmp']
-    if state['seqtype'] == 'DNA':
-        cmptable = state['dnacmp'][cmpname]
-    else:
-        cmptable = state['procmp'][cmpname]
+    cmpname = p['cmp']
+    cmptable = state[seqtype][cmpname]
     match.readNCBI(cmptable)
 
     dataframes = [{'data': 'dots', 'fn': match.windowThreshold, 'var': ['x', 'y', 'score']},
@@ -188,7 +188,7 @@ def dotplot():
                   ]
     match.setupFrame(dataframes)
 
-    if plot_type == "reverse":
+    if plottype == "reverse":
         match.seqreverse = True
     match.setupCalculation(fasta1, fasta2,
                            window=int(p['window']), threshold=int(p['threshold']))
@@ -199,7 +199,7 @@ def dotplot():
     match.bdot('dots', 'main', width=p['width'] == 'True', color=p['color'] == 'True',
                mode=p['mode'])
 
-    if plot_type == "forward_backward":
+    if plottype == "forward_backward":
         match.seqreverse = True
         match.resetFrame('dots')
         match.setupCalculation(fasta1, fasta2, resetstat=False,
