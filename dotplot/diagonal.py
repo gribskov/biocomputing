@@ -617,9 +617,9 @@ class Diagonal(Score, Fasta):
         :param figurename: string, a figure defined in setupBokeh and stored in self.figure
         :param width: boolean, scale size of markers by the score
         :param color: boolean, scale the color of the markers by the score
-        :param mode: string, if dot use the circle renerer, otherwise segment renderer
+        :param mode: string, if dot use the circle renderer, otherwise segment renderer
         :param set_colormap: boolean, set the colormap based on score range, turn off for second
-        plot
+        plot to use the same scale
         :return: True
         -----------------------------------------------------------------------------------------"""
         data = self.frame[dataname]
@@ -631,7 +631,7 @@ class Diagonal(Score, Fasta):
 
         scoremin, scoremax = self.valueMinMax(data['score'])
 
-        if width:
+        if width == 1:
             self.scaleColumn('dots', 'score', 'size',
                              (threshold - 1, scoremax), (self.mindotsize, self.maxdotsize))
         else:
@@ -643,8 +643,12 @@ class Diagonal(Score, Fasta):
             data['score'] = [scoremax for _ in range(len(data['score']))]
 
         if set_colormap:
-            cmap = LinearColorMapper(self.palette,
-                                     low=max(threshold - 1.0, scoremin - 1), high=scoremax)
+            if color == 1:
+                cmap = LinearColorMapper(self.palette,
+                                         low=max(threshold - 1.0, scoremin - 1), high=scoremax)
+            else:
+                cmap = LinearColorMapper(self.palette,
+                                         low=threshold-0.1, high=threshold)
             self.cmap = cmap
         else:
             cmap = self.cmap
