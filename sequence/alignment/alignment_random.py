@@ -59,28 +59,82 @@ class Alignment(Score):
         edge = self.min + open  # a small value to use for gaps on the edges
 
         scoremax = 0
+        posmax = [0, 0]
         bestrow = edge
         bestcol = [edge for _ in i1]
         score = [0 for _ in i1]
         cell = 0
         diag = 0
 
+        jpos = 0
         for j in i2:
             # print(score)
             diag = 0  # uncomment to print score matrix
             bestrow = edge + extend
-            pos = 0
+            ipos = 0
             for i in i1:
-                cell = max(cmp[j][i] + max(diag, bestcol[pos], bestrow), 0.0)
-                scoremax = max(cell, scoremax)
+                cell = max(cmp[j][i] + max(diag, bestcol[ipos], bestrow), 0.0)
+                if cell > scoremax:
+                    scoremax = cell
+                    posmax = [ipos, jpos]
+
                 bestrow = max(diag + open, bestrow + extend)
-                bestcol[pos] = max(diag + open, bestcol[pos] + extend)
-                diag = score[pos]
-                score[pos] = cell
-                pos += 1
+                bestcol[ipos] = max(diag + open, bestcol[ipos] + extend)
+                diag = score[ipos]
+                score[ipos] = cell
+                ipos += 1
+
+            jpos += 1
 
         # print(score)
-        return scoremax
+        return scoremax, posmax
+
+    def localReverse(self, open, extend, bestscore, bestpos):
+        """-----------------------------------------------------------------------------------------
+        Start from the endpoint of the best alignment and do an alignment in reverse to find the
+        beginning point
+        :param open: float, gap opening penalty
+        :param extend: float, gap extension penalty
+        :param bestscore: float, score of best alignment
+        :param bestpos: list of 2 float, position of best alignment
+        :return: float (alignment score), list of two floats (position of max)
+        -----------------------------------------------------------------------------------------"""
+        i, j = bestpos
+        i1save = self.i1
+        i2save = self.i2
+
+        self.i1 = self.i1[0:i:-1]
+        self.i2 = self.i2[0:j:-1]
+
+        score, pos = self.localScore(open, extend)
+        print('begin pos: {} = [{},{}]'.format(pos, bestpos[0] - pos[0], bestpos[1] - pos[1]))
+
+        self.i1 = i1save
+        self.i2 = i2save
+
+        return score, [bestpos[0] - pos[0], bestpos[1] - pos[1]]
+
+
+        # def traceback(self, open, extend, bestscore, bestpos):
+        #     """-----------------------------------------------------------------------------------------
+        #     traceback without score matrix
+        #
+        #     :param open: float, gap opening penalty
+        #     :param extend: float, gap extension penalty
+        #     :param bestscore: float, score of best alignment
+        #     :param bestpos: list of 2 float, position of best alignment
+        #     :return: string, string, the padded aligned sequences
+        #     -----------------------------------------------------------------------------------------"""
+        #     cmp = self.table
+        #     i1 = self.i1
+        #     i2 = self.i2
+        #     l1 = len(i1)
+        #     l2 = len(i2)
+        #
+        #     score = bestscore
+        #     ipos, jpos = bestpos
+        #     while score > 0:
+        target
 
 
 # --------------------------------------------------------------------------------------------------
@@ -102,14 +156,16 @@ if __name__ == '__main__':
 
     align.seqToInt()
     # random.shuffle(align.i1)          # uncomment to test scores for random alignments
-    original_score = align.localScore(-10, -1)
-    print('original score: {}'.format(original_score))
+    original_score, bestpos = align.localScore(-10, -1)
+    print('original score: {} at {}'.format(original_score, bestpos))
+    beginscore, beginpos = align.localReverse(-10,-1, original_score, bestpos)
+    exit(1)
 
-    nrandom = 1000
+    nrandom = 10
     rscore = []
     for i in range(nrandom):
         random.shuffle(align.i2)
-        score = align.localScore(-20, -2)
+        score, pos = align.localScore(-20, -2)
         rscore.append(score)
         # this just gives something to look at
         print('\t{}: {}'.format(i, score))
