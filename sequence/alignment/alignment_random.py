@@ -4,6 +4,8 @@ Significance of alignment using random simulation
 Michael Gribskov     02 August 2020
 ================================================================================================="""
 import sys
+from math import log10
+import random
 from sequence.fasta import Fasta
 from sequence.score import Score
 
@@ -55,40 +57,29 @@ class Alignment(Score):
 
         edge = self.min + open  # a small value to use for gaps on the edges
 
+        scoremax = 0
         bestrow = edge
         bestcol = [edge for _ in i1]
         score = [0 for _ in i1]
         cell = 0
         diag = 0
 
-        # initialize row zero
-        j = i2[0]
-        pos = 0
-        for i in i1:
-            s = max(cmp[j][i], 0.0)
-            score[pos] = s
-            bestcol[pos] += extend
-            pos += 1
-
-        for j in i2[1:]:
-            print(score)
-            i = i1[0]
-            score[0] = max(cmp[j][i], 0.0)
-
-            diag = score[0]
-            bestcol[0] = max(diag + open, bestcol[0] + extend)
+        for j in i2:
+            # print(score)
+            diag = 0  # uncomment to print score matrix
             bestrow = edge + extend
-            pos = 1
-            for i in i1[1:]:
+            pos = 0
+            for i in i1:
                 cell = max(cmp[j][i] + max(diag, bestcol[pos], bestrow), 0.0)
+                scoremax = max(cell, scoremax)
                 bestrow = max(diag + open, bestrow + extend)
                 bestcol[pos] = max(diag + open, bestcol[pos] + extend)
                 diag = score[pos]
                 score[pos] = cell
                 pos += 1
 
-        print(score)
-        return True
+        # print(score)
+        return scoremax
 
 
 # --------------------------------------------------------------------------------------------------
@@ -97,18 +88,45 @@ class Alignment(Score):
 if __name__ == '__main__':
     align = Alignment()
 
-    # align.s1 = Fasta(filename=sys.argv[1])
-    # align.s2 = Fasta(filename=sys.argv[2])
-    # align.readNCBI('../../dotplot/table/BLOSUM62.matrix')
+    align.s1 = Fasta(filename=sys.argv[1])
+    align.s2 = Fasta(filename=sys.argv[2])
+    align.readNCBI('../../dotplot/table/BLOSUM62.matrix')
 
     # testing
-    align.s1 = Fasta()
-    align.s1.seq = 'AATGCC'
-    align.s2 = Fasta()
-    align.s2.seq = 'AAGCC'
-    align.readNCBI('../../dotplot/table/NUC4.4.matrix')
+    # align.s1 = Fasta()
+    # align.s1.seq = 'ACTGCC'
+    # align.s2 = Fasta()
+    # align.s2.seq = 'ATGCC'
+    # align.readNCBI('../../dotplot/table/NUC4.4.matrix')
 
     align.seqToInt()
-    align.localScore(-1, -1)
+    score = align.localScore(-10, -1)
+    print('original score: {}'.format(score))
+
+    nrandom = 2000
+    rscore = []
+    for i in range(nrandom):
+        random.shuffle(align.i2)
+        # random.shuffle(align.i1)
+        score = align.localScore(-20, -2)
+        rscore.append(score)
+        print('\t{}: {}'.format(i, score))
+
+    i = 0
+    N = []
+    rscore.sort(reverse=True)
+    ro = rscore[0]
+    for r in rscore:
+        if r < ro:
+            N.append([i, ro])
+            ro = r
+
+        i += 1
+        print('\t{}\t{}\t{:.3f}'.format(i, log10(i), r))
+    N.append([i,ro])
+
+
+    for pair in N:
+        print('\t{}\t{:.3f}\t{}'.format(pair[0], log10(pair[0]), pair[1]))
 
     exit(0)
