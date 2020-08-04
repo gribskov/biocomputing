@@ -6,6 +6,7 @@ Michael Gribskov     02 August 2020
 import sys
 from math import log10
 import random
+from scipy import stats
 from sequence.fasta import Fasta
 from sequence.score import Score
 
@@ -100,33 +101,58 @@ if __name__ == '__main__':
     # align.readNCBI('../../dotplot/table/NUC4.4.matrix')
 
     align.seqToInt()
-    score = align.localScore(-10, -1)
-    print('original score: {}'.format(score))
+    # random.shuffle(align.i1)          # uncomment to test scores for random alignments
+    original_score = align.localScore(-10, -1)
+    print('original score: {}'.format(original_score))
 
-    nrandom = 2000
+    nrandom = 1000
     rscore = []
     for i in range(nrandom):
         random.shuffle(align.i2)
-        # random.shuffle(align.i1)
         score = align.localScore(-20, -2)
         rscore.append(score)
+        # this just gives something to look at
         print('\t{}: {}'.format(i, score))
 
+    # tabulate observed number >= score and peak of score distribution
     i = 0
     N = []
+    last = 0
+    peak = 0
+    peakval = 0
     rscore.sort(reverse=True)
     ro = rscore[0]
     for r in rscore:
         if r < ro:
             N.append([i, ro])
+            interval = i - last
+            if interval >= peakval:
+                peak = ro
+                peakval = interval
+            last = i
             ro = r
 
         i += 1
         print('\t{}\t{}\t{:.3f}'.format(i, log10(i), r))
-    N.append([i,ro])
+    N.append([i, ro])
 
+    print('peak:{}  count:{}'.format(peak, peakval))
 
+    # fit a straight line from point 2 to the peak
+    x = []
+    y = []
+    i = 0
     for pair in N:
         print('\t{}\t{:.3f}\t{}'.format(pair[0], log10(pair[0]), pair[1]))
+        if i < 1 and i < peak:
+            y.append(log10(pair[0]))
+            x.append(pair[1])
 
+    slope, intercept, r, p, std_err = stats.linregress(x, y)
+    print('slope:{:4g}\tint:{:4f}\tr:{:4f}\tp:{:4f}\tstd err:{:4f}'.format(slope, intercept, r, p,
+                                                                           std_err))
+
+    logE = slope * original_score + intercept
+    E = 10 ** (logE)
+    print('E({}) = {:.2g}\tlog(E)={}'.format(original_score, E, logE))
     exit(0)
