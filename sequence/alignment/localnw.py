@@ -42,6 +42,7 @@ class Alignment(Score):
         self.s2 = None
         self.i1 = None
         self.i2 = None
+        self.score = None
 
     def seqToInt(self):
         """-----------------------------------------------------------------------------------------
@@ -78,35 +79,41 @@ class Alignment(Score):
 
         scoremax = 0
         posmax = [0, 0]
+        # i dimension of score is length + 1 to avoid update exception at end of row fill loop
         score = [[Cell() for i in i1] for j in i2]
+        self.score = score
         bestrow = Cell()
-        bestrow.p = edge
-        bestrow.score = edge.score
+        # bestrow.p = edge
+        # bestrow.score = edge.score
         bestcol = []
         for _ in i1:
             c = Cell()
-            c.p = edge
+            c.p = [edge]
             c.score = edge.score
             bestcol.append(c)
+
+        for ipos in range(l1):
+            score[0][ipos].score = edge.score
+            score[0][ipos].p = [edge]
 
         diag = Cell()
 
         jpos = 0
         for j in i2:
-            # print(score) # uncomment to print score matrix
-            diag.p = edge
-            diag.score = edge.score
-            bestrow.p = edge
+            bestrow.p = [edge]
             bestrow.score = edge.score + extend
+            diag.p = [edge]
+            diag.score = edge.score
+
             ipos = 0
             for i in i1:
                 previous = max(diag.score, bestcol[ipos].score, bestrow.score, 0.0)
                 cell = max(cmp[j][i] + previous, 0.0)
                 if cell > 0:
-                    score[jpos][ipos].score = cell
+                    # score[jpos][ipos].score = cell
                     if cell > scoremax:
                         scoremax = cell
-                        posmax = [ipos, jpos]
+                        posmax = [jpos, ipos]
 
                     if previous > 0:
                         # only set pointers if cell score > zero and there is a non-zero best
@@ -114,26 +121,78 @@ class Alignment(Score):
                         for dir in (diag, bestrow, bestcol[ipos]):
                             if dir.score == previous:
                                 # set pointers for all directions
-                                score[jpos][ipos].p.append( dir.p )
+                                score[jpos][ipos].p.append(dir.p)
 
-                    if diag.score + open > bestrow.score + extend:
-                        # what if scores are equal? some paths missed
-                        bestrow.p = diag.p
-                        bestrow.score = diag.score + open
+                # update best row and column values
+                if diag.score + open > bestrow.score + extend:
+                    # what if scores are equal? some paths missed
+                    bestrow.p = diag.p
+                    bestrow.score = diag.score + open
+                else:
+                    bestrow.score += extend
 
-                    if diag.score + open > bestcol[ipos].score + extend:
-                        bestcol[ipos].p = diag.p
-                        bestcol[ipos].score = diag.score + open
+                if diag.score + open > bestcol[ipos].score + extend:
+                    bestcol[ipos].p = diag.p
+                    bestcol[ipos].score = diag.score + open
+                else:
+                    bestcol[ipos].score += extend
 
-                diag.p = score[jpos][ipos]
-                diag.score = score[jpos][ipos].score
+                # diagonal score for next cell
+                if jpos > 0:
+                    diag.p = score[jpos - 1][ipos]
+                    diag.score = score[jpos - 1][ipos].score
+
                 score[jpos][ipos].score = cell
                 ipos += 1
 
             jpos += 1
 
+        for j in range(l2):
+            for i in range(l1):
+                sys.stdout.write('\t{}'.format(score[j][i].score))
+
+            sys.stdout.write('\n')
         # print(score)
         return scoremax, posmax
+
+    def trace1(self, pos):
+        """-----------------------------------------------------------------------------------------
+        Trace back one alignment using the first pointer for each cell
+
+        :param pos: list of 2 int, traceback start position
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        s1 = self.s1.seq
+        s2 = self.s2.seq
+        l1 = len(s1)
+        l2 = len(s2)
+        score = self.score
+        current = score[pos[0]][pos[1]]
+
+        a1 = ''
+        a2 = ''
+        rowold = pos[0]
+        colold = pos[1]
+        while current.score > 0:
+            n = current.n - 1
+            row = n // l1
+            col = n % l1
+            for c in range(col,colold-1):
+                a1 += s1[c]
+                a2 += '.'
+            a1 += s1[col]
+
+            for r in range(row, rowold-1):
+                a1 += '.'
+                a2 += s2[r]
+            a2 += s2[row]
+
+            if len(current.p):
+                current = current.p[0]
+            rowold = row
+            colold = col
+
+        return a1[::-1], a2[::-1]
 
 
 # --------------------------------------------------------------------------------------------------
@@ -148,15 +207,16 @@ if __name__ == '__main__':
 
     # testing
     align.s1 = Fasta()
-    align.s1.seq = 'ACTGCC'
+    align.s1.seq = 'ACTGCCTTGATC'
     align.s2 = Fasta()
-    align.s2.seq = 'ATGCC'
+    align.s2.seq = 'ATGCCAAAGATC'
     align.readNCBI('../../dotplot/table/NUC4.4.matrix')
 
     align.seqToInt()
     # # random.shuffle(align.i1)          # uncomment to test scores for random alignments
-    original_score, bestpos = align.localBrute(-10, -1)
-
-    # print('original score: {} at {}'.format(original_score, bestpos))
+    original_score, bestpos = align.localBrute(-1, -1)
+    print('original score: {} at {}'.format(original_score, bestpos))
+    a1, a2 = align.trace1(bestpos)
+    print('{}\n{}'.format(a1,a2))
 
     exit(0)
