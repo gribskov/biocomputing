@@ -160,33 +160,48 @@ class Alignment(Score):
         s2 = self.s2.seq
         l1 = len(s1)
         l2 = len(s2)
+        cmp = self.table
+        a2i = self.a2i
+
         score = self.score
         current = score[pos[0]][pos[1]]
 
         a1 = ''
         a2 = ''
+        m = ''
         rowold = pos[0]
         colold = pos[1]
         while current.score > 0:
             n = current.n - 1
             row = n // l1
             col = n % l1
-            for c in range(col,colold-1):
+            for c in range(colold - 1, col, -1):
                 a1 += s1[c]
                 a2 += '.'
-            a1 += s1[col]
+                m += ' '
 
-            for r in range(row, rowold-1):
+            for r in range(rowold - 1, row, -1):
                 a1 += '.'
                 a2 += s2[r]
+                m += ' '
+
+            a1 += s1[col]
             a2 += s2[row]
+
+            if s1[col] == s2[row]:
+                m += '|'
+            elif cmp[a2i[s1[col]]][a2i[s2[row]]] > 0:
+                m += ':'
+            else:
+                m += ' '
 
             if len(current.p):
                 current = current.p[0]
+
             rowold = row
             colold = col
 
-        return a1[::-1], a2[::-1]
+        return a1[::-1], a2[::-1], m[::-1]
 
     def writeScoreMatrix(self, file, decimal=0):
         """-----------------------------------------------------------------------------------------
@@ -202,10 +217,10 @@ class Alignment(Score):
         scoremax = 0.0
         for row in score:
             for col in row:
-                scoremax = max (scoremax, col.score)
+                scoremax = max(scoremax, col.score)
 
-        fmt = '{{:>{}.{}f}}'.format(len(str(scoremax))+1,decimal)
-        smt = '{{:>{}s}}'.format(len(str(scoremax))+1)
+        fmt = '{{:>{}.{}f}}'.format(len(str(scoremax)) + 1, decimal)
+        smt = '{{:>{}s}}'.format(len(str(scoremax)) + 1)
 
         file.write(smt.format(' '))
         for c in self.s1.seq:
@@ -247,7 +262,7 @@ if __name__ == '__main__':
     original_score, bestpos = align.localBrute(-1, -1)
     print('original score: {} at {}\n'.format(original_score, bestpos))
     align.writeScoreMatrix(sys.stdout)
-    a1, a2 = align.trace1(bestpos)
-    print('\n{}\n{}'.format(a1,a2))
+    a1, a2, m = align.trace1(bestpos)
+    print('\n{}\n{}\n{}'.format(a1, m, a2))
 
     exit(0)
