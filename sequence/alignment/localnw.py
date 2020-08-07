@@ -205,8 +205,18 @@ class Alignment(Score):
                 scoremax = max (scoremax, col.score)
 
         fmt = '{{:>{}.{}f}}'.format(len(str(scoremax))+1,decimal)
+        smt = '{{:>{}s}}'.format(len(str(scoremax))+1)
 
+        file.write(smt.format(' '))
+        for c in self.s1.seq:
+            file.write(smt.format(c))
+        file.write('\n')
+
+        s2 = self.s2.seq
+        i = 0
         for row in score:
+            file.write(smt.format(s2[i]))
+            i += 1
             for col in row:
                 file.write(fmt.format(col.score))
 
@@ -235,7 +245,7 @@ if __name__ == '__main__':
     align.seqToInt()
     # # random.shuffle(align.i1)          # uncomment to test scores for random alignments
     original_score, bestpos = align.localBrute(-1, -1)
-    print('original score: {} at {}'.format(original_score, bestpos))
+    print('original score: {} at {}\n'.format(original_score, bestpos))
     align.writeScoreMatrix(sys.stdout)
     a1, a2 = align.trace1(bestpos)
     print('\n{}\n{}'.format(a1,a2))
