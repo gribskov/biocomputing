@@ -147,12 +147,6 @@ class Alignment(Score):
 
             jpos += 1
 
-        for j in range(l2):
-            for i in range(l1):
-                sys.stdout.write('\t{}'.format(score[j][i].score))
-
-            sys.stdout.write('\n')
-        # print(score)
         return scoremax, posmax
 
     def trace1(self, pos):
@@ -194,6 +188,32 @@ class Alignment(Score):
 
         return a1[::-1], a2[::-1]
 
+    def writeScoreMatrix(self, file, decimal=0):
+        """-----------------------------------------------------------------------------------------
+        Write out the score matrix in an aligned table. Could provide scoremax, but then it wouldn't
+        work for a sub-table.
+
+        :param file: open filehandle for output, think stdout
+        :param decimal:int, number of digits past decimal point
+        :return: float, maximum score
+        -----------------------------------------------------------------------------------------"""
+        # first find the largest value (maximum column width)
+        score = self.score
+        scoremax = 0.0
+        for row in score:
+            for col in row:
+                scoremax = max (scoremax, col.score)
+
+        fmt = '{{:>{}.{}f}}'.format(len(str(scoremax))+1,decimal)
+
+        for row in score:
+            for col in row:
+                file.write(fmt.format(col.score))
+
+            file.write('\n')
+
+        return scoremax
+
 
 # --------------------------------------------------------------------------------------------------
 # testing
@@ -216,7 +236,8 @@ if __name__ == '__main__':
     # # random.shuffle(align.i1)          # uncomment to test scores for random alignments
     original_score, bestpos = align.localBrute(-1, -1)
     print('original score: {} at {}'.format(original_score, bestpos))
+    align.writeScoreMatrix(sys.stdout)
     a1, a2 = align.trace1(bestpos)
-    print('{}\n{}'.format(a1,a2))
+    print('\n{}\n{}'.format(a1,a2))
 
     exit(0)
