@@ -168,38 +168,30 @@ class Alignment(Score):
 
         a1 = ''
         a2 = ''
-        m = ''
         rowold = pos[0]
         colold = pos[1]
-        while current.score > 0:
-            n = current.n - 1
-            row = n // l1
-            col = n % l1
+        while len(current.p) > 0:
+            row, col = Alignment.n2pos(l1, current.n)
+
             for c in range(colold - 1, col, -1):
                 a1 += s1[c]
                 a2 += '.'
-                m += ' '
 
             for r in range(rowold - 1, row, -1):
                 a1 += '.'
                 a2 += s2[r]
-                m += ' '
 
             a1 += s1[col]
             a2 += s2[row]
 
-            if s1[col] == s2[row]:
-                m += '|'
-            elif cmp[a2i[s1[col]]][a2i[s2[row]]] > 0:
-                m += ':'
-            else:
-                m += ' '
 
             if len(current.p):
                 current = current.p[0]
 
             rowold = row
             colold = col
+
+        m = self.matchString( a1, a2 )
 
         return a1[::-1], a2[::-1], m[::-1]
 
@@ -359,11 +351,11 @@ if __name__ == '__main__':
     original_score, bestpos = align.localBrute(-1, -1)
     print('original score: {} at {}\n'.format(original_score, bestpos))
     align.writeScoreMatrix(sys.stdout)
-    # a1, a2, m = align.trace1(bestpos)
-    # print('\n{}\n{}\n{}'.format(a1, m, a2))
-    alignments = align.traceAll(bestpos)
-    for a in alignments:
-        m = align.matchString( a[0], a[1])
-        print('{}\n{}\n{}\n\n'.format(a[0], m, a[1]))
+    a1, a2, m = align.trace1(bestpos)
+    print('\n{}\n{}\n{}'.format(a1, m, a2))
+    # alignments = align.traceAll(bestpos)
+    # for a in alignments:
+    #     m = align.matchString( a[0], a[1])
+    #     print('{}\n{}\n{}\n\n'.format(a[0], m, a[1]))
 
     exit(0)
