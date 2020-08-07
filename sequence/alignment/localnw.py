@@ -94,7 +94,7 @@ class Alignment(Score):
 
         for ipos in range(l1):
             score[0][ipos].score = edge.score
-            score[0][ipos].p = [edge]
+            # score[0][ipos].p = [edge]
 
         diag = Cell()
 
@@ -203,6 +203,63 @@ class Alignment(Score):
 
         return a1[::-1], a2[::-1], m[::-1]
 
+    def traceAll(self, pos):
+        """-----------------------------------------------------------------------------------------
+        Trace back one alignment using the first pointer for each cell
+
+        :param pos: list of 2 int, traceback start position
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        s1 = self.s1.seq
+        s2 = self.s2.seq
+        l1 = len(s1)
+        l2 = len(s2)
+        cmp = self.table
+        a2i = self.a2i
+
+        score = self.score
+        stack = []
+        a1 = ' ' * (l1 * l2)
+        a2 = ' ' * (l1 * l2)
+        n = score[pos[0]][pos[1]].n
+        nold = score[pos[0]][pos[1]].n
+        alen = 0
+        stack.append([n, nold, alen])
+
+        save = []
+        while stack:
+            n, nold, alen = stack.pop()
+            row, col = Alignment.n2pos(l1, n)
+            rowold, colold = Alignment.n2pos(l1, nold)
+            a1 = a1[:alen]
+            a2 = a2[:alen]
+
+            for c in range(colold - 1, col, -1):
+                a1 += s1[c]
+                a2 += '.'
+                alen += 1
+
+            for r in range(rowold - 1, row, -1):
+                a1 += '.'
+                a2 += s2[r]
+                alen += 1
+
+            a1 += s1[col]
+            a2 += s2[row]
+            alen += 1
+
+            # for each path in the pointers of the current cell push on stack
+            ptrs = score[row][col].p
+            if len(ptrs):
+                for p in ptrs:
+                    stack.append([p.n, n, alen])
+
+            else:
+                # if there are no pointers, it is the end of a path
+                save.append([a1[:alen], a2[:alen]])
+
+        return save
+
     def writeScoreMatrix(self, file, decimal=0):
         """-----------------------------------------------------------------------------------------
         Write out the score matrix in an aligned table. Could provide scoremax, but then it wouldn't
@@ -239,6 +296,46 @@ class Alignment(Score):
 
         return scoremax
 
+    def matchString(self, a1, a2):
+        """-----------------------------------------------------------------------------------------
+        creat a string showing the match between the aligned sequences a1 and a2.
+
+        :param a1: string, aligned sequence 1
+        :param a2: string, aligned sequence 2
+        :return: string, match string
+        -----------------------------------------------------------------------------------------"""
+        idchar = '|'
+        simchar = ':'
+        cmp = self.table
+        a2i = self.a2i
+
+        match = ''
+        for i in range( len(a1)):
+            c1 = a1[i]
+            c2 = a2[i]
+            if c1 == c2:
+                match += idchar
+            elif c1 == '.' or c2 == '.':
+                match += ' '
+            elif cmp[a2i[c1]][a2i[c2]] > 0:
+                match += simchar
+            else:
+                match += ' '
+
+        return match
+
+
+    @staticmethod
+    def n2pos(l1, n):
+        """-----------------------------------------------------------------------------------------
+        return the row and col corresponding to cell n
+
+        :param l1: int, length of sequence 1 (col)
+        :param n: int, cell n
+        :return: int, int; row, col
+        -----------------------------------------------------------------------------------------"""
+        return (n - 1) // l1, (n - 1) % l1
+
 
 # --------------------------------------------------------------------------------------------------
 # testing
@@ -262,7 +359,11 @@ if __name__ == '__main__':
     original_score, bestpos = align.localBrute(-1, -1)
     print('original score: {} at {}\n'.format(original_score, bestpos))
     align.writeScoreMatrix(sys.stdout)
-    a1, a2, m = align.trace1(bestpos)
-    print('\n{}\n{}\n{}'.format(a1, m, a2))
+    # a1, a2, m = align.trace1(bestpos)
+    # print('\n{}\n{}\n{}'.format(a1, m, a2))
+    alignments = align.traceAll(bestpos)
+    for a in alignments:
+        m = align.matchString( a[0], a[1])
+        print('{}\n{}\n{}\n\n'.format(a[0], m, a[1]))
 
     exit(0)
