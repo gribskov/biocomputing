@@ -58,7 +58,7 @@ class Alignment(Score):
 
         return len(self.i1), len(self.i2)
 
-    def globalBrute(self, open, extend):
+    def globalBrute(self, open, extend, nogap=False):
         """-----------------------------------------------------------------------------------------
         Local alignment score only.
         s1 is the horizontal sequence and s2 is the vertical sequence.  this makes s2 the row
@@ -93,16 +93,10 @@ class Alignment(Score):
 
         jpos = 0
         vgap = 0
+        diag.score = 0
         for j in i2:
             bestrow.p = []
             bestrow.score = edge.score
-            diag.p = []
-            diag.score = vgap
-            hgap = open
-            if jpos:
-                vgap += extend
-            else:
-                vgap = open
 
             ipos = 0
             for i in i1:
@@ -112,7 +106,7 @@ class Alignment(Score):
                 for dir in (diag, bestrow, bestcol[ipos]):
                     if dir.score == previous:
                         # set pointers for all directions
-                        score[jpos][ipos].p.append(dir.p)
+                        score[jpos][ipos].p.append(dir)
 
                 # update best row and column values
                 if diag.score + open > bestrow.score + extend:
@@ -133,26 +127,40 @@ class Alignment(Score):
                     diag.p = score[jpos - 1][ipos]
                     diag.score = score[jpos - 1][ipos].score
                 else:
-                    diag.score = hgap
-                    hgap += extend
+                    diag.score = edge.score
 
                 score[jpos][ipos].score = cell
                 ipos += 1
 
+            # end of loop over columns
+
+            # special case for first cell in each row, best previous is always a column gap
+            if jpos:
+                vgap += extend
+            else:
+                vgap = open
+            bestcol[0].score = vgap
+
+            diag.score = edge.score
+            diag.p = []
+
             jpos += 1
 
-        # add the end gap penalties
-        gap = open
-        jpos = len(i2) - 1
-        for ipos in range(len(i1)-2, -1,  -1):
-            score[jpos][ipos].score += gap
-            gap += extend
+            # end of loop over rows
 
-        gap = open
-        ipos = len(i1) - 1
-        for jpos in range(len(i2)-2, -1, -1):
-            score[jpos][ipos].score += gap
-            gap += extend
+        # add the end gap penalties
+        if not nogap:
+            gap = open
+            jpos = len(i2) - 1
+            for ipos in range(len(i1) - 2, -1, -1):
+                score[jpos][ipos].score += gap
+                gap += extend
+
+            gap = open
+            ipos = len(i1) - 1
+            for jpos in range(len(i2) - 2, -1, -1):
+                score[jpos][ipos].score += gap
+                gap += extend
 
         scoremax = 1
         posmax = [1, 1]
@@ -350,7 +358,7 @@ class Alignment(Score):
 
         return save
 
-    def writeScoreMatrix(self, file, decimal=0, reverse=False):
+    def writeScoreMatrix(self, file, decimal=0, reverse=False, space=2):
         """-----------------------------------------------------------------------------------------
         Write out the score matrix in an aligned table. Could provide scoremax, but then it wouldn't
         work for a sub-table.
@@ -366,8 +374,8 @@ class Alignment(Score):
             for col in row:
                 scoremax = max(scoremax, col.score)
 
-        fmt = '{{:>{}.{}f}}'.format(len(str(scoremax)) + 1, decimal)
-        smt = '{{:>{}s}}'.format(len(str(scoremax)) + 1)
+        fmt = '{{:>{}.{}f}}'.format(len(str(scoremax)) + space, decimal)
+        smt = '{{:>{}s}}'.format(len(str(scoremax)) + space)
 
         if reverse:
             # up, left
@@ -458,27 +466,43 @@ class Alignment(Score):
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     align = Alignment()
-    align.alphabet = 'ACGT'
-    align.identity(pos=3, neg=-3)
+
 
     align.s1 = Fasta()
-    # align.s1.seq = 'ACTTATCTTAT'
-    # align.s1.seq = 'ATTCTATTCAA'
-    align.s1.seq = 'TGGTATACTAT'
     align.s2 = Fasta()
+
+    # align.alphabet = 'ACGT'
+    # align.identity(pos=3, neg=-3)
+
+    # align.s1.seq = 'ACTTATCTTAT'
+    # align.s1.seq = 'TATTCTATTCA'
+    # align.s1.seq = 'TGGTATACTAT'
+    # align.s1.seq = 'GATACTATCTA'
+
     # align.s2.seq = 'AGTATCATATT'
     # align.s2.seq = 'TTATACTATGG'
-    align.s2.seq = 'TACTATTTAGAT'
+    # align.s2.seq = 'TACTATTTAGAT'
+    # align.s2.seq = 'TTATACTATGA'
 
+
+    # align.seqToInt()
+    # bestscore, bestpos = align.globalBrute(-1, -1, nogap=False)
+    # bestscore, bestpos = align.localBrute(-1, -1)
+    # print('score: {} at {}\n'.format(bestscore, bestpos))
+    # align.writeScoreMatrix(sys.stdout, reverse=True, space=3)
+    # alignments = align.traceAll(bestpos)
+    # for a in alignments:
+    #     m = align.matchString( a[0], a[1])
+    #     print('{}\n{}\n{}\n\n'.format(a[0], m, a[1]))
+
+    align.readNCBI('..//tables/alphabet.matrix')
+    align.s1.seq = 'BORROW'
+    align.s2.seq = 'BORABORA'
     align.seqToInt()
-    # bestscore, bestpos = align.globalBrute(-1, -1)
+    # bestscore, bestpos = align.globalBrute(-1, -1, nogap=False)
     bestscore, bestpos = align.localBrute(-1, -1)
     print('score: {} at {}\n'.format(bestscore, bestpos))
-    align.writeScoreMatrix(sys.stdout, reverse=True)
-    alignments = align.traceAll(bestpos)
-    for a in alignments:
-        m = align.matchString( a[0], a[1])
-        print('{}\n{}\n{}\n\n'.format(a[0], m, a[1]))
+    align.writeScoreMatrix(sys.stdout, reverse=False, space=3)
 
     # testing
     # align.s1 = Fasta()
