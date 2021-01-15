@@ -43,15 +43,20 @@ if __name__ == '__main__':
     #     #     print(codon, codon2aa[codon])
     #     #
     #     # print('number of codons:', ncodon)
-    for rf in range(0,3):
+    rfseq = ['', '', '']
+    for rf in range(0, 3):
         # loop over reading frames
 
         start = rf
-        while start < len(seq)-2:
-            codon = seq[start:start+3]
-            print(rf, start, codon, codon2aa[codon])
+        while start < len(seq) - 2:
+            codon = seq[start:start + 3]
+            # print(rf, start, codon, codon2aa[codon])
+            rfseq[rf] += codon2aa[codon]
 
-            start+= 3
+            start += 3
+
+    for rf in range(0, 3):
+        print(rf, rfseq[rf])
 
     # Report results
 
