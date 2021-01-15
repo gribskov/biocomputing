@@ -13,7 +13,7 @@ import random
 
 def composition(seq='', k=1):
     """---------------------------------------------------------------------------------------------
-    Count the kmer words in sequnce and return the number of words and a dictionary with the count
+    Count the kmer words in sequence and return the number of words and a dictionary with the count
     of each
 
     :param seq: string
