@@ -31,7 +31,7 @@ codon2aa = {"AAA": "K", "AAC": "N", "AAG": "K", "AAT": "N",
 if __name__ == '__main__':
     # Read nucleotide file
     # for now just a dummy sequence string
-    seq = 'CATATCATCGATCTACGTACGTATCGAGCTATCGGACTCGATCGATCGATCGTCGATCGTAGCATGCTAGCTAGCTAG'
+    seq = 'CATATCATCGATCTACGTACGTATCGAGCTATCGGACTCGATCGATCGATCGTCGATCGTAGCATGCTTAGTAGCTAG'
 
     # check codon table
 
@@ -57,6 +57,21 @@ if __name__ == '__main__':
 
     for rf in range(0, 3):
         print(rf, rfseq[rf])
+
+    # find ORFs in rfseq
+    for rf in range(0, 3):
+        s = rfseq[rf]
+        start = 0
+        stop = len(s)
+        star = s.find('*')
+        while star != -1:
+            if star > 0:
+                print( 'i', start, stop, star, s[start:start+star])
+            start += star + 1
+            star = s[start:stop].find('*')
+        if start <= stop-1:
+            print( 'f', start, stop, star, s[start:stop])
+
 
     # Report results
 
