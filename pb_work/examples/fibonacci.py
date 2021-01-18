@@ -21,15 +21,11 @@ if __name__ == '__main__':
     print('F(', 1, ') =', f)
 
     # for each successive term, up to n_max, print the new term
-    n = 2
-    while True:
+    for n in range(2, n_max + 1):
         f_new = f + f_old
         print('F(', n, ') =', f_new)
 
         f_old = f
         f = f_new
-        n += 1
-        if n > 6:
-            break
 
     exit(0)
