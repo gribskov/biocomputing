@@ -22,12 +22,14 @@ if __name__ == '__main__':
 
     # for each successive term, up to n_max, print the new term
     n = 2
-    while n < n_max:
+    while True:
         f_new = f + f_old
         print('F(', n, ') =', f_new)
 
         f_old = f
         f = f_new
         n += 1
+        if n > 6:
+            break
 
     exit(0)
