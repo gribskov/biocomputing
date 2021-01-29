@@ -104,21 +104,26 @@ class Mpileup:
 
             # print('{}\t{}'.format(self.parsed['depth'], bases))
 
-        for c in bases:
-            if c in count:
-                count[c] += 1
-            else:
-                count[c] = 1
-
-        # count the upper cas (forward strand) and lower case (backward strand)
+        # count the bases and reflect into upper case. we only need the forward backward info for
+        # the aggregate bases
         count['forward'] = 0
         count['backward'] = 0
-        for c in 'acgtnACGTN':
-            if c in count:
-                if c.islower():
-                    count['forward'] += count[c]
-                elif c.isupper():
-                    count['backward'] += count[c]
+        for c in bases:
+            # each base at this position in the genome: should be acgtnACGTN*$
+            if c.islower():
+                count['backward'] += 1
+                count[c.upper()] += 1
+            else:
+                count['forward'] += 1
+                count[c] += 1
+
+        # # count the upper case (forward strand) and lower case (backward strand)
+        # for c in 'ACGTN':
+        #     if c in count:
+        #         if c.islower():
+        #             count['forward'] += count[c]
+        #         elif c.isupper():
+        #             count['backward'] += count[c.lower()]
 
         # bias with +1 prior
         count['strand_bias'] = log((count['forward'] + 1) / (count['backward'] + 1), 2)
@@ -210,16 +215,11 @@ if __name__ == '__main__':
         print('{}\t{}\t{}:{}:{}:{}:{}\t{}\t{:.3f}\t{:.3f}\t{}\t{:.3f}\t{}'.format(
             mp.parsed['position'],
             mp.parsed['depth'],
-            count['A'] + count['a'],
-            count['C'] + count['c'],
-            count['G'] + count['g'],
-            count['T'] + count['t'],
-            count['N'] + count['n'],
+            count['A'], count['C'], count['G'], count['T'], count['N'],
             genotype,
             count['strand_bias'],
             count['end_frac'],
-            count['indel'],
-            count['indel_frac'],
+            count['indel'], count['indel_frac'],
             status
         ))
 

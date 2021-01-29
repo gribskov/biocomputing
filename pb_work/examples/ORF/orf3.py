@@ -55,10 +55,12 @@ if __name__ == '__main__':
 
             start += 3
 
-    for rf in range(0, 3):
-        print(rf, rfseq[rf])
+    # for rf in range(0, 3):
+    #     print(rf, rfseq[rf])
 
     # find ORFs in rfseq
+    ORF = []
+    # ORF = list() also works
     for rf in range(0, 3):
         s = rfseq[rf]
         start = 0
@@ -66,13 +68,18 @@ if __name__ == '__main__':
         star = s.find('*')
         while star != -1:
             if star > 0:
-                print( 'i', start, stop, star, s[start:start+star])
+                ORF.append(s[start:start+star])
+                # print( 'i', start, stop, star, s[start:start+star])
             start += star + 1
             star = s[start:stop].find('*')
         if start <= stop-1:
-            print( 'f', start, stop, star, s[start:stop])
-
+            ORF.append(s[start:stop])
+            # print( 'f', start, stop, star, s[start:stop])
 
     # Report results
+    n = 0
+    for orfseq in ORF:
+        n += 1
+        print('ORF', n, '    Residues:', len(orfseq), orfseq)
 
     exit(0)
