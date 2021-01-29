@@ -94,7 +94,9 @@ class Mpileup:
             match = indel.search(bases)
             while match:
                 mlen = int(match.group(2))
-                indel_list.append(mlen)
+                if match.group(1) == '+':
+                    # only add insertions, the deletions are marked as *
+                    indel_list.append(mlen)
                 old = '{}{}{}'.format(match.group(1), mlen, match.group(3)[:mlen])
                 # print(bases, old)
                 bases = bases.replace(old, '', 1)
@@ -155,16 +157,21 @@ class Mpileup:
         genotype = 'N'
         for c in 'ACGTN':
             freq = (count[c] + count[c.lower()] + 1) / depth
+
             if freq > maxfreq:
                 maxfreq = freq
                 maxallele = c
+                if freq < 0.5:
+                    continue
                 minorfreq = 1 - freq
                 if minorfreq < hommax:
                     genotype = 'H'
-                elif minorfreq > hetmin and minorfreq < hetmax:
+                elif minorfreq > hetmin:
                     genotype = 'h'
+                else:
+                    genotype = 'N'
 
-        return genotype
+        return '{}{}'.format(genotype, maxallele)
 
     # end of mendel
 
@@ -178,6 +185,7 @@ class Mpileup:
 if __name__ == '__main__':
     depth_min = 10
     bias_max = 3
+    indel_max = 0.03
 
     mp = Mpileup()
     mp.open_file('../data/PrFi_10k.mpileup', 'r')
@@ -188,12 +196,16 @@ if __name__ == '__main__':
         count = mp.countchar()
         # print('\t', count)
         genotype = mp.mendel()
+        if genotype and genotype[0] not in 'hN':
+            continue
 
         status = ''
         if mp.parsed['depth'] < depth_min:
             status += 'L'
         if abs(count['strand_bias']) >= bias_max:
             status += 'B'
+        if count['indel_frac'] > indel_max:
+            status += 'I'
 
         print('{}\t{}\t{}:{}:{}:{}:{}\t{}\t{:.3f}\t{:.3f}\t{}\t{:.3f}\t{}'.format(
             mp.parsed['position'],
