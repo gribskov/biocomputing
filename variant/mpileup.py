@@ -74,21 +74,20 @@ class Mpileup:
 
         bases = self.parsed['bases']
         count = {'indel': [], 'mapqual': [],
-                 'A': 0, 'a': 0, 'C': 0, 'c': 0, 'G': 0, 'g': 0, 'T': 0, 't': 0, 'N': 0, 'n': 0,
-                 '*': 0, '$': 0,
-                 'forward': 0, 'backward': 0, 'strand_bias': 0}
-        indel_list = []
+                 'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, '*': 0, '$': 0}
+
 
         # first check for multi-character sequences
         begin = 0
         if '^' in bases:
-            # beginning of sequence marker and map quality
+            # marks beginning of sequence and map shows quality
             for match in readstart.finditer(bases):
                 # print(bases)
                 # print(match.group(1), ord(match.group(1)) - 33)
                 bases = readstart.sub('', bases)
                 begin += 1
 
+        indel_list = []
         if '-' in bases or '+' in bases:
             # indel present
             match = indel.search(bases)
