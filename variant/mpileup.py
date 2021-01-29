@@ -4,6 +4,7 @@ Examin mpileup file produced from bam file by samtools
 Michael Gribskov     26 January 2021
 ================================================================================================="""
 import re
+from math import log
 
 
 class Mpileup:
@@ -102,14 +103,19 @@ class Mpileup:
             else:
                 count[c] = 1
 
-        # error checking
-        #     if self.parsed['depth'] != len(bases):
-        #     dollar = bases.count('$')
-        #     if len(bases) - dollar != self.parsed['depth']:
-        #         print('{}:{}\t{}\t{}'.format(self.parsed['position'],
-        #                                      self.parsed['depth'],
-        #                                      len(bases),
-        #                                      bases))
+        # count the upper cas (forward strand) and lower case (backward strand)
+        count['forward'] = 0
+        count['backward'] = 0
+        for c in 'acgtnACGTN':
+            if c in count:
+                if c.islower():
+                    count['forward'] += count[c]
+                elif c.isupper():
+                    count['backward'] += count[c]
+
+        # bias with +1 prior
+        count['strand_bias'] = log((count['forward'] + 1) / (count['backward'] + 1), 2)
+
         count['indel'] = indel_list
         self.count = count
         return self.count
@@ -129,9 +135,10 @@ if __name__ == '__main__':
 
     total = {'indel': []}
     while mp.parse():
-        print('=>', mp.parsed['position'], mp.parsed['depth'])
         # print(mp.countchar())
         mp.countchar()
+        print('=>', mp.parsed['position'], mp.parsed['depth'])
+
         for key in mp.count:
             if key is 'indel':
                 if mp.count['indel']:
