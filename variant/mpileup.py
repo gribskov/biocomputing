@@ -76,7 +76,6 @@ class Mpileup:
         count = {'indel': [], 'mapqual': [],
                  'A': 0, 'C': 0, 'G': 0, 'T': 0, 'N': 0, '*': 0, '$': 0}
 
-
         # first check for multi-character sequences
         begin = 0
         if '^' in bases:
@@ -136,7 +135,7 @@ class Mpileup:
 
     # end of count
 
-    def mendel(self, hommax=0.1, hetmin=0.4, hetmax=0.6):
+    def mendel(self, hommax=0.12, hetmin=0.4, hetmax=0.6, known_min=0.89):
         """-----------------------------------------------------------------------------------------
         Decides if a position is homozygous (H) or heterozygous (h).  Positions with less than
         hommax alternate bases are H, positions with between hetmin and hetmax alternate bases are
@@ -145,37 +144,39 @@ class Mpileup:
         :param hommax: float, maximum alternate allele frequency for homozygous
         :param hetmin: float, minimum alternate allele frequency for heterozygous
         :param hetmax: float, maximum alternate allele frequency for heterozygous
+        :param known_min: float, minimum fraction of known bases
         :return: string, H, h, N, or ''
         -----------------------------------------------------------------------------------------"""
-        genotype = ''
+        genotype = 'U'
+        major = '.'
+        minor = '.'
         depth = self.parsed['depth']
+        freq = {}
 
         if depth == 0:
             # no base present
-            return genotype
+            return genotype, major, minor
 
         # find the maximum allele
-        depth += 1  # plus 1 prior
-        maxfreq = 0
-        maxallele = ''
         genotype = 'N'
-        for c in 'ACGTN':
-            freq = (count[c] + count[c.lower()] + 1) / depth
+        depth += 1  # plus 1 prior
+        for c in 'ACGTN*':
+            freq[c] = (count[c] + 0.167) / depth
 
-            if freq > maxfreq:
-                maxfreq = freq
-                maxallele = c
-                if freq < 0.5:
-                    continue
-                minorfreq = 1 - freq
-                if minorfreq < hommax:
-                    genotype = 'H'
-                elif minorfreq > hetmin:
-                    genotype = 'h'
-                else:
-                    genotype = 'N'
+        freq_order = sorted(freq.keys(), key=lambda x: freq[x], reverse=True)
+        major = freq_order[0]
+        minor = freq_order[1]
 
-        return '{}{}'.format(genotype, maxallele)
+        if freq[major] + freq[minor] < known_min:
+            genotype = 'U'
+        elif 1 - freq[major] < hommax:
+            genotype = 'H'
+        elif freq[minor] > hetmin and freq[minor] < hetmax:
+            genotype = 'h'
+        else:
+            genotype = 'N'
+
+        return genotype, major, minor
 
     # end of mendel
 
@@ -199,8 +200,8 @@ if __name__ == '__main__':
     while mp.parse():
         count = mp.countchar()
         # print('\t', count)
-        genotype = mp.mendel()
-        if genotype and genotype[0] not in 'hN':
+        genotype, major, minor = mp.mendel()
+        if genotype and 'H' in genotype:
             continue
 
         status = ''
@@ -211,11 +212,11 @@ if __name__ == '__main__':
         if count['indel_frac'] > indel_max:
             status += 'I'
 
-        print('{}\t{}\t{}:{}:{}:{}:{}\t{}\t{:.3f}\t{:.3f}\t{}\t{:.3f}\t{}'.format(
+        print('{}\t{}\t{}:{}:{}:{}:{}:{}\t{} {}{}\t{:.3f}\t{:.3f}\t{}\t{:.3f}\t{}'.format(
             mp.parsed['position'],
             mp.parsed['depth'],
-            count['A'], count['C'], count['G'], count['T'], count['N'],
-            genotype,
+            count['A'], count['C'], count['G'], count['T'], count['N'], count['*'],
+            genotype, major, minor,
             count['strand_bias'],
             count['end_frac'],
             count['indel'], count['indel_frac'],
