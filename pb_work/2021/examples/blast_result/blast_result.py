@@ -77,4 +77,18 @@ if __name__ == '__main__':
     for hit in sorted(blastx.hits, key=lambda h: h['subject_id']):
         sys.stdout.write('{}\n'.format(hit))
 
+    subject = {}
+    n_subject = 0
+    for hit in blastx.hits:
+        if hit['subject_id'] in subject:
+            subject[hit['subject_id']] += 1
+        else:
+            subject[hit['subject_id']] = 1
+            n_subject += 1
+
+    sys.stderr.write('{} unique subjects found\n'.format(n_subject))
+
+    for s in sorted(subject, key=lambda s: subject[s], reverse=True):
+        sys.stderr.write('{}: {}\n'.format(s, subject[s]))
+
     exit(0)
