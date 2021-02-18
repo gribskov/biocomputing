@@ -4,6 +4,7 @@ calculate depth and minor allele fraction along a sequence from mpileup file
 Michael Gribskov     05 February 2021
 ================================================================================================="""
 import math
+import matplotlib.pyplot as plt
 from mpileup import Mpileup
 
 # --------------------------------------------------------------------------------------------------
@@ -42,5 +43,13 @@ if __name__ == '__main__':
         position.append(mp.parsed['position'])
         depthpos.append(depth)
         print('{}\t{}\t{}\t{}\t{:0.3f}'.format(position[-1], major, depthpos[-1], mafh, mafpos[-1]))
+
+    # plot
+    plt.plot(position,mafpos)
+    plt.show()
+
+    plt.plot(range(0,100), maf_histogram)
+    plt.show()
+
 
     exit(0)

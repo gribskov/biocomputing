@@ -168,7 +168,6 @@ if __name__ == '__main__':
         all = basecount(fq_entry, all)
         high_quality = basecount(fq_entry, high_quality, quality_threshold)
         trimmed = basecount(truncate(fq_entry, quality_threshold), trimmed)
-        # break
 
     # report
     print('Fastq entries read: {}'.format(n_entry))
