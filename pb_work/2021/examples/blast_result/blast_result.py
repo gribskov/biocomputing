@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     sys.stderr.write('{} unique subjects found\n'.format(n_subject))
 
-    for s in sorted(subject, key=lambda s: subject[s], reverse=True):
+    for s in sorted(subject, key=lambda s: (-subject[s], s)):
         sys.stderr.write('{}: {}\n'.format(s, subject[s]))
 
     exit(0)
