@@ -72,6 +72,9 @@ class BlastResult:
 if __name__ == '__main__':
     blastx = BlastResult('../../../../blast/data/diamond.blastx')
     nhits = blastx.read_and_parse()
-    sys.stderr.write('{} blast hits read from {}'.format(nhits, blastx.filename))
+    sys.stderr.write('{} blast hits read from {}\n'.format(nhits, blastx.filename))
+
+    for hit in sorted(blastx.hits, key=lambda h: h['subject_id']):
+        sys.stdout.write('{}\n'.format(hit))
 
     exit(0)
