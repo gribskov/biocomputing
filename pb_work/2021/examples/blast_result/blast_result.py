@@ -40,7 +40,7 @@ class BlastResult:
 
     def read_and_parse(self):
         """-----------------------------------------------------------------------------------------
-        Read and parse the entire blast result.  Store in BlastResult.hits as a lsit of dictionaries
+        Read and parse the entire blast result.  Store in BlastResult.hits as a list of dictionaries
         Dictionary keys are:
             query_id
             subject_id
@@ -55,14 +55,19 @@ class BlastResult:
         for line in self.fh:
             nhits += 1
             field = line.rstrip().split()
-            self.hits.append({'query_id':       field[0],
-                              'subject_id':     field[1],
-                              'percent_id':     float(field[2]),
-                              'query_coverage': float(field[3]),
-                              'bit_score':      int(field[4]),
-                              'evalue':         float(field[5]),
-                              }
-                             )
+            self.hits.append({'qseqid':    field[0],
+                              'sseqid':    field[1],
+                              'pident':    float(field[2]),
+                              'length':    int(field[3]),
+                              'mismatch':  int(field[4]),
+                              'gapopen':   int(field[5]),
+                              'qstart':    int(field[6]),
+                              'qend':      int(field[7]),
+                              'sstart':    int(field[8]),
+                              'ssend':     int(field[9]),
+                              'bit_score': float(field[10]),
+                              'evalue':    float(field[11]),
+                              })
         return nhits
 
 
@@ -70,25 +75,41 @@ class BlastResult:
 # Testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    blastx = BlastResult('../../../../blast/data/diamond.blastx')
+    blastx = BlastResult('genome.small_uniref50.dmndblastx')
     nhits = blastx.read_and_parse()
     sys.stderr.write('{} blast hits read from {}\n'.format(nhits, blastx.filename))
 
-    for hit in sorted(blastx.hits, key=lambda h: h['subject_id']):
-        sys.stdout.write('{}\n'.format(hit))
-
-    subject = {}
-    n_subject = 0
-    for hit in blastx.hits:
-        if hit['subject_id'] in subject:
-            subject[hit['subject_id']] += 1
-        else:
-            subject[hit['subject_id']] = 1
-            n_subject += 1
-
-    sys.stderr.write('{} unique subjects found\n'.format(n_subject))
-
-    for s in sorted(subject, key=lambda s: (-subject[s], s)):
-        sys.stderr.write('{}: {}\n'.format(s, subject[s]))
+    # for hit in sorted(blastx.hits, key=lambda h: h['sseq:id']):
+    #     sys.stdout.write('{}\n'.format(hit))
+    #
+    # subject = {}
+    # subj_idx = {}
+    # n_subject = 0
+    # n_hit = 0
+    # for hit in blastx.hits:
+    #     if hit['subject_id'] in subject:
+    #         # a known subject
+    #         subject[hit['subject_id']] += 1
+    #     else:
+    #         # previously unknown subject
+    #         subject[hit['subject_id']] = 1
+    #         n_subject += 1
+    #         subj_idx[hit['subject_id']] = []
+    #
+    #     subj_idx[hit['subject_id']].append(hit)
+    #     n_hit += 1
+    #
+    # sys.stderr.write('{} unique subjects found\n'.format(n_subject))
+    #
+    # for s in sorted(subj_idx, key=lambda s: (-len(subj_idx[s]), s)):
+    #     # sys.stderr.write('{}: {}\n'.format(s, subj_idx[s]))
+    #     sys.stderr.write('{}\n'.format(s))
+    #     for h in subj_idx[s]:
+    #         sys.stderr.write('\t{}\n'.format(h))
+    #
+    # print('{} => {}'.format(id(blastx.hits[0]), blastx.hits[0]))
+    # s = 'C1MXJ7_MICPC'
+    # hit = subj_idx[s]
+    # print('{} => {}'.format(id(hit[0]), hit[0]))
 
     exit(0)
