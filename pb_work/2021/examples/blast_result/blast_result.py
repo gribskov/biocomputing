@@ -79,37 +79,30 @@ if __name__ == '__main__':
     nhits = blastx.read_and_parse()
     sys.stderr.write('{} blast hits read from {}\n'.format(nhits, blastx.filename))
 
-    # for hit in sorted(blastx.hits, key=lambda h: h['sseq:id']):
-    #     sys.stdout.write('{}\n'.format(hit))
-    #
-    # subject = {}
-    # subj_idx = {}
-    # n_subject = 0
-    # n_hit = 0
-    # for hit in blastx.hits:
-    #     if hit['subject_id'] in subject:
-    #         # a known subject
-    #         subject[hit['subject_id']] += 1
-    #     else:
-    #         # previously unknown subject
-    #         subject[hit['subject_id']] = 1
-    #         n_subject += 1
-    #         subj_idx[hit['subject_id']] = []
-    #
-    #     subj_idx[hit['subject_id']].append(hit)
-    #     n_hit += 1
-    #
-    # sys.stderr.write('{} unique subjects found\n'.format(n_subject))
-    #
-    # for s in sorted(subj_idx, key=lambda s: (-len(subj_idx[s]), s)):
-    #     # sys.stderr.write('{}: {}\n'.format(s, subj_idx[s]))
-    #     sys.stderr.write('{}\n'.format(s))
-    #     for h in subj_idx[s]:
-    #         sys.stderr.write('\t{}\n'.format(h))
-    #
-    # print('{} => {}'.format(id(blastx.hits[0]), blastx.hits[0]))
-    # s = 'C1MXJ7_MICPC'
-    # hit = subj_idx[s]
-    # print('{} => {}'.format(id(hit[0]), hit[0]))
+    # for hit in sorted(blastx.hits, key=lambda h: h['sseqid']):
+    #     sys.stdout.write('{}\t\t{}\t\t{}\n'.format(hit['qseqid'], hit['sseqid'], hit['evalue']))
+
+    # count unique sseq and number of hits for each
+    subject = {}
+    subj_idx = {}
+    n_subject = 0
+    for hit in blastx.hits:
+        if hit['sseqid'] in subject:
+            # a known subject
+            subject[hit['sseqid']] += 1
+        else:
+            # previously unknown subject
+            subject[hit['sseqid']] = 1
+            n_subject += 1
+            subj_idx[hit['sseqid']] = []
+
+        subj_idx[hit['sseqid']].append(hit)
+
+    sys.stderr.write('{} unique subjects found\n'.format(n_subject))
+    for s in sorted(subj_idx, key=lambda s: (-len(subj_idx[s]), s)):
+        sys.stderr.write('{}: {}\n'.format(s, len(subj_idx[s])))
+        for h in subj_idx[s]:
+            sys.stderr.write('\t{}\n'.format(h))
+
 
     exit(0)
