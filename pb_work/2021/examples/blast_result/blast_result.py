@@ -86,7 +86,6 @@ if __name__ == '__main__':
     subject = {}
     subj_idx = {}
     n_subject = 0
-    n_hit = 0
     for hit in blastx.hits:
         if hit['sseqid'] in subject:
             # a known subject
@@ -97,19 +96,30 @@ if __name__ == '__main__':
             n_subject += 1
             subj_idx[hit['sseqid']] = []
 
-        subj_idx[hit['sseqid']].append(n_hit)
-        n_hit += 1
+        subj_idx[hit['sseqid']].append(hit)
 
     sys.stderr.write('{} unique subjects found\n'.format(n_subject))
     nn = 0
     for s in sorted(subj_idx, key=lambda s: (-len(subj_idx[s]), s)):
         sys.stderr.write('{}:{}\n'.format(s, len(subj_idx[s])))
         for h in subj_idx[s]:
-            sys.stderr.write('\t{}\t{}\t{}\t{}\n'.
-                             format(h, blastx.hits[h]['sseqid'], blastx.hits[h]['qseqid'],
-                                    blastx.hits[h]['evalue']))
+            sys.stderr.write('\t{}\t{}\t{}\n'.
+                             format(h['sseqid'], h['qseqid'], h['evalue']))
         nn += 1
         if nn > 5:
+            break
+
+    nn = 0
+    for hit in blastx.hits:
+        sseqid = hit['sseqid']
+        sys.stderr.write('\naddress: {}\t\thit{}\t{}\n'.
+                         format(id(hit), hit['sseqid'], hit['qseqid']))
+
+        for h in subj_idx[sseqid]:
+            sys.stderr.write('address: {}\t\thit{}\t{}\n'.
+                             format(id(h), h['sseqid'], h['qseqid']))
+        nn += 1
+        if nn > 3:
             break
 
     exit(0)
