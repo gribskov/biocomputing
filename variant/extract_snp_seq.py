@@ -23,9 +23,11 @@ def read_snps_tabular(filename):
         exit(1)
 
     snplist = {}
+    maxpos = {}
     for line in snp:
-        if line.startswith('SNP'):
+        if line.startswith('SNP '):
             # skip header
+            print('skipping line {}'.format(line))
             continue
 
         field = line.rstrip().split('\t')
@@ -38,15 +40,22 @@ def read_snps_tabular(filename):
         except IndexError:
             pass
 
-        if field[1] in snplist:
-            snplist[field[1]].append({'id': field[0], 'pos': int(field[2]), 'in_25k': shortlist})
+        if field[1] == '18':
+            # in the genome unplaced scaffolds are assigned chromosome 00
+            field[1] = '00'
+        chr = 'Chr{:02d}'.format(int(field[1]))
+
+        if chr in snplist:
+            snplist[chr].append({'id': field[0], 'pos': int(field[2]), 'in_25k': shortlist})
+            maxpos[chr] = max( maxpos[chr], int(field[2]))
         else:
-            snplist[field[1]]= [{'id': field[0], 'pos': int(field[2]), 'in_25k': shortlist}]
+            snplist[chr] = [{'id': field[0], 'pos': int(field[2]), 'in_25k': shortlist}]
+            maxpos[chr] = int(field[2])
 
     snp.close()
-    print('{} SNPs read from {}'.format(len(snplist), filename))
 
-    return snplist
+    return snplist, maxpos
+
 
 # --------------------------------------------------------------------------------------------------
 # main
@@ -54,12 +63,31 @@ def read_snps_tabular(filename):
 if __name__ == '__main__':
     # read SNPS
     robust_snp = 'C:/Users/michael/Desktop/apple/235000_robust_snps.txt'
-    read_snps_tabular(robust_snp)
+    snplist, maxpos = read_snps_tabular(robust_snp)
+    for chr in snplist:
+        print('{} {} snps max: {}'.format(chr, len(snplist[chr]), maxpos[chr]))
 
     # read genome and match, one sequence at a time
     fastafile = 'C:/Users/michael/Desktop/apple/GDDH13_1-1_formatted.fasta'
-    fasta = Fasta(filename=fastafile)
-    while fasta.next():
-        print(fasta.id)
+    fasta = Fasta()
+    fasta.open(fastafile)
+
+    bases = 0
+    sequence = {}
+    for line in fasta.fh:
+        if line.startswith('>'):
+            try:
+                id, doc = line.rstrip().split(' ')
+            except ValueError:
+                id = line.rstrip()
+
+            id = id.replace('>', '')
+            sequence[id] = 0
+
+        else:
+            sequence[id] += len(line.rstrip())
+
+    for chr in sorted(sequence):
+        print('{}\t{} bases\t{} snps\t{} max'.format(chr,sequence[chr], len(snplist[chr]), maxpos[chr]))
 
     exit(0)
