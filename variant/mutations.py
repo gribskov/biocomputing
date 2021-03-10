@@ -4,6 +4,7 @@ Calculate mutations per read from the CIGAR string and MD: field in a sam file
 Michael Gribskov     09 March 2021
 ================================================================================================="""
 import sys
+import re
 
 
 class Sam:
@@ -94,6 +95,28 @@ class Sam:
 
         return True
 
+    def count_diff(self):
+        """-----------------------------------------------------------------------------------------
+        count the number of difference between this read and reh reference.  The count is the number
+        of alphabetic characters in the MD string, plus the number of insertions in the CIGAR
+        string. Deletions in the CIGAR string appear in the MD string so they can be ignored.
+
+        :return: int, number of sequence differences
+        -----------------------------------------------------------------------------------------"""
+        diff = 0
+
+        insert = re.compile('(\d+)I')
+        found = insert.findall(self.cigar)
+        for f in found:
+            diff += int(f)
+
+        md = self.option['MD'][1]
+        for base in 'ACGTN':
+            diff += md.count(base)
+
+        return diff
+
+        return
 
 # --------------------------------------------------------------------------------------------------
 # main
@@ -104,9 +127,10 @@ if __name__ == '__main__':
 
     n = 0
     while sam.parse_alignment():
-        print('{}\t{}\t{}\t{}'.format(sam.qname, sam.pos, sam.cigar, sam.option['MD'][1]))
+        diff = sam.count_diff()
+        print('{}\t{}\t{}\t{}\t{}'.format(sam.qname, sam.pos, sam.cigar, sam.option['MD'][1], diff))
         n += 1
-        if n > 10:
+        if n > 30:
             break
 
     exit(0)
