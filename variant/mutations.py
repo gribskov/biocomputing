@@ -19,6 +19,8 @@ class Sam:
         self.filename = ''
         self.fh = None
 
+        self.header = {}
+
         self.qname = ''
         self.flag = 0
         self.rname = ''
@@ -39,6 +41,27 @@ class Sam:
             except (OSError, IOError):
                 sys.stderr.write('Sam::__init__ - error opening SAM file ({})'.format(filename))
 
+    def read_header(self):
+        """-----------------------------------------------------------------------------------------
+        Doesn't do much with the header, just parses out whatever tags are there and saves them
+        in lists
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        line = sam.fh.readline().rstrip()
+        while line.startswith('@'):
+            field = line.split('\t')
+            tag = field[0].replace('@','')
+            if tag in self.header:
+                self.header[tag].append(field[1:])
+            else:
+                self.header[tag] = [field[1:]]
+
+            line = sam.fh.readline().rstrip()
+            self.line = line
+
+        return
+
     def parse_alignment(self):
         """-----------------------------------------------------------------------------------------
         Parse the tab delimited SAM format.  Mandatory fields are stored inattributes, optional
@@ -46,11 +69,10 @@ class Sam:
 
         :return:
         -----------------------------------------------------------------------------------------"""
-        line = self.fh.readline()
-        if not line:
+        if not self.line:
             return False
 
-        field = line.rstrip().split('\t')
+        field = self.line.rstrip().split('\t')
         self.qname = field[0]
         self.flag = int(field[1])
         self.rname = field[2]
@@ -68,6 +90,8 @@ class Sam:
             tag, type, value = field[i].split(':')
             self.option[tag] = [type, value]
 
+        self.line = self.fh.readline()
+
         return True
 
 
@@ -76,14 +100,13 @@ class Sam:
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     sam = Sam(filename='chr11.test.sam')
-    line = sam.fh.readline()
-    while line.startswith('@'):
-        line = sam.fh.readline()
+    sam.read_header()
 
     n = 0
-    while n < 10:
-        sam.parse_alignment()
-
-    n += 1
+    while sam.parse_alignment():
+        print('{}\t{}\t{}\t{}'.format(sam.qname, sam.pos, sam.cigar, sam.option['MD'][1]))
+        n += 1
+        if n > 10:
+            break
 
     exit(0)
