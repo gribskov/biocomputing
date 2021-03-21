@@ -5094,6 +5094,14 @@ AAGG
                     if path['databaseName'] == 'Reactome':
                         field = path['id'].split('-')
                         id = 'Reactome:{}'.format(field[2])
+                    elif path['databaseName'] == 'MetaCyc':
+                        id = 'Metacyc:{}'.format(path['id'])
+                    elif path['databaseName'] == 'KEGG':
+                        id = 'KEGG:{}'.format(path['id'])
+                    else:
+                        print('unknown pathway {} | {} | {}'.format(path['databaseName'],
+                                                                    path['id'], path['name']))
+
                     if id in path_all:
                         if s['library'] not in path_all[id]['source']:
                             path_all[id]['source'].append(s['library'])
