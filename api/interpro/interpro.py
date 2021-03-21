@@ -1,5 +1,6 @@
 import sys
 import time
+import json
 import requests
 
 
@@ -44,8 +45,8 @@ class Interpro:
         self.output_avail = {'out', 'log', 'tsv', 'xml', 'gff', 'json',
                              'htmltarball', 'sequence', 'submission'}
         self.poll_time = poll_time  # seconds between polling
-        self.poll_max = poll_max    # maximum number of times to poll
-        self.poll_count = 0         # number of times this job has been polled
+        self.poll_max = poll_max  # maximum number of times to poll
+        self.poll_count = 0  # number of times this job has been polled
 
         self.email = ''  # user email (optional)
         self.title = ''  # title for job (optional)
@@ -109,6 +110,90 @@ class Interpro:
             self.parameters[key] = select[key]
 
         return len(self.parameters)
+
+    def parse_json(self):
+        """-----------------------------------------------------------------------------------------
+        Parse the contented returned from the server in JSON format. Three outputs are produced
+            A list of dictionaries for each hit in the sequence
+            A list of dictionaries listing  GO terms and what entries they were drawn from
+                keys: 'name': gene ontology ID
+                      'category': ontology category = BIOLOGICAL_pROCESS |
+                                                      MOLECULAR_FUNCTION |
+                                                      CELLULAR_COMPONENT,
+                      'source': list of strings, motifs that are associated with this term
+            A list of dictionaries listing pathways and the entry theies were drawn from
+                keys: 'databaseName': the pathway database KEGG | Reactome | Metacyc
+                      'id': UID of the pathway in its database
+                      'name': text description of pathway
+                      'source': list of strings, motifs that are associated with this term
+
+        This is fairly specific for my purpose
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        pjson = json.loads(self.content)
+
+        matches = pjson['results'][0]['matches']
+        go_all = {}
+        path_all = {}
+        motifs = []
+        for m in matches:
+            # each match in the interproscan search
+            # source_accession is the UID of the matching motif in the source database
+            # source is the database and version listed at interpro
+            # entry is the subtree of information about a match
+            entry = m['signature']['entry']
+            signature = m['signature']['signatureLibraryRelease']
+            source_accession = m['signature']['accession']
+            source = '{} {}'.format(signature['library'],
+                                    signature['version'])
+
+            if not entry:
+                # panther subfamily entries have no ['signature']['entry']
+                # e.g., PTHR21139:SF24
+                continue
+
+            # parse an entry, en entry is a hit vs a specific entry in a database
+            motifs.append({'interpro_accession': entry['accession'],
+                           'source_accession':   source_accession,
+                           'description':        entry['description'] or ''})
+
+            # name = entry['name']
+            # type = entry['type']
+
+            if 'goXRefs' in entry:
+                gostr = ''
+                for go in entry['goXRefs']:
+                    gostr += '{} ({}:{})'.format(go['id'], go['category'], go['name'])
+                    if go['id'] in go_all:
+                        go_all[go['id']]['source'].append(signature['library'])
+                    else:
+                        go_all[go['id']] = {'name':   go['name'], 'category': go['category'],
+                                            'source': [signature['library']]}
+
+            if 'pathwayXRefs' in entry:
+                pathstr = ''
+                for path in entry['pathwayXRefs']:
+                    pathstr += '{} ({})'.format(path['id'], path['name'])
+                    if path['databaseName'] == 'Reactome':
+                        field = path['id'].split('-')
+                        id = 'Reactome:{}'.format(field[2])
+                    elif path['databaseName'] == 'MetaCyc':
+                        id = 'Metacyc:{}'.format(path['id'])
+                    elif path['databaseName'] == 'KEGG':
+                        id = 'KEGG:{}'.format(path['id'])
+                    else:
+                        print('unknown pathway {} | {} | {}'.format(path['databaseName'],
+                                                                    path['id'], path['name']))
+
+                    if id in path_all:
+                        if signature['library'] not in path_all[id]['source']:
+                            path_all[id]['source'].append(signature['library'])
+                    else:
+                        path_all[id] = {'name':   path['name'],
+                                        'source': [signature['library']]}
+
+        return [motifs, go_all, path_all]
 
     def run(self, show_query=False):
         """-----------------------------------------------------------------------------------------
@@ -255,20 +340,16 @@ class Interpro:
         return time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
 
 
-import json
-from jsonpath_ng import jsonpath, parse
-
-
-class InterproscanJSON():
-    """=============================================================================================
-    Manipulate JSON response from interproscan
-    ============================================================================================="""
-
-    def __init__(self, jsonstring):
-        """-----------------------------------------------------------------------------------------
-        :param jsonstring:
-        -----------------------------------------------------------------------------------------"""
-        self.json = json.loads(jsonstring)
+# class InterproscanJSON():
+#     """=============================================================================================
+#     Manipulate JSON response from interproscan
+#     ============================================================================================="""
+#
+#     def __init__(self, jsonstring):
+#         """-----------------------------------------------------------------------------------------
+#         :param jsonstring:
+#         -----------------------------------------------------------------------------------------"""
+#         self.json = json.loads(jsonstring)
 
 
 def json_test():
@@ -5055,87 +5136,42 @@ TAAATTATTTCACTGTCTCTTACTCAGATGGGCACATGGGAGGGCAAAACACTGAAGACATAAAGAAATG
 AAGG
 '''
     ips = Interpro(loglevel=2, poll_time=60)
-    ips.email = 'gribskov@purdue.edu'
-    ips.title = 'globin'
-    ips.sequence = testpro
-    ips.application_select(['TIGRFAM', 'CDD', 'PfamA'])
-    # ips.application_select(['Phobius', 'ProSitePatterns'])
-    ips.output_select('json')
-    ips.parameter_select({'goterms': True, 'pathways': True})
-
-    if not ips.run():
-        exit(1)
-
-    time.sleep(ips.poll_time)
-    while ips.status() != 'FINISHED':
-        ips.poll_count += 1
-        if ips.poll_count > ips.poll_max:
-            break
-
-        time.sleep(ips.poll_time)
-
-    ips.result()
-    # j = InterproscanJSON(ips.content)
+    # ips.email = 'gribskov@purdue.edu'
+    # ips.title = 'globin'
+    # ips.sequence = testpro
+    # ips.application_select(['TIGRFAM', 'CDD', 'PfamA'])
+    # # ips.application_select(['Phobius', 'ProSitePatterns'])
+    # ips.output_select('json')
+    # ips.parameter_select({'goterms': True, 'pathways': True})
+    #
+    # if not ips.run():
+    #     exit(1)
+    #
+    # time.sleep(ips.poll_time)
+    # while ips.status() != 'FINISHED':
+    #     ips.poll_count += 1
+    #     if ips.poll_count > ips.poll_max:
+    #         break
+    #
+    #     time.sleep(ips.poll_time)
+    #
+    # ips.result()
+    ips.content = json_test()
+    parsed_result = ips.parse_json()
 
     # exit(1)
 
     # json = json.loads(json_test())
-    json = json.loads(ips.content)
 
-    matches = json['results'][0]['matches']
-    go_all = {}
-    path_all = {}
-    for m in matches:
-        source_accession = m['signature']['accession']
-        s = m['signature']['signatureLibraryRelease']
-        source = '{} {}'.format(s['library'], s['version'])
-        entry = m['signature']['entry']
-        if entry:
-            accession = entry['accession']
-            name = entry['name']
-            description = entry['description']
-            type = entry['type']
-
-            if 'goXRefs' in entry:
-                gostr = ''
-                for go in entry['goXRefs']:
-                    gostr += '{} ({}:{})'.format(go['id'], go['category'], go['name'])
-                    if go['id'] in go_all:
-                        go_all[go['id']]['source'].append(s['library'])
-                    else:
-                        go_all[go['id']] = {'name':   go['name'], 'category': go['category'],
-                                            'source': [s['library']]}
-
-            if 'pathwayXRefs' in entry:
-                pathstr = ''
-                for path in entry['pathwayXRefs']:
-                    pathstr += '{} ({})'.format(path['id'], path['name'])
-                    if path['databaseName'] == 'Reactome':
-                        field = path['id'].split('-')
-                        id = 'Reactome:{}'.format(field[2])
-                    elif path['databaseName'] == 'MetaCyc':
-                        id = 'Metacyc:{}'.format(path['id'])
-                    elif path['databaseName'] == 'KEGG':
-                        id = 'KEGG:{}'.format(path['id'])
-                    else:
-                        print('unknown pathway {} | {} | {}'.format(path['databaseName'],
-                                                                    path['id'], path['name']))
-
-                    if id in path_all:
-                        if s['library'] not in path_all[id]['source']:
-                            path_all[id]['source'].append(s['library'])
-                    else:
-                        path_all[id] = {'name': path['name'], 'source': [s['library']]}
-
-        print('{}\t{}\t{}\t{}'.format(accession, source_accession, name, description))
-        print('\t{}'.format(source))
-        print('\t{}'.format(gostr))
-
-    # print(go_all)
-    for go in go_all:
-        print('{}\t{}\t{}'.format(go, go_all[go]['name'], go_all[go]['source']))
-    for path in path_all:
-        print('{}\t{}\t{}'.format(path, path_all[path]['name'], path_all[path]['source']))
+    #     print('{}\t{}\t{}\t{}'.format(accession, source_accession, name, description))
+    #     print('\t{}'.format(source))
+    #     print('\t{}'.format(gostr))
+    #
+    # # print(go_all)
+    # for go in go_all:
+    #     print('{}\t{}\t{}'.format(go, go_all[go]['name'], go_all[go]['source']))
+    # for path in path_all:
+    #     print('{}\t{}\t{}'.format(path, path_all[path]['name'], path_all[path]['source']))
 
     print('done')
 
