@@ -154,9 +154,9 @@ class Interpro:
                 continue
 
             # parse an entry, en entry is a hit vs a specific entry in a database
-            motifs.append({'interpro_accession': entry['accession'],
-                           'source_accession':   source_accession,
-                           'description':        entry['description'] or ''})
+            motifs.append({'ipr_accession': entry['accession'],
+                           'src_accession': source_accession,
+                           'description':   entry['description'] or ''})
 
             # name = entry['name']
             # type = entry['type']
@@ -166,10 +166,10 @@ class Interpro:
                 for go in entry['goXRefs']:
                     gostr += '{} ({}:{})'.format(go['id'], go['category'], go['name'])
                     if go['id'] in go_all:
-                        go_all[go['id']]['source'].append(signature['library'])
+                        go_all[go['id']]['source'].append(source_accession)
                     else:
                         go_all[go['id']] = {'name':   go['name'], 'category': go['category'],
-                                            'source': [signature['library']]}
+                                            'source': [source_accession]}
 
             if 'pathwayXRefs' in entry:
                 pathstr = ''
@@ -187,13 +187,13 @@ class Interpro:
                                                                     path['id'], path['name']))
 
                     if id in path_all:
-                        if signature['library'] not in path_all[id]['source']:
-                            path_all[id]['source'].append(signature['library'])
+                        if source_accession not in path_all[id]['source']:
+                            path_all[id]['source'].append(source_accession)
                     else:
                         path_all[id] = {'name':   path['name'],
-                                        'source': [signature['library']]}
+                                        'source': [source_accession]}
 
-        return [motifs, go_all, path_all]
+        return {'motifs': motifs, 'go': go_all, 'pathway': path_all}
 
     def run(self, show_query=False):
         """-----------------------------------------------------------------------------------------
@@ -5136,42 +5136,40 @@ TAAATTATTTCACTGTCTCTTACTCAGATGGGCACATGGGAGGGCAAAACACTGAAGACATAAAGAAATG
 AAGG
 '''
     ips = Interpro(loglevel=2, poll_time=60)
-    # ips.email = 'gribskov@purdue.edu'
-    # ips.title = 'globin'
-    # ips.sequence = testpro
-    # ips.application_select(['TIGRFAM', 'CDD', 'PfamA'])
-    # # ips.application_select(['Phobius', 'ProSitePatterns'])
-    # ips.output_select('json')
-    # ips.parameter_select({'goterms': True, 'pathways': True})
-    #
-    # if not ips.run():
-    #     exit(1)
-    #
-    # time.sleep(ips.poll_time)
-    # while ips.status() != 'FINISHED':
-    #     ips.poll_count += 1
-    #     if ips.poll_count > ips.poll_max:
-    #         break
-    #
-    #     time.sleep(ips.poll_time)
-    #
-    # ips.result()
-    ips.content = json_test()
+    ips.email = 'gribskov@purdue.edu'
+    ips.title = 'globin'
+    ips.sequence = testpro
+    ips.application_select(['TIGRFAM', 'CDD', 'PfamA'])
+    # ips.application_select(['Phobius', 'ProSitePatterns'])
+    ips.output_select('json')
+    ips.parameter_select({'goterms': True, 'pathways': True})
+
+    if not ips.run():
+        exit(1)
+
+    time.sleep(ips.poll_time)
+    while ips.status() != 'FINISHED':
+        ips.poll_count += 1
+        if ips.poll_count > ips.poll_max:
+            break
+
+        time.sleep(ips.poll_time)
+
+    ips.result()
+
+    # parse and print the result
+    # ips.content = json_test()
     parsed_result = ips.parse_json()
 
-    # exit(1)
+    for eachmotif in parsed_result['motifs']:
+        print('{ipr_accession}\t{src_accession}\t{description}'.format(**eachmotif))
+    for goterm in parsed_result['go']:
+        go = parsed_result['go'][goterm]
+        print('{}\t{}\t{}'.format(goterm, go['name'], go['source']))
+    for path in parsed_result['pathway']:
+        pathway = parsed_result['pathway'][path]
+        print('{}\t{}\t{}'.format(path, pathway['name'], pathway['source']))
 
-    # json = json.loads(json_test())
-
-    #     print('{}\t{}\t{}\t{}'.format(accession, source_accession, name, description))
-    #     print('\t{}'.format(source))
-    #     print('\t{}'.format(gostr))
-    #
-    # # print(go_all)
-    # for go in go_all:
-    #     print('{}\t{}\t{}'.format(go, go_all[go]['name'], go_all[go]['source']))
-    # for path in path_all:
-    #     print('{}\t{}\t{}'.format(path, path_all[path]['name'], path_all[path]['source']))
 
     print('done')
 
