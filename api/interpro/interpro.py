@@ -10,7 +10,7 @@ class Interpro:
     25 December 2018    Michael Gribskov
     ============================================================================================="""
 
-    def __init__(self, loglevel=0, poll_time=60, poll_count=20):
+    def __init__(self, loglevel=0, poll_time=60, poll_max=20):
         """-----------------------------------------------------------------------------------------
         interpro query/response constructor
 
@@ -44,7 +44,8 @@ class Interpro:
         self.output_avail = {'out', 'log', 'tsv', 'xml', 'gff', 'json',
                              'htmltarball', 'sequence', 'submission'}
         self.poll_time = poll_time  # seconds between polling
-        self.poll_count = poll_count  # maximum number of times to poll
+        self.poll_max = poll_max    # maximum number of times to poll
+        self.poll_count = 0         # number of times this job has been polled
 
         self.email = ''  # user email (optional)
         self.title = ''  # title for job (optional)
@@ -55,7 +56,7 @@ class Interpro:
 
         self.url = u'https://www.ebi.ac.uk/Tools/services/rest/iprscan5/'
         self.jobid = ''
-        self.state = 'UNKNOWN'
+        self.jobstatus = ''
         self.content = ''
 
     def application_select(self, selected, keep=False):
@@ -76,8 +77,7 @@ class Interpro:
             if app in self.applications_avail:
                 self.applications.append(app)
             else:
-                self.log_fh.write(
-                    '{}\trequested application ({}) not available'.format(Interpro.logtime(), app))
+                self.log_message('not_available', 'application={}'.format(app))
 
         return len(self.applications)
 
@@ -92,9 +92,8 @@ class Interpro:
         if selected in self.output_avail:
             self.output = selected
         else:
-            self.log_fh.write(
-                '{}\trequested output format ({}) is not available'.format(
-                    Interpro.logtime(), selected))
+            self.log_message('not_available', 'output={}'.format(selected))
+
             return False
 
         return True
@@ -111,10 +110,12 @@ class Interpro:
 
         return len(self.parameters)
 
-    def run(self):
+    def run(self, show_query=False):
         """-----------------------------------------------------------------------------------------
         Construct a REST command and dispatch the job to the server
         Any previously existing jobID is overwritten
+
+        :param show_query: boolean, print query if true
         :return: logical, True = success, False = failure
         -----------------------------------------------------------------------------------------"""
         is_success = False
@@ -134,61 +135,46 @@ class Interpro:
         command = self.url + 'run'
         response = requests.post(command, files=param, headers={'User-Agent': 'ips-client'})
 
-        print(response.request.headers, '\n')
-        print(response.request.body, '\n')
+        if show_query:
+            # print out query if requested
+            print(response.request.headers, '\n')
+            print(response.request.body, '\n')
 
-        if not self.response_is_error('submitting job', response):
+        if self.response_is_error('submitting job', response):
+            self.jobstatus = 'SUBMIT_ERROR'
+        else:
             # success
             self.jobid = response.text
+            self.jobstatus = 'SUBMIT_OK'
             if self.log:
-                # TODO add sequence name?
-                self.log_fh.write(
-                    '{}\tinterproscan job {} submitted\n'.format(Interpro.logtime(), self.jobid))
+                self.log_message('submitted', 'job_id={}'.format(self.jobid))
+
             is_success = True
 
         return is_success
 
-    def status(self):
+    def status(self, log=True):
         """-----------------------------------------------------------------------------------------
-        Poll job status at the server.
-        wait for self.poll_time seconds after polling
+        Poll job status at the server. The job is polled only once so it you want to poll
+        multiple times call this method in a loop
 
-        :return: Logical, True if a result was returned
+        :return: string, status of job at server
         -----------------------------------------------------------------------------------------"""
-        response = None
-        complete = False
-        tries = 0
-        while not complete:
-            tries += 1
+        command = self.url + 'status/' + self.jobid
+        response = requests.get(command)
+        response_text = response.text.rstrip()
+        if self.log > 1:
+            self.log_message('polling', 'job_id={};response={}'.format(self.jobid, response_text))
 
-            command = self.url + 'status/' + self.jobid
-            response = requests.get(command)
-            if self.log > 1:
-                self.log_fh.write('{}\tinterproscan job {} polling - {}\n'.format(
-                    Interpro.logtime(), self.jobid, response.text))
-
-            if 'FINISHED' in response.text:
-                complete = True
-                break
-            elif tries >= self.poll_count:
-                break
-
-            # don't poll too often
-            time.sleep(self.poll_time)
-
-        self.state = response.text
-        if not complete:
-            # polling reached limit
+        if 'FINISHED' in response.text:
+            self.jobstatus = 'FINISHED'
             if self.log > 0:
-                self.log_fh.write('{}\tinterproscan job {} {} - poll_limit={}\n'.format(
-                    Interpro.logtime(), self.jobid, self.state, self.poll_count))
+                self.log_message('finished', 'job_id={}'.format(self.jobid))
 
-        else:
-            if self.log > 0:
-                self.log_fh.write(
-                    '{}\tinterproscan job {} finished\n'.format(Interpro.logtime(), self.jobid))
+            else:
+                self.jobstatus = response_text
 
-        return complete
+        return self.jobstatus
 
     def result(self):
         """-----------------------------------------------------------------------------------------
@@ -203,8 +189,8 @@ class Interpro:
             # success
             self.content = response.text
             if self.log > 1:
-                self.log_fh.write('{}\tinterproscan job {} result retrieved from {} as {}'.format(
-                    Interpro.logtime(), self.jobid, self.url, self.output))
+                self.log_message(
+                    'retrieved', 'job_id={};output_len={}'.format(self.jobid, len(self.output)))
             return True
 
         return False
@@ -221,8 +207,8 @@ class Interpro:
         is_error = False
         if not response.status_code == 200:
             if self.log > 0:
-                self.log_fh.write('{}\t{}interproscan job {} error\tstatus={}'.format(
-                    Interpro.logtime(), self.jobid, task, response.status_code))
+                self.log_message('server_error',
+                                 'job_id={};status={}'.format(self.jobid, response.status_code))
 
             is_error = True
 
@@ -235,11 +221,34 @@ class Interpro:
         self.log_fh = fh
         return fh
 
+    def log_message(self, type, message):
+        """-----------------------------------------------------------------------------------------
+        write a message to the log
+
+        types:
+            not_available (for submission options)
+            submitted
+            polling
+            finished
+            retrieved
+            server_error
+
+        :type: string, type of message
+        :param message: string, text of message
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        event_time = time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
+        self.log_fh.write('{}\t{}\t{}\n'.format(event_time, type, message))
+
+        return True
+
     @classmethod
     def logtime(cls):
         """-----------------------------------------------------------------------------------------
         Return current time as a string. Format is 10/Oct/2000:13:55:36 which is similar to the
         common log format (without the time zone)
+
+        DEPRECATED: The same time is generated in log_message()
 
         :return: string
         -----------------------------------------------------------------------------------------"""
@@ -5045,24 +5054,34 @@ AATTATGAAGTGTTTTGAGCATCTGGCCTCTGCCTAATAAAGACATTTATTTTCATTGCACTGGTGTATT
 TAAATTATTTCACTGTCTCTTACTCAGATGGGCACATGGGAGGGCAAAACACTGAAGACATAAAGAAATG
 AAGG
 '''
-    # ips = Interpro(loglevel=2, poll_time=60)
-    # ips.email = 'gribskov@purdue.edu'
-    # ips.title = 'globin'
-    # ips.sequence = testpro
-    # # ips.application_select(['TIGRFAM', 'CDD', 'PfamA'])
-    # # ips.application_select(['Phobius', 'ProSitePatterns'])
-    # ips.output_select('json')
-    # ips.parameter_select({'goterms': True, 'pathways': True})
-    #
-    # if not ips.run():
-    #     exit(1)
-    #
-    # if ips.status():
-    #     ips.result()
-    #     # sys.stdout.write(ips.content)
-    #     j = InterproscanJSON(ips.content)
+    ips = Interpro(loglevel=2, poll_time=60)
+    ips.email = 'gribskov@purdue.edu'
+    ips.title = 'globin'
+    ips.sequence = testpro
+    ips.application_select(['TIGRFAM', 'CDD', 'PfamA'])
+    # ips.application_select(['Phobius', 'ProSitePatterns'])
+    ips.output_select('json')
+    ips.parameter_select({'goterms': True, 'pathways': True})
 
-    json = json.loads(json_test())
+    if not ips.run():
+        exit(1)
+
+    time.sleep(ips.poll_time)
+    while ips.status() != 'FINISHED':
+        ips.poll_count += 1
+        if ips.poll_count > ips.poll_max:
+            break
+
+        time.sleep(ips.poll_time)
+
+    ips.result()
+    # j = InterproscanJSON(ips.content)
+
+    # exit(1)
+
+    # json = json.loads(json_test())
+    json = json.loads(ips.content)
+
     matches = json['results'][0]['matches']
     go_all = {}
     path_all = {}
@@ -5086,7 +5105,7 @@ AAGG
                     else:
                         go_all[go['id']] = {'name':   go['name'], 'category': go['category'],
                                             'source': [s['library']]}
-                        
+
             if 'pathwayXRefs' in entry:
                 pathstr = ''
                 for path in entry['pathwayXRefs']:
@@ -5108,7 +5127,6 @@ AAGG
                     else:
                         path_all[id] = {'name': path['name'], 'source': [s['library']]}
 
-
         print('{}\t{}\t{}\t{}'.format(accession, source_accession, name, description))
         print('\t{}'.format(source))
         print('\t{}'.format(gostr))
@@ -5118,7 +5136,6 @@ AAGG
         print('{}\t{}\t{}'.format(go, go_all[go]['name'], go_all[go]['source']))
     for path in path_all:
         print('{}\t{}\t{}'.format(path, path_all[path]['name'], path_all[path]['source']))
-
 
     print('done')
 
