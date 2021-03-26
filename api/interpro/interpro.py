@@ -52,12 +52,14 @@ class Interpro:
         self.title = ''  # title for job (optional)
         self.sequence = ''
         self.applications = []
-        self.output = ''
+        self.output = 'json'
         self.parameters = {}
 
         self.url = u'https://www.ebi.ac.uk/Tools/services/rest/iprscan5/'
         self.jobid = ''
         self.jobstatus = ''
+
+        self.response = None
         self.content = ''
 
     def application_select(self, selected, keep=False):
@@ -75,6 +77,8 @@ class Interpro:
             self.applications = []
 
         for app in selected:
+            if app == 'Pfam':
+                app = 'PfamA'
             if app in self.applications_avail:
                 self.applications.append(app)
             else:
@@ -89,7 +93,7 @@ class Interpro:
         :param selected: string, one of the formats in self.output_avail
         :return: True if format is available
         -----------------------------------------------------------------------------------------"""
-        self.output = ''
+        # self.output = ''
         if selected in self.output_avail:
             self.output = selected
         else:
@@ -218,18 +222,18 @@ class Interpro:
                 param[para] = self.parameters[para]
 
         command = self.url + 'run'
-        response = requests.post(command, files=param, headers={'User-Agent': 'ips-client'})
+        self.response = requests.post(command, files=param, headers={'User-Agent': 'ips-client'})
 
         if show_query:
             # print out query if requested
-            print(response.request.headers, '\n')
-            print(response.request.body, '\n')
+            print(self.response.request.headers, '\n')
+            print(self.response.request.body, '\n')
 
-        if self.response_is_error('submitting job', response):
+        if self.response_is_error('submitting job'):
             self.jobstatus = 'SUBMIT_ERROR'
         else:
             # success
-            self.jobid = response.text
+            self.jobid = self.response.text
             self.jobstatus = 'SUBMIT_OK'
             if self.log:
                 self.log_message('submitted', 'job_id={}'.format(self.jobid))
@@ -246,18 +250,20 @@ class Interpro:
         :return: string, status of job at server
         -----------------------------------------------------------------------------------------"""
         command = self.url + 'status/' + self.jobid
-        response = requests.get(command)
-        response_text = response.text.rstrip()
+        self.response = requests.get(command)
+        response_text = self.response.text.rstrip()
         if self.log > 1:
             self.log_message('polling', 'job_id={};response={}'.format(self.jobid, response_text))
 
-        if 'FINISHED' in response.text:
+        if 'FINISHED' in self.response.text:
             self.jobstatus = 'FINISHED'
             if self.log > 0:
                 self.log_message('finished', 'job_id={}'.format(self.jobid))
 
-            else:
-                self.jobstatus = response_text
+        else:
+            self.jobstatus = self.response.text
+            if self.log > 0:
+                self.log_message(self.jobstatus, 'job_id={}'.format(self.jobid))
 
         return self.jobstatus
 
@@ -269,10 +275,10 @@ class Interpro:
         -----------------------------------------------------------------------------------------"""
         # get the final result
         command = self.url + 'result/' + self.jobid + '/' + self.output
-        response = requests.get(command)
-        if not self.response_is_error('retrieving result', response):
+        self.response = requests.get(command)
+        if not self.response_is_error('retrieving result'):
             # success
-            self.content = response.text
+            self.content = self.response.text
             if self.log > 1:
                 self.log_message(
                     'retrieved', 'job_id={};output_len={}'.format(self.jobid, len(self.output)))
@@ -280,22 +286,25 @@ class Interpro:
 
         return False
 
-    def response_is_error(self, task, response):
+    def response_is_error(self, task):
         """-----------------------------------------------------------------------------------------
         Return true if the response code is other than 200. Write error message to stderr if
         loglevel > 1. Task is a string describing the task that failed for inclusion in the error
-        message
+        message.  The most recent response is stored in self.response
 
-        :param response: requests object response
+        :param task: string, text description of response being tested for error message
         :return: logical True = error, False = no error
         -----------------------------------------------------------------------------------------"""
-        is_error = False
-        if not response.status_code == 200:
-            if self.log > 0:
-                self.log_message('server_error',
-                                 'job_id={};status={}'.format(self.jobid, response.status_code))
+        if self.response.status_code == 200:
+            # success
+            is_error = False
 
+        else:
+            # error
             is_error = True
+            if self.log > 0:
+                self.log_message(task, 'job_id={};status={}'.format(self.jobid,
+                                                              self.response.status_code))
 
         return is_error
 
@@ -338,18 +347,6 @@ class Interpro:
         :return: string
         -----------------------------------------------------------------------------------------"""
         return time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
-
-
-# class InterproscanJSON():
-#     """=============================================================================================
-#     Manipulate JSON response from interproscan
-#     ============================================================================================="""
-#
-#     def __init__(self, jsonstring):
-#         """-----------------------------------------------------------------------------------------
-#         :param jsonstring:
-#         -----------------------------------------------------------------------------------------"""
-#         self.json = json.loads(jsonstring)
 
 
 def json_test():
@@ -5169,7 +5166,6 @@ AAGG
     for path in parsed_result['pathway']:
         pathway = parsed_result['pathway'][path]
         print('{}\t{}\t{}'.format(path, pathway['name'], pathway['source']))
-
 
     print('done')
 
