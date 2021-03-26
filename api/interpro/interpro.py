@@ -1,6 +1,7 @@
 import sys
 import time
 import json
+from copy import deepcopy
 import requests
 
 
@@ -115,13 +116,22 @@ class Interpro:
 
         return len(self.parameters)
 
+    def copy(self):
+        """-----------------------------------------------------------------------------------------
+        Return a copy of the object.  This allows an object with the metadata filled in to be
+        used as a template for a series of jobs
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        return deepcopy(self)
+
     def parse_json(self):
         """-----------------------------------------------------------------------------------------
         Parse the contented returned from the server in JSON format. Three outputs are produced
             A list of dictionaries for each hit in the sequence
             A list of dictionaries listing  GO terms and what entries they were drawn from
                 keys: 'name': gene ontology ID
-                      'category': ontology category = BIOLOGICAL_pROCESS |
+                      'category': ontology category = BIOLOGICAL_PROCESS |
                                                       MOLECULAR_FUNCTION |
                                                       CELLULAR_COMPONENT,
                       'source': list of strings, motifs that are associated with this term
@@ -304,7 +314,7 @@ class Interpro:
             is_error = True
             if self.log > 0:
                 self.log_message(task, 'job_id={};status={}'.format(self.jobid,
-                                                              self.response.status_code))
+                                                                    self.response.status_code))
 
         return is_error
 
