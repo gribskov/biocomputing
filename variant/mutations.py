@@ -126,11 +126,21 @@ if __name__ == '__main__':
     sam.read_header()
 
     n = 0
+    hist = [0 for _ in range(150)]
+    diff_total = 0
     while sam.parse_alignment():
         diff = sam.count_diff()
+        diff_total += diff
+        hist[diff] += 1
         print('{}\t{}\t{}\t{}\t{}'.format(sam.qname, sam.pos, sam.cigar, sam.option['MD'][1], diff))
         n += 1
-        if n > 30:
-            break
+        # if n > 30:
+        #     break
+
+    cumulative = 0
+    for i in range(150):
+        cumulative += hist[i]
+        frac = cumulative / n
+        print('{}\t{}\t{:.3f}'.format(i, hist[i], frac))
 
     exit(0)
