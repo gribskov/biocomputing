@@ -87,6 +87,41 @@ def batch_process(jobs_pending, n_sequence, batch_limit, batch_wait):
 
     return outputlist
 
+def poll_all( jobs_pending, batch_wait=61, max_tries=50):
+    """---------------------------------------------------------------------------------------------
+    Poll the jobs in the jobs_pending list until all have finished. Finished can be
+        1) reached maximum number of polling attempts
+        2) returned a status other than success or waiting
+        3) success
+
+    :param jobs_pending: list of interproscan objects that have been submitted
+    :param max_tries: int, maximum number of times to poll
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+
+    # jobs_pending is False when the maximum number of sequences have been submitted
+    outputlist = []
+    while jobs_pending:
+        # poll all pending jobs (ips.status includes poll_time seconds pause). Copy jobs that
+        # have not terminated into unfinished, and make this the new list of pending jobs for
+        # the next round
+        unfinished = []
+        time.sleep(batch_wait)
+
+        for ips in jobs_pending:
+            if ips.status() == 'FINISHED':
+                ips.result()
+                if ips.content:
+                    # content may be empty if there are no hits
+                    outputlist += ips.content.split('\n')
+
+            else:
+                unfinished.append(ips)
+
+        jobs_pending = unfinished.copy()
+
+    return outputlist
+
 
 # ==================================================================================================
 # Main
@@ -98,31 +133,51 @@ args.logfile.write('\tinput ORF file: {}\n'.format(args.fasta_in.name))
 args.logfile.write('\tminimum ORF length: {}\n\n'.format(args.minlen))
 
 fasta = Fasta(fh=args.fasta_in)
-n_sequence = 0
+
+batch_limit = 2
+batch_wait = 30
+total_seq = 3
 
 job_list = {}
 jobs_pending = []
 outputlist = []
+n_sequence = 0
+
 while fasta.next():
-    if fasta.length() >= args.minlen:
-        n_sequence += 1
-        if n_sequence < 50:
-            continue
-        ips = Interpro(loglevel=1, poll_time=5, poll_count=1)
-        ips.log_fh = args.logfile
-        ips.email = 'gribskov@purdue.edu'
-        ips.title = 'ORF{}'.format(n_sequence)
-        ips.sequence = fasta.format(linelen=60)
-        if not ips.run():
-            sys.stderr.write('Error - sequence={}\n'.format(fasta.id),flush=True)
-            continue
-        jobs_pending.append(ips)
-    else:
+    if n_sequence >= total_seq:
+        # run up to total_seq queries
+        break
+
+    if fasta.length() < args.minlen:
+        # skip short sequences
         continue
 
-    outputlist = batch_process(jobs_pending, n_sequence, batch_limit, batch_wait)
-    for line in outputlist:
-        sys.stdout.write('{}\n'.format(line))
+    proseq = fasta.translate()
+    proseq.seq = proseq.seq.rstrip('*')
+    n_sequence += 1
+
+    # submit jobs
+    ips = Interpro(loglevel=1, poll_time=batch_wait, poll_max=1)
+    ips.log_fh = args.logfile
+    ips.email = 'gribskov@purdue.edu'
+    ips.title = 'ORF{}'.format(n_sequence)
+    ips.sequence = proseq.format(linelen=60)
+    ips.application_select(['Pfam'])
+    if ips.run():
+        jobs_pending.append(ips)
+    else:
+        sys.stderr.write('Error - sequence={}\n'.format(fasta.id),flush=True)
+        continue
+
+    if n_sequence % batch_limit and n_sequence < total_seq:
+        # keep submitting until batch_limit is reached
+        continue
+
+    # replace with poll_all
+    # outputlist = batch_process(jobs_pending, n_sequence, batch_limit, batch_wait)
+    poll_all(jobs_pending)
+    for job in outputlist:
+        # sys.stdout.write('{}\n'.format(job.content))
         jobs_pending = []
 
     # if n_sequence > 50:
