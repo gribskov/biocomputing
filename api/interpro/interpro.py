@@ -1,7 +1,6 @@
 import sys
 import time
 import json
-from copy import deepcopy
 import requests
 
 
@@ -18,7 +17,7 @@ class Interpro:
 
         loglevel   0 no log, 1 job submission/completion, 2 all
         -----------------------------------------------------------------------------------------"""
-        self.log = loglevel
+        self.loglevel = loglevel
         self.log_fh = sys.stderr
 
         # availble options/parameters taken from
@@ -59,6 +58,7 @@ class Interpro:
         self.url = u'https://www.ebi.ac.uk/Tools/services/rest/iprscan5/'
         self.jobid = ''
         self.jobstatus = ''
+        self.jobname = ''
 
         self.response = None
         self.content = ''
@@ -116,14 +116,18 @@ class Interpro:
 
         return len(self.parameters)
 
-    def copy(self):
+    def clone(self):
         """-----------------------------------------------------------------------------------------
         Return a copy of the object.  This allows an object with the metadata filled in to be
         used as a template for a series of jobs
 
         :return:
         -----------------------------------------------------------------------------------------"""
-        return deepcopy(self)
+        copy = Interpro()
+        for v in vars(self):
+            setattr(copy, v, getattr(self, v))
+
+        return copy
 
     def parse_json(self):
         """-----------------------------------------------------------------------------------------
@@ -245,8 +249,8 @@ class Interpro:
             # success
             self.jobid = self.response.text
             self.jobstatus = 'SUBMIT_OK'
-            if self.log:
-                self.log_message('submitted', 'job_id={}'.format(self.jobid))
+            self.log_message('submitted', 'job_name={};job_id={}'.format(self.jobname, self.jobid),
+                             loglevel=1)
 
             is_success = True
 
@@ -262,18 +266,19 @@ class Interpro:
         command = self.url + 'status/' + self.jobid
         self.response = requests.get(command)
         response_text = self.response.text.rstrip()
-        if self.log > 1:
-            self.log_message('polling', 'job_id={};response={}'.format(self.jobid, response_text))
+        self.log_message('polling',
+                         'job_id={};response={}'.format(self.jobid, response_text),
+                         loglevel=2)
 
         if 'FINISHED' in self.response.text:
-            self.jobstatus = 'FINISHED'
-            if self.log > 0:
-                self.log_message('finished', 'job_id={}'.format(self.jobid))
+            if self.jobstatus != 'FINISHED':
+                # only print finsihed message once
+                self.log_message('finished', 'job_id={}'.format(self.jobid), loglevel=1)
+                self.jobstatus = 'FINISHED'
 
         else:
             self.jobstatus = self.response.text
-            if self.log > 0:
-                self.log_message(self.jobstatus, 'job_id={}'.format(self.jobid))
+            self.log_message(self.jobstatus, 'job_id={}'.format(self.jobid), loglevel=1)
 
         return self.jobstatus
 
@@ -281,7 +286,7 @@ class Interpro:
         """-----------------------------------------------------------------------------------------
         Retrieve the result
 
-        :return: Logical True=success, False=failure
+        :return: string, 'retrieved' if successful, '' if unsuccessful (False)
         -----------------------------------------------------------------------------------------"""
         # get the final result
         command = self.url + 'result/' + self.jobid + '/' + self.output
@@ -289,12 +294,11 @@ class Interpro:
         if not self.response_is_error('retrieving result'):
             # success
             self.content = self.response.text
-            if self.log > 1:
-                self.log_message(
-                    'retrieved', 'job_id={};output_len={}'.format(self.jobid, len(self.output)))
-            return True
+            message = 'job_id={};output_len={}'.format(self.jobid, len(self.output))
+            self.log_message('retrieved', message, loglevel=1)
+            return 'retrieved'
 
-        return False
+        return ''
 
     def response_is_error(self, task):
         """-----------------------------------------------------------------------------------------
@@ -312,9 +316,8 @@ class Interpro:
         else:
             # error
             is_error = True
-            if self.log > 0:
-                self.log_message(task, 'job_id={};status={}'.format(self.jobid,
-                                                                    self.response.status_code))
+            message = 'job_id={};status={}'.format(self.jobid, self.response.status_code)
+            self.log_message(task, message, loglevel=1)
 
         return is_error
 
@@ -325,9 +328,9 @@ class Interpro:
         self.log_fh = fh
         return fh
 
-    def log_message(self, type, message):
+    def log_message(self, type, message, loglevel=1):
         """-----------------------------------------------------------------------------------------
-        write a message to the log
+        write a message to the log. Messages are only written if self.loglevel >= loglevel
 
         types:
             not_available (for submission options)
@@ -339,12 +342,15 @@ class Interpro:
 
         :type: string, type of message
         :param message: string, text of message
-        :return:
+        :param loglevel: int, minimum loglevel to write message to log
+        :return: True if message was written
         -----------------------------------------------------------------------------------------"""
-        event_time = time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
-        self.log_fh.write('{}\t{}\t{}\n'.format(event_time, type, message))
+        if self.loglevel >= loglevel:
+            event_time = time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
+            self.log_fh.write('{}\t{}\t{}\n'.format(event_time, type, message))
+            return True
 
-        return True
+        return False
 
     @classmethod
     def logtime(cls):
