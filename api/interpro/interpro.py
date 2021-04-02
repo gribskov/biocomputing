@@ -7,6 +7,8 @@ import requests
 class Interpro:
     """=============================================================================================
     Interpro class for running interproscan
+    TODO: update to work with jobmanager class
+    TODO: move job control variables and logging to jobmanager
 
     25 December 2018    Michael Gribskov
     ============================================================================================="""
