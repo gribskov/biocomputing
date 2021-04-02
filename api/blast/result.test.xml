@@ -1,0 +1,2555 @@
+<?xml version="1.0"?>
+<!DOCTYPE BlastOutput PUBLIC "-//NCBI//NCBI BlastOutput/EN" "http://www.ncbi.nlm.nih.gov/dtd/NCBI_BlastOutput.dtd">
+<BlastOutput>
+  <BlastOutput_program>blastp</BlastOutput_program>
+  <BlastOutput_version>BLASTP 2.11.0+</BlastOutput_version>
+  <BlastOutput_reference>Stephen F. Altschul, Thomas L. Madden, Alejandro A. Sch&amp;auml;ffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and David J. Lipman (1997), &quot;Gapped BLAST and PSI-BLAST: a new generation of protein database search programs&quot;, Nucleic Acids Res. 25:3389-3402.</BlastOutput_reference>
+  <BlastOutput_db>pdb</BlastOutput_db>
+  <BlastOutput_query-ID>Query_23135</BlastOutput_query-ID>
+  <BlastOutput_query-def>HA</BlastOutput_query-def>
+  <BlastOutput_query-len>292</BlastOutput_query-len>
+  <BlastOutput_param>
+    <Parameters>
+      <Parameters_matrix>BLOSUM62</Parameters_matrix>
+      <Parameters_expect>10</Parameters_expect>
+      <Parameters_gap-open>11</Parameters_gap-open>
+      <Parameters_gap-extend>1</Parameters_gap-extend>
+      <Parameters_filter>F</Parameters_filter>
+    </Parameters>
+  </BlastOutput_param>
+<BlastOutput_iterations>
+<Iteration>
+  <Iteration_iter-num>1</Iteration_iter-num>
+  <Iteration_query-ID>Query_23135</Iteration_query-ID>
+  <Iteration_query-def>HA</Iteration_query-def>
+  <Iteration_query-len>292</Iteration_query-len>
+<Iteration_hits>
+<Hit>
+  <Hit_num>1</Hit_num>
+  <Hit_id>pdb|1GDI|A</Hit_id>
+  <Hit_def>CRYSTAL STRUCTURE OF FERRIC COMPLEXES OF THE YELLOW LUPIN LEGHEMOGLOBIN WITH ISOQUINOLINE AT 1.8 ANGSTROMS RESOLUTION (RUSSIAN) [Lupinus luteus] &gt;pdb|1GDJ|A CRYSTAL STRUCTURE OF FERRIC COMPLEXES OF THE YELLOW LUPIN LEGHEMOGLOBIN WITH ISOQUINOLINE AT 1.8 ANGSTROMS RESOLUTION (RUSSIAN) [Lupinus luteus] &gt;pdb|1GDK|A CRYSTAL STRUCTURE OF FERRIC COMPLEXES OF THE YELLOW LUPIN LEGHEMOGLOBIN WITH ISOQUINOLINE AT 1.8 ANGSTROMS RESOLUTION (RUSSIAN) [Lupinus luteus] &gt;pdb|1GDL|A CRYSTAL STRUCTURE OF FERRIC COMPLEXES OF THE YELLOW LUPIN LEGHEMOGLOBIN WITH ISOQUINOLINE AT 1.8 ANGSTROMS RESOLUTION (RUSSIAN) [Lupinus luteus] &gt;pdb|1LH1|A X-Ray Structural Investigation Of Leghemoglobin. Vi. Structure Of Acetate-Ferrileghemoglobin At A Resolution Of 2.0 Angstroms (Russian) [Lupinus luteus] &gt;pdb|1LH2|A X-Ray Structural Investigation Of Leghemoglobin. Vi. Structure Of Acetate-Ferrileghemoglobin At A Resolution Of 2.0 Angstroms (Russian) [Lupinus luteus] &gt;pdb|1LH3|A X-Ray Structural Investigation Of Leghemoglobin. Vi. Structure Of Acetate-Ferrileghemoglobin At A Resolution Of 2.0 Angstroms (Russian) [Lupinus luteus] &gt;pdb|1LH5|A X-Ray Structural Investigation Of Leghemoglobin. Vi. Structure Of Acetate-Ferrileghemoglobin At A Resolution Of 2.0 Angstroms (Russian) [Lupinus luteus] &gt;pdb|1LH6|A X-Ray Structural Investigation Of Leghemoglobin. Vi. Structure Of Acetate-Ferrileghemoglobin At A Resolution Of 2.0 Angstroms (Russian) [Lupinus luteus] &gt;pdb|1LH7|A X-Ray Structural Investigation Of Leghemoglobin. Vi. Structure Of Acetate-Ferrileghemoglobin At A Resolution Of 2.0 Angstroms (Russian) [Lupinus luteus] &gt;pdb|2GDM|A LEGHEMOGLOBIN (OXY) [Lupinus luteus] &gt;pdb|2LH1|A X-Ray Structural Investigation Of Leghemoglobin. Vi. Structure Of Acetate-Ferrileghemoglobin At A Resolution Of 2.0 Angstroms (Russian) [Lupinus luteus] &gt;pdb|2LH2|A X-ray Structural Investigation Of Leghemoglobin. Vi. Structure Of Acetate-ferrileghemoglobin At A Resolution Of 2.0 Angstroms (russian) [Lupinus luteus] &gt;pdb|2LH3|A X-Ray Structural Investigation Of Leghemoglobin. Vi. Structure Of Acetate-Ferrileghemoglobin At A Resolution Of 2.0 Angstroms (Russian) [Lupinus luteus] &gt;pdb|2LH5|A X-Ray Structural Investigation Of Leghemoglobin. Vi. Structure Of Acetate-Ferrileghemoglobin At A Resolution Of 2.0 Angstroms (Russian) [Lupinus luteus] &gt;pdb|2LH6|A X-Ray Structural Investigation Of Leghemoglobin. Vi. Structure Of Acetate-Ferrileghemoglobin At A Resolution Of 2.0 Angstroms (Russian) [Lupinus luteus] &gt;pdb|2LH7|A X-Ray Structural Investigation Of Leghemoglobin. Vi. Structure Of Acetate-Ferrileghemoglobin At A Resolution Of 2.0 Angstroms (Russian) [Lupinus luteus]</Hit_def>
+  <Hit_accession>1GDI_A</Hit_accession>
+  <Hit_len>153</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>83.5741</Hsp_bit-score>
+      <Hsp_score>205</Hsp_score>
+      <Hsp_evalue>3.16926e-19</Hsp_evalue>
+      <Hsp_query-from>5</Hsp_query-from>
+      <Hsp_query-to>70</Hsp_query-to>
+      <Hsp_hit-from>2</Hsp_hit-from>
+      <Hsp_hit-to>67</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>48</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>66</Hsp_align-len>
+      <Hsp_qseq>GFTEKQEALVKESWEILKQDIPKYSLHFFSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKV</Hsp_qseq>
+      <Hsp_hseq>ALTESQAALVKSSWEEFNANIPKHTHRFFILVLEIAPAAKDLFSFLKGTSEVPQNNPELQAHAGKV</Hsp_hseq>
+      <Hsp_midline>  TE Q ALVK SWE    +IPK++  FF  +LEIAPAAK LFSFL+ + EVP NNP+L+AHA KV</Hsp_midline>
+    </Hsp>
+    <Hsp>
+      <Hsp_num>2</Hsp_num>
+      <Hsp_bit-score>36.965</Hsp_bit-score>
+      <Hsp_score>84</Hsp_score>
+      <Hsp_evalue>0.0112969</Hsp_evalue>
+      <Hsp_query-from>260</Hsp_query-from>
+      <Hsp_query-to>287</Hsp_query-to>
+      <Hsp_hit-from>122</Hsp_hit-from>
+      <Hsp_hit-to>149</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>15</Hsp_identity>
+      <Hsp_positive>21</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>28</Hsp_align-len>
+      <Hsp_qseq>LGEKYNEEVEGAWSQAYDHLALAIKTEM</Hsp_qseq>
+      <Hsp_hseq>VGAKWSEELNSAWTIAYDELAIVIKKEM</Hsp_hseq>
+      <Hsp_midline>+G K++EE+  AW+ AYD LA+ IK EM</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>2</Hit_num>
+  <Hit_id>pdb|2R50|A</Hit_id>
+  <Hit_def>The crystal structure of nonsymbiotic corn hemoglobin 1 [Zea mays subsp. parviglumis] &gt;pdb|2R50|B The crystal structure of nonsymbiotic corn hemoglobin 1 [Zea mays subsp. parviglumis] &gt;pdb|2R50|C The crystal structure of nonsymbiotic corn hemoglobin 1 [Zea mays subsp. parviglumis] &gt;pdb|2R50|D The crystal structure of nonsymbiotic corn hemoglobin 1 [Zea mays subsp. parviglumis]</Hit_def>
+  <Hit_accession>2R50_A</Hit_accession>
+  <Hit_len>165</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>80.4925</Hsp_bit-score>
+      <Hsp_score>197</Hsp_score>
+      <Hsp_evalue>5.14094e-18</Hsp_evalue>
+      <Hsp_query-from>2</Hsp_query-from>
+      <Hsp_query-to>139</Hsp_query-to>
+      <Hsp_hit-from>9</Hsp_hit-from>
+      <Hsp_hit-to>132</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>53</Hsp_identity>
+      <Hsp_positive>70</Hsp_positive>
+      <Hsp_gaps>14</Hsp_gaps>
+      <Hsp_align-len>138</Hsp_align-len>
+      <Hsp_qseq>GEIGFTEKQEALVKESWEILKQDIPKYSLHFFSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKVSFDARPVDAQAAVDDAADADAPPPASDGALVNERTPLLHTASHHSAEGDVTPPSEEWSSHALLRTLKEG</Hsp_qseq>
+      <Hsp_hseq>GAVVFGEEQEALVLKSWAVMKKDAANLGLRFFLKVFEIAPSAKQMFSFLRDSDVPLEKNPKLKTHAMSVF--VMTCEAAAQLRKA-----------GKVTVRETTLKRLGATHLRYG-VADGHFEVTGFALLETIKEA</Hsp_hseq>
+      <Hsp_midline>G + F E+QEALV +SW ++K+D     L FF ++ EIAP+AK +FSFLRDSD     NPKLK HA+ V       +A A +  A           G +    T L    + H   G V     E +  ALL T+KE </Hsp_midline>
+    </Hsp>
+    <Hsp>
+      <Hsp_num>2</Hsp_num>
+      <Hsp_bit-score>28.8758</Hsp_bit-score>
+      <Hsp_score>63</Hsp_score>
+      <Hsp_evalue>6.22509</Hsp_evalue>
+      <Hsp_query-from>264</Hsp_query-from>
+      <Hsp_query-to>288</Hsp_query-to>
+      <Hsp_hit-from>138</Hsp_hit-from>
+      <Hsp_hit-to>162</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>12</Hsp_identity>
+      <Hsp_positive>18</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>25</Hsp_align-len>
+      <Hsp_qseq>YNEEVEGAWSQAYDHLALAIKTEMK</Hsp_qseq>
+      <Hsp_hseq>WSLEMKKAWAEAYSQLVAAIKREMK</Hsp_hseq>
+      <Hsp_midline>++ E++ AW++AY  L  AIK EMK</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>3</Hit_num>
+  <Hit_id>pdb|5W7Q|A</Hit_id>
+  <Hit_def>Crystal Structure of Reconstructed Bacterial Elongation Factor Node 168 [synthetic construct]</Hit_def>
+  <Hit_accession>5W7Q_A</Hit_accession>
+  <Hit_len>373</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>83.5741</Hsp_bit-score>
+      <Hsp_score>205</Hsp_score>
+      <Hsp_evalue>8.74075e-18</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>198</Hsp_query-to>
+      <Hsp_hit-from>179</Hsp_hit-from>
+      <Hsp_hit-to>230</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>37</Hsp_identity>
+      <Hsp_positive>43</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>52</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIA</Hsp_qseq>
+      <Hsp_hseq>EDKILELMDAVDSYIPTPERDIDKPFLMPIEDVFSISGRGTVVTGRVERGIV</Hsp_hseq>
+      <Hsp_midline>E KILEL+ A D ++  P RD++KPFLMP+EDVFSISGRGTV TGRVERGI </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>4</Hit_num>
+  <Hit_id>pdb|7A5G|Z</Hit_id>
+  <Hit_def>Chain Z, Elongation factor Tu, mitochondrial [Homo sapiens]</Hit_def>
+  <Hit_accession>7A5G_Z</Hit_accession>
+  <Hit_len>452</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>83.1889</Hsp_bit-score>
+      <Hsp_score>204</Hsp_score>
+      <Hsp_evalue>1.95896e-17</Hsp_evalue>
+      <Hsp_query-from>140</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>226</Hsp_hit-from>
+      <Hsp_hit-to>316</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>42</Hsp_identity>
+      <Hsp_positive>56</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>91</Hsp_align-len>
+      <Hsp_qseq>GRDPEMGEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGI--------ATTHRLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>GRDPELGLKSVQKLLDAVDTYIPVPARDLEKPFLLPVEAVYSVPGRGTVVTGTLERGILKKGDECELLGHSKNIRTVVTGIEMFHKSLERA</Hsp_hseq>
+      <Hsp_midline>GRDPE+G K + +L+ A D ++ +P RDLEKPFL+PVE V+S+ GRGTV TG +ERGI           H    ++ V  I+   K LE A</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>5</Hit_num>
+  <Hit_id>pdb|6I8R|A</Hit_id>
+  <Hit_def>Crystal structure of an ancient sequence-reconstructed Elongation factor Tu (node 170) [synthetic construct]</Hit_def>
+  <Hit_accession>6I8R_A</Hit_accession>
+  <Hit_len>394</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>82.4185</Hsp_bit-score>
+      <Hsp_score>202</Hsp_score>
+      <Hsp_evalue>2.69402e-17</Hsp_evalue>
+      <Hsp_query-from>148</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>187</Hsp_hit-from>
+      <Hsp_hit-to>269</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>41</Hsp_identity>
+      <Hsp_positive>54</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>83</Hsp_align-len>
+      <Hsp_qseq>KKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EKIMELMDAVDSYIPEPERDIDKPFLMPIEDVFSITGRGTVVTGRVERGIVKVGDEVEIVGLRDTRKTVVTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>+KI+EL+ A D ++  P RD++KPFLMP+EDVFSI+GRGTV TGRVERGI            R   K+ V  ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>6</Hit_num>
+  <Hit_id>pdb|2OIF|A</Hit_id>
+  <Hit_def>The crystal structure of ferric cyanide bound barley hexacoordinate hemoglobin. [Hordeum vulgare] &gt;pdb|2OIF|B The crystal structure of ferric cyanide bound barley hexacoordinate hemoglobin. [Hordeum vulgare] &gt;pdb|2OIF|C The crystal structure of ferric cyanide bound barley hexacoordinate hemoglobin. [Hordeum vulgare] &gt;pdb|2OIF|D The crystal structure of ferric cyanide bound barley hexacoordinate hemoglobin. [Hordeum vulgare] &gt;pdb|2OIF|E The crystal structure of ferric cyanide bound barley hexacoordinate hemoglobin. [Hordeum vulgare] &gt;pdb|2OIF|F The crystal structure of ferric cyanide bound barley hexacoordinate hemoglobin. [Hordeum vulgare] &gt;pdb|2OIF|G The crystal structure of ferric cyanide bound barley hexacoordinate hemoglobin. [Hordeum vulgare] &gt;pdb|2OIF|H The crystal structure of ferric cyanide bound barley hexacoordinate hemoglobin. [Hordeum vulgare]</Hit_def>
+  <Hit_accession>2OIF_A</Hit_accession>
+  <Hit_len>162</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.1814</Hsp_bit-score>
+      <Hsp_score>191</Hsp_score>
+      <Hsp_evalue>2.90871e-17</Hsp_evalue>
+      <Hsp_query-from>2</Hsp_query-from>
+      <Hsp_query-to>139</Hsp_query-to>
+      <Hsp_hit-from>6</Hsp_hit-from>
+      <Hsp_hit-to>129</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>53</Hsp_identity>
+      <Hsp_positive>69</Hsp_positive>
+      <Hsp_gaps>14</Hsp_gaps>
+      <Hsp_align-len>138</Hsp_align-len>
+      <Hsp_qseq>GEIGFTEKQEALVKESWEILKQDIPKYSLHFFSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKVSFDARPVDAQAAVDDAADADAPPPASDGALVNERTPLLHTASHHSAEGDVTPPSEEWSSHALLRTLKEG</Hsp_qseq>
+      <Hsp_hseq>GAVVFSEEKEALVLKSWAIMKKDSANLGLRFFLKIFEIAPSARQMFPFLRDSDVPLETNPKLKTHAVSVF--VMTCEAAAQLRKA-----------GKITVRETTLKRLGGTHLKYG-VADGHFEVTRFALLETIKEA</Hsp_hseq>
+      <Hsp_midline>G + F+E++EALV +SW I+K+D     L FF +I EIAP+A+ +F FLRDSD     NPKLK HAV V       +A A +  A           G +    T L      H   G V     E +  ALL T+KE </Hsp_midline>
+    </Hsp>
+    <Hsp>
+      <Hsp_num>2</Hsp_num>
+      <Hsp_bit-score>31.5722</Hsp_bit-score>
+      <Hsp_score>70</Hsp_score>
+      <Hsp_evalue>0.723045</Hsp_evalue>
+      <Hsp_query-from>264</Hsp_query-from>
+      <Hsp_query-to>291</Hsp_query-to>
+      <Hsp_hit-from>135</Hsp_hit-from>
+      <Hsp_hit-to>162</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>14</Hsp_identity>
+      <Hsp_positive>17</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>28</Hsp_align-len>
+      <Hsp_qseq>YNEEVEGAWSQAYDHLALAIKTEMKQEE</Hsp_qseq>
+      <Hsp_hseq>WGPEMRNAWGEAYDQLVAAIKQEMKPAE</Hsp_hseq>
+      <Hsp_midline>+  E+  AW +AYD L  AIK EMK  E</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>7</Hit_num>
+  <Hit_id>pdb|3ZHW|A</Hit_id>
+  <Hit_def>X-ray Crystallographic Structural Characteristics of Arabidopsis Hemoglobin I and their Functional Implications [Arabidopsis thaliana] &gt;pdb|3ZHW|B X-ray Crystallographic Structural Characteristics of Arabidopsis Hemoglobin I and their Functional Implications [Arabidopsis thaliana]</Hit_def>
+  <Hit_accession>3ZHW_A</Hit_accession>
+  <Hit_len>160</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.1814</Hsp_bit-score>
+      <Hsp_score>191</Hsp_score>
+      <Hsp_evalue>3.37365e-17</Hsp_evalue>
+      <Hsp_query-from>2</Hsp_query-from>
+      <Hsp_query-to>145</Hsp_query-to>
+      <Hsp_hit-from>5</Hsp_hit-from>
+      <Hsp_hit-to>132</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>55</Hsp_identity>
+      <Hsp_positive>74</Hsp_positive>
+      <Hsp_gaps>16</Hsp_gaps>
+      <Hsp_align-len>144</Hsp_align-len>
+      <Hsp_qseq>GEIGFTEKQEALVKESWEILKQDIPKYSLHFFSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKVSFDARPVDAQAAVDDAADADAPPPASDGALVNERTPLLHTASHHSAEGDVTPPSEEWSSHALLRTLKEGGRDPEM</Hsp_qseq>
+      <Hsp_hseq>GKIVFTEEQEALVVKSWSVMKKNSAELGLKLFIKIFEIAPTTKKMFSFLRDSPIPAEQNPKLKPHAMSVFV----MCCESAVQ---------LRKTGKVTVRETTLKRLGASHSKYG-VVDEHFEVAKYALLETIKEA--VPEM</Hsp_hseq>
+      <Hsp_midline>G+I FTE+QEALV +SW ++K++  +  L  F +I EIAP  K +FSFLRDS      NPKLK HA+ V      +  ++AV              G +    T L    + HS  G V     E + +ALL T+KE    PEM</Hsp_midline>
+    </Hsp>
+    <Hsp>
+      <Hsp_num>2</Hsp_num>
+      <Hsp_bit-score>36.1946</Hsp_bit-score>
+      <Hsp_score>82</Hsp_score>
+      <Hsp_evalue>0.0244565</Hsp_evalue>
+      <Hsp_query-from>259</Hsp_query-from>
+      <Hsp_query-to>287</Hsp_query-to>
+      <Hsp_hit-from>128</Hsp_hit-from>
+      <Hsp_hit-to>156</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>16</Hsp_identity>
+      <Hsp_positive>21</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>29</Hsp_align-len>
+      <Hsp_qseq>ALGEKYNEEVEGAWSQAYDHLALAIKTEM</Hsp_qseq>
+      <Hsp_hseq>AVPEMWSPEMKVAWGQAYDHLVAAIKAEM</Hsp_hseq>
+      <Hsp_midline>A+ E ++ E++ AW QAYDHL  AIK EM</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>8</Hit_num>
+  <Hit_id>pdb|6GFU|A</Hit_id>
+  <Hit_def>Crystal structure of an ancient sequence-reconstructed Elongation Factor Tu (node 262) [synthetic construct]</Hit_def>
+  <Hit_accession>6GFU_A</Hit_accession>
+  <Hit_len>400</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>81.6481</Hsp_bit-score>
+      <Hsp_score>200</Hsp_score>
+      <Hsp_evalue>5.33194e-17</Hsp_evalue>
+      <Hsp_query-from>144</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>183</Hsp_hit-from>
+      <Hsp_hit-to>269</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>41</Hsp_identity>
+      <Hsp_positive>55</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>87</Hsp_align-len>
+      <Hsp_qseq>EMGEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EIGEEAILKLMDAVDSYIPEPERAIDKPFLMPIEDVFSISGRGTVVTGRVERGIVKVGEEVEIVGIRDTQKTTCTGVEMFRKLLDQG</Hsp_hseq>
+      <Hsp_midline>E+GE+ IL+L+ A D ++  P R ++KPFLMP+EDVFSISGRGTV TGRVERGI            R   K+    ++  RK L++ </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>9</Hit_num>
+  <Hit_id>pdb|1D8U|A</Hit_id>
+  <Hit_def>CRYSTAL STRUCTURE OF NON-SYMBIOTIC PLANT HEMOGLOBIN FROM RICE [Oryza sativa] &gt;pdb|1D8U|B CRYSTAL STRUCTURE OF NON-SYMBIOTIC PLANT HEMOGLOBIN FROM RICE [Oryza sativa]</Hit_def>
+  <Hit_accession>1D8U_A</Hit_accession>
+  <Hit_len>166</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>77.411</Hsp_bit-score>
+      <Hsp_score>189</Hsp_score>
+      <Hsp_evalue>6.25e-17</Hsp_evalue>
+      <Hsp_query-from>4</Hsp_query-from>
+      <Hsp_query-to>70</Hsp_query-to>
+      <Hsp_hit-from>12</Hsp_hit-from>
+      <Hsp_hit-to>78</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>36</Hsp_identity>
+      <Hsp_positive>48</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>67</Hsp_align-len>
+      <Hsp_qseq>IGFTEKQEALVKESWEILKQDIPKYSLHFFSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKV</Hsp_qseq>
+      <Hsp_hseq>VSFSEEQEALVLKSWAILKKDSANIALRFFLKIFEVAPSASQMFSFLRNSDVPLEKNPKLKTHAMSV</Hsp_hseq>
+      <Hsp_midline>+ F+E+QEALV +SW ILK+D    +L FF +I E+AP+A  +FSFLR+SD     NPKLK HA+ V</Hsp_midline>
+    </Hsp>
+    <Hsp>
+      <Hsp_num>2</Hsp_num>
+      <Hsp_bit-score>35.039</Hsp_bit-score>
+      <Hsp_score>79</Hsp_score>
+      <Hsp_evalue>0.0660566</Hsp_evalue>
+      <Hsp_query-from>261</Hsp_query-from>
+      <Hsp_query-to>291</Hsp_query-to>
+      <Hsp_hit-from>136</Hsp_hit-from>
+      <Hsp_hit-to>166</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>15</Hsp_identity>
+      <Hsp_positive>21</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>31</Hsp_align-len>
+      <Hsp_qseq>GEKYNEEVEGAWSQAYDHLALAIKTEMKQEE</Hsp_qseq>
+      <Hsp_hseq>ADMWSPAMKSAWSEAYDHLVAAIKQEMKPAE</Hsp_hseq>
+      <Hsp_midline> + ++  ++ AWS+AYDHL  AIK EMK  E</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>10</Hit_num>
+  <Hit_id>pdb|1XB2|A</Hit_id>
+  <Hit_def>Crystal Structure of Bos taurus mitochondrial Elongation Factor Tu/Ts Complex [Bos taurus]</Hit_def>
+  <Hit_accession>1XB2_A</Hit_accession>
+  <Hit_len>409</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>80.8777</Hsp_bit-score>
+      <Hsp_score>198</Hsp_score>
+      <Hsp_evalue>9.58788e-17</Hsp_evalue>
+      <Hsp_query-from>141</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>184</Hsp_hit-from>
+      <Hsp_hit-to>273</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>41</Hsp_identity>
+      <Hsp_positive>55</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>90</Hsp_align-len>
+      <Hsp_qseq>RDPEMGEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATT--------HRLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>RDPELGLKSVQKLLDAVDTYIPVPTRDLEKPFLLPVESVYSIPGRGTVVTGTLERGILKKGDECEFLGHSKNIRTVVTGIEXFHKSLDRA</Hsp_hseq>
+      <Hsp_midline>RDPE+G K + +L+ A D ++ +P RDLEKPFL+PVE V+SI GRGTV TG +ERGI           H    ++ V  I+   K L+ A</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>11</Hit_num>
+  <Hit_id>pdb|1D2E|A</Hit_id>
+  <Hit_def>CRYSTAL STRUCTURE OF MITOCHONDRIAL EF-TU IN COMPLEX WITH GDP [Bos taurus] &gt;pdb|1D2E|B CRYSTAL STRUCTURE OF MITOCHONDRIAL EF-TU IN COMPLEX WITH GDP [Bos taurus] &gt;pdb|1D2E|C CRYSTAL STRUCTURE OF MITOCHONDRIAL EF-TU IN COMPLEX WITH GDP [Bos taurus] &gt;pdb|1D2E|D CRYSTAL STRUCTURE OF MITOCHONDRIAL EF-TU IN COMPLEX WITH GDP [Bos taurus]</Hit_def>
+  <Hit_accession>1D2E_A</Hit_accession>
+  <Hit_len>397</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>80.4925</Hsp_bit-score>
+      <Hsp_score>197</Hsp_score>
+      <Hsp_evalue>1.05361e-16</Hsp_evalue>
+      <Hsp_query-from>141</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>173</Hsp_hit-from>
+      <Hsp_hit-to>262</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>41</Hsp_identity>
+      <Hsp_positive>55</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>90</Hsp_align-len>
+      <Hsp_qseq>RDPEMGEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIA--------TTHRLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>RDPELGLKSVQKLLDAVDTYIPVPTRDLEKPFLLPVESVYSIPGRGTVVTGTLERGILKKGDECEFLGHSKNIRTVVTGIEMFHKSLDRA</Hsp_hseq>
+      <Hsp_midline>RDPE+G K + +L+ A D ++ +P RDLEKPFL+PVE V+SI GRGTV TG +ERGI           H    ++ V  I+   K L+ A</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>12</Hit_num>
+  <Hit_id>pdb|6HTW|B</Hit_id>
+  <Hit_def>Crystal structure of an ancient sequence-reconstructed Elongation factor Tu (node 184) [synthetic construct] &gt;pdb|6HTW|H Crystal structure of an ancient sequence-reconstructed Elongation factor Tu (node 184) [synthetic construct]</Hit_def>
+  <Hit_accession>6HTW_B</Hit_accession>
+  <Hit_len>385</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>79.7221</Hsp_bit-score>
+      <Hsp_score>195</Hsp_score>
+      <Hsp_evalue>1.94601e-16</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>179</Hsp_hit-from>
+      <Hsp_hit-to>260</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>41</Hsp_identity>
+      <Hsp_positive>52</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>82</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>KIWELMDAVDSYIPTPERDVDKPFLMPVEDVFTITGRGTVATGRVERGTVKVGDEVEIVGLRDTRKTVVTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A D ++  P RD++KPFLMPVEDVF+I+GRGTVATGRVERG             R   K+ V  ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>13</Hit_num>
+  <Hit_id>pdb|2GNW|A</Hit_id>
+  <Hit_def>Crystal structure of non-symbiotic plant hemoglobin from rice, B10 mutant F40W [Oryza sativa] &gt;pdb|2GNW|B Crystal structure of non-symbiotic plant hemoglobin from rice, B10 mutant F40W [Oryza sativa]</Hit_def>
+  <Hit_accession>2GNW_A</Hit_accession>
+  <Hit_len>165</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.0998</Hsp_bit-score>
+      <Hsp_score>183</Hsp_score>
+      <Hsp_evalue>4.63576e-16</Hsp_evalue>
+      <Hsp_query-from>4</Hsp_query-from>
+      <Hsp_query-to>70</Hsp_query-to>
+      <Hsp_hit-from>11</Hsp_hit-from>
+      <Hsp_hit-to>77</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>35</Hsp_identity>
+      <Hsp_positive>48</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>67</Hsp_align-len>
+      <Hsp_qseq>IGFTEKQEALVKESWEILKQDIPKYSLHFFSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKV</Hsp_qseq>
+      <Hsp_hseq>VSFSEEQEALVLKSWAILKKDSANIALRFWLKIFEVAPSASQMFSFLRNSDVPLEKNPKLKTHAMSV</Hsp_hseq>
+      <Hsp_midline>+ F+E+QEALV +SW ILK+D    +L F+ +I E+AP+A  +FSFLR+SD     NPKLK HA+ V</Hsp_midline>
+    </Hsp>
+    <Hsp>
+      <Hsp_num>2</Hsp_num>
+      <Hsp_bit-score>34.6538</Hsp_bit-score>
+      <Hsp_score>78</Hsp_score>
+      <Hsp_evalue>0.0692597</Hsp_evalue>
+      <Hsp_query-from>261</Hsp_query-from>
+      <Hsp_query-to>291</Hsp_query-to>
+      <Hsp_hit-from>135</Hsp_hit-from>
+      <Hsp_hit-to>165</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>15</Hsp_identity>
+      <Hsp_positive>21</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>31</Hsp_align-len>
+      <Hsp_qseq>GEKYNEEVEGAWSQAYDHLALAIKTEMKQEE</Hsp_qseq>
+      <Hsp_hseq>ADMWSPAMKSAWSEAYDHLVAAIKQEMKPAE</Hsp_hseq>
+      <Hsp_midline> + ++  ++ AWS+AYDHL  AIK EMK  E</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>14</Hit_num>
+  <Hit_id>pdb|4IW3|B</Hit_id>
+  <Hit_def>Crystal structure of a Pseudomonas putida prolyl-4-hydroxylase (P4H) in complex with elongation factor Tu (EF-Tu) [Pseudomonas putida KT2440] &gt;pdb|4IW3|K Crystal structure of a Pseudomonas putida prolyl-4-hydroxylase (P4H) in complex with elongation factor Tu (EF-Tu) [Pseudomonas putida KT2440] &gt;pdb|4J0Q|A Crystal structure of Pseudomonas putida elongation factor Tu (EF-Tu) [Pseudomonas putida KT2440] &gt;pdb|4J0Q|B Crystal structure of Pseudomonas putida elongation factor Tu (EF-Tu) [Pseudomonas putida KT2440] &gt;pdb|4J0Q|C Crystal structure of Pseudomonas putida elongation factor Tu (EF-Tu) [Pseudomonas putida KT2440] &gt;pdb|4J0Q|D Crystal structure of Pseudomonas putida elongation factor Tu (EF-Tu) [Pseudomonas putida KT2440] &gt;pdb|4J0Q|E Crystal structure of Pseudomonas putida elongation factor Tu (EF-Tu) [Pseudomonas putida KT2440]</Hit_def>
+  <Hit_accession>4IW3_B</Hit_accession>
+  <Hit_len>433</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.9518</Hsp_bit-score>
+      <Hsp_score>193</Hsp_score>
+      <Hsp_evalue>5.20643e-16</Hsp_evalue>
+      <Hsp_query-from>112</Hsp_query-from>
+      <Hsp_query-to>198</Hsp_query-to>
+      <Hsp_hit-from>195</Hsp_hit-from>
+      <Hsp_hit-to>276</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>42</Hsp_identity>
+      <Hsp_positive>54</Hsp_positive>
+      <Hsp_gaps>5</Hsp_gaps>
+      <Hsp_align-len>87</Hsp_align-len>
+      <Hsp_qseq>SHHSAEGDVTPPSEEWSSHALLRTLKEGGRDPEMGEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIA</Hsp_qseq>
+      <Hsp_hseq>STYDFPGDDTPIIIGSARMAL-----EGKDDNEMGTTAVKKLVETLDSYIPEPVRAIDQPFLMPIEDVFSISGRGTVVTGRIERGIV</Hsp_hseq>
+      <Hsp_midline>S +   GD TP     +  AL     EG  D EMG   + +LV+  D ++  P R +++PFLMP+EDVFSISGRGTV TGR+ERGI </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>15</Hit_num>
+  <Hit_id>pdb|1B23|P</Hit_id>
+  <Hit_def>E. coli cysteinyl-tRNA and T. aquaticus elongation factor EF-TU:GTP ternary complex [Thermus aquaticus] &gt;pdb|1OB5|A T. aquaticus elongation factor EF-Tu complexed with the antibiotic enacyloxin IIa, a GTP analog, and Phe-tRNA [Thermus aquaticus] &gt;pdb|1OB5|C T. aquaticus elongation factor EF-Tu complexed with the antibiotic enacyloxin IIa, a GTP analog, and Phe-tRNA [Thermus aquaticus] &gt;pdb|1OB5|E T. aquaticus elongation factor EF-Tu complexed with the antibiotic enacyloxin IIa, a GTP analog, and Phe-tRNA [Thermus aquaticus] &gt;pdb|1TTT|A Phe-tRNA, elongation factoR EF-TU:GDPNP ternary complex [Thermus aquaticus] &gt;pdb|1TTT|B Phe-tRNA, elongation factoR EF-TU:GDPNP ternary complex [Thermus aquaticus] &gt;pdb|1TTT|C Phe-tRNA, elongation factoR EF-TU:GDPNP ternary complex [Thermus aquaticus] &gt;pdb|1TUI|A Intact Elongation Factor Tu In Complex With Gdp [Thermus aquaticus] &gt;pdb|1TUI|B Intact Elongation Factor Tu In Complex With Gdp [Thermus aquaticus] &gt;pdb|1TUI|C Intact Elongation Factor Tu In Complex With Gdp [Thermus aquaticus] &gt;pdb|1ZC8|Y Coordinates of tmRNA, SmpB, EF-Tu and h44 fitted into Cryo-EM map of the 70S ribosome and tmRNA complex [Thermus thermophilus]</Hit_def>
+  <Hit_accession>1B23_P</Hit_accession>
+  <Hit_len>405</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.5666</Hsp_bit-score>
+      <Hsp_score>192</Hsp_score>
+      <Hsp_evalue>5.93792e-16</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>198</Hsp_hit-from>
+      <Hsp_hit-to>245</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>34</Hsp_identity>
+      <Hsp_positive>42</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>48</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>KIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A DE++  P RD++KPFLMPVEDVF+I+GRGTVATGR+ERG</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>16</Hit_num>
+  <Hit_id>pdb|2GNV|A</Hit_id>
+  <Hit_def>Crystal structure of non-symbiotic plant hemoglobin from rice, B10 mutant F40L [Oryza sativa] &gt;pdb|2GNV|B Crystal structure of non-symbiotic plant hemoglobin from rice, B10 mutant F40L [Oryza sativa]</Hit_def>
+  <Hit_accession>2GNV_A</Hit_accession>
+  <Hit_len>165</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>74.7146</Hsp_bit-score>
+      <Hsp_score>182</Hsp_score>
+      <Hsp_evalue>5.97593e-16</Hsp_evalue>
+      <Hsp_query-from>4</Hsp_query-from>
+      <Hsp_query-to>70</Hsp_query-to>
+      <Hsp_hit-from>11</Hsp_hit-from>
+      <Hsp_hit-to>77</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>35</Hsp_identity>
+      <Hsp_positive>47</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>67</Hsp_align-len>
+      <Hsp_qseq>IGFTEKQEALVKESWEILKQDIPKYSLHFFSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKV</Hsp_qseq>
+      <Hsp_hseq>VSFSEEQEALVLKSWAILKKDSANIALRFLLKIFEVAPSASQMFSFLRNSDVPLEKNPKLKTHAMSV</Hsp_hseq>
+      <Hsp_midline>+ F+E+QEALV +SW ILK+D    +L F  +I E+AP+A  +FSFLR+SD     NPKLK HA+ V</Hsp_midline>
+    </Hsp>
+    <Hsp>
+      <Hsp_num>2</Hsp_num>
+      <Hsp_bit-score>35.039</Hsp_bit-score>
+      <Hsp_score>79</Hsp_score>
+      <Hsp_evalue>0.0660954</Hsp_evalue>
+      <Hsp_query-from>261</Hsp_query-from>
+      <Hsp_query-to>291</Hsp_query-to>
+      <Hsp_hit-from>135</Hsp_hit-from>
+      <Hsp_hit-to>165</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>15</Hsp_identity>
+      <Hsp_positive>21</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>31</Hsp_align-len>
+      <Hsp_qseq>GEKYNEEVEGAWSQAYDHLALAIKTEMKQEE</Hsp_qseq>
+      <Hsp_hseq>ADMWSPAMKSAWSEAYDHLVAAIKQEMKPAE</Hsp_hseq>
+      <Hsp_midline> + ++  ++ AWS+AYDHL  AIK EMK  E</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>17</Hit_num>
+  <Hit_id>pdb|4ABR|Z</Hit_id>
+  <Hit_def>Complex Of Smpb, A Tmrna Fragment And Ef-Tu-Gdp-Kirromycin With The 70s Ribosome [Thermus thermophilus HB8] &gt;pdb|4V8Q|BZ Chain BZ, ELONGATION FACTOR TU [Thermus thermophilus HB8]</Hit_def>
+  <Hit_accession>4ABR_Z</Hit_accession>
+  <Hit_len>405</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.5666</Hsp_bit-score>
+      <Hsp_score>192</Hsp_score>
+      <Hsp_evalue>6.10906e-16</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>198</Hsp_hit-from>
+      <Hsp_hit-to>245</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>34</Hsp_identity>
+      <Hsp_positive>42</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>48</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>KIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A DE++  P RD++KPFLMPVEDVF+I+GRGTVATGR+ERG</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>18</Hit_num>
+  <Hit_id>pdb|1AIP|A</Hit_id>
+  <Hit_def>Ef-Tu Ef-Ts Complex From Thermus Thermophilus [Thermus thermophilus] &gt;pdb|1AIP|B Ef-Tu Ef-Ts Complex From Thermus Thermophilus [Thermus thermophilus] &gt;pdb|1AIP|E Ef-Tu Ef-Ts Complex From Thermus Thermophilus [Thermus thermophilus] &gt;pdb|1AIP|F Ef-Tu Ef-Ts Complex From Thermus Thermophilus [Thermus thermophilus]</Hit_def>
+  <Hit_accession>1AIP_A</Hit_accession>
+  <Hit_len>405</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.5666</Hsp_bit-score>
+      <Hsp_score>192</Hsp_score>
+      <Hsp_evalue>6.22588e-16</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>198</Hsp_hit-from>
+      <Hsp_hit-to>245</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>34</Hsp_identity>
+      <Hsp_positive>42</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>48</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>KIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A DE++  P RD++KPFLMPVEDVF+I+GRGTVATGR+ERG</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>19</Hit_num>
+  <Hit_id>pdb|1EFT|A</Hit_id>
+  <Hit_def>The Crystal Structure Of Elongation Factor Ef-Tu From Thermus Aquaticus In The Gtp Conformation [Thermus aquaticus]</Hit_def>
+  <Hit_accession>1EFT_A</Hit_accession>
+  <Hit_len>405</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.5666</Hsp_bit-score>
+      <Hsp_score>192</Hsp_score>
+      <Hsp_evalue>6.22588e-16</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>198</Hsp_hit-from>
+      <Hsp_hit-to>245</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>34</Hsp_identity>
+      <Hsp_positive>42</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>48</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>KIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A DE++  P RD++KPFLMPVEDVF+I+GRGTVATGR+ERG</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>20</Hit_num>
+  <Hit_id>pdb|2C77|A</Hit_id>
+  <Hit_def>EF-Tu complexed with a GTP analog and the antibiotic GE2270 A [Thermus thermophilus HB8]</Hit_def>
+  <Hit_accession>2C77_A</Hit_accession>
+  <Hit_len>405</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.5666</Hsp_bit-score>
+      <Hsp_score>192</Hsp_score>
+      <Hsp_evalue>6.34492e-16</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>198</Hsp_hit-from>
+      <Hsp_hit-to>245</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>34</Hsp_identity>
+      <Hsp_positive>42</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>48</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>KIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A DE++  P RD++KPFLMPVEDVF+I+GRGTVATGR+ERG</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>21</Hit_num>
+  <Hit_id>pdb|2Y0Y|Z</Hit_id>
+  <Hit_def>The crystal structure of EF-Tu and G24A-tRNA-Trp bound to a near- cognate codon on the 70S ribosome [Thermus thermophilus HB8] &gt;pdb|2Y10|Z The crystal structure of EF-Tu and Trp-tRNA-Trp bound to a cognate codon on the 70S ribosome. [Thermus thermophilus HB8] &gt;pdb|2Y12|Z The crystal structure of EF-Tu and G24A-tRNA-Trp bound to a near- cognate codon on the 70S ribosome [Thermus thermophilus] &gt;pdb|2Y14|Z The crystal structure of EF-Tu and G24A-tRNA-Trp bound to a cognate codon on the 70S ribosome. [Thermus thermophilus HB8] &gt;pdb|2Y16|Z The crystal structure of EF-Tu and G24A-tRNA-Trp bound to a cognate codon on the 70S ribosome. [Thermus thermophilus HB8] &gt;pdb|2Y18|Z The crystal structure of EF-Tu and Trp-tRNA-Trp bound to a cognate codon on the 70S ribosome. [Thermus thermophilus HB8] &gt;pdb|4V5Q|AZ Chain AZ, ELONGATION FACTOR TU [Thermus thermophilus HB8] &gt;pdb|4V5Q|CZ Chain CZ, ELONGATION FACTOR TU [Thermus thermophilus HB8] &gt;pdb|4V5R|AZ Chain AZ, ELONGATION FACTOR TU [Thermus thermophilus HB8] &gt;pdb|4V5R|CZ Chain CZ, ELONGATION FACTOR TU [Thermus thermophilus HB8] &gt;pdb|4V5S|AZ Chain AZ, ELONGATION FACTOR TU [Thermus thermophilus HB8] &gt;pdb|4V5S|CZ Chain CZ, ELONGATION FACTOR TU [Thermus thermophilus HB8]</Hit_def>
+  <Hit_accession>2Y0Y_Z</Hit_accession>
+  <Hit_len>405</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.1814</Hsp_bit-score>
+      <Hsp_score>191</Hsp_score>
+      <Hsp_evalue>6.52776e-16</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>198</Hsp_hit-from>
+      <Hsp_hit-to>245</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>34</Hsp_identity>
+      <Hsp_positive>42</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>48</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>KIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A DE++  P RD++KPFLMPVEDVF+I+GRGTVATGR+ERG</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>22</Hit_num>
+  <Hit_id>pdb|1EXM|A</Hit_id>
+  <Hit_def>CRYSTAL STRUCTURE OF THERMUS THERMOPHILUS ELONGATION FACTOR TU (EF-TU) IN COMPLEX WITH THE GTP ANALOGUE GPPNHP. [Thermus thermophilus] &gt;pdb|1HA3|A ELONGATION FACTOR TU IN COMPLEX WITH aurodox [Thermus thermophilus HB8] &gt;pdb|1HA3|B ELONGATION FACTOR TU IN COMPLEX WITH aurodox [Thermus thermophilus HB8] &gt;pdb|2XQD|Z The structure of EF-Tu and aminoacyl-tRNA bound to the 70S ribosome with a GTP analog [Thermus thermophilus HB8] &gt;pdb|3FIC|Z T. thermophilus 70S ribosome in complex with mRNA, tRNAs and EF-Tu.GDP.kirromycin ternary complex, fitted to a 6.4 A Cryo-EM map. This file contains the 30S subunit and the ligands [Thermus thermophilus] &gt;pdb|4V5L|AZ Chain AZ, ELONGATION FACTOR TU [Thermus thermophilus HB8] &gt;pdb|4V68|AZ Chain AZ, Elongation factor Tu-A [Thermus thermophilus]</Hit_def>
+  <Hit_accession>1EXM_A</Hit_accession>
+  <Hit_len>405</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.1814</Hsp_bit-score>
+      <Hsp_score>191</Hsp_score>
+      <Hsp_evalue>6.52776e-16</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>198</Hsp_hit-from>
+      <Hsp_hit-to>245</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>34</Hsp_identity>
+      <Hsp_positive>42</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>48</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>KIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A DE++  P RD++KPFLMPVEDVF+I+GRGTVATGR+ERG</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>23</Hit_num>
+  <Hit_id>pdb|2C78|A</Hit_id>
+  <Hit_def>EF-Tu complexed with a GTP analog and the antibiotic pulvomycin [Thermus thermophilus HB8] &gt;pdb|4H9G|A Probing EF-Tu with a very small brominated fragment library identifies the CCA pocket [Thermus thermophilus]</Hit_def>
+  <Hit_accession>2C78_A</Hit_accession>
+  <Hit_len>405</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.1814</Hsp_bit-score>
+      <Hsp_score>191</Hsp_score>
+      <Hsp_evalue>6.52776e-16</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>198</Hsp_hit-from>
+      <Hsp_hit-to>245</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>34</Hsp_identity>
+      <Hsp_positive>42</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>48</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>KIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A DE++  P RD++KPFLMPVEDVF+I+GRGTVATGR+ERG</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>24</Hit_num>
+  <Hit_id>pdb|4LBV|A</Hit_id>
+  <Hit_def>Identifying ligand binding hot spots in proteins using brominated fragments [Thermus thermophilus] &gt;pdb|4LBW|A Identifying ligand binding hot spots in proteins using brominated fragments [Thermus thermophilus] &gt;pdb|4LBY|A Identifying ligand binding hot spots in proteins using brominated fragments [Thermus thermophilus] &gt;pdb|4LBZ|A Identifying ligand binding hot spots in proteins using brominated fragments [Thermus thermophilus] &gt;pdb|4LC0|A Identifying ligand binding hot spots in proteins using brominated fragments [Thermus thermophilus]</Hit_def>
+  <Hit_accession>4LBV_A</Hit_accession>
+  <Hit_len>404</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.1814</Hsp_bit-score>
+      <Hsp_score>191</Hsp_score>
+      <Hsp_evalue>6.56169e-16</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>197</Hsp_hit-from>
+      <Hsp_hit-to>244</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>34</Hsp_identity>
+      <Hsp_positive>42</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>48</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>KIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A DE++  P RD++KPFLMPVEDVF+I+GRGTVATGR+ERG</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>25</Hit_num>
+  <Hit_id>pdb|2Y0U|Z</Hit_id>
+  <Hit_def>The crystal structure of EF-Tu and A9C-tRNA-Trp bound to a near- cognate codon on the 70S ribosome [Thermus thermophilus HB8] &gt;pdb|2Y0W|Z The crystal structure of EF-Tu and A9C-tRNA-Trp bound to a near- cognate codon on the 70S ribosome [Thermus thermophilus HB8] &gt;pdb|4V5P|AZ Chain AZ, ELONGATION FACTOR TU [Thermus thermophilus HB8] &gt;pdb|4V5P|CZ Chain CZ, ELONGATION FACTOR TU [Thermus thermophilus HB8]</Hit_def>
+  <Hit_accession>2Y0U_Z</Hit_accession>
+  <Hit_len>405</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.1814</Hsp_bit-score>
+      <Hsp_score>191</Hsp_score>
+      <Hsp_evalue>6.58987e-16</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>198</Hsp_hit-from>
+      <Hsp_hit-to>245</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>34</Hsp_identity>
+      <Hsp_positive>42</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>48</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>KIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A DE++  P RD++KPFLMPVEDVF+I+GRGTVATGR+ERG</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>26</Hit_num>
+  <Hit_id>pdb|2WRN|Z</Hit_id>
+  <Hit_def>The crystal structure of the 70S ribosome bound to EF-Tu and tRNA (Part 1 of 4). [Thermus thermophilus HB8] &gt;pdb|2WRQ|Z The crystal structure of the 70S ribosome bound to EF-Tu and tRNA (part 3 of 4). [Thermus thermophilus HB8] &gt;pdb|4V5G|AZ Chain AZ, ELONGATION FACTOR TU-A [Thermus thermophilus HB8] &gt;pdb|4V5G|CZ Chain CZ, ELONGATION FACTOR TU-A [Thermus thermophilus HB8]</Hit_def>
+  <Hit_accession>2WRN_Z</Hit_accession>
+  <Hit_len>406</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>78.1814</Hsp_bit-score>
+      <Hsp_score>191</Hsp_score>
+      <Hsp_evalue>6.61787e-16</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>199</Hsp_hit-from>
+      <Hsp_hit-to>246</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>34</Hsp_identity>
+      <Hsp_positive>42</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>48</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>KIWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A DE++  P RD++KPFLMPVEDVF+I+GRGTVATGR+ERG</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>27</Hit_num>
+  <Hit_id>pdb|5W75|A</Hit_id>
+  <Hit_def>Crystal Structure of Reconstructed Bacterial Elongation Factor Node 168 [Thermotoga neapolitana DSM 4359] &gt;pdb|5W75|B Crystal Structure of Reconstructed Bacterial Elongation Factor Node 168 [Thermotoga neapolitana DSM 4359] &gt;pdb|5W75|C Crystal Structure of Reconstructed Bacterial Elongation Factor Node 168 [Thermotoga neapolitana DSM 4359] &gt;pdb|5W75|D Crystal Structure of Reconstructed Bacterial Elongation Factor Node 168 [Thermotoga neapolitana DSM 4359]</Hit_def>
+  <Hit_accession>5W75_A</Hit_accession>
+  <Hit_len>392</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>77.411</Hsp_bit-score>
+      <Hsp_score>189</Hsp_score>
+      <Hsp_evalue>1.30203e-15</Hsp_evalue>
+      <Hsp_query-from>148</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>183</Hsp_hit-from>
+      <Hsp_hit-to>266</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>39</Hsp_identity>
+      <Hsp_positive>55</Hsp_positive>
+      <Hsp_gaps>11</Hsp_gaps>
+      <Hsp_align-len>85</Hsp_align-len>
+      <Hsp_qseq>KKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG----------IATTHRLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>KPIQELLDAMDNYIPDPQRDVDKPFLMPIEDVFSITGRGTVVTGRIERGRIRPGDEVEIIGLSYEIR-KTVVTSVEMFRKELDEG</Hsp_hseq>
+      <Hsp_midline>K I EL+ A D ++  P RD++KPFLMP+EDVFSI+GRGTV TGR+ERG          I  ++ +  K+ V  ++  RK+L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>28</Hit_num>
+  <Hit_id>pdb|5I4Q|C</Hit_id>
+  <Hit_def>Contact-dependent inhibition system from Escherichia coli NC101 - ternary CdiA/CdiI/EF-Tu complex (domains 2 and 3) [Escherichia coli BL21(DE3)]</Hit_def>
+  <Hit_accession>5I4Q_C</Hit_accession>
+  <Hit_len>217</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>74.7146</Hsp_bit-score>
+      <Hsp_score>182</Hsp_score>
+      <Hsp_evalue>2.00568e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>9</Hsp_hit-from>
+      <Hsp_hit-to>92</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>29</Hit_num>
+  <Hit_id>pdb|4ZV4|A</Hit_id>
+  <Hit_def>Structure of Tse6 in complex with EF-Tu [Pseudomonas aeruginosa PAO1] &gt;pdb|4ZV4|B Structure of Tse6 in complex with EF-Tu [Pseudomonas aeruginosa PAO1]</Hit_def>
+  <Hit_accession>4ZV4_A</Hit_accession>
+  <Hit_len>405</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>76.6406</Hsp_bit-score>
+      <Hsp_score>187</Hsp_score>
+      <Hsp_evalue>2.31683e-15</Hsp_evalue>
+      <Hsp_query-from>138</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>180</Hsp_hit-from>
+      <Hsp_hit-to>272</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>39</Hsp_identity>
+      <Hsp_positive>55</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>93</Hsp_align-len>
+      <Hsp_qseq>EGGRDPEMGEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EGKDDNGIGVSAVQKLVETLDSYIPEPVRAIDQPFLMPIEDVFSISGRGTVVTGRVERGIIKVQEEVEIVGIKATTKTTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>EG  D  +G   + +LV+  D ++  P R +++PFLMP+EDVFSISGRGTV TGRVERGI            +  +K+    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>30</Hit_num>
+  <Hit_id>pdb|1BIN|A</Hit_id>
+  <Hit_def>Leghemoglobin A (Acetomet) [Glycine max] &gt;pdb|1BIN|B Leghemoglobin A (Acetomet) [Glycine max] &gt;pdb|1FSL|A FERRIC SOYBEAN LEGHEMOGLOBIN COMPLEXED WITH NICOTINATE [Glycine max] &gt;pdb|1FSL|B FERRIC SOYBEAN LEGHEMOGLOBIN COMPLEXED WITH NICOTINATE [Glycine max]</Hit_def>
+  <Hit_accession>1BIN_A</Hit_accession>
+  <Hit_len>143</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>72.4034</Hsp_bit-score>
+      <Hsp_score>176</Hsp_score>
+      <Hsp_evalue>2.47588e-15</Hsp_evalue>
+      <Hsp_query-from>4</Hsp_query-from>
+      <Hsp_query-to>70</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>65</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>37</Hsp_identity>
+      <Hsp_positive>48</Hsp_positive>
+      <Hsp_gaps>2</Hsp_gaps>
+      <Hsp_align-len>67</Hsp_align-len>
+      <Hsp_qseq>IGFTEKQEALVKESWEILKQDIPKYSLHFFSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKV</Hsp_qseq>
+      <Hsp_hseq>VAFTEKQDALVSSSFEAFKANIPQYSVVFYTSILEKAPAAKDLFSFL--ANGVDPTNPKLTGHAEKL</Hsp_hseq>
+      <Hsp_midline>+ FTEKQ+ALV  S+E  K +IP+YS+ F++ ILE APAAK LFSFL  ++ V   NPKL  HA K+</Hsp_midline>
+    </Hsp>
+    <Hsp>
+      <Hsp_num>2</Hsp_num>
+      <Hsp_bit-score>32.7278</Hsp_bit-score>
+      <Hsp_score>73</Hsp_score>
+      <Hsp_evalue>0.319198</Hsp_evalue>
+      <Hsp_query-from>259</Hsp_query-from>
+      <Hsp_query-to>284</Hsp_query-to>
+      <Hsp_hit-from>116</Hsp_hit-from>
+      <Hsp_hit-to>141</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>14</Hsp_identity>
+      <Hsp_positive>20</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>26</Hsp_align-len>
+      <Hsp_qseq>ALGEKYNEEVEGAWSQAYDHLALAIK</Hsp_qseq>
+      <Hsp_hseq>AVGDKWSDELSRAWEVAYDELAAAIK</Hsp_hseq>
+      <Hsp_midline>A+G+K+++E+  AW  AYD LA AIK</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>31</Hit_num>
+  <Hit_id>pdb|4R71|A</Hit_id>
+  <Hit_def>Structure of the Qbeta holoenzyme complex in the P1211 crystal form [Escherichia coli K-12] &gt;pdb|4R71|C Structure of the Qbeta holoenzyme complex in the P1211 crystal form [Escherichia coli K-12]</Hit_def>
+  <Hit_accession>4R71_A</Hit_accession>
+  <Hit_len>694</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>76.2554</Hsp_bit-score>
+      <Hsp_score>186</Hsp_score>
+      <Hsp_evalue>4.85011e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>470</Hsp_hit-from>
+      <Hsp_hit-to>553</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>32</Hit_num>
+  <Hit_id>pdb|3MMP|A</Hit_id>
+  <Hit_def>Structure of the Qb replicase, an RNA-dependent RNA polymerase consisting of viral and host proteins [Escherichia coli K-12] &gt;pdb|3MMP|C Structure of the Qb replicase, an RNA-dependent RNA polymerase consisting of viral and host proteins [Escherichia coli K-12]</Hit_def>
+  <Hit_accession>3MMP_A</Hit_accession>
+  <Hit_len>678</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>76.2554</Hsp_bit-score>
+      <Hsp_score>186</Hsp_score>
+      <Hsp_evalue>5.22289e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>470</Hsp_hit-from>
+      <Hsp_hit-to>553</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>33</Hit_num>
+  <Hit_id>pdb|3QQQ|A</Hit_id>
+  <Hit_def>Crystal structure of non-symbiotic plant hemoglobin from Trema tomentosa [Trema tomentosum] &gt;pdb|3QQQ|B Crystal structure of non-symbiotic plant hemoglobin from Trema tomentosa [Trema tomentosum]</Hit_def>
+  <Hit_accession>3QQQ_A</Hit_accession>
+  <Hit_len>168</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>72.4034</Hsp_bit-score>
+      <Hsp_score>176</Hsp_score>
+      <Hsp_evalue>5.34626e-15</Hsp_evalue>
+      <Hsp_query-from>6</Hsp_query-from>
+      <Hsp_query-to>70</Hsp_query-to>
+      <Hsp_hit-from>16</Hsp_hit-from>
+      <Hsp_hit-to>80</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>35</Hsp_identity>
+      <Hsp_positive>47</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>65</Hsp_align-len>
+      <Hsp_qseq>FTEKQEALVKESWEILKQDIPKYSLHFFSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKV</Hsp_qseq>
+      <Hsp_hseq>FTEEQEALVVKSWAVMKKNSAELGLKFFLKIFEIAPSAKNLFSYLKDSPIPLEQNPKLKPHAMTV</Hsp_hseq>
+      <Hsp_midline>FTE+QEALV +SW ++K++  +  L FF +I EIAP+AK LFS+L+DS      NPKLK HA+ V</Hsp_midline>
+    </Hsp>
+    <Hsp>
+      <Hsp_num>2</Hsp_num>
+      <Hsp_bit-score>35.039</Hsp_bit-score>
+      <Hsp_score>79</Hsp_score>
+      <Hsp_evalue>0.0578754</Hsp_evalue>
+      <Hsp_query-from>259</Hsp_query-from>
+      <Hsp_query-to>288</Hsp_query-to>
+      <Hsp_hit-from>135</Hsp_hit-from>
+      <Hsp_hit-to>164</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>15</Hsp_identity>
+      <Hsp_positive>22</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>30</Hsp_align-len>
+      <Hsp_qseq>ALGEKYNEEVEGAWSQAYDHLALAIKTEMK</Hsp_qseq>
+      <Hsp_hseq>AVPEMWSPEMKNAWGEAYDQLVAAIKSEMK</Hsp_hseq>
+      <Hsp_midline>A+ E ++ E++ AW +AYD L  AIK+EMK</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>34</Hit_num>
+  <Hit_id>pdb|2HCJ|B</Hit_id>
+  <Hit_def>Trypsin-modified Elongation Factor Tu in complex with tetracycline [Escherichia coli]</Hit_def>
+  <Hit_accession>2HCJ_B</Hit_accession>
+  <Hit_len>335</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.0998</Hsp_bit-score>
+      <Hsp_score>183</Hsp_score>
+      <Hsp_evalue>5.5615e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>127</Hsp_hit-from>
+      <Hsp_hit-to>210</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>35</Hit_num>
+  <Hit_id>pdb|1EFM|A</Hit_id>
+  <Hit_def>STRUCTURE OF THE GDP DOMAIN OF EF-TU AND LOCATION OF THE AMINO ACIDS HOMOLOGOUS TO RAS ONCOGENE PROTEINS [Escherichia coli]</Hit_def>
+  <Hit_accession>1EFM_A</Hit_accession>
+  <Hit_len>379</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>5.73361e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>171</Hsp_hit-from>
+      <Hsp_hit-to>254</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>36</Hit_num>
+  <Hit_id>pdb|1EFU|A</Hit_id>
+  <Hit_def>Elongation Factor Complex Ef-TuEF-Ts From Escherichia Coli [Escherichia coli] &gt;pdb|1EFU|C Elongation Factor Complex Ef-TuEF-Ts From Escherichia Coli [Escherichia coli]</Hit_def>
+  <Hit_accession>1EFU_A</Hit_accession>
+  <Hit_len>385</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>5.95564e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>177</Hsp_hit-from>
+      <Hsp_hit-to>260</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>37</Hit_num>
+  <Hit_id>pdb|5WE6|z</Hit_id>
+  <Hit_def>70S ribosome-EF-Tu H84A complex with GTP and cognate tRNA [Escherichia coli] &gt;pdb|5WF0|z 70S ribosome-EF-Tu H84A complex with GTP and near-cognate tRNA (Complex C2) [Escherichia coli O139:H28 str. E24377A] &gt;pdb|5WFK|z 70S ribosome-EF-Tu H84A complex with GTP and near-cognate tRNA (Complex C3) [Escherichia coli K-12] &gt;pdb|5WFS|z 70S ribosome-EF-Tu H84A complex with GTP and near-cognate tRNA (Complex C4) [Escherichia coli]</Hit_def>
+  <Hit_accession>5WE6_z</Hit_accession>
+  <Hit_len>393</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>6.05461e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>185</Hsp_hit-from>
+      <Hsp_hit-to>268</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>38</Hit_num>
+  <Hit_id>pdb|2HDN|B</Hit_id>
+  <Hit_def>Trypsin-modified Elongation Factor Tu in complex with tetracycline at 2.8 Angstrom resolution [Escherichia coli] &gt;pdb|2HDN|D Trypsin-modified Elongation Factor Tu in complex with tetracycline at 2.8 Angstrom resolution [Escherichia coli] &gt;pdb|2HDN|F Trypsin-modified Elongation Factor Tu in complex with tetracycline at 2.8 Angstrom resolution [Escherichia coli] &gt;pdb|2HDN|H Trypsin-modified Elongation Factor Tu in complex with tetracycline at 2.8 Angstrom resolution [Escherichia coli] &gt;pdb|2HDN|J Trypsin-modified Elongation Factor Tu in complex with tetracycline at 2.8 Angstrom resolution [Escherichia coli] &gt;pdb|2HDN|L Trypsin-modified Elongation Factor Tu in complex with tetracycline at 2.8 Angstrom resolution [Escherichia coli] &gt;pdb|5I4R|D Contact-dependent inhibition system from Escherichia coli NC101 - ternary CdiA/CdiI/EF-Tu complex (trypsin-modified) [Escherichia coli BL21(DE3)] &gt;pdb|5I4R|H Contact-dependent inhibition system from Escherichia coli NC101 - ternary CdiA/CdiI/EF-Tu complex (trypsin-modified) [Escherichia coli BL21(DE3)]</Hit_def>
+  <Hit_accession>2HDN_B</Hit_accession>
+  <Hit_len>335</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.0998</Hsp_bit-score>
+      <Hsp_score>183</Hsp_score>
+      <Hsp_evalue>6.12145e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>127</Hsp_hit-from>
+      <Hsp_hit-to>210</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>39</Hit_num>
+  <Hit_id>pdb|3U2Q|A</Hit_id>
+  <Hit_def>EF-Tu (Escherichia coli) in complex with NVP-LFF571 [Escherichia coli K-12] &gt;pdb|3U6B|A Ef-tu (escherichia coli) in complex with nvp-ldi028 [Escherichia coli K-12] &gt;pdb|3U6B|B Ef-tu (escherichia coli) in complex with nvp-ldi028 [Escherichia coli K-12] &gt;pdb|3U6K|A Ef-tu (escherichia coli) in complex with nvp-ldk733 [Escherichia coli K-12] &gt;pdb|3U6K|B Ef-tu (escherichia coli) in complex with nvp-ldk733 [Escherichia coli K-12] &gt;pdb|4G5G|A ef-tu (Escherichia coli) complexed with nvp-ldu796 [Escherichia coli K-12]</Hit_def>
+  <Hit_accession>3U2Q_A</Hit_accession>
+  <Hit_len>394</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>6.19604e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>186</Hsp_hit-from>
+      <Hsp_hit-to>269</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>40</Hit_num>
+  <Hit_id>pdb|1OB2|A</Hit_id>
+  <Hit_def>E. coli elongation factor EF-Tu complexed with the antibiotic kirromycin, a GTP analog, and Phe-tRNA [Escherichia coli BL21]</Hit_def>
+  <Hit_accession>1OB2_A</Hit_accession>
+  <Hit_len>393</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>6.22849e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>185</Hsp_hit-from>
+      <Hsp_hit-to>268</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>41</Hit_num>
+  <Hit_id>pdb|6WD2|8</Hit_id>
+  <Hit_def>Cryo-EM of elongating ribosome with EF-Tu*GTP elucidates tRNA proofreading (Cognate Structure II-A) [Escherichia coli] &gt;pdb|6WD3|8 Cryo-EM of elongating ribosome with EF-Tu*GTP elucidates tRNA proofreading (Cognate Structure II-B1) [Escherichia coli] &gt;pdb|6WD4|8 Cryo-EM of elongating ribosome with EF-Tu*GTP elucidates tRNA proofreading (Cognate Structure II-B2) [Escherichia coli] &gt;pdb|6WD5|8 Cryo-EM of elongating ribosome with EF-Tu*GTP elucidates tRNA proofreading (Cognate Structure II-C1) [Escherichia coli] &gt;pdb|6WD6|8 Cryo-EM of elongating ribosome with EF-Tu*GTP elucidates tRNA proofreading (Cognate Structure II-C2) [Escherichia coli K-12] &gt;pdb|6WD7|8 Cryo-EM of elongating ribosome with EF-Tu*GTP elucidates tRNA proofreading (Cognate Structure II-D) [Escherichia coli] &gt;pdb|6WD8|8 Cryo-EM of elongating ribosome with EF-Tu*GTP elucidates tRNA proofreading (Cognate Structure III-A) [Escherichia coli] &gt;pdb|6WD9|8 Cryo-EM of elongating ribosome with EF-Tu*GTP elucidates tRNA proofreading (Cognate Structure III-B) [Escherichia coli] &gt;pdb|6WDA|8 Cryo-EM of elongating ribosome with EF-Tu*GTP elucidates tRNA proofreading (Cognate Structure III-C) [Escherichia coli]</Hit_def>
+  <Hit_accession>6WD2_8</Hit_accession>
+  <Hit_len>400</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>6.23039e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>185</Hsp_hit-from>
+      <Hsp_hit-to>268</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>42</Hit_num>
+  <Hit_id>pdb|1EFC|A</Hit_id>
+  <Hit_def>Intact Elongation Factor From E.Coli [Escherichia coli] &gt;pdb|1EFC|B Intact Elongation Factor From E.Coli [Escherichia coli] &gt;pdb|1LS2|A Fitting of EF-Tu and tRNA in the Low Resolution Cryo-EM Map of an EF-Tu Ternary Complex (GDP and Kirromycin) Bound to E. coli 70S Ribosome [Escherichia coli] &gt;pdb|1QZD|A EF-Tu.kirromycin coordinates fitted into the cryo-EM map of EF-Tu ternary complex (GDP.Kirromycin) bound 70S ribosome [Escherichia coli] &gt;pdb|2BVN|A E. coli EF-Tu:GDPNP in complex with the antibiotic enacyloxin IIa [Escherichia coli BL21] &gt;pdb|2BVN|B E. coli EF-Tu:GDPNP in complex with the antibiotic enacyloxin IIa [Escherichia coli BL21] &gt;pdb|3EP2|X Model of Phe-tRNA(Phe) in the ribosomal pre-accommodated state revealed by cryo-EM [Escherichia coli K-12] &gt;pdb|3EQ3|X Model of tRNA(Trp)-EF-Tu in the ribosomal pre-accommodated state revealed by cryo-EM [Escherichia coli K-12] &gt;pdb|3EQ4|X Model of tRNA(Leu)-EF-Tu in the ribosomal pre-accommodated state revealed by cryo-EM [Escherichia coli K-12] &gt;pdb|3FIH|Z Ternary complex-bound E.coli 70S ribosome. This entry consists of the 30S subunit, tRNAs and the ternary complex. [Escherichia coli] &gt;pdb|3IZV|C Structural insights into cognate vs. near-cognate discrimination during decoding. This entry contains the small subunit of a ribosome programmed with a near-cognate codon, A/T-site tRNA, P-site tRNA, mRNA and EF-Tu [Escherichia coli K-12] &gt;pdb|3IZW|C Structural insights into cognate vs. near-cognate discrimination during decoding.This entry contains the small subunit of a ribosome programmed with a cognate codon, A/T-site tRNA, P-site tRNA, mRNA and EF-Tu [Escherichia coli K-12] &gt;pdb|4V69|AZ Chain AZ, Elongation factor Tu [Escherichia coli] &gt;pdb|4V6K|BC Chain BC, Elongation factor Tu 2 [Escherichia coli K-12] &gt;pdb|4V6L|AC Chain AC, Elongation factor Tu 2 [Escherichia coli K-12] &gt;pdb|5AFI|z 2.9A Structure of E. coli ribosome-EF-TU complex by cs-corrected cryo-EM [Escherichia coli]</Hit_def>
+  <Hit_accession>1EFC_A</Hit_accession>
+  <Hit_len>393</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>6.28755e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>185</Hsp_hit-from>
+      <Hsp_hit-to>268</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>43</Hit_num>
+  <Hit_id>pdb|5WDT|z</Hit_id>
+  <Hit_def>70S ribosome-EF-Tu H84A complex with GppNHp [Escherichia coli]</Hit_def>
+  <Hit_accession>5WDT_z</Hit_accession>
+  <Hit_len>393</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>6.34717e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>185</Hsp_hit-from>
+      <Hsp_hit-to>268</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>44</Hit_num>
+  <Hit_id>pdb|5WE4|z</Hit_id>
+  <Hit_def>70S ribosome-EF-Tu wt complex with GppNHp [Escherichia coli]</Hit_def>
+  <Hit_accession>5WE4_z</Hit_accession>
+  <Hit_len>393</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>6.34717e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>185</Hsp_hit-from>
+      <Hsp_hit-to>268</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>45</Hit_num>
+  <Hit_id>pdb|1D8T|A</Hit_id>
+  <Hit_def>CRYSTAL STRUCTURE OF ELONGATION FACTOR, TU (EF-TU-MGGDP) COMPLEXED WITH GE2270A, A THIAZOLYL PEPTIDE ANTIBIOTIC [Escherichia coli] &gt;pdb|1D8T|B CRYSTAL STRUCTURE OF ELONGATION FACTOR, TU (EF-TU-MGGDP) COMPLEXED WITH GE2270A, A THIAZOLYL PEPTIDE ANTIBIOTIC [Escherichia coli] &gt;pdb|1ETU|A Structural Details Of The Binding Of Guanosine Diphosphate To Elongation Factor Tu From E. Coli As Studied By X-Ray Crystallography [Escherichia coli K-12] &gt;pdb|2FX3|A Crystal Structure Determination of E. coli Elongation Factor, Tu using a Twinned Data Set [Escherichia coli] &gt;pdb|4Q7J|B Complex structure of viral RNA polymerase [Escherichia coli K-12] &gt;pdb|4Q7J|F Complex structure of viral RNA polymerase [Escherichia coli K-12]</Hit_def>
+  <Hit_accession>1D8T_A</Hit_accession>
+  <Hit_len>393</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>6.40735e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>185</Hsp_hit-from>
+      <Hsp_hit-to>268</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>46</Hit_num>
+  <Hit_id>pdb|4P3Y|A</Hit_id>
+  <Hit_def>Crystal structure of Acinetobacter baumannii DsbA in complex with EF-Tu [Escherichia coli BL21(DE3)] &gt;pdb|4PC1|A Elongation Factor Tu:Ts complex with a bound phosphate [Escherichia coli str. K-12 substr. DH10B] &gt;pdb|4PC1|B Elongation Factor Tu:Ts complex with a bound phosphate [Escherichia coli str. K-12 substr. DH10B] &gt;pdb|4PC2|A Elongation factor Tu:Ts complex with a bound GDP [Escherichia coli str. K-12 substr. DH10B] &gt;pdb|4PC2|B Elongation factor Tu:Ts complex with a bound GDP [Escherichia coli str. K-12 substr. DH10B] &gt;pdb|4PC3|A Elongation factor Tu:Ts complex with partially bound GDP [Escherichia coli K-12] &gt;pdb|4PC3|B Elongation factor Tu:Ts complex with partially bound GDP [Escherichia coli K-12] &gt;pdb|4PC6|A Elongation factor Tu:Ts complex with bound GDPNP [Escherichia coli str. K-12 substr. DH10B] &gt;pdb|4PC6|B Elongation factor Tu:Ts complex with bound GDPNP [Escherichia coli str. K-12 substr. DH10B] &gt;pdb|4PC7|A Elongation factor Tu:Ts complex in a near GTP conformation. [Escherichia coli K-12] &gt;pdb|5JBQ|A Ef-tu (escherichia Coli) In Complex With Thiomuracin Analog [Escherichia coli K-12]</Hit_def>
+  <Hit_accession>4P3Y_A</Hit_accession>
+  <Hit_len>394</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>6.43435e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>186</Hsp_hit-from>
+      <Hsp_hit-to>269</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>47</Hit_num>
+  <Hit_id>pdb|1DG1|G</Hit_id>
+  <Hit_def>Whole, Unmodified, Ef-Tu(Elongation Factor Tu). [Escherichia coli] &gt;pdb|1DG1|H Whole, Unmodified, Ef-Tu(Elongation Factor Tu). [Escherichia coli] &gt;pdb|6EZE|A The open conformation of E.coli Elongation Factor Tu in complex with GDPNP. [Escherichia coli K-12] &gt;pdb|6EZE|B The open conformation of E.coli Elongation Factor Tu in complex with GDPNP. [Escherichia coli K-12]</Hit_def>
+  <Hit_accession>1DG1_G</Hit_accession>
+  <Hit_len>394</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>6.49534e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>186</Hsp_hit-from>
+      <Hsp_hit-to>269</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>48</Hit_num>
+  <Hit_id>pdb|5UYK|Z</Hit_id>
+  <Hit_def>Chain Z, Elongation factor Tu 2 [Escherichia coli K-12] &gt;pdb|5UYL|Z Chain Z, Elongation factor Tu 2 [Escherichia coli K-12] &gt;pdb|5UYM|Z Chain Z, Elongation factor Tu 2 [Escherichia coli K-12] &gt;pdb|5UYN|Z Chain Z, Elongation factor Tu 2 [Escherichia coli K-12] &gt;pdb|5UYP|Z Chain Z, Elongation factor Tu 2 [Escherichia coli K-12] &gt;pdb|5UYQ|Z Chain Z, Elongation factor Tu 2 [Escherichia coli K-12]</Hit_def>
+  <Hit_accession>5UYK_Z</Hit_accession>
+  <Hit_len>392</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>6.50176e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>185</Hsp_hit-from>
+      <Hsp_hit-to>268</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>49</Hit_num>
+  <Hit_id>pdb|5OPD|A</Hit_id>
+  <Hit_def>Structure of phosphorylated EF-Tu in complex with GTP [Escherichia coli HS] &gt;pdb|5OPD|B Structure of phosphorylated EF-Tu in complex with GTP [Escherichia coli HS]</Hit_def>
+  <Hit_accession>5OPD_A</Hit_accession>
+  <Hit_len>400</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.0998</Hsp_bit-score>
+      <Hsp_score>183</Hsp_score>
+      <Hsp_evalue>7.24396e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>186</Hsp_hit-from>
+      <Hsp_hit-to>269</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>50</Hit_num>
+  <Hit_id>pdb|5MI3|A</Hit_id>
+  <Hit_def>Structure of phosphorylated translation elongation factor EF-Tu from E. coli [Escherichia coli K-12] &gt;pdb|5MI3|B Structure of phosphorylated translation elongation factor EF-Tu from E. coli [Escherichia coli K-12]</Hit_def>
+  <Hit_accession>5MI3_A</Hit_accession>
+  <Hit_len>402</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.0998</Hsp_bit-score>
+      <Hsp_score>183</Hsp_score>
+      <Hsp_evalue>7.43889e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>194</Hsp_hit-from>
+      <Hsp_hit-to>277</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>51</Hit_num>
+  <Hit_id>pdb|3AGP|A</Hit_id>
+  <Hit_def>Structure of viral polymerase form I [Escherichia coli O157:H7] &gt;pdb|3AGQ|A Structure of viral polymerase form II [Escherichia coli O157:H7] &gt;pdb|3AVT|A Structure of viral RNA polymerase complex 1 [Escherichia coli O157:H7] &gt;pdb|3AVU|A Structure of viral RNA polymerase complex 2 [Escherichia coli O157:H7] &gt;pdb|3AVV|A Structure of viral RNA polymerase complex 3 [Escherichia coli O157:H7] &gt;pdb|3AVW|A Structure of viral RNA polymerase complex 4 [Escherichia coli O157:H7] &gt;pdb|3AVX|A Structure of viral RNA polymerase complex 5 [Escherichia coli O157:H7] &gt;pdb|3AVY|A Structure of viral RNA polymerase complex 6 [Escherichia coli O157:H7] &gt;pdb|3VNU|A Complex structure of viral RNA polymerase I [Escherichia coli O157:H7] &gt;pdb|3VNV|A Complex structure of viral RNA polymerase II [Escherichia coli O157:H7] &gt;pdb|4FWT|A Complex structure of viral RNA polymerase form III [Escherichia coli O157:H7]</Hit_def>
+  <Hit_accession>3AGP_A</Hit_accession>
+  <Hit_len>1289</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>75.485</Hsp_bit-score>
+      <Hsp_score>184</Hsp_score>
+      <Hsp_evalue>9.469e-15</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>470</Hsp_hit-from>
+      <Hsp_hit-to>553</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>50</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSISGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSISGRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>52</Hit_num>
+  <Hit_id>pdb|3QQR|A</Hit_id>
+  <Hit_def>Crystal structure of Parasponia hemoglobin; Differential Heme Coordination is Linked to Quaternary Structure [Parasponia andersonii] &gt;pdb|3QQR|B Crystal structure of Parasponia hemoglobin; Differential Heme Coordination is Linked to Quaternary Structure [Parasponia andersonii]</Hit_def>
+  <Hit_accession>3QQR_A</Hit_accession>
+  <Hit_len>162</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>71.2478</Hsp_bit-score>
+      <Hsp_score>173</Hsp_score>
+      <Hsp_evalue>1.2152e-14</Hsp_evalue>
+      <Hsp_query-from>6</Hsp_query-from>
+      <Hsp_query-to>70</Hsp_query-to>
+      <Hsp_hit-from>10</Hsp_hit-from>
+      <Hsp_hit-to>74</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>34</Hsp_identity>
+      <Hsp_positive>46</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>65</Hsp_align-len>
+      <Hsp_qseq>FTEKQEALVKESWEILKQDIPKYSLHFFSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKV</Hsp_qseq>
+      <Hsp_hseq>FTEEQEALVVKAWAVMKKNSAELGLQFFLKIFEIAPSAKNLFSYLKDSPVPLEQNPKLKPHATTV</Hsp_hseq>
+      <Hsp_midline>FTE+QEALV ++W ++K++  +  L FF +I EIAP+AK LFS+L+DS      NPKLK HA  V</Hsp_midline>
+    </Hsp>
+    <Hsp>
+      <Hsp_num>2</Hsp_num>
+      <Hsp_bit-score>32.7278</Hsp_bit-score>
+      <Hsp_score>73</Hsp_score>
+      <Hsp_evalue>0.292721</Hsp_evalue>
+      <Hsp_query-from>259</Hsp_query-from>
+      <Hsp_query-to>288</Hsp_query-to>
+      <Hsp_hit-from>129</Hsp_hit-from>
+      <Hsp_hit-to>158</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>15</Hsp_identity>
+      <Hsp_positive>20</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>30</Hsp_align-len>
+      <Hsp_qseq>ALGEKYNEEVEGAWSQAYDHLALAIKTEMK</Hsp_qseq>
+      <Hsp_hseq>AVPEMWSPEMKNAWGVAYDQLVAAIKFEMK</Hsp_hseq>
+      <Hsp_midline>A+ E ++ E++ AW  AYD L  AIK EMK</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>53</Hit_num>
+  <Hit_id>pdb|5MI9|A</Hit_id>
+  <Hit_def>Structure of the phosphomimetic mutant of the elongation factor EF-Tu T62E [Escherichia coli HS] &gt;pdb|5MI9|B Structure of the phosphomimetic mutant of the elongation factor EF-Tu T62E [Escherichia coli HS]</Hit_def>
+  <Hit_accession>5MI9_A</Hit_accession>
+  <Hit_len>402</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>73.9442</Hsp_bit-score>
+      <Hsp_score>180</Hsp_score>
+      <Hsp_evalue>1.94086e-14</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>194</Hsp_hit-from>
+      <Hsp_hit-to>277</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>39</Hsp_identity>
+      <Hsp_positive>49</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSICGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSI GRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>54</Hit_num>
+  <Hit_id>pdb|5MI8|A</Hit_id>
+  <Hit_def>Structure of the phosphomimetic mutant of EF-Tu T383E [Escherichia coli HS] &gt;pdb|5MI8|B Structure of the phosphomimetic mutant of EF-Tu T383E [Escherichia coli HS]</Hit_def>
+  <Hit_accession>5MI8_A</Hit_accession>
+  <Hit_len>402</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>73.9442</Hsp_bit-score>
+      <Hsp_score>180</Hsp_score>
+      <Hsp_evalue>1.94086e-14</Hsp_evalue>
+      <Hsp_query-from>147</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>194</Hsp_hit-from>
+      <Hsp_hit-to>277</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>39</Hsp_identity>
+      <Hsp_positive>49</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>84</Hsp_align-len>
+      <Hsp_qseq>EKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EAKILELAGFLDSYIPEPERAIDKPFLLPIEDVFSICGRGTVVTGRVERGIIKVGEEVEIVGIKETQKSTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E KILEL    D ++  P R ++KPFL+P+EDVFSI GRGTV TGRVERGI            +   KS    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>55</Hit_num>
+  <Hit_id>pdb|6MIJ|A</Hit_id>
+  <Hit_def>Crystal structure of EF-Tu from Acinetobacter baumannii in complex with Mg2+ and GDP [Acinetobacter baumannii ATCC 19606 = CIP 70.34 = JCM 6841]</Hit_def>
+  <Hit_accession>6MIJ_A</Hit_accession>
+  <Hit_len>396</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>73.559</Hsp_bit-score>
+      <Hsp_score>179</Hsp_score>
+      <Hsp_evalue>2.8164e-14</Hsp_evalue>
+      <Hsp_query-from>146</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>187</Hsp_hit-from>
+      <Hsp_hit-to>271</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>39</Hsp_identity>
+      <Hsp_positive>51</Hsp_positive>
+      <Hsp_gaps>8</Hsp_gaps>
+      <Hsp_align-len>85</Hsp_align-len>
+      <Hsp_qseq>GEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>GEESVLALVAALDSYIPEPERAIDKAFLMPIEDVFSISGRGTVVTGRVEAGIIKVGEEVEIVGIKDTVKTTVTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>GE+ +L LV A D ++  P R ++K FLMP+EDVFSISGRGTV TGRVE GI            +   K+ V  ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>56</Hit_num>
+  <Hit_id>pdb|5W76|A</Hit_id>
+  <Hit_def>Crystal Structure of Reconstructed Bacterial Elongation Factor Node 168 [synthetic construct]</Hit_def>
+  <Hit_accession>5W76_A</Hit_accession>
+  <Hit_len>385</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>73.1738</Hsp_bit-score>
+      <Hsp_score>178</Hsp_score>
+      <Hsp_evalue>3.6429e-14</Hsp_evalue>
+      <Hsp_query-from>144</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>175</Hsp_hit-from>
+      <Hsp_hit-to>260</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>40</Hsp_identity>
+      <Hsp_positive>53</Hsp_positive>
+      <Hsp_gaps>9</Hsp_gaps>
+      <Hsp_align-len>87</Hsp_align-len>
+      <Hsp_qseq>EMGEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTH--------RLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>EEGEEAIMKLMDAVDSYIPEPERAIDKPFLMPIEDVFSIS-RGTVVTGRVERGIVKVGEEVEIVGIRDTQKTTCTGVEMFRKLLDEG</Hsp_hseq>
+      <Hsp_midline>E GE+ I++L+ A D ++  P R ++KPFLMP+EDVFSIS RGTV TGRVERGI            R   K+    ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>57</Hit_num>
+  <Hit_id>pdb|1MJ1|A</Hit_id>
+  <Hit_def>FITTING THE TERNARY COMPLEX OF EF-Tu/tRNA/GTP AND RIBOSOMAL PROTEINS INTO A 13 A CRYO-EM MAP OF THE COLI 70S RIBOSOME [Escherichia coli]</Hit_def>
+  <Hit_accession>1MJ1_A</Hit_accession>
+  <Hit_len>405</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>73.1738</Hsp_bit-score>
+      <Hsp_score>178</Hsp_score>
+      <Hsp_evalue>4.1528e-14</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>222</Hsp_query-to>
+      <Hsp_hit-from>198</Hsp_hit-from>
+      <Hsp_hit-to>280</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>39</Hsp_identity>
+      <Hsp_positive>51</Hsp_positive>
+      <Hsp_gaps>9</Hsp_gaps>
+      <Hsp_align-len>83</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG---------IATTHRLESKSQVNLIDTLRKQLEEA</Hsp_qseq>
+      <Hsp_hseq>KIWELLDAIDEYIRTRVRDVDKRFLMRVEDVFTITGRGTVATGRIERGKVKVGDEVEIVGLARETRKTVVTGVEMHRKTLQEG</Hsp_hseq>
+      <Hsp_midline>KI EL+ A DE++    RD++K FLM VEDVF+I+GRGTVATGR+ERG         I    R   K+ V  ++  RK L+E </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>58</Hit_num>
+  <Hit_id>pdb|1JNY|A</Hit_id>
+  <Hit_def>Crystal structure of Sulfolobus solfataricus elongation factor 1 alpha in complex with GDP [Saccharolobus solfataricus] &gt;pdb|1JNY|B Crystal structure of Sulfolobus solfataricus elongation factor 1 alpha in complex with GDP [Saccharolobus solfataricus] &gt;pdb|1SKQ|A The crystal structure of Sulfolobus solfataricus elongation factor 1-alpha in complex with magnesium and GDP [Saccharolobus solfataricus] &gt;pdb|1SKQ|B The crystal structure of Sulfolobus solfataricus elongation factor 1-alpha in complex with magnesium and GDP [Saccharolobus solfataricus]</Hit_def>
+  <Hit_accession>1JNY_A</Hit_accession>
+  <Hit_len>435</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>53.5286</Hsp_bit-score>
+      <Hsp_score>127</Hsp_score>
+      <Hsp_evalue>1.16299e-07</Hsp_evalue>
+      <Hsp_query-from>161</Hsp_query-from>
+      <Hsp_query-to>197</Hsp_query-to>
+      <Hsp_hit-from>222</Hsp_hit-from>
+      <Hsp_hit-to>258</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>22</Hsp_identity>
+      <Hsp_positive>30</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>37</Hsp_align-len>
+      <Hsp_qseq>LELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGI</Hsp_qseq>
+      <Hsp_hseq>LELPPKPVDKPLRIPIQDVYSISGVGTVPVGRVESGV</Hsp_hseq>
+      <Hsp_midline>LELPP+ ++KP  +P++DV+SISG GTV  GRVE G+</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>59</Hit_num>
+  <Hit_id>pdb|3VMF|A</Hit_id>
+  <Hit_def>Archaeal protein [Aeropyrum pernix K1]</Hit_def>
+  <Hit_accession>3VMF_A</Hit_accession>
+  <Hit_len>440</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>53.1434</Hsp_bit-score>
+      <Hsp_score>126</Hsp_score>
+      <Hsp_evalue>1.77601e-07</Hsp_evalue>
+      <Hsp_query-from>123</Hsp_query-from>
+      <Hsp_query-to>272</Hsp_query-to>
+      <Hsp_hit-from>194</Hsp_hit-from>
+      <Hsp_hit-to>337</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>44</Hsp_identity>
+      <Hsp_positive>72</Hsp_positive>
+      <Hsp_gaps>24</Hsp_gaps>
+      <Hsp_align-len>159</Hsp_align-len>
+      <Hsp_qseq>PSEEWSSHALLRTLKEGGRDPEMGEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESK---------SQVNLIDTLRKQLEEAGPLINAVRASSALMETDAAKQKMENEKLQAELDKAKALGEKYNEEVEGAW</Hsp_qseq>
+      <Hsp_hseq>PVSAWKGDNLIE------RSPNMPWYNGPTLVEALDQ-LQPPAKPVDKPLRIPVQNVYSIPGAGTVPVGRVETGVL---RVGDKVVFMPPGVVGEVRSIEMHYQQLQQAEPGDNIGFAVRGVSKSD-----IKRGDVAGHLDKPPTVAEEFEARIFVIW</Hsp_hseq>
+      <Hsp_midline>P   W    L+       R P M       LV+A D+ L+ P + ++KP  +PV++V+SI G GTV  GRVE G+    R+  K          +V  I+   +QL++A P  N   A   + ++D     ++   +   LDK   + E++   +   W</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>60</Hit_num>
+  <Hit_id>pdb|3WXM|A</Hit_id>
+  <Hit_def>Crystal structure of archaeal Pelota and GTP-bound EF1 alpha complex [Aeropyrum pernix K1] &gt;pdb|3WXM|C Crystal structure of archaeal Pelota and GTP-bound EF1 alpha complex [Aeropyrum pernix K1] &gt;pdb|3WXM|E Crystal structure of archaeal Pelota and GTP-bound EF1 alpha complex [Aeropyrum pernix K1] &gt;pdb|3WXM|G Crystal structure of archaeal Pelota and GTP-bound EF1 alpha complex [Aeropyrum pernix K1] &gt;pdb|6JI2|A Crystal structure of archaeal ribosomal protein aP1, aPelota, and GTP-bound aEF1A complex [Aeropyrum pernix K1] &gt;pdb|6JI2|E Crystal structure of archaeal ribosomal protein aP1, aPelota, and GTP-bound aEF1A complex [Aeropyrum pernix K1]</Hit_def>
+  <Hit_accession>3WXM_A</Hit_accession>
+  <Hit_len>447</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>53.1434</Hsp_bit-score>
+      <Hsp_score>126</Hsp_score>
+      <Hsp_evalue>1.7926e-07</Hsp_evalue>
+      <Hsp_query-from>123</Hsp_query-from>
+      <Hsp_query-to>272</Hsp_query-to>
+      <Hsp_hit-from>194</Hsp_hit-from>
+      <Hsp_hit-to>337</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>44</Hsp_identity>
+      <Hsp_positive>72</Hsp_positive>
+      <Hsp_gaps>24</Hsp_gaps>
+      <Hsp_align-len>159</Hsp_align-len>
+      <Hsp_qseq>PSEEWSSHALLRTLKEGGRDPEMGEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESK---------SQVNLIDTLRKQLEEAGPLINAVRASSALMETDAAKQKMENEKLQAELDKAKALGEKYNEEVEGAW</Hsp_qseq>
+      <Hsp_hseq>PVSAWKGDNLIE------RSPNMPWYNGPTLVEALDQ-LQPPAKPVDKPLRIPVQNVYSIPGAGTVPVGRVETGVL---RVGDKVVFMPPGVVGEVRSIEMHYQQLQQAEPGDNIGFAVRGVSKSD-----IKRGDVAGHLDKPPTVAEEFEARIFVIW</Hsp_hseq>
+      <Hsp_midline>P   W    L+       R P M       LV+A D+ L+ P + ++KP  +PV++V+SI G GTV  GRVE G+    R+  K          +V  I+   +QL++A P  N   A   + ++D     ++   +   LDK   + E++   +   W</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>61</Hit_num>
+  <Hit_id>pdb|4CXG|A</Hit_id>
+  <Hit_def>Regulation of the mammalian elongation cycle by 40S subunit rolling: a eukaryotic-specific ribosome rearrangement [Oryctolagus cuniculus] &gt;pdb|4CXH|A Regulation of the mammalian elongation cycle by 40S subunit rolling: a eukaryotic-specific ribosome rearrangement [Oryctolagus cuniculus]</Hit_def>
+  <Hit_accession>4CXG_A</Hit_accession>
+  <Hit_len>437</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>53.1434</Hsp_bit-score>
+      <Hsp_score>126</Hsp_score>
+      <Hsp_evalue>1.80104e-07</Hsp_evalue>
+      <Hsp_query-from>123</Hsp_query-from>
+      <Hsp_query-to>272</Hsp_query-to>
+      <Hsp_hit-from>191</Hsp_hit-from>
+      <Hsp_hit-to>334</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>44</Hsp_identity>
+      <Hsp_positive>72</Hsp_positive>
+      <Hsp_gaps>24</Hsp_gaps>
+      <Hsp_align-len>159</Hsp_align-len>
+      <Hsp_qseq>PSEEWSSHALLRTLKEGGRDPEMGEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESK---------SQVNLIDTLRKQLEEAGPLINAVRASSALMETDAAKQKMENEKLQAELDKAKALGEKYNEEVEGAW</Hsp_qseq>
+      <Hsp_hseq>PVSAWKGDNLIE------RSPNMPWYNGPTLVEALDQ-LQPPAKPVDKPLRIPVQNVYSIPGAGTVPVGRVETGVL---RVGDKVVFMPPGVVGEVRSIEMHYQQLQQAEPGDNIGFAVRGVSKSD-----IKRGDVAGHLDKPPTVAEEFEARIFVIW</Hsp_hseq>
+      <Hsp_midline>P   W    L+       R P M       LV+A D+ L+ P + ++KP  +PV++V+SI G GTV  GRVE G+    R+  K          +V  I+   +QL++A P  N   A   + ++D     ++   +   LDK   + E++   +   W</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>62</Hit_num>
+  <Hit_id>pdb|3WY9|A</Hit_id>
+  <Hit_def>Crystal structure of a complex of the archaeal ribosomal stalk protein aP1 and the GDP-bound archaeal elongation factor aEF1alpha [Pyrococcus horikoshii OT3] &gt;pdb|3WY9|B Crystal structure of a complex of the archaeal ribosomal stalk protein aP1 and the GDP-bound archaeal elongation factor aEF1alpha [Pyrococcus horikoshii OT3] &gt;pdb|3WYA|A Crystal structure of GDP-bound EF1alpha from Pyrococcus horikoshii [Pyrococcus horikoshii OT3]</Hit_def>
+  <Hit_accession>3WY9_A</Hit_accession>
+  <Hit_len>434</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>45.8246</Hsp_bit-score>
+      <Hsp_score>107</Hsp_score>
+      <Hsp_evalue>4.55347e-05</Hsp_evalue>
+      <Hsp_query-from>153</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>203</Hsp_hit-from>
+      <Hsp_hit-to>245</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>21</Hsp_identity>
+      <Hsp_positive>31</Hsp_positive>
+      <Hsp_gaps>1</Hsp_gaps>
+      <Hsp_align-len>44</Hsp_align-len>
+      <Hsp_qseq>LVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>LIEALDQIPE-PEKPIDKPLRIPIQDVYSIKGVGTVPVGRVETG</Hsp_hseq>
+      <Hsp_midline>L++A D+  E P + ++KP  +P++DV+SI G GTV  GRVE G</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>63</Hit_num>
+  <Hit_id>pdb|5IZK|A</Hit_id>
+  <Hit_def>The crystal structure of human eEFSec in complex with GDP [Homo sapiens] &gt;pdb|5IZK|B The crystal structure of human eEFSec in complex with GDP [Homo sapiens] &gt;pdb|5IZL|A The crystal structure of human eEFSec in complex with GDPCP [Homo sapiens] &gt;pdb|5IZL|B The crystal structure of human eEFSec in complex with GDPCP [Homo sapiens]</Hit_def>
+  <Hit_accession>5IZK_A</Hit_accession>
+  <Hit_len>616</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>45.8246</Hsp_bit-score>
+      <Hsp_score>107</Hsp_score>
+      <Hsp_evalue>5.04539e-05</Hsp_evalue>
+      <Hsp_query-from>150</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>222</Hsp_hit-from>
+      <Hsp_hit-to>268</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>21</Hsp_identity>
+      <Hsp_positive>28</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>47</Hsp_align-len>
+      <Hsp_qseq>ILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>IPELIELLTSQISIPTRDPSGPFLMSVDHCFSIKGQGTVMTGTILSG</Hsp_hseq>
+      <Hsp_midline>I EL++     + +P RD   PFLM V+  FSI G+GTV TG +  G</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>64</Hit_num>
+  <Hit_id>pdb|4C0S|A</Hit_id>
+  <Hit_def>Mammalian translation elongation factor eEF1A2 [Oryctolagus cuniculus] &gt;pdb|4C0S|B Mammalian translation elongation factor eEF1A2 [Oryctolagus cuniculus]</Hit_def>
+  <Hit_accession>4C0S_A</Hit_accession>
+  <Hit_len>463</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>45.4394</Hsp_bit-score>
+      <Hsp_score>106</Hsp_score>
+      <Hsp_evalue>5.22867e-05</Hsp_evalue>
+      <Hsp_query-from>151</Hsp_query-from>
+      <Hsp_query-to>211</Hsp_query-to>
+      <Hsp_hit-from>226</Hsp_hit-from>
+      <Hsp_hit-to>285</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>24</Hsp_identity>
+      <Hsp_positive>36</Hsp_positive>
+      <Hsp_gaps>1</Hsp_gaps>
+      <Hsp_align-len>61</Hsp_align-len>
+      <Hsp_qseq>LELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESKSQVNL</Hsp_qseq>
+      <Hsp_hseq>VSLLEALDTILP-PXRPTDKPLRLPLQDVYKIGGIGTVPVGRVETGILRPGMVVTFAPVNI</Hsp_hseq>
+      <Hsp_midline>+ L++A D  L  P R  +KP  +P++DV+ I G GTV  GRVE GI     + + + VN+</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>65</Hit_num>
+  <Hit_id>pdb|1F60|A</Hit_id>
+  <Hit_def>CRYSTAL STRUCTURE OF THE YEAST ELONGATION FACTOR COMPLEX EEF1A:EEF1BA [Saccharomyces cerevisiae] &gt;pdb|1G7C|A Yeast Eef1a:eef1ba In Complex With Gdpnp [Saccharomyces cerevisiae] &gt;pdb|1IJE|A Nucleotide Exchange Intermediates in the eEF1A-eEF1Ba Complex [Saccharomyces cerevisiae] &gt;pdb|1IJF|A Nucleotide exchange mechanisms in the eEF1A-eEF1Ba complex [Saccharomyces cerevisiae] &gt;pdb|2B7B|A Yeast guanine nucleotide exchange factor eEF1Balpha K205A mutant in complex with eEF1A and GDP [Saccharomyces cerevisiae] &gt;pdb|2B7C|A Yeast guanine nucleotide exchange factor eEF1Balpha K205A mutant in complex with eEF1A [Saccharomyces cerevisiae]</Hit_def>
+  <Hit_accession>1F60_A</Hit_accession>
+  <Hit_len>458</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>45.0542</Hsp_bit-score>
+      <Hsp_score>105</Hsp_score>
+      <Hsp_evalue>7.37372e-05</Hsp_evalue>
+      <Hsp_query-from>148</Hsp_query-from>
+      <Hsp_query-to>224</Hsp_query-to>
+      <Hsp_hit-from>224</Hsp_hit-from>
+      <Hsp_hit-to>302</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>27</Hsp_identity>
+      <Hsp_positive>44</Hsp_positive>
+      <Hsp_gaps>10</Hsp_gaps>
+      <Hsp_align-len>83</Hsp_align-len>
+      <Hsp_qseq>KKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLES------KSQVNLIDTLRKQLEEAGP</Hsp_qseq>
+      <Hsp_hseq>KTLLEAIDA----IEQPSRPTDKPLRLPLQDVYKIGGIGTVPVGRVETGVIKPGMVVTFAPAGVTTEVKSVEMHHEQLEQGVP</Hsp_hseq>
+      <Hsp_midline>K +LE + A    +E P R  +KP  +P++DV+ I G GTV  GRVE G+     + +       ++V  ++   +QLE+  P</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>66</Hit_num>
+  <Hit_id>pdb|5O8W|A</Hit_id>
+  <Hit_def>CRYSTAL STRUCTURE ANALYSIS OF THE YEAST ELONGATION FACTOR COMPLEX EEF1A:EEF1BA [Saccharomyces cerevisiae]</Hit_def>
+  <Hit_accession>5O8W_A</Hit_accession>
+  <Hit_len>466</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>45.0542</Hsp_bit-score>
+      <Hsp_score>105</Hsp_score>
+      <Hsp_evalue>7.56529e-05</Hsp_evalue>
+      <Hsp_query-from>148</Hsp_query-from>
+      <Hsp_query-to>224</Hsp_query-to>
+      <Hsp_hit-from>224</Hsp_hit-from>
+      <Hsp_hit-to>302</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>27</Hsp_identity>
+      <Hsp_positive>44</Hsp_positive>
+      <Hsp_gaps>10</Hsp_gaps>
+      <Hsp_align-len>83</Hsp_align-len>
+      <Hsp_qseq>KKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLES------KSQVNLIDTLRKQLEEAGP</Hsp_qseq>
+      <Hsp_hseq>KTLLEAIDA----IEQPSRPTDKPLRLPLQDVYKIGGIGTVPVGRVETGVIKPGMVVTFAPAGVTTEVKSVEMHHEQLEQGVP</Hsp_hseq>
+      <Hsp_midline>K +LE + A    +E P R  +KP  +P++DV+ I G GTV  GRVE G+     + +       ++V  ++   +QLE+  P</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>67</Hit_num>
+  <Hit_id>pdb|5LZS|jj</Hit_id>
+  <Hit_def>Chain jj, Elongation factor 1-alpha 1 [Oryctolagus cuniculus]</Hit_def>
+  <Hit_accession>5LZS_jj</Hit_accession>
+  <Hit_len>462</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>43.8986</Hsp_bit-score>
+      <Hsp_score>102</Hsp_score>
+      <Hsp_evalue>0.000190753</Hsp_evalue>
+      <Hsp_query-from>153</Hsp_query-from>
+      <Hsp_query-to>211</Hsp_query-to>
+      <Hsp_hit-from>228</Hsp_hit-from>
+      <Hsp_hit-to>285</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>23</Hsp_identity>
+      <Hsp_positive>35</Hsp_positive>
+      <Hsp_gaps>1</Hsp_gaps>
+      <Hsp_align-len>59</Hsp_align-len>
+      <Hsp_qseq>LVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESKSQVNL</Hsp_qseq>
+      <Hsp_hseq>LLEALDCILP-PTRPTDKPLRLPLQDVYKIGGIGTVPVGRVETGVLKPGMVVTFAPVNV</Hsp_hseq>
+      <Hsp_midline>L++A D  L  P R  +KP  +P++DV+ I G GTV  GRVE G+     + + + VN+</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>68</Hit_num>
+  <Hit_id>pdb|6ZMO|CD</Hit_id>
+  <Hit_def>Chain CD, Elongation factor 1-alpha 1 [Homo sapiens]</Hit_def>
+  <Hit_accession>6ZMO_CD</Hit_accession>
+  <Hit_len>462</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>43.8986</Hsp_bit-score>
+      <Hsp_score>102</Hsp_score>
+      <Hsp_evalue>0.000195927</Hsp_evalue>
+      <Hsp_query-from>153</Hsp_query-from>
+      <Hsp_query-to>211</Hsp_query-to>
+      <Hsp_hit-from>228</Hsp_hit-from>
+      <Hsp_hit-to>285</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>23</Hsp_identity>
+      <Hsp_positive>35</Hsp_positive>
+      <Hsp_gaps>1</Hsp_gaps>
+      <Hsp_align-len>59</Hsp_align-len>
+      <Hsp_qseq>LVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESKSQVNL</Hsp_qseq>
+      <Hsp_hseq>LLEALDCILP-PTRPTDKPLRLPLQDVYKIGGIGTVPVGRVETGVLKPGMVVTFAPVNV</Hsp_hseq>
+      <Hsp_midline>L++A D  L  P R  +KP  +P++DV+ I G GTV  GRVE G+     + + + VN+</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>69</Hit_num>
+  <Hit_id>pdb|6RA9|A</Hit_id>
+  <Hit_def>Novel structural features and post-translational modifications in eukaryotic elongation factor 1A2 from Oryctolagus cuniculus [Oryctolagus cuniculus]</Hit_def>
+  <Hit_accession>6RA9_A</Hit_accession>
+  <Hit_len>454</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>43.1282</Hsp_bit-score>
+      <Hsp_score>100</Hsp_score>
+      <Hsp_evalue>0.000344115</Hsp_evalue>
+      <Hsp_query-from>146</Hsp_query-from>
+      <Hsp_query-to>211</Hsp_query-to>
+      <Hsp_hit-from>221</Hsp_hit-from>
+      <Hsp_hit-to>285</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>24</Hsp_identity>
+      <Hsp_positive>36</Hsp_positive>
+      <Hsp_gaps>1</Hsp_gaps>
+      <Hsp_align-len>66</Hsp_align-len>
+      <Hsp_qseq>GEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESKSQVNL</Hsp_qseq>
+      <Hsp_hseq>GNASGVSLLEALDTILP-PTRPTDKPLRLPLQDVYKIGGIGTVPVGXVETGILRPGMVVTFAPVNI</Hsp_hseq>
+      <Hsp_midline>G    + L++A D  L  P R  +KP  +P++DV+ I G GTV  G VE GI     + + + VN+</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>70</Hit_num>
+  <Hit_id>pdb|6RA9|B</Hit_id>
+  <Hit_def>Novel structural features and post-translational modifications in eukaryotic elongation factor 1A2 from Oryctolagus cuniculus [Oryctolagus cuniculus]</Hit_def>
+  <Hit_accession>6RA9_B</Hit_accession>
+  <Hit_len>461</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>43.1282</Hsp_bit-score>
+      <Hsp_score>100</Hsp_score>
+      <Hsp_evalue>0.000349467</Hsp_evalue>
+      <Hsp_query-from>146</Hsp_query-from>
+      <Hsp_query-to>211</Hsp_query-to>
+      <Hsp_hit-from>221</Hsp_hit-from>
+      <Hsp_hit-to>285</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>24</Hsp_identity>
+      <Hsp_positive>36</Hsp_positive>
+      <Hsp_gaps>1</Hsp_gaps>
+      <Hsp_align-len>66</Hsp_align-len>
+      <Hsp_qseq>GEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESKSQVNL</Hsp_qseq>
+      <Hsp_hseq>GNASGVSLLEALDTILP-PTRPTDKPLRLPLQDVYKIGGIGTVPVGXVETGILRPGMVVTFAPVNI</Hsp_hseq>
+      <Hsp_midline>G    + L++A D  L  P R  +KP  +P++DV+ I G GTV  G VE GI     + + + VN+</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>71</Hit_num>
+  <Hit_id>pdb|5IZM|A</Hit_id>
+  <Hit_def>The crystal structure of human eEFSec in complex with GDPNP [Homo sapiens] &gt;pdb|5IZM|B The crystal structure of human eEFSec in complex with GDPNP [Homo sapiens]</Hit_def>
+  <Hit_accession>5IZM_A</Hit_accession>
+  <Hit_len>616</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>43.1282</Hsp_bit-score>
+      <Hsp_score>100</Hsp_score>
+      <Hsp_evalue>0.000389967</Hsp_evalue>
+      <Hsp_query-from>150</Hsp_query-from>
+      <Hsp_query-to>196</Hsp_query-to>
+      <Hsp_hit-from>222</Hsp_hit-from>
+      <Hsp_hit-to>268</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>20</Hsp_identity>
+      <Hsp_positive>27</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>47</Hsp_align-len>
+      <Hsp_qseq>ILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG</Hsp_qseq>
+      <Hsp_hseq>IPELIELLTSQISIPTRDPSGPFLXSVDHCFSIKGQGTVXTGTILSG</Hsp_hseq>
+      <Hsp_midline>I EL++     + +P RD   PFL  V+  FSI G+GTV TG +  G</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>72</Hit_num>
+  <Hit_id>pdb|4HRR|B</Hit_id>
+  <Hit_def>Chain B, Hemoglobin B chain [Anadara inaequivalvis] &gt;pdb|4HRR|D Chain D, Hemoglobin B chain [Anadara inaequivalvis] &gt;pdb|4HRR|F Chain F, Hemoglobin B chain [Anadara inaequivalvis] &gt;pdb|4HRR|H Chain H, Hemoglobin B chain [Anadara inaequivalvis] &gt;pdb|4HRT|B Chain B, Hemoglobin B chain [Anadara inaequivalvis] &gt;pdb|4HRT|D Chain D, Hemoglobin B chain [Anadara inaequivalvis] &gt;pdb|4HRT|F Chain F, Hemoglobin B chain [Anadara inaequivalvis] &gt;pdb|4HRT|H Chain H, Hemoglobin B chain [Anadara inaequivalvis]</Hit_def>
+  <Hit_accession>4HRR_B</Hit_accession>
+  <Hit_len>152</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>39.6614</Hsp_bit-score>
+      <Hsp_score>91</Hsp_score>
+      <Hsp_evalue>0.00153964</Hsp_evalue>
+      <Hsp_query-from>10</Hsp_query-from>
+      <Hsp_query-to>72</Hsp_query-to>
+      <Hsp_hit-from>17</Hsp_hit-from>
+      <Hsp_hit-to>78</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>18</Hsp_identity>
+      <Hsp_positive>35</Hsp_positive>
+      <Hsp_gaps>1</Hsp_gaps>
+      <Hsp_align-len>63</Hsp_align-len>
+      <Hsp_qseq>QEALVKESWEILKQDIPKYSLHFFSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKVSF</Hsp_qseq>
+      <Hsp_hseq>QKDLLRMSWGVLSVDMEGTGLMLMANLFKTSPSAKGKFARLGDV-SAGKDNSKLRGHSITLMY</Hsp_hseq>
+      <Hsp_midline>Q+ L++ SW +L  D+    L   + + + +P+AKG F+ L D      +N KL+ H++ + +</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>73</Hit_num>
+  <Hit_id>pdb|5LZW|jj</Hit_id>
+  <Hit_def>Chain jj, Hbs1l [Homo sapiens] &gt;pdb|5LZX|jj Chain jj, HBS1-like protein [Homo sapiens] &gt;pdb|5LZY|jj Chain jj, HBS1-like protein [Homo sapiens] &gt;pdb|5LZZ|jj Chain jj, HBS1-like protein [Homo sapiens]</Hit_def>
+  <Hit_accession>5LZW_jj</Hit_accession>
+  <Hit_len>710</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>38.891</Hsp_bit-score>
+      <Hsp_score>89</Hsp_score>
+      <Hsp_evalue>0.00939748</Hsp_evalue>
+      <Hsp_query-from>149</Hsp_query-from>
+      <Hsp_query-to>203</Hsp_query-to>
+      <Hsp_hit-from>492</Hsp_hit-from>
+      <Hsp_hit-to>546</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>23</Hsp_identity>
+      <Hsp_positive>32</Hsp_positive>
+      <Hsp_gaps>2</Hsp_gaps>
+      <Hsp_align-len>56</Hsp_align-len>
+      <Hsp_qseq>KILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERG-IATTHRL</Hsp_qseq>
+      <Hsp_hseq>KGLCLLEQIDSF-KPPQRSIDKPFRLCVSDVFKDQGSGFCITGKIEAGYIQTGDRL</Hsp_hseq>
+      <Hsp_midline>K L L++  D + + P R ++KPF + V DVF   G G   TG++E G I T  RL</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>74</Hit_num>
+  <Hit_id>pdb|4AC9|A</Hit_id>
+  <Hit_def>Crystal Structure Of Translation Elongation Factor Selb From Methanococcus Maripaludis In Complex With Gdp [Methanococcus maripaludis] &gt;pdb|4AC9|B Crystal Structure Of Translation Elongation Factor Selb From Methanococcus Maripaludis In Complex With Gdp [Methanococcus maripaludis] &gt;pdb|4AC9|C Crystal Structure Of Translation Elongation Factor Selb From Methanococcus Maripaludis In Complex With Gdp [Methanococcus maripaludis] &gt;pdb|4AC9|D Crystal Structure Of Translation Elongation Factor Selb From Methanococcus Maripaludis In Complex With Gdp [Methanococcus maripaludis] &gt;pdb|4ACA|A Crystal Structure Of Translation Elongation Factor Selb From Methanococcus Maripaludis, Apo Form [Methanococcus maripaludis] &gt;pdb|4ACA|B Crystal Structure Of Translation Elongation Factor Selb From Methanococcus Maripaludis, Apo Form [Methanococcus maripaludis] &gt;pdb|4ACA|C Crystal Structure Of Translation Elongation Factor Selb From Methanococcus Maripaludis, Apo Form [Methanococcus maripaludis] &gt;pdb|4ACA|D Crystal Structure Of Translation Elongation Factor Selb From Methanococcus Maripaludis, Apo Form [Methanococcus maripaludis] &gt;pdb|4ACB|A Crystal Structure Of Translation Elongation Factor Selb From Methanococcus Maripaludis In Complex With The Gtp Analogue Gppnhp [Methanococcus maripaludis] &gt;pdb|4ACB|B Crystal Structure Of Translation Elongation Factor Selb From Methanococcus Maripaludis In Complex With The Gtp Analogue Gppnhp [Methanococcus maripaludis] &gt;pdb|4ACB|C Crystal Structure Of Translation Elongation Factor Selb From Methanococcus Maripaludis In Complex With The Gtp Analogue Gppnhp [Methanococcus maripaludis] &gt;pdb|4ACB|D Crystal Structure Of Translation Elongation Factor Selb From Methanococcus Maripaludis In Complex With The Gtp Analogue Gppnhp [Methanococcus maripaludis]</Hit_def>
+  <Hit_accession>4AC9_A</Hit_accession>
+  <Hit_len>482</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>35.8094</Hsp_bit-score>
+      <Hsp_score>81</Hsp_score>
+      <Hsp_evalue>0.0752391</Hsp_evalue>
+      <Hsp_query-from>166</Hsp_query-from>
+      <Hsp_query-to>198</Hsp_query-to>
+      <Hsp_hit-from>194</Hsp_hit-from>
+      <Hsp_hit-to>226</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>15</Hsp_identity>
+      <Hsp_positive>20</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>33</Hsp_align-len>
+      <Hsp_qseq>RDLEKPFLMPVEDVFSISGRGTVATGRVERGIA</Hsp_qseq>
+      <Hsp_hseq>RNTESYFKMPLDHAFPIKGAGTVVTGTINKGIV</Hsp_hseq>
+      <Hsp_midline>R+ E  F MP++  F I G GTV TG + +GI </Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>75</Hit_num>
+  <Hit_id>pdb|5A9Z|CA</Hit_id>
+  <Hit_def>Chain CA, BipA [Thermus thermophilus HB8]</Hit_def>
+  <Hit_accession>5A9Z_CA</Hit_accession>
+  <Hit_len>593</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>33.4982</Hsp_bit-score>
+      <Hsp_score>75</Hsp_score>
+      <Hsp_evalue>0.418209</Hsp_evalue>
+      <Hsp_query-from>153</Hsp_query-from>
+      <Hsp_query-to>214</Hsp_query-to>
+      <Hsp_hit-from>186</Hsp_hit-from>
+      <Hsp_hit-to>242</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>19</Hsp_identity>
+      <Hsp_positive>32</Hsp_positive>
+      <Hsp_gaps>5</Hsp_gaps>
+      <Hsp_align-len>62</Hsp_align-len>
+      <Hsp_qseq>LVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESKSQVNLIDT</Hsp_qseq>
+      <Hsp_hseq>LYQAIVDHVPAPDVDLDGPFQMQISQLDYNSYVGVIGIGRIKRG-----KVKPNQQVTIIDS</Hsp_hseq>
+      <Hsp_midline>L QA  + +  P  DL+ PF M +  +   S  G +  GR++RG     +++   QV +ID+</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>76</Hit_num>
+  <Hit_id>pdb|5AA0|BZ</Hit_id>
+  <Hit_def>Chain BZ, GTP-binding protein [Thermus thermophilus HB8]</Hit_def>
+  <Hit_accession>5AA0_BZ</Hit_accession>
+  <Hit_len>605</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>33.4982</Hsp_bit-score>
+      <Hsp_score>75</Hsp_score>
+      <Hsp_evalue>0.423642</Hsp_evalue>
+      <Hsp_query-from>153</Hsp_query-from>
+      <Hsp_query-to>214</Hsp_query-to>
+      <Hsp_hit-from>186</Hsp_hit-from>
+      <Hsp_hit-to>242</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>19</Hsp_identity>
+      <Hsp_positive>32</Hsp_positive>
+      <Hsp_gaps>5</Hsp_gaps>
+      <Hsp_align-len>62</Hsp_align-len>
+      <Hsp_qseq>LVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESKSQVNLIDT</Hsp_qseq>
+      <Hsp_hseq>LYQAIVDHVPAPDVDLDGPFQMQISQLDYNSYVGVIGIGRIKRG-----KVKPNQQVTIIDS</Hsp_hseq>
+      <Hsp_midline>L QA  + +  P  DL+ PF M +  +   S  G +  GR++RG     +++   QV +ID+</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>77</Hit_num>
+  <Hit_id>pdb|5A9V|A</Hit_id>
+  <Hit_def>Structure of apo BipA [Escherichia coli] &gt;pdb|5A9V|B Structure of apo BipA [Escherichia coli] &gt;pdb|5A9V|C Structure of apo BipA [Escherichia coli] &gt;pdb|5A9V|D Structure of apo BipA [Escherichia coli] &gt;pdb|5A9V|E Structure of apo BipA [Escherichia coli] &gt;pdb|5A9V|F Structure of apo BipA [Escherichia coli] &gt;pdb|5A9W|A Structure of GDPCP BipA [Escherichia coli] &gt;pdb|5A9X|A Structure of GDP bound BipA [Escherichia coli] &gt;pdb|5A9Y|A Structure of ppGpp BipA [Escherichia coli]</Hit_def>
+  <Hit_accession>5A9V_A</Hit_accession>
+  <Hit_len>607</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>33.4982</Hsp_bit-score>
+      <Hsp_score>75</Hsp_score>
+      <Hsp_evalue>0.43143</Hsp_evalue>
+      <Hsp_query-from>153</Hsp_query-from>
+      <Hsp_query-to>214</Hsp_query-to>
+      <Hsp_hit-from>186</Hsp_hit-from>
+      <Hsp_hit-to>242</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>19</Hsp_identity>
+      <Hsp_positive>32</Hsp_positive>
+      <Hsp_gaps>5</Hsp_gaps>
+      <Hsp_align-len>62</Hsp_align-len>
+      <Hsp_qseq>LVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESKSQVNLIDT</Hsp_qseq>
+      <Hsp_hseq>LYQAIVDHVPAPDVDLDGPFQMQISQLDYNSYVGVIGIGRIKRG-----KVKPNQQVTIIDS</Hsp_hseq>
+      <Hsp_midline>L QA  + +  P  DL+ PF M +  +   S  G +  GR++RG     +++   QV +ID+</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>78</Hit_num>
+  <Hit_id>pdb|4ZCM|A</Hit_id>
+  <Hit_def>Crystal Structure of Escherichia coli GTPase BipA/TypA Complexed with ppGpp [Escherichia coli K-12] &gt;pdb|4ZCM|B Crystal Structure of Escherichia coli GTPase BipA/TypA Complexed with ppGpp [Escherichia coli K-12]</Hit_def>
+  <Hit_accession>4ZCM_A</Hit_accession>
+  <Hit_len>641</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>33.4982</Hsp_bit-score>
+      <Hsp_score>75</Hsp_score>
+      <Hsp_evalue>0.447688</Hsp_evalue>
+      <Hsp_query-from>153</Hsp_query-from>
+      <Hsp_query-to>214</Hsp_query-to>
+      <Hsp_hit-from>220</Hsp_hit-from>
+      <Hsp_hit-to>276</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>19</Hsp_identity>
+      <Hsp_positive>32</Hsp_positive>
+      <Hsp_gaps>5</Hsp_gaps>
+      <Hsp_align-len>62</Hsp_align-len>
+      <Hsp_qseq>LVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESKSQVNLIDT</Hsp_qseq>
+      <Hsp_hseq>LYQAIVDHVPAPDVDLDGPFQMQISQLDYNSYVGVIGIGRIKRG-----KVKPNQQVTIIDS</Hsp_hseq>
+      <Hsp_midline>L QA  + +  P  DL+ PF M +  +   S  G +  GR++RG     +++   QV +ID+</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>79</Hit_num>
+  <Hit_id>pdb|4ZCI|A</Hit_id>
+  <Hit_def>Crystal Structure of Escherichia coli GTPase BipA/TypA [Escherichia coli K-12] &gt;pdb|4ZCI|B Crystal Structure of Escherichia coli GTPase BipA/TypA [Escherichia coli K-12] &gt;pdb|4ZCL|A Crystal Structure of Escherichia coli GTPase BipA/TypA Complexed with GDP [Escherichia coli K-12] &gt;pdb|4ZCL|B Crystal Structure of Escherichia coli GTPase BipA/TypA Complexed with GDP [Escherichia coli K-12]</Hit_def>
+  <Hit_accession>4ZCI_A</Hit_accession>
+  <Hit_len>635</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>33.4982</Hsp_bit-score>
+      <Hsp_score>75</Hsp_score>
+      <Hsp_evalue>0.454792</Hsp_evalue>
+      <Hsp_query-from>153</Hsp_query-from>
+      <Hsp_query-to>214</Hsp_query-to>
+      <Hsp_hit-from>220</Hsp_hit-from>
+      <Hsp_hit-to>276</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>19</Hsp_identity>
+      <Hsp_positive>32</Hsp_positive>
+      <Hsp_gaps>5</Hsp_gaps>
+      <Hsp_align-len>62</Hsp_align-len>
+      <Hsp_qseq>LVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIATTHRLESKSQVNLIDT</Hsp_qseq>
+      <Hsp_hseq>LYQAIVDHVPAPDVDLDGPFQMQISQLDYNSYVGVIGIGRIKRG-----KVKPNQQVTIIDS</Hsp_hseq>
+      <Hsp_midline>L QA  + +  P  DL+ PF M +  +   S  G +  GR++RG     +++   QV +ID+</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>80</Hit_num>
+  <Hit_id>pdb|2P22|C</Hit_id>
+  <Hit_def>Structure of the Yeast ESCRT-I Heterotetramer Core [Saccharomyces cerevisiae]</Hit_def>
+  <Hit_accession>2P22_C</Hit_accession>
+  <Hit_len>192</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>30.8018</Hsp_bit-score>
+      <Hsp_score>68</Hsp_score>
+      <Hsp_evalue>1.55034</Hsp_evalue>
+      <Hsp_query-from>203</Hsp_query-from>
+      <Hsp_query-to>286</Hsp_query-to>
+      <Hsp_hit-from>38</Hsp_hit-from>
+      <Hsp_hit-to>134</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>30</Hsp_identity>
+      <Hsp_positive>46</Hsp_positive>
+      <Hsp_gaps>13</Hsp_gaps>
+      <Hsp_align-len>97</Hsp_align-len>
+      <Hsp_qseq>LESKSQVNLIDTLRKQLE----EAGPL------INAVRASSALMETDAAKQKMENEKLQAELDKAKALGEKYN---EEVEGAWSQAYDHLALAIKTE</Hsp_qseq>
+      <Hsp_hseq>LSSKEIIDLIQTHRHQLELYVTKFNPLTDFAGKIHAFRDQFKQLEENFEDLHEQKDKVQALLENARILESKYVASWQDYHSEFSKKYGDIALKKKLE</Hsp_hseq>
+      <Hsp_midline>L SK  ++LI T R QLE    +  PL      I+A R     +E +      + +K+QA L+ A+ L  KY    ++    +S+ Y  +AL  K E</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>81</Hit_num>
+  <Hit_id>pdb|5Z8O|A</Hit_id>
+  <Hit_def>Structural of START superfamily protein MSMEG_0129 from Mycobacterium smegmatis [Mycolicibacterium smegmatis MC2 155] &gt;pdb|5Z8O|B Structural of START superfamily protein MSMEG_0129 from Mycobacterium smegmatis [Mycolicibacterium smegmatis MC2 155]</Hit_def>
+  <Hit_accession>5Z8O_A</Hit_accession>
+  <Hit_len>147</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>30.0314</Hsp_bit-score>
+      <Hsp_score>66</Hsp_score>
+      <Hsp_evalue>2.17755</Hsp_evalue>
+      <Hsp_query-from>31</Hsp_query-from>
+      <Hsp_query-to>76</Hsp_query-to>
+      <Hsp_hit-from>2</Hsp_hit-from>
+      <Hsp_hit-to>48</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>14</Hsp_identity>
+      <Hsp_positive>26</Hsp_positive>
+      <Hsp_gaps>1</Hsp_gaps>
+      <Hsp_align-len>47</Hsp_align-len>
+      <Hsp_qseq>HFFSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKVSF-DARP</Hsp_qseq>
+      <Hsp_hseq>HMVSKTVEVAASAETITSIVSDFEAYPQWNPEIKGCWILARYNDGRP</Hsp_hseq>
+      <Hsp_midline>H  S+ +E+A +A+ + S + D +  P  NP++K   +   + D RP</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>82</Hit_num>
+  <Hit_id>pdb|1YHU|C</Hit_id>
+  <Hit_def>Crystal structure of Riftia pachyptila C1 hemoglobin reveals novel assembly of 24 subunits. [Riftia pachyptila] &gt;pdb|1YHU|G Crystal structure of Riftia pachyptila C1 hemoglobin reveals novel assembly of 24 subunits. [Riftia pachyptila] &gt;pdb|1YHU|K Crystal structure of Riftia pachyptila C1 hemoglobin reveals novel assembly of 24 subunits. [Riftia pachyptila] &gt;pdb|1YHU|O Crystal structure of Riftia pachyptila C1 hemoglobin reveals novel assembly of 24 subunits. [Riftia pachyptila] &gt;pdb|1YHU|S Crystal structure of Riftia pachyptila C1 hemoglobin reveals novel assembly of 24 subunits. [Riftia pachyptila] &gt;pdb|1YHU|W Crystal structure of Riftia pachyptila C1 hemoglobin reveals novel assembly of 24 subunits. [Riftia pachyptila]</Hit_def>
+  <Hit_accession>1YHU_C</Hit_accession>
+  <Hit_len>148</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>29.6462</Hsp_bit-score>
+      <Hsp_score>65</Hsp_score>
+      <Hsp_evalue>2.96321</Hsp_evalue>
+      <Hsp_query-from>33</Hsp_query-from>
+      <Hsp_query-to>70</Hsp_query-to>
+      <Hsp_hit-from>37</Hsp_hit-from>
+      <Hsp_hit-to>71</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>13</Hsp_identity>
+      <Hsp_positive>24</Hsp_positive>
+      <Hsp_gaps>3</Hsp_gaps>
+      <Hsp_align-len>38</Hsp_align-len>
+      <Hsp_qseq>FSQILEIAPAAKGLFSFLRDSDEVPHNNPKLKAHAVKV</Hsp_qseq>
+      <Hsp_hseq>FAALFKMVPAAKNLFTRVNVADI---NSPEFQGHVVRV</Hsp_hseq>
+      <Hsp_midline>F+ + ++ PAAK LF+ +  +D    N+P+ + H V+V</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>83</Hit_num>
+  <Hit_id>pdb|1IQO|A</Hit_id>
+  <Hit_def>Solution structure of MTH1880 from methanobacterium thermoautotrophicum [Methanothermobacter] &gt;pdb|1IQS|A Minimized average structure of MTH1880 from Methanobacterium Thermoautotrophicum [Methanothermobacter thermautotrophicus]</Hit_def>
+  <Hit_accession>1IQO_A</Hit_accession>
+  <Hit_len>88</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>27.335</Hsp_bit-score>
+      <Hsp_score>59</Hsp_score>
+      <Hsp_evalue>8.81737</Hsp_evalue>
+      <Hsp_query-from>195</Hsp_query-from>
+      <Hsp_query-to>227</Hsp_query-to>
+      <Hsp_hit-from>46</Hsp_hit-from>
+      <Hsp_hit-to>77</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>15</Hsp_identity>
+      <Hsp_positive>20</Hsp_positive>
+      <Hsp_gaps>1</Hsp_gaps>
+      <Hsp_align-len>33</Hsp_align-len>
+      <Hsp_qseq>RGIATTHRLESKSQVNLIDTLRKQLEEAGPLIN</Hsp_qseq>
+      <Hsp_hseq>KGTQSNHVL-FLSSYNSVDEIRKELEEAGAKIN</Hsp_hseq>
+      <Hsp_midline>+G  + H L   S  N +D +RK+LEEAG  IN</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+</Iteration_hits>
+  <Iteration_stat>
+    <Statistics>
+      <Statistics_db-num>126996</Statistics_db-num>
+      <Statistics_db-len>33638405</Statistics_db-len>
+      <Statistics_hsp-len>0</Statistics_hsp-len>
+      <Statistics_eff-space>0</Statistics_eff-space>
+      <Statistics_kappa>0.041</Statistics_kappa>
+      <Statistics_lambda>0.267</Statistics_lambda>
+      <Statistics_entropy>0.14</Statistics_entropy>
+    </Statistics>
+  </Iteration_stat>
+</Iteration>
+</BlastOutput_iterations>
+</BlastOutput>
