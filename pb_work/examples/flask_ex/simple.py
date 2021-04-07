@@ -3,12 +3,12 @@ Example Flask application
 
 Michael Gribskov     30 March 2021
 ================================================================================================="""
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request, redirect, url_for, render_template
 app = Flask(__name__)
 
 @app.route('/<worldtype>')
 def welcome(worldtype):
-    return '<H1>Welcome to the world of {}<H1>'.format(worldtype)
+    return render_template('welcome.html', name=worldtype)
 
 @app.route('/login',methods = ['POST', 'GET'])
 def login():
