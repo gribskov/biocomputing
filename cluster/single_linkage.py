@@ -88,12 +88,16 @@ class SingleLinkage:
 
         return len(self.kidx)
 
-    def single(self):
+    def single(self, threshold=10, select='evalue'):
         """-----------------------------------------------------------------------------------------
         second try using the structure of the data
         :return:
         -----------------------------------------------------------------------------------------"""
         gidx = self.groupidx
+
+        # column for thresholding
+        crit = self.keys[select]
+
         for l1 in self.barrio:
             known = set()
             unknown = set()
@@ -104,6 +108,10 @@ class SingleLinkage:
 
             for b in self.barrio[l1]:
                 l2 = b[1]
+                if threshold < b[crit]:
+                    # apply threshold to critical value
+                    continue
+
                 if l2 in gidx:
                     known.add(l2)
                 else:
@@ -120,10 +128,15 @@ class SingleLinkage:
             for member in unknown:
                 self.group[g].append(member)
                 gidx[member] = g
+
             for member in known:
-                if self.groupidx[member] != g:
-                    self.group.g += self.group[groupidx[member]]
-                    gidx.member = g
+                if gidx[member] != g:
+                    self.group[g] += self.group[gidx[member]]
+                    self.group[gidx[member]] = []
+                    gidx[member] = g
+            # for member in known:
+            #     if gidx[member] != g:
+            #         self.group[gidx[member]] = []
 
             # print('{}:{}'.format(g, self.group[g]))
 
@@ -139,14 +152,20 @@ class SingleLinkage:
             nidx = SingleLinkage.invert_names(self.names)
 
             for g in range(len(self.group)):
+                if not self.group[g]:
+                    continue
+
                 fh.write('group {}: '.format(g))
                 members = []
                 for each in self.group[g]:
                     members += nidx[each]
-                fh.write('{}\n'.format(', '.join(members)))
+                fh.write('{}\n'.format(', '.join(sorted(members))))
 
         else:
             for g in range(len(self.group)):
+                if not self.group[g]:
+                    continue
+
                 fh.write('{}: {}\n'.format(g, self.group[g]))
 
         return
@@ -191,13 +210,13 @@ if __name__ == '__main__':
 
     d1 = [{'sname':'a', 'qname':'b', 'evalue':1e-50, 'id':80},
           {'sname':'a', 'qname':'c', 'evalue':1e-100, 'id':80},
-          {'sname':'b', 'qname':'c', 'evalue':1e-100, 'id':80},
-          # {'sname':'b', 'qname':'h', 'evalue':1e-100, 'id':80},
+          {'sname':'b', 'qname':'h', 'evalue':1e-100, 'id':80},
+          {'sname':'h', 'qname':'b', 'evalue':1e-100, 'id':80},
           {'sname':'c', 'qname':'d', 'evalue':1e-100, 'id':80},
           {'sname':'c', 'qname':'e', 'evalue':1e-100, 'id':80},
           {'sname':'d', 'qname':'e', 'evalue':1e-100, 'id':80},
           {'sname':'e', 'qname':'f', 'evalue':1e-50, 'id':80},
-          # {'sname':'f', 'qname':'g', 'evalue':1e-100, 'id':80},
+          {'sname':'f', 'qname':'g', 'evalue':1e-100, 'id':80},
           {'sname':'g', 'qname':'h', 'evalue':1e-100, 'id':80},
           {'sname':'g', 'qname':'j', 'evalue':1e-100, 'id':80},
           {'sname':'g', 'qname':'l', 'evalue':1e-100, 'id':80},
@@ -213,7 +232,7 @@ if __name__ == '__main__':
     for d in d1:
         cluster.append(d)
 
-    cluster.single()
+    cluster.single(threshold=1e-51)
     cluster.write_groups(sys.stdout)
 
     exit(0)
