@@ -3,6 +3,7 @@
 
 Michael Gribskov     12 April 2021
 ================================================================================================="""
+import sys
 
 
 class SingleLinkage:
@@ -24,7 +25,8 @@ class SingleLinkage:
 
         -----------------------------------------------------------------------------------------"""
         self.barrio = {}
-        self.groups = []
+        self.group = []
+        self.groupidx = {}
         self.names = {}
         self.labels = {}
         self.keys = {}
@@ -54,6 +56,21 @@ class SingleLinkage:
 
         return None
 
+    @staticmethod
+    def invert_names(names):
+        """-----------------------------------------------------------------------------------------
+        return a dictionary with the keys and values reverse so that numerical IDs can be
+        converted back to strings
+
+        :param names: dict, usually self.names
+        :return: dict
+        -----------------------------------------------------------------------------------------"""
+        reverse = {}
+        for id in names:
+            reverse[names[id]] = id
+
+        return reverse
+
     def set_keys(self, keys):
         """-----------------------------------------------------------------------------------------
         Set up the coversion between data column names and indices.  Include labels in the keys
@@ -70,6 +87,69 @@ class SingleLinkage:
             self.kidx.append(k)
 
         return len(self.kidx)
+
+    def single(self):
+        """-----------------------------------------------------------------------------------------
+        second try using the structure of the data
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        gidx = self.groupidx
+        for l1 in self.barrio:
+            known = set()
+            unknown = set()
+            if l1 in gidx:
+                known.add(l1)
+            else:
+                unknown.add(l1)
+
+            for b in self.barrio[l1]:
+                l2 = b[1]
+                if l2 in gidx:
+                    known.add(l2)
+                else:
+                    unknown.add(l2)
+
+            # print('{}:{}:{}'.format(l1, known, unknown))
+            if not known:
+                # all are unknown, make a new group and assign all to it
+                g = len(self.group)
+                self.group.append([])
+            else:
+                g = self.groupidx[known.pop()]
+
+            for member in unknown:
+                self.group[g].append(member)
+                gidx[member] = g
+            for member in known:
+                if self.groupidx[member] != g:
+                    self.group.g += self.group[groupidx[member]]
+                    gidx.member = g
+
+            # print('{}:{}'.format(g, self.group[g]))
+
+        return
+
+    def write_groups(self, fh, names=True):
+        """-----------------------------------------------------------------------------------------
+        write all groups to filehandle
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        if names:
+            nidx = SingleLinkage.invert_names(self.names)
+
+            for g in range(len(self.group)):
+                fh.write('group {}: '.format(g))
+                members = []
+                for each in self.group[g]:
+                    members += nidx[each]
+                fh.write('{}\n'.format(', '.join(members)))
+
+        else:
+            for g in range(len(self.group)):
+                fh.write('{}: {}\n'.format(g, self.group[g]))
+
+        return
 
 
 # --------------------------------------------------------------------------------------------------
@@ -88,5 +168,52 @@ if __name__ == '__main__':
 
     for d in d0:
         cluster.append(d)
+
+    cluster.single()
+
+    d1 = [{'sname':'a', 'qname':'b', 'evalue':1e-100, 'id':80},
+          {'sname':'a', 'qname':'c', 'evalue':1e-100, 'id':80},
+          {'sname':'b', 'qname':'c', 'evalue':1e-100, 'id':80},
+          {'sname':'d', 'qname':'e', 'evalue':1e-100, 'id':80},
+          {'sname':'f', 'qname':'g', 'evalue':1e-100, 'id':80},
+          {'sname':'f', 'qname':'b', 'evalue':1e-100, 'id':80},
+          {'sname':'d', 'qname':'a', 'evalue':1e-100, 'id':80},
+          ]
+
+    cluster = SingleLinkage()
+    cluster.set_keys(['sname', 'qname', 'evalue', 'id'])
+    cluster.labels = ['sname', 'qname']
+    for d in d1:
+        cluster.append(d)
+
+    cluster.single()
+    cluster.write_groups(sys.stdout)
+
+    d1 = [{'sname':'a', 'qname':'b', 'evalue':1e-50, 'id':80},
+          {'sname':'a', 'qname':'c', 'evalue':1e-100, 'id':80},
+          {'sname':'b', 'qname':'c', 'evalue':1e-100, 'id':80},
+          # {'sname':'b', 'qname':'h', 'evalue':1e-100, 'id':80},
+          {'sname':'c', 'qname':'d', 'evalue':1e-100, 'id':80},
+          {'sname':'c', 'qname':'e', 'evalue':1e-100, 'id':80},
+          {'sname':'d', 'qname':'e', 'evalue':1e-100, 'id':80},
+          {'sname':'e', 'qname':'f', 'evalue':1e-50, 'id':80},
+          # {'sname':'f', 'qname':'g', 'evalue':1e-100, 'id':80},
+          {'sname':'g', 'qname':'h', 'evalue':1e-100, 'id':80},
+          {'sname':'g', 'qname':'j', 'evalue':1e-100, 'id':80},
+          {'sname':'g', 'qname':'l', 'evalue':1e-100, 'id':80},
+          {'sname':'h', 'qname':'i', 'evalue':1e-100, 'id':80},
+          {'sname':'i', 'qname':'j', 'evalue':1e-100, 'id':80},
+          {'sname':'j', 'qname':'k', 'evalue':1e-100, 'id':80},
+          {'sname':'k', 'qname':'l', 'evalue':1e-100, 'id':80},
+          ]
+
+    cluster = SingleLinkage()
+    cluster.set_keys(['sname', 'qname', 'evalue', 'id'])
+    cluster.labels = ['sname', 'qname']
+    for d in d1:
+        cluster.append(d)
+
+    cluster.single()
+    cluster.write_groups(sys.stdout)
 
     exit(0)
