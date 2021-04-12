@@ -107,7 +107,11 @@ class Blast(object):
         usage
             blast.readTabular()
         -----------------------------------------------------------------------------------------"""
-        line = self.fh.readline()
+        line = '#'
+        while line.startswith('#'):
+            #TODO needs to be improved to record the names of sequences with no hits
+            line = self.fh.readline()
+
         if line:
             line = line.rstrip()
             # print('line:', line)
