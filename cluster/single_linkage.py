@@ -98,6 +98,7 @@ class SingleLinkage:
         # column for thresholding
         crit = self.keys[select]
 
+        n = 0
         for l1 in self.barrio:
             known = set()
             unknown = set()
@@ -118,6 +119,11 @@ class SingleLinkage:
                     unknown.add(l2)
 
             # print('{}:{}:{}'.format(l1, known, unknown))
+            n += 1
+            if not n % 1000:
+                print('.', end='')
+            if not n % 50000:
+                print()
             if not known:
                 # all are unknown, make a new group and assign all to it
                 g = len(self.group)
@@ -151,24 +157,25 @@ class SingleLinkage:
         if names:
             nidx = SingleLinkage.invert_names(self.names)
 
+            groupcount = [0 for _ in range(len(self.group))]
             for g in range(len(self.group)):
                 if not self.group[g]:
                     continue
-
-                fh.write('group {}: '.format(g))
+                groupcount[len(self.group[g])] += 1
+                fh.write('group {}\t{} members: \n'.format(g, len(self.group[g])))
                 members = []
                 for each in self.group[g]:
-                    members += nidx[each]
-                fh.write('{}\n'.format(', '.join(sorted(members))))
+                    members.append(nidx[each])
+                fh.write('\t{}\n'.format(', '.join(sorted(members))))
 
         else:
             for g in range(len(self.group)):
                 if not self.group[g]:
                     continue
-
+                groupcount[len(self.group[g])] += 1
                 fh.write('{}: {}\n'.format(g, self.group[g]))
 
-        return
+        return groupcount
 
 
 # --------------------------------------------------------------------------------------------------
