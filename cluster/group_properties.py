@@ -116,7 +116,10 @@ if __name__ == '__main__':
     for fxn in sorted(function):
         out.write('function:{}\tsequences:{}\n'.format(fxn, function[fxn]['count']))
         for g in function[fxn]['groupnum']:
-            otherfxn = str(groups[g]['function']).replace("'", "").replace(': ', ':').strip('{}')
+            otherfxn = []
+            for f in groups[g]['function']:
+                otherfxn.append('{}={}'.format(f, groups[g]['function'][f]))
+            otherfxn = '; '.join(otherfxn)
             out.write('\tgroup:{:<6d}\tsequences:{:<6d}\tthis:{:<6d}\tall:{}\n'.format(
                 groups[g]['name'],groups[g]['n'], groups[g]['function'][fxn], otherfxn))
 
