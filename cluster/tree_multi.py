@@ -62,31 +62,52 @@ class Tree:
         :param newick: string
         :return: True
         -----------------------------------------------------------------------------------------"""
-        # remove outer parentheses
-        newick = newick.strip(' ;')
-        if newick.startswith('('):
-            newick = newick[1:-1]
+        subtree = Tree.split_newick(newick)
 
-        # find central comma
-        comma = Tree.find_comma(newick)
+        if subtree:
+            for node in subtree:
+                child = Tree()
+                child.from_newick(node)
+                self.children.append(child)
 
-        if comma:
-            # build child nodes
-            left = newick[:comma]
-            right = newick[comma + 1:]
-
-            child = Tree()
-            child.from_newick(left)
-            self.children.append(child)
-
-            child = Tree()
-            child.from_newick(right)
-            self.children.append(child)
         else:
             # leaf node add string to id
             self.id = newick
 
         return True
+
+    @staticmethod
+    def split_newick(newick):
+        """-----------------------------------------------------------------------------------------
+        Split a newick string into its child nodes
+
+        :param newick: string
+        :return: list of newick substrings (child nodes of tree)
+        -----------------------------------------------------------------------------------------"""
+        # remove outer parentheses
+        newick = newick.strip(' ;')
+        if newick.startswith('('):
+            newick = newick[1:-1]
+
+        subtree = []
+
+        depth = 0
+        pos = 0
+        for c in newick:
+            if c == '(':
+                depth += 1
+            elif c == ')':
+                depth -= 1
+            elif c == ',':
+                if depth == 0:
+                    break
+            pos += 1
+
+        if pos < len(newick):
+            subtree.append(newick[:pos])
+            subtree.append(newick[pos + 1:])
+
+        return subtree
 
 
 # --------------------------------------------------------------------------------------------------
