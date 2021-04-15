@@ -13,6 +13,24 @@ class Tree:
         self.distance = None
         self.children = []
 
+    def dump(self):
+        """-----------------------------------------------------------------------------------------
+        Dump the contents of the tree. Mostly for debugging
+
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+
+        print('\nnode:{}\n\tid:{}'.format(id(self), self.id))
+        print('\tchildren:', end='')
+
+        for child in self.children:
+            print(' {}'.format(id(child)), end='')
+        print()
+        for child in self.children:
+            child.dump()
+
+        return True
+
     @staticmethod
     def find_comma(newick):
         """-----------------------------------------------------------------------------------------
@@ -87,5 +105,6 @@ if __name__ == '__main__':
     for n in newick:
         tree = Tree()
         tree.from_newick(n)
+        tree.dump()
 
     exit(0)
