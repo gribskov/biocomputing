@@ -46,22 +46,27 @@ class Tree:
         -----------------------------------------------------------------------------------------"""
         # remove outer parentheses
         newick = newick.strip(' ;')
-        newick = newick[1:-1]
+        if newick.startswith('('):
+            newick = newick[1:-1]
 
         # find central comma
         comma = Tree.find_comma(newick)
 
-        # build child nodes
-        left = newick[:comma]
-        right = newick[comma + 1:]
+        if comma:
+            # build child nodes
+            left = newick[:comma]
+            right = newick[comma + 1:]
 
-        child = Tree()
-        child.from_newick(left)
-        self.children.append(child)
+            child = Tree()
+            child.from_newick(left)
+            self.children.append(child)
 
-        child = Tree()
-        child.from_newick(right)
-        self.children.append(child)
+            child = Tree()
+            child.from_newick(right)
+            self.children.append(child)
+        else:
+            # leaf node add string to id
+            self.id = newick
 
         return True
 
@@ -71,9 +76,16 @@ class Tree:
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    newick = [ '(a,b),(c, (d,e)', 'a,b', 'c, (d,e)']
+    # # test 1: does find_comma() work?
+    # newick = [ '(a,b),(c, (d,e)', 'a,b', 'c, (d,e)']
+    # for n in newick:
+    #     comma = Tree.find_comma(n)
+    #     print('{} => {}\t\t{}'.format(n, n[:comma], n[comma+1:]))
+
+    # test 2: build a tree
+    newick = ['((a,b),(c, (d,e)));']
     for n in newick:
-        comma = Tree.find_comma(n)
-        print('{} => {}\t\t{}'.format(n, n[:comma], n[comma+1:]))
+        tree = Tree()
+        tree.from_newick(n)
 
     exit(0)
