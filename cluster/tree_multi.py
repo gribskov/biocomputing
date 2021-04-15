@@ -62,6 +62,9 @@ class Tree:
         :param newick: string
         :return: True
         -----------------------------------------------------------------------------------------"""
+        branch_length, newick = self.get_branch_length(newick)
+        if branch_length:
+            self.id += str(branch_length)
         subtree = Tree.split_newick(newick)
 
         if subtree:
@@ -77,6 +80,25 @@ class Tree:
         return True
 
     @staticmethod
+    def get_branch_length(newick):
+        """-----------------------------------------------------------------------------------------
+        Check if a branch length is present, and if it is extract it, return the branch length
+        and the shortened string.  if no branch length is present, return None and the original
+        string
+
+        :param newick: string
+        :return: float, string
+        -----------------------------------------------------------------------------------------"""
+        last_colon = newick.rfind(':')
+        last_paren = newick.rfind(')')
+        if last_paren == -1 or last_paren > last_colon:
+            return None, newick
+        else:
+            branch_length = float(newick[last_colon+1:])
+            newick = newick[:last_colon]
+            return branch_length, newick
+
+    @staticmethod
     def split_newick(newick):
         """-----------------------------------------------------------------------------------------
         Split a newick string into its child nodes
@@ -90,6 +112,7 @@ class Tree:
             newick = newick[1:-1]
 
         subtree = []
+        comma = []
 
         depth = 0
         pos = 0
@@ -100,12 +123,15 @@ class Tree:
                 depth -= 1
             elif c == ',':
                 if depth == 0:
-                    break
+                    comma.append(pos)
             pos += 1
 
-        if pos < len(newick):
-            subtree.append(newick[:pos])
-            subtree.append(newick[pos + 1:])
+        if comma:
+            begin = 0
+            for c in comma:
+                subtree.append(newick[begin:c])
+                begin = c + 1
+            subtree.append(newick[begin:])
 
         return subtree
 
@@ -122,7 +148,14 @@ if __name__ == '__main__':
     #     print('{} => {}\t\t{}'.format(n, n[:comma], n[comma+1:]))
 
     # test 2: build a tree
-    newick = ['((a,b),(c, (d,e)));']
+    # newick = ['((a,b),(c, (d,e)));']
+    # for n in newick:
+    #     tree = Tree()
+    #     tree.from_newick(n)
+    #     tree.dump()
+
+    newick = ['((raccoon,bear),((sea_lion, seal),((monkey,cat), weasel)),dog);',
+              '((raccoon:19.2,bear:6.8):0.9,((sea_lion:13.0, seal:12.0):7.5,((monkey:100.9,cat:47.1):20.6, weasel:18.9):2.09):3.9,dog:25.5);']
     for n in newick:
         tree = Tree()
         tree.from_newick(n)
