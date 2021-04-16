@@ -108,6 +108,24 @@ class Tree:
             newick = newick[:last_colon]
             return branch_length, newick
 
+    def newick_string(self):
+        """-----------------------------------------------------------------------------------------
+        Recursively generate newick string for the tree
+        :return:string
+        -----------------------------------------------------------------------------------------"""
+        newick = ''
+        if self.children:
+            newick += '('
+            for child in self.children:
+                newick += child.newick_string() + ','
+            newick = newick.rstrip(',') + ')'
+            if self.id:
+                newick += ':' + self.id
+        else:
+            newick += self.id
+
+        return newick
+
     @staticmethod
     def split_newick(newick):
         """-----------------------------------------------------------------------------------------
@@ -144,24 +162,6 @@ class Tree:
             subtree.append(newick[begin:])
 
         return subtree
-
-    def newick_string(self):
-        """-----------------------------------------------------------------------------------------
-        Recursively generate newick string for the tree
-        :return:string
-        -----------------------------------------------------------------------------------------"""
-        newick = ''
-        if self.children:
-            newick += '('
-            for child in self.children:
-                newick += child.newick_string() + ','
-            newick = newick.rstrip(',') + ')'
-            if self.id:
-                newick += ':' + self.id
-        else:
-            newick += self.id
-
-        return newick
 
 
 # --------------------------------------------------------------------------------------------------
