@@ -17,11 +17,28 @@ class Tree:
         return self.dfs()
 
     def dfs(self):
+        """-----------------------------------------------------------------------------------------
+        Generator function for depth-first traversal of tree
+        :return: True
+        -----------------------------------------------------------------------------------------"""
         yield self
         for child in self.children:
             yield from child.dfs()
 
-        return
+        return True
+
+    def balance(self, reverse=True):
+        """-----------------------------------------------------------------------------------------
+        Rearrange tree with the largest branches on the left (reverse=True) or on the right
+        (reverse=False)
+        :param reverse: boolean
+        :return: True
+        -----------------------------------------------------------------------------------------"""
+        for node in self:
+            if node.children:
+                node.children.sort(key=lambda n: n.size(), reverse=reverse)
+
+        return True
 
     def dump(self):
         """-----------------------------------------------------------------------------------------
@@ -126,6 +143,16 @@ class Tree:
 
         return newick
 
+    def size(self):
+        """-----------------------------------------------------------------------------------------
+        Return number of nodes (including self)
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        n = 0
+        for node in self:
+            n += 1
+        return n
+
     @staticmethod
     def split_newick(newick):
         """-----------------------------------------------------------------------------------------
@@ -182,17 +209,24 @@ if __name__ == '__main__':
     #     tree.from_newick(n)
     #     tree.dump()
 
-    newick = ['((raccoon,bear),((sea_lion, seal),((monkey,cat), weasel)),dog);',
+    newick = ['((a,b),(c, (d,e)));',
+              '((raccoon,bear),((sea_lion, seal),((monkey,cat), weasel)),dog);',
               '((raccoon:19.2,bear:6.8):0.9,((sea_lion:13.0, seal:12.0):7.5,((monkey:100.9,cat:47.1):20.6, weasel:18.9):2.09):3.9,dog:25.5);',
               '(dog:25.5,(raccoon:19.2,bear:6.8):0.9,((sea_lion:13.0, seal:12.0):7.5,((monkey:100.9,cat:47.1):20.6,weasel:18.9):2.09):3.9);']
     for n in newick:
         tree = Tree()
         tree.from_newick(n)
-        tree.dump()
+        # tree.dump()
 
+        print('tree size: {}'.format(tree.size()))
         for node in tree:
             print('node:{}\tid:{}:'.format(id(node), node.id))
 
+        print(tree.newick_string())
+
+        tree.balance()
+        print(tree.newick_string())
+        tree.balance(reverse=False)
         print(tree.newick_string())
 
     exit(0)
