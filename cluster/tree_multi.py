@@ -13,6 +13,16 @@ class Tree:
         self.distance = None
         self.children = []
 
+    def __iter__(self):
+        return self.dfs()
+
+    def dfs(self):
+        yield self
+        for child in self.children:
+            yield from child.dfs()
+
+        return
+
     def dump(self):
         """-----------------------------------------------------------------------------------------
         Dump the contents of the tree. Mostly for debugging
@@ -94,7 +104,7 @@ class Tree:
         if last_paren == -1 or last_paren > last_colon:
             return None, newick
         else:
-            branch_length = float(newick[last_colon+1:])
+            branch_length = float(newick[last_colon + 1:])
             newick = newick[:last_colon]
             return branch_length, newick
 
@@ -135,6 +145,24 @@ class Tree:
 
         return subtree
 
+    def newick_string(self):
+        """-----------------------------------------------------------------------------------------
+        Recursively generate newick string for the tree
+        :return:string
+        -----------------------------------------------------------------------------------------"""
+        newick = ''
+        if self.children:
+            newick += '('
+            for child in self.children:
+                newick += child.newick_string() + ','
+            newick = newick.rstrip(',') + ')'
+            if self.id:
+                newick += ':' + self.id
+        else:
+            newick += self.id
+
+        return newick
+
 
 # --------------------------------------------------------------------------------------------------
 # Testing
@@ -155,10 +183,16 @@ if __name__ == '__main__':
     #     tree.dump()
 
     newick = ['((raccoon,bear),((sea_lion, seal),((monkey,cat), weasel)),dog);',
-              '((raccoon:19.2,bear:6.8):0.9,((sea_lion:13.0, seal:12.0):7.5,((monkey:100.9,cat:47.1):20.6, weasel:18.9):2.09):3.9,dog:25.5);']
+              '((raccoon:19.2,bear:6.8):0.9,((sea_lion:13.0, seal:12.0):7.5,((monkey:100.9,cat:47.1):20.6, weasel:18.9):2.09):3.9,dog:25.5);',
+              '(dog:25.5,(raccoon:19.2,bear:6.8):0.9,((sea_lion:13.0, seal:12.0):7.5,((monkey:100.9,cat:47.1):20.6,weasel:18.9):2.09):3.9);']
     for n in newick:
         tree = Tree()
         tree.from_newick(n)
         tree.dump()
+
+        for node in tree:
+            print('node:{}\tid:{}:'.format(id(node), node.id))
+
+        print(tree.newick_string())
 
     exit(0)
