@@ -162,7 +162,7 @@ class BlastNCBI():
         """-----------------------------------------------------------------------------------------
         Polls the server and gets the status of the job in self.rid. The server returns:
         WAITING, UNKNOWN, or READY
-        self.status is set as running, unkown, or finished, respectively
+        self.status is set as running, unknown, or finished, respectively
 
         :param wait: boolean, if True wait for self.poll_time before sending request
         :return: string, status running | unknown | finished
