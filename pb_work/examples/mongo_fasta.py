@@ -19,20 +19,26 @@ phage = biocomputing['phage']
 
 fasta = Fasta('C:/Users/michael/Desktop/phage.fa')
 
-start_time = time.perf_counter()
+fasta_start_time = time.perf_counter()
 nseq = 0
+all = []
 while fasta.next():
     nseq += 1
     if not nseq %10001:
         break
+    all.append({'_id':fasta.id, 'documentation':fasta.doc, 'sequence':fasta.seq})
 
-    result = phage.insert_one( {'_id':fasta.id, 'documentation':fasta.doc, 'sequence':fasta.seq})
-    # print(f'\tsequence {fasta.id} inserted as {result.inserted_id}')
 
-end_time = time.perf_counter()
-print(f'{phage.count_documents({})} loaded in {end_time-start_time} seconds')
+fasta_end_time = time.perf_counter()
+print(f'{nseq-1} sequences read in {fasta_end_time-fasta_start_time} seconds')
 
-for seq in phage.find():
-    print(f'{seq["_id"]}\tlength:{len(seq["sequence"])}')
+mongo_start_time = time.perf_counter()
+result = phage.insert_many(all)
+mongo_end_time = time.perf_counter()
+print(f'{phage.count_documents({})} sequences loaded in {mongo_end_time-mongo_start_time} seconds')
+print(f'overall time: {mongo_end_time-fasta_start_time} seconds')
+
+# for seq in phage.find():
+#     print(f'{seq["_id"]}\tlength:{len(seq["sequence"])}')
 
 exit(0)
