@@ -30,7 +30,7 @@ while fasta.next():
 
 
 fasta_end_time = time.perf_counter()
-print(f'{nseq-1} sequences read in {fasta_end_time-fasta_start_time} seconds')
+print(f'{nseq} sequences read in {fasta_end_time-fasta_start_time} seconds')
 
 mongo_start_time = time.perf_counter()
 result = phage.insert_many(all)
@@ -38,7 +38,11 @@ mongo_end_time = time.perf_counter()
 print(f'{phage.count_documents({})} sequences loaded in {mongo_end_time-mongo_start_time} seconds')
 print(f'overall time: {mongo_end_time-fasta_start_time} seconds')
 
-# for seq in phage.find():
-#     print(f'{seq["_id"]}\tlength:{len(seq["sequence"])}')
+# build index
+phage.create_index([('documentation', 'text')])
+result = phage.find({'$text':{'$search':'lysin A'}})
+for seq in result:
+    print(f'{seq["_id"]} {seq["documentation"]}')
+
 
 exit(0)
