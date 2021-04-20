@@ -40,9 +40,9 @@ print(f'overall time: {mongo_end_time-fasta_start_time} seconds')
 
 # build index
 phage.create_index([('documentation', 'text')])
-result = phage.find({'$text':{'$search':'lysin A'}})
+result = phage.find({'$text':{'$search':'lysin A'}},{'score':{'$meta':'textScore'}})
 for seq in result:
-    print(f'{seq["_id"]} {seq["documentation"]}')
+    print(f'{seq["_id"]} {seq["documentation"]}\t score:{seq["score"]}')
 
 
 exit(0)
