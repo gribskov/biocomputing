@@ -23,8 +23,8 @@ nseq = 0
 all = []
 while fasta.next():
     nseq += 1
-    if not nseq % 10001:
-        break
+    # if not nseq % 10001:
+    #     break
     all.append({'_id':fasta.id, 'documentation':fasta.doc, 'sequence':fasta.seq})
 
 fasta_end_time = time.perf_counter()
@@ -39,9 +39,8 @@ print(f'overall time: {mongo_end_time - fasta_start_time} seconds')
 
 # build index
 phage.create_index([('documentation', 'text')])
-result = phage.find({'$text':{'$search':'lysin A'}}, {'score':{'$meta':'textScore'}})
-for seq in result.sort([('score',{'$meta':"textScore"})]):
-
+result = phage.find({'$text':{'$search':'"lysin A"'}}, {'score':{'$meta':'textScore'}})
+for seq in result.sort([('score', {'$meta':"textScore"}), ('_id', -1)]):
     print(f'{seq["_id"]} {seq["documentation"]}\t score:{seq["score"]}')
 
 exit(0)
