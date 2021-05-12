@@ -15,16 +15,28 @@ if __name__ == '__main__':
 
     mp = Mpileup()
     mp.open_file('../data/PrFi_10k.mpileup', 'r')
+    mp.open_file('C:/users/michael/Desktop/apple/out5.mpileup', 'r')
 
     position = []
     depthpos = []
     mafpos = []
-    maf_histogram = [0 for _ in range(100)]
+    maf_histogram = [0 for _ in range(bins)]
 
     freq = {}
+    n = 0
+    next = 100
     while mp.parse():
+
         mp.countchar()
         depth = mp.parsed['depth']
+        if depth < 20:
+            continue
+
+        n += 1
+        # if n < next:
+        #     continue
+        #
+        # next += 10000
         depthplus = depth + 1.0
         for c in 'ACGTN*':
             freq[c] = (mp.count[c] + 0.167) / depthplus
@@ -32,23 +44,27 @@ if __name__ == '__main__':
         freq_order = sorted(freq.keys(), key=lambda x: freq[x], reverse=True)
         major = freq_order[0]
 
-        if not depth or mp.count[major] == depth:
-            continue
+            # continue
 
         minorfreq = 1.0 - freq[major]
         mafpos.append(minorfreq)
         mafh = math.floor(bins * minorfreq)
-        maf_histogram[mafh] += 1
+        # maf_histogram[mafh] += 1
 
         position.append(mp.parsed['position'])
         depthpos.append(depth)
-        print('{}\t{}\t{}\t{}\t{:0.3f}'.format(position[-1], major, depthpos[-1], mafh, mafpos[-1]))
-
+        if minorfreq > 0.15:
+            print('{}\t{}\t{}\t{}\t{:0.3f}'.format(position[-1], major, depthpos[-1], mafh, mafpos[-1]))
+            maf_histogram[mafh] += 1
+        # if n > 100000:
+        #     break
+        if not depth or mp.count[major] == depth:
+            continue
     # plot
     plt.plot(position,mafpos)
     plt.show()
 
-    plt.plot(range(0,100), maf_histogram)
+    plt.plot(range(0,bins), maf_histogram)
     plt.show()
 
 

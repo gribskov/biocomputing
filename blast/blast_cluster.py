@@ -95,7 +95,8 @@ if __name__ == '__main__':
     sys.stderr.write('Blast search: {}\n'.format(infile))
     blast = Blast(file=sys.argv[1])
 
-    fmt = 'qname qlen qbegin qend sname slen sbegin send alignlen score evalue stitle'
+    # fmt = 'qname qlen qbegin qend sname slen sbegin send alignlen score evalue stitle'
+    fmt = 'qname sname id alignlen mismatch gapopen qbeg qend sbeg send evalue bit_score'
     nfields = blast.setFormat(fmt)
 
     record = []
@@ -193,4 +194,4 @@ if __name__ == '__main__':
                                                                     int(edge['slen']),
                                                                     edge['stitle']))
 
-exit(0)
+    exit(0)

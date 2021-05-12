@@ -8,8 +8,6 @@ from ..jobmanager_api import JobManagerAPI
 class Interpro(JobManagerAPI):
     """=============================================================================================
     Interpro class for running interproscan
-    TODO: update to work with jobmanager class
-    TODO: move job control variables and logging to jobmanager
 
     25 December 2018    Michael Gribskov
     ============================================================================================="""
@@ -43,12 +41,12 @@ class Interpro(JobManagerAPI):
 
         loglevel   0 no log, 1 job submission/completion, 2 all
         -----------------------------------------------------------------------------------------"""
-        self.loglevel = loglevel
-        self.log_fh = sys.stderr
-
-        self.poll_time = poll_time  # seconds between polling
-        self.poll_max = poll_max  # maximum number of times to poll
-        self.poll_count = 0  # number of times this job has been polled
+        # self.loglevel = loglevel
+        # self.log_fh = sys.stderr
+        #
+        # self.poll_time = poll_time  # seconds between polling
+        # self.poll_max = poll_max  # maximum number of times to poll
+        # self.poll_count = 0  # number of times this job has been polled
 
         self.email = ''  # user email (optional)
         self.title = ''  # title for job (optional)
@@ -82,10 +80,12 @@ class Interpro(JobManagerAPI):
         for app in selected:
             if app == 'Pfam':
                 app = 'PfamA'
-            if app in self.applications_avail:
+            if app in Interpro.available['applications']:
                 self.applications.append(app)
             else:
-                self.log_message('not_available', 'application={}'.format(app))
+                self.message = {'type':    'not_available',
+                                'text':    f'application={app}',
+                                'loglevel':2}
 
         return len(self.applications)
 
@@ -97,10 +97,12 @@ class Interpro(JobManagerAPI):
         :return: True if format is available
         -----------------------------------------------------------------------------------------"""
         # self.output = ''
-        if selected in self.output_avail:
+        if selected in Interpro.available['outputs']:
             self.output = selected
         else:
-            self.log_message('not_available', 'output={}'.format(selected))
+            self.message = {'type':    'not_available',
+                            'text':    f'output={selected}',
+                            'loglevel':2}
 
             return False
 
@@ -246,13 +248,14 @@ class Interpro(JobManagerAPI):
             print(self.response.request.body, '\n')
 
         if self.response_is_error('submitting job'):
-            self.jobstatus = 'SUBMIT_ERROR'
+            self.jobstatus = 'failed'
         else:
             # success
             self.jobid = self.response.text
-            self.jobstatus = 'SUBMIT_OK'
-            self.log_message('submitted', 'job_name={};job_id={}'.format(self.jobname, self.jobid),
-                             loglevel=1)
+            self.jobstatus = 'submitted'
+            self.message = {'type':    'submitted',
+                            'text':    f'job_name={self.title};job_id={self.jobid}',
+                            'loglevel':1}
 
             is_success = True
 
@@ -268,19 +271,19 @@ class Interpro(JobManagerAPI):
         command = self.url + 'status/' + self.jobid
         self.response = requests.get(command)
         response_text = self.response.text.rstrip()
-        self.log_message('polling',
-                         'job_id={};response={}'.format(self.jobid, response_text),
-                         loglevel=2)
 
-        if 'FINISHED' in self.response.text:
-            if self.jobstatus != 'FINISHED':
-                # only print finsihed message once
-                self.log_message('finished', 'job_id={}'.format(self.jobid), loglevel=1)
-                self.jobstatus = 'FINISHED'
+        if 'RUNNING' in self.response.text:
+            self.message = {'type':    'polling',
+                            'text':    f'job_id={self.jobid};response={response_text}',
+                            'loglevel':2}
 
-        else:
-            self.jobstatus = self.response.text
-            self.log_message(self.jobstatus, 'job_id={}'.format(self.jobid), loglevel=1)
+        elif 'FINISHED' in self.response.text:
+            if self.jobstatus != 'finished':
+                # only print finished message once
+                self.jobstatus = 'finished'
+                self.message = {'type':    'finished',
+                                'text':    f'job_id={self.jobid}',
+                                'loglevel':1}
 
         return self.jobstatus
 
@@ -296,8 +299,9 @@ class Interpro(JobManagerAPI):
         if not self.response_is_error('retrieving result'):
             # success
             self.content = self.response.text
-            message = 'job_id={};output_len={}'.format(self.jobid, len(self.output))
-            self.log_message('retrieved', message, loglevel=1)
+            self.message = {'type':    'retrieved',
+                            'text':    f'job_id={self.jobid};output_len={len(self.output)}',
+                            'loglevel':1}
             return 'retrieved'
 
         return ''
@@ -318,53 +322,54 @@ class Interpro(JobManagerAPI):
         else:
             # error
             is_error = True
-            message = 'job_id={};status={}'.format(self.jobid, self.response.status_code)
-            self.log_message(task, message, loglevel=1)
+            self.message = {'type':    task,
+                            'text':    f'job_id={self.jobid};status={self.response.status_code}',
+                            'loglevel':1}
 
         return is_error
 
-    def set_log_fh(self, fh):
-        """-----------------------------------------------------------------------------------------
-        The output for the log is STDERR by default.  This function allows you to change it
-        -----------------------------------------------------------------------------------------"""
-        self.log_fh = fh
-        return fh
-
-    def log_message(self, type, message, loglevel=1):
-        """-----------------------------------------------------------------------------------------
-        write a message to the log. Messages are only written if self.loglevel >= loglevel
-
-        types:
-            not_available (for submission options)
-            submitted
-            polling
-            finished
-            retrieved
-            server_error
-
-        :type: string, type of message
-        :param message: string, text of message
-        :param loglevel: int, minimum loglevel to write message to log
-        :return: True if message was written
-        -----------------------------------------------------------------------------------------"""
-        if self.loglevel >= loglevel:
-            event_time = time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
-            self.log_fh.write('{}\t{}\t{}\n'.format(event_time, type, message))
-            return True
-
-        return False
-
-    @classmethod
-    def logtime(cls):
-        """-----------------------------------------------------------------------------------------
-        Return current time as a string. Format is 10/Oct/2000:13:55:36 which is similar to the
-        common log format (without the time zone)
-
-        DEPRECATED: The same time is generated in log_message()
-
-        :return: string
-        -----------------------------------------------------------------------------------------"""
-        return time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
+    # def set_log_fh(self, fh):
+    #     """-----------------------------------------------------------------------------------------
+    #     The output for the log is STDERR by default.  This function allows you to change it
+    #     -----------------------------------------------------------------------------------------"""
+    #     self.log_fh = fh
+    #     return fh
+    #
+    # def log_message(self, type, message, loglevel=1):
+    #     """-----------------------------------------------------------------------------------------
+    #     write a message to the log. Messages are only written if self.loglevel >= loglevel
+    #
+    #     types:
+    #         not_available (for submission options)
+    #         submitted
+    #         polling
+    #         finished
+    #         retrieved
+    #         server_error
+    #
+    #     :type: string, type of message
+    #     :param message: string, text of message
+    #     :param loglevel: int, minimum loglevel to write message to log
+    #     :return: True if message was written
+    #     -----------------------------------------------------------------------------------------"""
+    #     if self.loglevel >= loglevel:
+    #         event_time = time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
+    #         self.log_fh.write('{}\t{}\t{}\n'.format(event_time, type, message))
+    #         return True
+    #
+    #     return False
+    #
+    # @classmethod
+    # def logtime(cls):
+    #     """-----------------------------------------------------------------------------------------
+    #     Return current time as a string. Format is 10/Oct/2000:13:55:36 which is similar to the
+    #     common log format (without the time zone)
+    #
+    #     DEPRECATED: The same time is generated in log_message()
+    #
+    #     :return: string
+    #     -----------------------------------------------------------------------------------------"""
+    #     return time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
 
 
 def json_test():

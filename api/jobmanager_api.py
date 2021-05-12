@@ -11,11 +11,26 @@ class JobManagerAPI(ABC):
 
     Children must implement
         submit - returns self.rid
-        status - reeturns self.jobstatus
-        result
+        status - returns self.jobstatus
+        result - returns the final result
 
     Michael Gribskov     19 April 2021
     ============================================================================================="""
+
+    def __init_subclass__(cls):
+        """-----------------------------------------------------------------------------------------
+        called when subclass is instantiated.
+        message allows the subclass to send error/log output to the manager.  Allowed types
+            not_available (for submission options)
+            failed
+            submitted
+            polling
+            finished
+            retrieved
+            server_error
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        cls.message = {}
 
     def clone(self):
         """-----------------------------------------------------------------------------------------
@@ -40,7 +55,7 @@ class JobManagerAPI(ABC):
 
         :return: string
         -----------------------------------------------------------------------------------------"""
-        return __class__.__name__
+        return self.__class__.__name__
 
     @abstractmethod
     def result(self):

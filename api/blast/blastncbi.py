@@ -8,9 +8,10 @@ import time
 import requests
 from urllib.parse import quote
 from bs4 import BeautifulSoup, Comment
+from ..jobmanager_api import JobManagerAPI
 
 
-class BlastNCBI():
+class BlastNCBI(JobManagerAPI):
     """=============================================================================================
     Not all options are implemented.  See https://ncbi.github.io/blast-cloud/dev/api.html
     Some options are taken directly from the web form
@@ -135,13 +136,13 @@ class BlastNCBI():
 
         return(blasthits)
 
-    @staticmethod
-    def poke():
-        """-----------------------------------------------------------------------------------------
-        Return a signature string.  Can be used when class is useds as a callback
-        :return: string
-        -----------------------------------------------------------------------------------------"""
-        return 'BlastNCBI'
+    # @staticmethod
+    # def poke():
+    #     """-----------------------------------------------------------------------------------------
+    #     Return a signature string.  Can be used when class is useds as a callback
+    #     :return: string
+    #     -----------------------------------------------------------------------------------------"""
+    #     return 'BlastNCBI'
 
     def result(self):
         """-----------------------------------------------------------------------------------------

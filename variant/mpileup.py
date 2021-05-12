@@ -106,6 +106,8 @@ class Mpileup:
         # the aggregate bases
         count['forward'] = 0
         count['backward'] = 0
+        bases = bases.replace('.', self.parsed['refbase'])
+        bases = bases.replace(',', self.parsed['refbase'].lower())
         for c in bases:
             # each base at this position in the genome: should be acgtnACGTN*$
             if c.islower():

@@ -1,42 +1,49 @@
 import sys
 import time
-from api.blast.blastncbi import BlastNCBI
-from api.interpro.interpro import Interpro
 
 
 class Jobmanager:
     """=============================================================================================
     jobmanager
 
+    The main datastructure in the jobmanager is a dictionary of jobs.  Each element in the list
+    is an object that conforms to the JobManager_API.  The keys are the objects and the values
+    are the last determined status of the job
+
+    Jobs communicate with the jobmanger using JobManager_API.message
+
     manage submission of jobs using defined APIs. APIs should implement
         submit
         status
         result
-        clone
-        poke
+        clone (inherited)
+        poke  (inherited)
 
     Michael Gribskov     02 April 2021
     ============================================================================================="""
 
-    def __init__(self, loglevel=1, log_fh=sys.stderr, poll_time=61, poll_wait=0, poll_max=50):
+    def __init__(self, api=None, loglevel=1, log_fh=sys.stderr, poll_delay=61, poll_pause=0,
+                 poll_max=50):
         """-----------------------------------------------------------------------------------------
-
+        api = class with JobManagerAPI type
         -----------------------------------------------------------------------------------------"""
 
-        self.joblist = []
-        self.api = None
+        self.joblist = {}
+        self.api = api
         self.template = None
 
         self.loglevel = loglevel
         self.log_fh = log_fh
-        self.poll_time = poll_time  # seconds between polling cycles
-        self.poll_wait = poll_wait  # seconds between polling queries
+        self.poll_delay = poll_delay  # seconds between polling cycles
+        self.poll_pause = poll_pause  # seconds between polling queries
         self.poll_max = poll_max  # maximum number of times to poll
         self.poll_count = 0  # number of times this job has been polled
 
-    def log_message(self, type, message, loglevel=1):
+    def log_message(self, message):
         """-----------------------------------------------------------------------------------------
-        write a message to the log. Messages are only written if self.loglevel >= loglevel
+        Write a message to the log. Messages are only written if self.loglevel >= loglevel
+        Messages are stored in the client message attribute as a dict with the following keys
+        message = { type, text, loglevel}
 
         types:
             not_available (for submission options)
@@ -47,13 +54,14 @@ class Jobmanager:
             server_error
 
         :type: string, type of message
-        :param message: string, text of message
+        :param text: string, text of message
         :param loglevel: int, minimum loglevel to write message to log
         :return: True if message was written
         -----------------------------------------------------------------------------------------"""
-        if self.loglevel >= loglevel:
+        if self.loglevel >= message['loglevel']:
             event_time = time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
-            self.log_fh.write('{}\t{}\t{}\n'.format(event_time, type, message))
+            self.log_fh.write('{:24s}\t{:<16s}\t{}\n'.format(event_time, message['type'],
+                                                       message['text']))
             return True
 
         return False
@@ -79,54 +87,56 @@ class Jobmanager:
         else:
             return self.api()
 
-    def poll(self, joblist, wait_all=True):
-        """---------------------------------------------------------------------------------------------
+    def poll_all(self, wait_all=True):
+        """-----------------------------------------------------------------------------------------
         Poll all jobs in the jobs list and record their status. If wait_all is True, poll until all
         have finished.
 
         :param wait_all: boolean, if True poll until all jobs finish
         :return: int, number of finished jobs
-        ---------------------------------------------------------------------------------------------"""
-        time.sleep(self.poll_time)
+        -----------------------------------------------------------------------------------------"""
 
         not_done = True
-        n = 0
-        n_finished = 0
+        n = len(self.joblist)
         while not_done:
+            time.sleep(self.poll_delay)
             not_done = False
-            n += 1
+            n_finished = 0
 
             for job in self.joblist:
                 self.joblist[job] = job.status()
-                if job.status() == 'finishe':
+                self.log_message(job.message)
+                if job.status() == 'finished':
                     n_finished += 1
-                time.sleep(self.poll_wait)
+                time.sleep(self.poll_pause)
 
             if wait_all:
-                not_done = n != n_finished
+                not_done = n > n_finished
 
         return n_finished
 
     def save_all(self, reformat=None, fh=None, remove=True):
-        """---------------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         Return the output of all finished jobs.
-        Reformat is a callback function used to reformat the output.  for instance, interpro.parse_json
+        Reformat is a callback function used to reformat the output.  for instance,
+        interpro.parse_json
         If fh is True, output is written to the filehandle after reformatting.
         If remove is true, jobs are deleted from the list after saving
 
-        :param joblist: dict, ips object is key, staus is value
-        :param reformat: function, callback function for formatting job result, argument is ips object
+        :param joblist: dict, JobManager_API object is key, status is value
+        :param reformat: function, callback function for formatting job result
         :param fh: filehandle for writable file
         :param remove: boolean, remove finished jobs after saving
         :return: string, text of job content
-        ---------------------------------------------------------------------------------------------"""
+        -----------------------------------------------------------------------------------------"""
         delete_list = []
-        for job in joblist:
-            if joblist[job] != 'finished':
+        text = ''
+        for job in self.joblist:
+            if self.joblist[job] != 'finished':
                 # skip unfinished jobs
                 continue
 
-            joblist[job] = job.result()  # retrieve the completed job
+            # self.joblist[job] = job.result()  # retrieve the completed job
             # text = job.content
             if reformat:
                 text = reformat(job)
@@ -142,22 +152,20 @@ class Jobmanager:
                 delete_list.append(job)
 
         for job in delete_list:
-            del joblist[job]
+            del self.joblist[job]
 
         return text
 
-    def submit(self, job):
+    def start(self, job):
         """-----------------------------------------------------------------------------------------
-        Submit a job through the self.api and add the job to the joblist.  The object is the key and
-        the value is the status
+        Add a job to the joblist and submit via job.submit according to the JobManager_API.  The
+        job object is the key and the value is the status
 
         :param job: object from api
         :return: int, number of jobs in the joblist
         -----------------------------------------------------------------------------------------"""
-        status = job.submit()
-        self.joblist[job] = status
-
-        self.log_message(status, 'job_name={};job_id={}'.format(job.jobname, job.jobid), loglevel=1)
+        self.joblist[job] = job.submit()
+        self.log_message(job.message)
 
         return len(self.joblist)
 
@@ -166,10 +174,40 @@ class Jobmanager:
 # testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    joblist = Jobmanager()
-    joblist.api = BlastNCBI
-    print(joblist.api.poke())
+    import sys
+    from api.blast.blastncbi import BlastNCBI
+    from api.interpro.interpro import Interpro
 
-    new = joblist.api()
+    src = '''>AAX90616.1 Src [Mus musculus]
+    MGSNKSKPKDASQRRRSLEPSENVHGAGGAFPASQTPSKPASADGHRGPSAAFVPPAAEPKLFGGFNSSD
+    TVTSPQRAGPLAGGVTTFVALYDYESRTETDLSFKKGERLQIVNNTRKVDVREGDWWLAHSLSTGQTGYI
+    PSNYVAPSDSIQAEEWYFGKITRRESERLLLNAENPRGTFLVRESETTKGAYCLSVSDFDNAKGLNVKHY
+    KIRKLDSGGFYITSRTQFNSLQQLVAYYSKHADGLCHRLTTVCPTSKPQTQGLAKDAWEIPRESLRLEVK
+    LGQGCFGEVWMGTWNGTTRVAIKTLKPGTMSPEAFLQEAQVMKKLRHEKLVQLYAVVSEEPIYIVTEYMN
+    KGSLLDFLKGETGKYLRLPQLVDMSAQIASGMAYVERMNYVHRDLRAANILVGENLVCKVADFGLARLIE
+    DNEYTARQGAKFPIKWTAPEAALYGRFTIKSDVWSFGILLTELTTKGRVPYPGMVNREVLDQVERGYRMP
+    CPPECPESLHDLMCQCWRKEPEERPTFEYLQAFLEDYFTSTEPQYQPGENL'''
+
+    joblist = Jobmanager(Interpro)
+    joblist.poll_delay = 15
+    joblist.poll_pause = 5
+    joblist.loglevel = 2
+
+    ips = joblist.new_job()
+    print(ips.poke())
+    ips.email = 'gribskov@purdue.edu'
+    ips.title = 'mouse src'
+    ips.sequence = src
+    ips.application_select(['TIGRFAM', 'CDD', 'PfamA'])
+    # ips.application_select(['Phobius', 'ProSitePatterns'])
+    ips.output_select('json')
+    ips.parameter_select({'goterms':True, 'pathways':True})
+
+    # joblist.start(ips)
+    ips.jobid = 'iprscan5-R20210512-150227-0752-35433138-p2m'
+    joblist.joblist[ips] = 'finished'
+    ips.result()
+    # joblist.poll_all()
+    joblist.save_all(reformat=Interpro.parse_json, fh=sys.stdout)
 
     exit(0)
