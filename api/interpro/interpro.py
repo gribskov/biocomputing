@@ -2,9 +2,10 @@ import sys
 import time
 import json
 import requests
+from ..jobmanager_api import JobManagerAPI
 
 
-class Interpro:
+class Interpro(JobManagerAPI):
     """=============================================================================================
     Interpro class for running interproscan
     TODO: update to work with jobmanager class
@@ -12,6 +13,29 @@ class Interpro:
 
     25 December 2018    Michael Gribskov
     ============================================================================================="""
+    # availble options/parameters taken from
+    # https://www.ebi.ac.uk/Tools/services/rest/iprscan5/parameterdetails/appl
+
+    # available outputs
+    # from https://www.ebi.ac.uk/Tools/services/rest/iprscan5/resulttypes
+    # log - The output from the tool itself
+    # out - The results of the job (XML format)
+    # tsv - The results of the job in text format, tab separated values
+    # xml - The results of the job in XML
+    # gff - The results of the job in GFF3 format
+    # json - The results of the job in JSON format
+    # htmltarball - The results of the job in a tarball zip file
+    # sequence - Input sequence as seen by the tool
+    # submission - The submission details which were submitted as a job
+    available = {'applications':['TIGRFAM', 'SFLD', 'Phobius', 'SignalP', 'SignalP_EUK',
+                                 'SignalP_GRAM_POSITIVE', 'SignalP_GRAM_NEGATIVE', 'SUPERFAMILY',
+                                 'Panther', 'Gene3d', 'HAMAP', 'PrositeProfiles',
+                                 'PrositePatterns', 'Coils', 'SMART', 'CDD', 'PRINTS', 'PfamA',
+                                 'MobiDBLite', 'PIRSF', 'TMHMM', ],
+                 'commands':    ['run', 'status', 'result'],
+                 'outputs':     ['out', 'log', 'tsv', 'xml', 'gff', 'json',
+                                 'htmltarball', 'sequence', 'submission']
+                 }
 
     def __init__(self, loglevel=0, poll_time=60, poll_max=20):
         """-----------------------------------------------------------------------------------------
@@ -22,30 +46,6 @@ class Interpro:
         self.loglevel = loglevel
         self.log_fh = sys.stderr
 
-        # availble options/parameters taken from
-        # https://www.ebi.ac.uk/Tools/services/rest/iprscan5/parameterdetails/appl
-        self.applications_avail = ['TIGRFAM', 'SFLD', 'Phobius', 'SignalP', 'SignalP_EUK',
-                                   'SignalP_GRAM_POSITIVE', 'SignalP_GRAM_NEGATIVE', 'SUPERFAMILY',
-                                   'Panther', 'Gene3d', 'HAMAP', 'PrositeProfiles',
-                                   'PrositePatterns', 'Coils', 'SMART', 'CDD', 'PRINTS', 'PfamA',
-                                   'MobiDBLite', 'PIRSF', 'TMHMM', ]
-
-        self.commands_avail = ['run', 'status', 'result']
-
-        # available outputs
-        # from https://www.ebi.ac.uk/Tools/services/rest/iprscan5/resulttypes
-        # /iprscan5-R20210318-175621-0074-61690295-p2m
-        # log - The output from the tool itself
-        # out - The results of the job (XML format)
-        # tsv - The results of the job in text format, tab separated values
-        # xml - The results of the job in XML
-        # gff - The results of the job in GFF3 format
-        # json - The results of the job in JSON format
-        # htmltarball - The results of the job in a tarball zip file
-        # sequence - Input sequence as seen by the tool
-        # submission - The submission details which was submitted as a job
-        self.output_avail = {'out', 'log', 'tsv', 'xml', 'gff', 'json',
-                             'htmltarball', 'sequence', 'submission'}
         self.poll_time = poll_time  # seconds between polling
         self.poll_max = poll_max  # maximum number of times to poll
         self.poll_count = 0  # number of times this job has been polled
@@ -118,18 +118,18 @@ class Interpro:
 
         return len(self.parameters)
 
-    def clone(self):
-        """-----------------------------------------------------------------------------------------
-        Return a copy of the object.  This allows an object with the metadata filled in to be
-        used as a template for a series of jobs
-
-        :return:
-        -----------------------------------------------------------------------------------------"""
-        copy = Interpro()
-        for v in vars(self):
-            setattr(copy, v, getattr(self, v))
-
-        return copy
+    # def clone(self):
+    #     """-----------------------------------------------------------------------------------------
+    #     Return a copy of the object.  This allows an object with the metadata filled in to be
+    #     used as a template for a series of jobs
+    #
+    #     :return:
+    #     -----------------------------------------------------------------------------------------"""
+    #     copy = Interpro()
+    #     for v in vars(self):
+    #         setattr(copy, v, getattr(self, v))
+    #
+    #     return copy
 
     def parse_json(self):
         """-----------------------------------------------------------------------------------------
@@ -174,9 +174,9 @@ class Interpro:
                 continue
 
             # parse an entry, en entry is a hit vs a specific entry in a database
-            motifs.append({'ipr_accession': entry['accession'],
-                           'src_accession': source_accession,
-                           'description':   entry['description'] or ''})
+            motifs.append({'ipr_accession':entry['accession'],
+                           'src_accession':source_accession,
+                           'description':  entry['description'] or ''})
 
             # name = entry['name']
             # type = entry['type']
@@ -188,8 +188,8 @@ class Interpro:
                     if go['id'] in go_all:
                         go_all[go['id']]['source'].append(source_accession)
                     else:
-                        go_all[go['id']] = {'name':   go['name'], 'category': go['category'],
-                                            'source': [source_accession]}
+                        go_all[go['id']] = {'name':  go['name'], 'category':go['category'],
+                                            'source':[source_accession]}
 
             if 'pathwayXRefs' in entry:
                 pathstr = ''
@@ -210,12 +210,12 @@ class Interpro:
                         if source_accession not in path_all[id]['source']:
                             path_all[id]['source'].append(source_accession)
                     else:
-                        path_all[id] = {'name':   path['name'],
-                                        'source': [source_accession]}
+                        path_all[id] = {'name':  path['name'],
+                                        'source':[source_accession]}
 
-        return {'motifs': motifs, 'go': go_all, 'pathway': path_all}
+        return {'motifs':motifs, 'go':go_all, 'pathway':path_all}
 
-    def run(self, show_query=False):
+    def submit(self, show_query=False):
         """-----------------------------------------------------------------------------------------
         Construct a REST command and dispatch the job to the server
         Any previously existing jobID is overwritten
@@ -226,8 +226,8 @@ class Interpro:
         is_success = False
 
         # general fields for all queries
-        param = {u'email':  self.email, u'title': self.title, u'sequence': self.sequence,
-                 u'output': self.output}
+        param = {u'email': self.email, u'title':self.title, u'sequence':self.sequence,
+                 u'output':self.output}
 
         if self.applications:
             # add selected applications
@@ -238,7 +238,7 @@ class Interpro:
                 param[para] = self.parameters[para]
 
         command = self.url + 'run'
-        self.response = requests.post(command, files=param, headers={'User-Agent': 'ips-client'})
+        self.response = requests.post(command, files=param, headers={'User-Agent':'ips-client'})
 
         if show_query:
             # print out query if requested
@@ -5157,9 +5157,9 @@ AAGG
     ips.application_select(['TIGRFAM', 'CDD', 'PfamA'])
     # ips.application_select(['Phobius', 'ProSitePatterns'])
     ips.output_select('json')
-    ips.parameter_select({'goterms': True, 'pathways': True})
+    ips.parameter_select({'goterms':True, 'pathways':True})
 
-    if not ips.run():
+    if not ips.submit():
         exit(1)
 
     time.sleep(ips.poll_time)
