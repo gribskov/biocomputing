@@ -208,6 +208,7 @@ if __name__ == '__main__':
     joblist.joblist[ips] = 'finished'
     ips.result()
     # joblist.poll_all()
-    joblist.save_all(reformat=Interpro.parse_json, fh=sys.stdout)
+    # joblist.save_all(reformat=Interpro.parse_json, fh=sys.stdout)
+    joblist.save_all(reformat=lambda x:x.response.text, fh=sys.stdout)
 
     exit(0)
