@@ -14,6 +14,11 @@ class JobManagerAPI(ABC):
         status - returns self.jobstatus
         result - returns the final result
 
+    children inherit attributes
+        message - transmit log message to manager
+        jobname - name of job for use as key in final parsed result
+        content - retrieved content of result
+
     Michael Gribskov     19 April 2021
     ============================================================================================="""
 
@@ -30,7 +35,9 @@ class JobManagerAPI(ABC):
             server_error
         :return:
         -----------------------------------------------------------------------------------------"""
+        cls.jobname = ''
         cls.message = {}
+        cls.content = ''
 
     def clone(self):
         """-----------------------------------------------------------------------------------------
@@ -67,7 +74,7 @@ class JobManagerAPI(ABC):
         # return None
 
     @abstractmethod
-    def status(self, wait=False):
+    def status(self):
         """-----------------------------------------------------------------------------------------
         Checks to see if job is complete.  Often this means polling the server and getting the
         status of the job in self.rid.
@@ -107,7 +114,7 @@ if __name__ == '__main__':
         def result(self):
             pass
 
-
+    # should fail
     class fail(JobManagerAPI):
 
         def __init__(self):
