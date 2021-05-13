@@ -199,6 +199,9 @@ if __name__ == '__main__':
     from api.blast.blastncbi import BlastNCBI
     from api.interpro.interpro import Interpro
 
+    testinterpro = False
+    testblast = True
+
     src = '''>AAX90616.1 Src [Mus musculus]
     MGSNKSKPKDASQRRRSLEPSENVHGAGGAFPASQTPSKPASADGHRGPSAAFVPPAAEPKLFGGFNSSD
     TVTSPQRAGPLAGGVTTFVALYDYESRTETDLSFKKGERLQIVNNTRKVDVREGDWWLAHSLSTGQTGYI
@@ -209,36 +212,61 @@ if __name__ == '__main__':
     DNEYTARQGAKFPIKWTAPEAALYGRFTIKSDVWSFGILLTELTTKGRVPYPGMVNREVLDQVERGYRMP
     CPPECPESLHDLMCQCWRKEPEERPTFEYLQAFLEDYFTSTEPQYQPGENL'''
 
-    joblist = Jobmanager(Interpro)
-    joblist.poll_delay = 15
-    joblist.poll_pause = 5
-    joblist.loglevel = 2
+    if testinterpro:
+        joblist = Jobmanager(Interpro)
+        joblist.poll_delay = 15
+        joblist.poll_pause = 5
+        joblist.loglevel = 2
 
-    ips = joblist.new_job()
-    print(f'interface is {ips.poke()}')
-    ips.email = 'gribskov@purdue.edu'
-    ips.title = 'mouse src'
-    ips.sequence = src
-    ips.application_select(['TIGRFAM', 'CDD', 'PfamA'])
-    # ips.application_select(['Phobius', 'ProSitePatterns'])
-    ips.output_select('json')
-    ips.parameter_select({'goterms':True, 'pathways':True})
+        ips = joblist.new_job()
+        print(f'interface is {ips.poke()}')
+        ips.email = 'gribskov@purdue.edu'
+        ips.title = 'mouse src'
+        ips.sequence = src
+        ips.application_select(['TIGRFAM', 'CDD', 'PfamA'])
+        # ips.application_select(['Phobius', 'ProSitePatterns'])
+        ips.output_select('json')
+        ips.parameter_select({'goterms':True, 'pathways':True})
 
-    # uncomment to run a new job
-    # joblist.start(ips)
-    # joblist.poll_all()
-    # or use a known jobid to test
-    ips.jobid = 'iprscan5-R20210512-150227-0752-35433138-p2m'
-    ips.jobname = 'test'
-    joblist.joblist[ips] = 'finished'
+        # uncomment to run a new job
+        # joblist.start(ips)
+        # joblist.poll_all()
+        # or use a known jobid to test
+        ips.jobid = 'iprscan5-R20210512-150227-0752-35433138-p2m'
+        ips.jobname = 'test'
+        joblist.joblist[ips] = 'finished'
 
-    ips.result()
-    all = joblist.save_all(reformat=lambda x:x.response.text, remove=False, fh=sys.stdout)
-    picklejar = open('jobmanager.test.pkl', 'wb')
-    joblist.save_all(reformat=Interpro.parse_json, pickle=True, fh=picklejar)
-    picklejar.close()
-    picklejar = open('jobmanager.test.pkl', 'rb')
-    unpickle = pkl.load(picklejar)
-    picklejar.close()
+        ips.result()
+        all = joblist.save_all(reformat=lambda x:x.response.text, remove=False, fh=sys.stdout)
+        picklejar = open('jobmanager.test.pkl', 'wb')
+        joblist.save_all(reformat=Interpro.parse_json, pickle=True, fh=picklejar)
+        picklejar.close()
+        picklejar = open('jobmanager.test.pkl', 'rb')
+        unpickle = pkl.load(picklejar)
+        picklejar.close()
+
+    if testblast:
+        jobs = Jobmanager(BlastNCBI)
+        jobs.poll_delay = 60
+        jobs.poll_pause = 5
+        jobs.loglevel = 2
+
+        blast = jobs.new_job()
+        blast.email = 'gribskov@purdue.edu'
+        blast.jobname= 'mouse src'
+        blast.program = 'blastp'
+        blast.database = 'pdb'
+        blast.query = src
+
+        # comment out to test with a known rid
+        # jobs.start(blast)
+        # jobs.poll_all()
+
+        blast.jobid = '9U4Z1YDR013'
+        jobs.joblist[blast] = 'finished'
+
+        blast.result()
+        all = jobs.save_all(reformat=lambda x:x.response.text, remove=False, fh=sys.stdout)
+        all = jobs.save_all(BlastNCBI.parse_xml, remove=False, fh=sys.stdout)
 
     exit(0)
