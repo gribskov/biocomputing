@@ -6,7 +6,6 @@ Michael Gribskov     31 March 2021
 import sys
 import time
 import requests
-from urllib.parse import quote
 from bs4 import BeautifulSoup, Comment
 from ..jobmanager_api import JobManagerAPI
 
@@ -17,18 +16,31 @@ class BlastNCBI(JobManagerAPI):
     Some options are taken directly from the web form
 
     ============================================================================================="""
+    available = {'program':  ['blastp', 'psiBlast', 'deltaBlast', 'kmerBlastp', 'phiBlast',
+                              'blastx',
+                              'blastn', 'megablast', 'discomegablast', 'tblastn', 'tblastx'],
 
-    def __init__(self, loglevel=1, poll_time=60, poll_max=50):
+                 'database': ['nr', 'refseq_select_prot', 'refseq_protein', 'SMARTBLAST/landmark',
+                              'swissprot', 'pataa', 'pdb', 'env_nr', 'tsa_nr', 'nt',
+                              'refseq_select_rna', 'refseq_rna', 'refseq_representative_genomes',
+                              'refseq_genomes', 'Whole_Genome_Shotgun_contigs', 'est', 'sra',
+                              'htgs', 'patnt', 'pdbnt', 'genomic/9606/RefSeqGene', 'gss', 'sts',
+                              'rRNA_typestrains/16S_ribosomal_RNA', 'TL/18S_fungal_sequences'
+                                                                    'TL/28S_fungal_sequences',
+                              'rRNA_typestrains/ITS_RefSeq_Fungi'],
+
+                 'matrix':   ['PAM30', 'PAM70', 'PAM250', 'BLOSUM80', 'BLOSUM62', 'BLOSUM45',
+                              'BLOSUM50', 'BLOSUM90'],
+
+                 'format':   ['HTML', 'Text', 'XML', 'XML2', 'JSON2', 'Tabular']
+                 }
+
+    def __init__(self):
         """-----------------------------------------------------------------------------------------
 
         -----------------------------------------------------------------------------------------"""
-        self.loglevel = loglevel
-        self.log_fh = sys.stderr
-        self.poll_time = poll_time  # seconds between polling
-        self.poll_max = poll_max  # maximum number of times to poll
-        self.poll_count = 0  # number of times this job has been polled
-        self.jobstatus = ''
 
+        self.url = 'https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi'
         self.program = ''
         self.database = ''
         self.entrez = ''
@@ -41,35 +53,12 @@ class BlastNCBI(JobManagerAPI):
         self.qorganism = 1  # qorganism - TaxID to limit query
         self.entrez = ''  # qquery
 
-        self.url = 'https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi'
-        self.rid = ''
-        self.rtoe = None
+        self.jobstatus = ''
+        self.jobid = ''  # NCBI calls this RID
+        self.rtoe = None  # estimated time for job
+        self.response = None
 
-        self.available = {'program': ['blastp', 'psiBlast', 'deltaBlast', 'kmerBlastp', 'phiBlast',
-                                      'blastx',
-
-                                      'blastn', 'megablast', 'discomegablast', 'tblastn',
-                                      'tblastx'],
-
-                          'database':['nr', 'refseq_select_prot', 'refseq_protein',
-                                      'SMARTBLAST/landmark', 'swissprot', 'pataa', 'pdb', 'env_nr',
-                                      'tsa_nr',
-
-                                      'nt', 'refseq_select_rna', 'refseq_rna',
-                                      'refseq_representative_genomes', 'refseq_genomes',
-                                      'Whole_Genome_Shotgun_contigs', 'est', 'sra', 'htgs', 'patnt',
-                                      'pdbnt', 'genomic/9606/RefSeqGene', 'gss', 'sts',
-                                      'rRNA_typestrains/16S_ribosomal_RNA',
-                                      'TL/18S_fungal_sequences'
-                                      'TL/28S_fungal_sequences',
-                                      'rRNA_typestrains/ITS_RefSeq_Fungi'],
-
-                          'matrix':  ['PAM30', 'PAM70', 'PAM250', 'BLOSUM80', 'BLOSUM62',
-                                      'BLOSUM45',
-                                      'BLOSUM50', 'BLOSUM90'],
-
-                          'format':  ['HTML', 'Text', 'XML', 'XML2', 'JSON2', 'Tabular']
-                          }
+        # jobname, message, and content inherited from JobManagerAPI
 
     def get_qblastinfo(self):
         """-----------------------------------------------------------------------------------------
@@ -86,7 +75,7 @@ class BlastNCBI(JobManagerAPI):
         soup = BeautifulSoup(self.response.text.replace('QBlastInfoBegin', ' QBlastInfoBegin'),
                              'html.parser')
         comment = soup.find(
-            text=lambda text:isinstance(text, Comment) and text.find('QBlastInfoBegin') > 0)
+            text=lambda text: isinstance(text, Comment) and text.find('QBlastInfoBegin') > 0)
 
         info = {}
         # field = comment.split('\n')
@@ -107,7 +96,7 @@ class BlastNCBI(JobManagerAPI):
 
         :return: list of dictionaries
         -----------------------------------------------------------------------------------------"""
-        soup = BeautifulSoup(self.response.content.text, "xml")
+        soup = BeautifulSoup(self.response.text, "xml")
         # print(soup.prettify())
 
         hits = soup.find_all('Hit')
@@ -115,74 +104,70 @@ class BlastNCBI(JobManagerAPI):
         blasthits = []
         for hit in hits:
 
-            this_hit = {'id':       hit.Hit_id.text, 'def':hit.Hit_def.text,
-                        'accession':hit.Hit_accession.text, 'len':hit.Hit_len.text,
-                        'hsp':      []}
+            this_hit = {'id':        hit.Hit_id.text, 'def': hit.Hit_def.text,
+                        'accession': hit.Hit_accession.text, 'len': hit.Hit_len.text,
+                        'hsp':       []}
             blasthits.append(this_hit)
             for hsp in hit.find_all('Hsp'):
                 hsp_num = hsp.find('Hsp_num').text
-                this_hsp = {'bitscore': hsp.find('Hsp_bit-score').text,
-                            'hspscore':hsp.find('Hsp_score').text,
-                            'evalue':   hsp.find('Hsp_evalue').text,
-                            'identity': hsp.find('Hsp_identity').text,
-                            'positive': hsp.find('Hsp_positive').text,
-                            'gaps':     hsp.find('Hsp_gaps').text,
-                            'align_len':hsp.find('Hsp_align-len').text,
-                            'qbegin':   hsp.find('Hsp_query-from').text,
-                            'qend':     hsp.find('Hsp_query-to').text,
-                            'sbegin':   hsp.find('Hsp_hit-from').text,
-                            'send':     hsp.find('Hsp_hit-to').text}
+                this_hsp = {'hsp_num': hsp_num,
+                            'bitscore':  hsp.find('Hsp_bit-score').text,
+                            'hspscore':  hsp.find('Hsp_score').text,
+                            'evalue':    hsp.find('Hsp_evalue').text,
+                            'identity':  hsp.find('Hsp_identity').text,
+                            'positive':  hsp.find('Hsp_positive').text,
+                            'gaps':      hsp.find('Hsp_gaps').text,
+                            'align_len': hsp.find('Hsp_align-len').text,
+                            'qbegin':    hsp.find('Hsp_query-from').text,
+                            'qend':      hsp.find('Hsp_query-to').text,
+                            'sbegin':    hsp.find('Hsp_hit-from').text,
+                            'send':      hsp.find('Hsp_hit-to').text}
                 this_hit['hsp'].append(this_hsp)
 
-        return(blasthits)
-
-    # @staticmethod
-    # def poke():
-    #     """-----------------------------------------------------------------------------------------
-    #     Return a signature string.  Can be used when class is useds as a callback
-    #     :return: string
-    #     -----------------------------------------------------------------------------------------"""
-    #     return 'BlastNCBI'
+        return blasthits
 
     def result(self):
         """-----------------------------------------------------------------------------------------
         Retrieve the result from the server
 
-        :return:
+        :return: string, status of retrieval
         -----------------------------------------------------------------------------------------"""
 
-        command = {'CMD':        'Get',
-                   'FORMAT_TYPE':self.format,
-                   'RID':        self.rid
+        command = {'CMD':         'Get',
+                   'FORMAT_TYPE': self.format,
+                   'RID':         self.jobid
                    }
         self.response = requests.post(self.url, command)
+        self.content = self.response.text
+        self.message = {'type':     'retrieved',
+                        'text':     f'job_id={self.jobid};output_len={len(self.content)}',
+                        'loglevel': 2}
+        # TODO add check for failure
 
-        return None
+        return 'retrieved'
 
-    def status(self, wait=False):
+    def status(self):
         """-----------------------------------------------------------------------------------------
-        Polls the server and gets the status of the job in self.rid. The server returns:
+        Polls the server and gets the status of the job in self.jobid. The server returns:
         WAITING, UNKNOWN, or READY
         self.status is set as running, unknown, or finished, respectively
 
-        :param wait: boolean, if True wait for self.poll_time before sending request
         :return: string, status running | unknown | finished
         -----------------------------------------------------------------------------------------"""
-        xlate = {'WAITING':'running', 'UNKNOWN':'unknown', 'READY':'finished'}
+        xlate = {'WAITING': 'running', 'UNKNOWN': 'unknown', 'READY': 'finished'}
 
-        if wait:
-            time.sleep(self.poll_time)
-
-        self.poll_count += 1
-        command = {'CMD':          'Get',
-                   'FORMAT_OBJECT':'SearchInfo',
-                   'RID':          self.rid
+        command = {'CMD':           'Get',
+                   'FORMAT_OBJECT': 'SearchInfo',
+                   'RID':           self.jobid
                    }
         self.response = requests.post(self.url, command)
-        print(self.response.request.body, '\n')
+        # print(self.response.request.body, '\n')
 
         info = self.get_qblastinfo()
         self.jobstatus = xlate[info['Status']]
+        self.message = {'type':     self.jobstatus,
+                        'text':     f'job_id={self.jobid};response={info["Status"]}',
+                        'loglevel': 2}
 
         return self.jobstatus
 
@@ -192,20 +177,24 @@ class BlastNCBI(JobManagerAPI):
 
         :return: string, request ID (rid)
         -----------------------------------------------------------------------------------------"""
-        command = {'CMD':     'Put',
-                   'PROGRAM': self.program,
-                   'DATABASE':self.database,
-                   'QUERY':   self.query,
-                   'EMAIL':   self.email
+        command = {'CMD':      'Put',
+                   'PROGRAM':  self.program,
+                   'DATABASE': self.database,
+                   'QUERY':    self.query,
+                   'EMAIL':    self.email
                    }
         # print('command:', command)
         self.response = requests.post(self.url, command)
         info = self.get_qblastinfo()
 
-        self.rid = info['RID']
+        self.jobid = info['RID']
         self.rtoe = int(info['RTOE']) * 60
+        self.jobstatus = 'submitted'
+        self.message = {'type':     'submitted',
+                        'text':     f'job_name={self.jobname};job_id={self.jobid}',
+                        'loglevel': 1}
 
-        return self.rid
+        return self.jobid
 
 
 # --------------------------------------------------------------------------------------------------
@@ -213,7 +202,6 @@ class BlastNCBI(JobManagerAPI):
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     blast = BlastNCBI()
-    blast.poll_time = 60
     blast.email = 'gribskov@purdue.edu'
     blast.program = 'blastp'
     blast.database = 'pdb'
@@ -229,13 +217,14 @@ GRDPEMGEKKILELVQACDEWLELPPRDLEKPFLMPVEDVFSISGRGTVATGRVERGIAT
 THRLESKSQVNLIDTLRKQLEEAGPLINAVRASSALMETDAAKQKMENEKLQAELDKAKA
 LGEKYNEEVEGAWSQAYDHLALAIKTEMKQEES
 '''
-    rid = blast.submit()
-    print('rid:', rid, '\trtoe:', blast.rtoe)
-    time.sleep(10)
+    jobid = blast.submit()
+    print('rid:', jobid, '\trtoe:', blast.rtoe)
+    poll_delay = 60
     while blast.jobstatus != 'finished':
+        time.sleep(poll_delay)
         event_time = time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
         print(event_time)
-        blast.status(wait=True)
+        blast.status()
         print(blast.jobstatus)
 
     blast.result()
