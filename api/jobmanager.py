@@ -1,3 +1,4 @@
+import pickle as pkl
 import sys
 import time
 
@@ -61,7 +62,7 @@ class Jobmanager:
         if self.loglevel >= message['loglevel']:
             event_time = time.strftime('%d/%b/%G:%H:%M:%S', time.localtime(time.time()))
             self.log_fh.write('{:24s}\t{:<16s}\t{}\n'.format(event_time, message['type'],
-                                                       message['text']))
+                                                             message['text']))
             return True
 
         return False
@@ -115,22 +116,26 @@ class Jobmanager:
 
         return n_finished
 
-    def save_all(self, reformat=None, fh=None, remove=True):
+    def save_all(self, reformat=None, fh=None, pickle=False, remove=True):
         """-----------------------------------------------------------------------------------------
-        Return the output of all finished jobs.
+        Process the output of all finished jobs.
         Reformat is a callback function used to reformat the output.  for instance,
         interpro.parse_json
+        result is returned as a dictionary with the jobname as the ID
         If fh is True, output is written to the filehandle after reformatting.
+        if pickle is true, the result is pickled before writing
         If remove is true, jobs are deleted from the list after saving
 
         :param joblist: dict, JobManager_API object is key, status is value
         :param reformat: function, callback function for formatting job result
         :param fh: filehandle for writable file
-        :param remove: boolean, remove finished jobs after saving
+        :param pickle: boolean, True to pickle
+        :param remove: boolean, remove finished jobs from joblist after saving
         :return: string, text of job content
         -----------------------------------------------------------------------------------------"""
         delete_list = []
         text = ''
+        allresult = {}
         for job in self.joblist:
             if self.joblist[job] != 'finished':
                 # skip unfinished jobs
@@ -140,21 +145,37 @@ class Jobmanager:
             # text = job.content
             if reformat:
                 text = reformat(job)
-
-            if fh:
                 if text:
-                    fh.write('!{} - {}s\n'.format(job.jobname, job.jobid))
-                    fh.write('{}\n'.format(text))
+                    allresult[job.jobname] = text
                 else:
-                    fh.write('!{} - {} no hits\n'.format(job.jobname, job.jobid))
+                    allresult[job.jobname] = ''
+
+                if pickle:
+                    if fh.mode == 'wb':
+                        pkl.dump(text, fh)
+                    else:
+                        sys.stderr.write(
+                            'Jobmanager:save_all - pickle file must be in opened in "wb" mode')
+                elif fh:
+                    if text:
+                        fh.write('!{} - {}s\n'.format(job.jobname, job.jobid))
+                        fh.write('{}\n'.format(text))
+                    else:
+                        fh.write('!{} - {} result is empty\n'.format(job.jobname, job.jobid))
+
+            else:
+                # raw result without reformatting
+                allresult[job.jobname] = job.content
 
             if remove:
+                # mark the job for deletion from joblist
                 delete_list.append(job)
 
         for job in delete_list:
+            # delete jobs in delete_list from joblist
             del self.joblist[job]
 
-        return text
+        return allresult
 
     def start(self, job):
         """-----------------------------------------------------------------------------------------
@@ -194,7 +215,7 @@ if __name__ == '__main__':
     joblist.loglevel = 2
 
     ips = joblist.new_job()
-    print(ips.poke())
+    print(f'interface is {ips.poke()}')
     ips.email = 'gribskov@purdue.edu'
     ips.title = 'mouse src'
     ips.sequence = src
@@ -203,12 +224,21 @@ if __name__ == '__main__':
     ips.output_select('json')
     ips.parameter_select({'goterms':True, 'pathways':True})
 
+    # uncomment to run a new job
     # joblist.start(ips)
-    ips.jobid = 'iprscan5-R20210512-150227-0752-35433138-p2m'
-    joblist.joblist[ips] = 'finished'
-    ips.result()
     # joblist.poll_all()
-    # joblist.save_all(reformat=Interpro.parse_json, fh=sys.stdout)
-    joblist.save_all(reformat=lambda x:x.response.text, fh=sys.stdout)
+    # or use a known jobid to test
+    ips.jobid = 'iprscan5-R20210512-150227-0752-35433138-p2m'
+    ips.jobname = 'test'
+    joblist.joblist[ips] = 'finished'
+
+    ips.result()
+    all = joblist.save_all(reformat=lambda x:x.response.text, remove=False, fh=sys.stdout)
+    picklejar = open('jobmanager.test.pkl', 'wb')
+    joblist.save_all(reformat=Interpro.parse_json, pickle=True, fh=picklejar)
+    picklejar.close()
+    picklejar = open('jobmanager.test.pkl', 'rb')
+    unpickle = pkl.load(picklejar)
+    picklejar.close()
 
     exit(0)
