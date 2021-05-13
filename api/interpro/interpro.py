@@ -198,7 +198,7 @@ class Interpro(JobManagerAPI):
                         path_all[id] = {'name':  path['name'],
                                         'source':[source_accession]}
 
-        return {'motifs':motifs, 'go':go_all, 'pathway':path_all}
+        return {'jobname':self.jobname, 'motifs':motifs, 'go':go_all, 'pathway':path_all}
 
     def submit(self, show_query=False):
         """-----------------------------------------------------------------------------------------
