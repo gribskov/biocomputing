@@ -39,12 +39,12 @@ class Trinity(Fasta):
         get the sequence length from the documentation
         :return: length fread from length field in documentation
         -----------------------------------------------------------------------------------------------------------------"""
-        self.len = lenre.match(self.doc).group(1)
+        self.len = int(lenre.match(self.doc).group(1))
         return self.len
 
     def getPath(self):
         """-----------------------------------------------------------------------------------------------------------------
-        The path describes how the predicted trasncript is built from segments
+        The path describes how the predicted transcript is built from segments
         :return: list of path components from documentation
         -----------------------------------------------------------------------------------------------------------------"""
         path = pathre.match(self.doc).group(1)
