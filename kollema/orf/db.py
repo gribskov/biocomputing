@@ -17,7 +17,7 @@ class DB:
         -----------------------------------------------------------------------------------------"""
         self.db = MongoClient().peptides
 
-    def load_transcripts(self, fasta, clear=True):
+    def load_transcripts(self, fasta, batch=1, clear=True):
         """-----------------------------------------------------------------------------------------
         Load a set of transcripts from a fasta file
 
@@ -35,13 +35,16 @@ class DB:
             sys.stderr.write(f'DB:load_transcripts - cannot open file ({fasta})')
 
         nseq = 0
+        datablock = []
         while trinity.next():
             nseq += 1
 
             trinity.doc = 'len={}'.format(trinity.len)
             trinity.id = trinity.shortid
             # print(trinity.format())
-            doc = {'_id':        nseq,
+            name = f'{trinity.cluster}_{trinity.component}_{trinity.gene}_{trinity.isoform}'
+            doc = {'_id':       nseq,
+                   'name':      name,
                    'cluster':   trinity.cluster,
                    'component': trinity.component,
                    'gene':      trinity.gene,
@@ -49,10 +52,19 @@ class DB:
                    'sequence':  trinity.seq,
                    'path':      trinity.path,
                    'length':    trinity.len}
-            post_id = transcripts.insert_one(doc).inserted_id
-            # print(post_id)
+
+            datablock.append(doc)
+            if not nseq % batch:
+                transcripts.insert_many(datablock)
+                sys.stderr.write(f'loading {nseq}...\n')
+                datablock = []
+
+        # load the final block
+        transcripts.insert_many(datablock)
+        sys.stderr.write(f'loading {nseq}...\n')
 
         return nseq
+
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -64,10 +76,11 @@ if __name__ == '__main__':
     # post_id = transcripts.insert_one({'id': 'test'}).inserted_id
     # print(post_id)
     #
-    # ntranscript = pep.load_transcripts(
-    #     r'A:\mrg\Dropbox\avocado\avocado-R\chile-all\190701_trinity_chile.fasta')
-    # print(f'{ntranscript} transcripts loaded')
-
+    ntranscript = pep.load_transcripts(
+        r'A:\mrg\Dropbox\avocado\avocado-R\chile-all\190701_trinity_chile.fasta',
+        batch=1000,
+        clear=True)
+    print(f'{ntranscript} transcripts loaded')
 
     # result = transcripts.aggregate([
     #     {
@@ -79,16 +92,15 @@ if __name__ == '__main__':
     #         }
     #     ])
 
-
     # fix length to be int instead of string
     # transcripts.update_many({}, [{'$addFields':{'length':{'$toInt':'$length'}}}])
 
-    result = transcripts.find({'length':{'$gt':1500}})
-    i = 0
-    for doc in result:
-        print(doc)
-        i += 1
-        if i>3:
-            break
+    # result = transcripts.find({'length':{'$gt':1500}})
+    # i = 0
+    # for doc in result:
+    #     print(doc)
+    #     i += 1
+    #     if i>3:
+    #         break
 
     exit(0)
