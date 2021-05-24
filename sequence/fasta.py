@@ -255,6 +255,25 @@ class Fasta:
 
         return trans
 
+    def translate_all(self):
+        """-----------------------------------------------------------------------------------------
+        Return all six translated reading frames as a list of Fasta.  The starting positions of
+        the reading frames are:
+        0   0
+        1   1
+        2   2
+        3 len-1
+        4 len-2
+        5 len-3
+        :return: list of Fasta, the six reading frames translated
+        -----------------------------------------------------------------------------------------"""
+        i = 0
+        for direction in ('+', '-'):
+            for frame in range(3):
+                rf[i] = self.translate(frame, direction)
+
+        return rf
+
     def composition(fasta, uppercase=False):
         """-----------------------------------------------------------------------------------------
         Returns a dictionary with the composition of the sequence
