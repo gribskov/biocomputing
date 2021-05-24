@@ -44,11 +44,10 @@ class DB:
             # print(trinity.format())
             name = f'{trinity.cluster}_{trinity.component}_{trinity.gene}_{trinity.isoform}'
             doc = {'_id':       nseq,
-                   'name':      name,
-                   'cluster':   trinity.cluster,
-                   'component': trinity.component,
-                   'gene':      trinity.gene,
-                   'isoform':   trinity.isoform,
+                   'cluster':   f'{trinity.cluster}',
+                   'component': f'{trinity.cluster}_{trinity.component}',
+                   'gene':      f'{trinity.cluster}_{trinity.component}_{trinity.gene}',
+                   'isoform':   name,
                    'sequence':  trinity.seq,
                    'path':      trinity.path,
                    'length':    trinity.len}
@@ -65,6 +64,29 @@ class DB:
 
         return nseq
 
+    @staticmethod
+    def sequences_by_group(collection, level='cluster'):
+        """-----------------------------------------------------------------------------------------
+        return the set of sequences that match at a specified level:
+        cluster, component, or gene (isoform requires no grouping)
+
+        :param level: string, cluster, component, or gene
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        if not level.startswith('$'):
+            level = '$' + level
+
+        return collection.aggregate(
+            [{"$group":
+                  {"_id":     "$cluster",
+                   "seqlist": {"$addToSet": "$sequence"},
+                   "n":       {"$sum": 1},
+                   "name":    {"$addToSet": "$isoform"}
+                   }
+              }],
+            allowDiskUse=True
+            )
+
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -76,11 +98,11 @@ if __name__ == '__main__':
     # post_id = transcripts.insert_one({'id': 'test'}).inserted_id
     # print(post_id)
     #
-    ntranscript = pep.load_transcripts(
-        r'A:\mrg\Dropbox\avocado\avocado-R\chile-all\190701_trinity_chile.fasta',
-        batch=1000,
-        clear=True)
-    print(f'{ntranscript} transcripts loaded')
+    # ntranscript = pep.load_transcripts(
+    #     r'A:\mrg\Dropbox\avocado\avocado-R\chile-all\190701_trinity_chile.fasta',
+    #     batch=1000,
+    #     clear=True)
+    # print(f'{ntranscript} transcripts loaded')
 
     # result = transcripts.aggregate([
     #     {
@@ -102,5 +124,10 @@ if __name__ == '__main__':
     #     i += 1
     #     if i>3:
     #         break
+
+    seqs_by_cluster = DB.sequences_by_group(transcripts, level='cluster')
+
+    for i in seqs_by_cluster:
+        print(i)
 
     exit(0)
