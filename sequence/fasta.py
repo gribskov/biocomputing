@@ -205,12 +205,13 @@ class Fasta:
 
         return fasta.doc
 
-    def reverseComplement(fasta):
+    @staticmethod
+    def reverseComplement(seq):
         """-----------------------------------------------------------------------------------------
         Return the sequence converted to reverse complement
         :return: string
         -----------------------------------------------------------------------------------------"""
-        seq = fasta.seq.translate(Fasta.complement)
+        seq = seq.translate(Fasta.complement)
 
         return seq[::-1]
 
@@ -240,10 +241,9 @@ class Fasta:
         trans.id = fasta.id + '_{}'.format(rf)
         trans.doc = fasta.id + ' strand={} frame={}'.format(direction, frame)
 
-        if direction == '+':
-            seq = fasta.seq
-        else:
-            seq = fasta.reverseComplement()
+        seq = fasta.seq
+        if direction == '-':
+            seq = Fasta.reverseComplement(seq)
 
         pos = frame
         while pos < len(seq) - 2:
@@ -268,9 +268,10 @@ class Fasta:
         :return: list of Fasta, the six reading frames translated
         -----------------------------------------------------------------------------------------"""
         i = 0
+        rf = []
         for direction in ('+', '-'):
             for frame in range(3):
-                rf[i] = self.translate(frame, direction)
+                rf.append = self.translate(frame, direction)
 
         return rf
 
