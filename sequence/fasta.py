@@ -201,7 +201,9 @@ class Fasta:
             trim = re.compile( 'len=\d+ ' )
             doc = fasta.trimDocAfterMatch( trim )
         -----------------------------------------------------------------------------------------"""
-        fasta.doc = target.sub('', fasta.doc)
+        if target:
+            # skip if no regex is given
+            fasta.doc = target.sub('', fasta.doc)
 
         return fasta.doc
 
