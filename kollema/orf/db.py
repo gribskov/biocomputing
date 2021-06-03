@@ -4,6 +4,7 @@ import pprint
 import pymongo
 from pymongo import MongoClient
 from sequence.trinity import Trinity
+from sequence.word import Word
 from kollema.orf.orf import Orf
 
 
@@ -48,7 +49,7 @@ class DB:
             name = f'{trinity.cluster}_{trinity.component}_{trinity.gene}_{trinity.isoform}'
             orf = Orf()
             orf.sequence = trinity.seq
-            nrf = orf.findall(60)
+            nrf = orf.findall(60, includeseq=True)
             doc = {'_id':       nseq,
                    'cluster':   f'{trinity.cluster}',
                    'component': f'{trinity.cluster}_{trinity.component}',
@@ -97,10 +98,11 @@ class DB:
 
     def longest_orf_by_gene(self):
         return self.db.transcripts.aggregate([
+            # {
+            # # limit for testing
+            # '$limit': 5000
+            # },
             {
-                # limit for testing
-                '$limit': 50
-                }, {
                 # flatten all reading frames into individual documents, adding the orf sequence
                 # and length
                 '$unwind': {
@@ -108,15 +110,15 @@ class DB:
                     }
                 }, {
                 '$set': {
-                    'rf.seq': {
-                        '$substr': [
-                            '$sequence', '$rf.begin', {
-                                '$subtract': [
-                                    '$rf.end', '$rf.begin'
-                                    ]
-                                }
-                            ]
-                        },
+                    # 'rf.seq': {
+                    #     '$substr': [
+                    #         '$sequence', '$rf.begin', {
+                    #             '$subtract': [
+                    #                 '$rf.end', '$rf.begin'
+                    #                 ]
+                    #             }
+                    #         ]
+                    #     },
                     'rf.len': {
                         '$subtract': [
                             '$rf.end', '$rf.begin'
@@ -127,7 +129,7 @@ class DB:
                 # group reading frames by gene, get maximum length
                 '$group': {
                     '_id':        '$gene',
-                    'mxlen':        {
+                    'mxlen':      {
                         '$max': '$rf.len'
                         },
                     'n_isoforms': {
@@ -145,107 +147,132 @@ class DB:
                 # lookup orf with maximum length and report
                 '$project': {
                     'length': 1,
-                    'mxlen':    1,
-                    'mxrf':     {
+                    'mxlen':  1,
+                    'mxrf':   {
                         '$arrayElemAt': [
                             '$all', {
                                 '$indexOfArray': [
-                                    '$all.len', '$mxl'
+                                    '$all.len', '$mxlen'
                                     ]
                                 }
                             ]
                         },
-                    'mxid':    {
+                    'mxid':   {
                         '$arrayElemAt': [
                             '$iid', {
                                 '$indexOfArray': [
-                                    '$all.len', '$mxl'
+                                    '$all.len', '$mxlen'
                                     ]
                                 }
                             ]
                         }
                     }
-                }, #{
-                # '$project': {
-                #     '_id': 0
-                #     # 'rf':         1,
-                #     # 'mxl:': 1,
-                #     # 'n_isoforms': 1,
-                #     # 'iid':        1,
-                #     # 'all':        1
-                #     }
-                # }
-            ])
+                },
+            {
+                '$sort': {'mxlen': -1}
+                },
+            {
+                '$out': 'longorfbygene'
+                }
+            # {
+            # '$project': {
+            #     '_id': 0
+            #     # 'rf':         1,
+            #     # 'mxl:': 1,
+            #     # 'n_isoforms': 1,
+            #     # 'iid':        1,
+            #     # 'all':        1
+            #     }
+            # }
+            ],
+            allowDiskUse=True)
+
+    def length_distribution(self, minlen=0, show=True):
+        """
+        return the orfs greater than minlen and optionally print distribution of length
+        :return:
+        """
+        result = self.db.longorfbygene.find({'mxlen': {'$gte': minlen}})
+        if show:
+            nval = result.count()
+            step = 0.01 * nval
+            threshold = 0.0
+            n = 0
+            for r in result:
+                if n >= threshold:
+                    frac = f'{n / nval:0.3f}'
+                    print(f'{n}\t{frac}\t{r["mxrf"]["len"]}')
+                    threshold += step
+                n += 1
+
+            frac = f'{n / nval:0.3f}'
+            print(f'{n}\t{frac}\t{r["mxrf"]["len"]}')
+            print(f'{nval} gene sequences')
+
+        return result
 
 
 # --------------------------------------------------------------------------------------------------
 #
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
+
+    load_data = False
+    find_long_orfs = False
+
     pep = DB()
     print(pep.db.list_collection_names())
-    transcripts = pep.db.transcripts
-    # # post_id = transcripts.insert_one({'id': 'test'}).inserted_id
-    # print(post_id)
-    #
-    # ntranscript = pep.load_transcripts(
-    #     r'A:\mrg\Dropbox\avocado\avocado-R\chile-all\190701_trinity_chile.fasta',
-    #     batch=5000,
-    #     clear=True)
-    # print(f'{ntranscript} transcripts loaded')
-    # nn = 0
-    # for doc in transcripts.find({}):
-    #     nn += 1
-    #     print(doc)
-    #     if nn > 3:
-    #         break
 
-    print('aggregating')
-    result = list(pep.longest_orf_by_gene())
-    l = list(result)
-    print(f'len={len(l)}')
-    pp = pprint.PrettyPrinter(indent=2, width=60, compact=False)
-    for a in result:
-        pp.pprint(a)
+    if load_data:
+        print('loading data')
+        transcripts = pep.db.transcripts
+        ntranscript = pep.load_transcripts(
+            r'A:\mrg\Dropbox\avocado\avocado-R\chile-all\190701_trinity_chile.fasta',
+            batch=5000,
+            clear=True)
+        print(f'{ntranscript} transcripts loaded')
+
+    if find_long_orfs:
+        print('finding longest orfs in each gene')
+        # transcripts.create_index('gene')
+        result = pep.longest_orf_by_gene()
+        # result.sort(key=lambda r: r['mxrf']['len'])
+
+    def checkstop(seq):
+        nstop = 0
+        for pos in range(0,len(seq)-2,3):
+            if seq[pos:pos+3] in ('TAA', 'TAG', 'TGA'):
+                nstop += 1
+        return nstop
+
+    result = pep.length_distribution(1200, show=False)
+    coding = Word(size=6)
+    coding.init_words(initval=1)
+    nword = coding.remove_stops_inframe()
+    print(f'{nword} words remaining after removing stops')
+    for rf in result:
+        check = checkstop(rf["_id"])
+        if check > 0:
+            print(f'{rf["_id"]}\t{check}')
+            print(f'{rf["_id"]}\t{rf["mxlen"]}\t{len(rf["mxrf"]["seq"])}')
+        coding.sequence = rf['mxrf']['seq']
+        coding.counts_get()
+
+    for word in sorted(coding.count, key=lambda k:coding.count[k], reverse=True):
+        # if coding.count[word] == 1:
+        #     break
+
+        print(f'{word}\t{coding.count[word]}')
+        if word.startswith('TAA') or word.endswith('TAA') or \
+            word.startswith('TAG') or word.endswith('TAG') or \
+            word.startswith('TGA') or word.endswith('TGA'):
+            print("oops")
+
 
     # s = 0
     # for i in range(5):
     #     print(f'i={i}')
     #     s += i
-
-    # result = transcripts.aggregate([
-    #     {
-    #         '$addFields': {
-    #             'length': {
-    #                 '$toInt': '$length'
-    #                 }
-    #             }
-    #         }
-    #     ])
-
-    # fix length to be int instead of string
-    # transcripts.update_many({}, [{'$addFields':{'length':{'$toInt':'$length'}}}])
-
-    # result = transcripts.find({'length': {'$gt': 1500}})
-    # i = 0
-    # for doc in result:
-    #     orf = Orf()
-    #     orf.sequence = doc['sequence']
-    #     print(doc['isoform'], orf.sequence)
-    #     nrf = orf.findall(60)
-    #     for rf in sorted(orf.rflist, key=lambda x: x['end'] - x['begin']):
-    #         print(rf, rf['end'] - rf['begin'])
-    #     transcripts.update_one({'isoform': doc['isoform']},
-    #                            {'$set': {'rflist': orf.rflist}})
-
-    # i += 1
-    # if i > 10:
-    #     break
-
-    # seqs_by_cluster = DB.sequences_by_group(transcripts, level='cluster')
-    #
-    # for i in seqs_by_cluster:
-    #     print(i)
 
     # db = MongoClient().test
     # db.a.delete_many({})
