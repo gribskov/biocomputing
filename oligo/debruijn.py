@@ -178,16 +178,16 @@ if __name__ == '__main__':
     text2 = 'A A T G C G C T A C G T A G G G T A A T A T A A G A C C A'
 
 
-    kmer = KmerSet(text=text2)
+    kmer = KmerSet(text=text)
     print("original text\n", kmer.text)
     textlen = kmer.clean_text()
     print("\ncleaned text\n", kmer.text)
     print("\n{} letters".format(textlen))
 
-    # actual_coverage = kmer.sample_reads(8, 4)
-    # print("coverage: {:.2f}".format(actual_coverage))
-    # for read in kmer.reads:
-    #     print("\t {}".format(read))
+    actual_coverage = kmer.sample_reads(8, 3)
+    print("coverage: {:.2f}".format(actual_coverage))
+    for read in sorted(kmer.reads, key=lambda k: kmer.text.index(k)):
+        print("\t {}".format(read))
 
     k = 4
     # kmer.from_text_random(k, int(coverage * textlen / k))
