@@ -4,7 +4,7 @@ word composition of a string
 Michael Gribskov     02 June 2021
 ================================================================================================="""
 import copy
-from math import log2
+from math import log2, log
 from itertools import product
 
 
@@ -29,7 +29,7 @@ class Word:
         -----------------------------------------------------------------------------------------"""
         return copy.deepcopy(self)
 
-    def counts_get(self):
+    def counts_get(self, step=0):
         """-----------------------------------------------------------------------------------------
         count the words of length self.size, assumes word dict is initialized with all possible
         words, automatically initializes with zero if not previously done
@@ -39,8 +39,11 @@ class Word:
         if not self.initialized:
             self.init_words()
 
+        if step == 0:
+            step = self.size
+
         n = 0
-        for pos in range(0, len(self.sequence) - self.size + 1, self.size):
+        for pos in range(0, len(self.sequence) - self.size + 1, step):
             # print(self.sequence[pos: pos + self.size])
             word = self.sequence[pos: pos + self.size]
             # if 'TAA' in word:
@@ -137,7 +140,7 @@ class Word:
             p = 1.0
             for letter in word:
                 p *= freq[letter]
-            self.count[word] = self.count_total * p
+            self.count[word] = p
             new_total += self.count[word]
 
         self.count_total = new_total
@@ -164,13 +167,56 @@ class Word:
         """-----------------------------------------------------------------------------------------
         Convert counts to frequency by dividing by self.count_total
 
-        :return: dict, words as keys
+        :return: int, new total_count
         -----------------------------------------------------------------------------------------"""
-        freq = {}
-        for word in self.count:
-            freq[word] = self.count[word]/self.count_total
+        model = self.clone()
+        model.count_total = 0
+        for word in model.count:
+            model.count[word] = model.count[word]/self.count_total
+            model.count_total += model.count[word]
 
-        return freq
+        return model
+
+    def to_logfrequency(self):
+        """-----------------------------------------------------------------------------------------
+        Convert counts to frequency by dividing by self.count_total, the take log
+
+        :return: Word object
+        -----------------------------------------------------------------------------------------"""
+        model = self.clone()
+        model.count_total = 0
+        for word in model.count:
+            model.count[word] = log(model.count[word]/self.count_total)
+            model.count_total += model.count[word]
+
+        return model
+
+
+    def add(self, count):
+        """-----------------------------------------------------------------------------------------
+        Add the counts in count, a Word object, to this count.
+
+        :param count: Word object
+        :return: int, total count
+        -----------------------------------------------------------------------------------------"""
+        for word in self.count:
+            self.count[word] += count.count[word]
+            self.count_total += count.count[word]
+
+        return self.count_total
+
+    def add_dict(self, countdict):
+        """-----------------------------------------------------------------------------------------
+        Add the counts in count, a dict indexed by sequence name, to this count.
+
+        :param count: Word object
+        :return: int, total count
+        -----------------------------------------------------------------------------------------"""
+        for word in self.count:
+            self.count[word] += countdict[word]
+            self.count_total += countdict[word]
+
+        return self.count_total
 
 # --------------------------------------------------------------------------------------------------
 # testing
