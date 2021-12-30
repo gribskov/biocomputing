@@ -13,7 +13,8 @@ import sys
 
 def read_mirdeep_csv(filename):
     """---------------------------------------------------------------------------------------------
-    Read the fields into a dict using the column headings in the file as keys.
+    Read the fields into a dict using the column headings in the file as keys
+    below
     Add a field 'type': 'novel' or 'known'
 
     :param filename:
@@ -43,7 +44,7 @@ def read_mirdeep_csv(filename):
             # section ends with blank line
             break
 
-        thismirna = {'type':'novel'}
+        thismirna = {'type': 'novel'}
         field = line.rstrip().split('\t')
         f = 0
         for value in field:
@@ -70,7 +71,7 @@ def read_mirdeep_csv(filename):
             # section ends with blank line
             break
 
-        thismirna = {'type':'novel'}
+        thismirna = {'type': 'novel'}
         field = line.rstrip().split('\t')
         f = 0
         for value in field:
@@ -85,11 +86,58 @@ def read_mirdeep_csv(filename):
     return mirna
 
 
+def findmerges(mirna):
+    """---------------------------------------------------------------------------------------------
+    find which miRNAs are mergable because they have identical precursor sequences
+
+    :param mirna: list of dict, see read_mirdeep_csv()
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    seqp = ''
+    merges = [[-1]]
+
+    for m in sorted(range(len(mirna)), key=lambda x: mirna[x]['consensus precursor sequence']):
+        if mirna[m]['consensus precursor sequence'] == seqp:
+            merges[-1].append(m)
+
+        else:
+            if len(merges[-1]) == 1:
+                merges[-1] = [m]
+            else:
+                merges.append([m])
+            seqp = mirna[m]['consensus precursor sequence']
+
+
+    # last item will probably be unmerged
+    if len(merges[-1]) == 1:
+        merges.pop()
+
+    return merges
+
+
 # --------------------------------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    mir = read_mirdeep_csv('../data/result_23_01_2021_t_06_45_02.csv')
+    mirna = read_mirdeep_csv('../data/result_23_01_2021_t_06_45_02.csv')
+    merges = findmerges(mirna)
+
+    # print(f'{mirna[-1]}')
+    for i in range(len(merges)):
+        print(f'group {i}: {merges[i]}')
+        for g in merges[i]:
+            m = mirna[g]
+            try:
+                id = m["mature miRBase miRNA"]
+                alt = m['tag id']
+            except KeyError:
+                id = m['provisional id']
+                alt = m['example miRBase miRNA with the same seed']
+
+            count = m['total read count']
+            seq = m['consensus precursor sequence']
+            print(f'{g}\t{id}\t{alt}\t\t{count}\t\t{seq}')
+
 
     # pre = open('precursor.fa', 'w')
     # mat = open('mature.fa', 'w')
