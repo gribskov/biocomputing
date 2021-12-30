@@ -495,14 +495,20 @@ if __name__ == '__main__':
     #     m = align.matchString( a[0], a[1])
     #     print('{}\n{}\n{}\n\n'.format(a[0], m, a[1]))
 
-    align.readNCBI('..//tables/alphabet.matrix')
-    align.s1.seq = 'BORROW'
-    align.s2.seq = 'BORABORA'
+    # align.readNCBI('..//tables/alphabet.matrix')
+    # align.s1.seq = 'BORROW'
+    # align.s2.seq = 'BORABORA'
+    align.readNCBI('..//tables/dna4-2.matrix')
+    # align.s1.seq = "TAGATTTATCAT"
+    align.s2.seq = "TAGATTTATCAT"
+    # align.s2.seq = "TACTATTTAGAT"
+    align.s1.seq = "TGGTATACTAT"
+
     align.seqToInt()
     # bestscore, bestpos = align.globalBrute(-1, -1, nogap=False)
     bestscore, bestpos = align.localBrute(-1, -1)
     print('score: {} at {}\n'.format(bestscore, bestpos))
-    align.writeScoreMatrix(sys.stdout, reverse=False, space=3)
+    align.writeScoreMatrix(sys.stdout, reverse=False, space=1)
 
     # testing
     # align.s1 = Fasta()
