@@ -79,15 +79,19 @@ class Alignment:
 # ==================================================================================================
 if __name__ == '__main__':
     align = Alignment()
-    align.s1.seq = 'AGGC'
+    # align.s1.seq = 'AGGC'
+    # align.s1.seq = 'ACGTAAC'
+    align.s1.seq = "TAGATTTATCAT"
     print(align.s1.format())
 
-    align.s2.seq = "AGCGT"
+    # align.s2.seq = "AGCGT"
+    # align.s2.seq = "CGAAGTC"
+    align.s2.seq = 'TATCATATGGT'
     print(align.s2.format())
 
     align.index()
-    align.score.identity()
-    align.gi = 0
+    align.score.identity(pos=4, neg=-2)
+    align.gi = -1
     align.gd = -1
 
     # three pointer directions
