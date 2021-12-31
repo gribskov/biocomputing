@@ -16,6 +16,8 @@ def read_mirdeep_csv(filename):
     Read the fields into a dict using the column headings in the file as keys
     below
     Add a field 'type': 'novel' or 'known'
+    Add a field 'sid': with the provisional id or tag id for novel and known miRNAs respectively
+    Add a field 'group': used later for skipping merged miRNAs
 
     :param filename:
     :return: list of dict, all columns of information for each miRNA
@@ -44,7 +46,7 @@ def read_mirdeep_csv(filename):
             # section ends with blank line
             break
 
-        thismirna = {'type': 'novel'}
+        thismirna = {'type': 'novel', 'group': False}
         field = line.rstrip().split('\t')
         f = 0
         for value in field:
@@ -66,13 +68,13 @@ def read_mirdeep_csv(filename):
     header = fp.readline()
     title = header.rstrip().split('\t')
 
-    # read the predicted (novel) miRNAs
+    # read the known miRNAs
     for line in fp:
         if line == '\n':
             # section ends with blank line
             break
 
-        thismirna = {'type': 'novel'}
+        thismirna = {'type': 'known', 'group': False}
         field = line.rstrip().split('\t')
         f = 0
         for value in field:
@@ -103,6 +105,7 @@ def findmerges(mirna):
         # this sorts by the precursor sequence and the mirdeep id, e.g., 4_6597
         if mirna[m]['consensus precursor sequence'] == seqp:
             merges[-1].append(m)
+            mirna[m]['group'] = True
 
         else:
             if len(merges[-1]) == 1:
@@ -110,7 +113,6 @@ def findmerges(mirna):
             else:
                 merges.append([m])
             seqp = mirna[m]['consensus precursor sequence']
-
 
     # last item will probably be unmerged
     if len(merges[-1]) == 1:
@@ -128,20 +130,20 @@ if __name__ == '__main__':
 
     # print(f'{mirna[-1]}')
     for i in range(len(merges)):
-        print(f'group {i}: {merges[i]}')
+        print(f'\ngroup {i}: {merges[i]}')
         for g in merges[i]:
             m = mirna[g]
-            try:
+            if m['type'] == 'known':
                 id = m["mature miRBase miRNA"]
                 alt = m['tag id']
-            except KeyError:
+            else:
                 id = m['provisional id']
                 alt = m['example miRBase miRNA with the same seed']
 
             count = m['total read count']
             seq = m['consensus precursor sequence']
-            print(f'{g}\t{id}\t{alt}\t\t{count}\t\t{seq}')
-
+            group = m['group']
+            print(f'{g}\t{group}\t{id}\t{alt}\t\t{count}\t\t{seq}')
 
     # pre = open('precursor.fa', 'w')
     # mat = open('mature.fa', 'w')
