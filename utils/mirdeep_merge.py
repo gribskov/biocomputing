@@ -50,6 +50,7 @@ def read_mirdeep_csv(filename):
         for value in field:
             thismirna[title[f]] = field[f]
             f += 1
+        thismirna['sid'] = thismirna['provisional id']
         mirna.append(thismirna)
 
     nnovel = len(mirna)
@@ -77,6 +78,7 @@ def read_mirdeep_csv(filename):
         for value in field:
             thismirna[title[f]] = field[f]
             f += 1
+        thismirna['sid'] = thismirna['tag id']
         mirna.append(thismirna)
 
     nknown = len(mirna) - nnovel
@@ -96,7 +98,9 @@ def findmerges(mirna):
     seqp = ''
     merges = [[-1]]
 
-    for m in sorted(range(len(mirna)), key=lambda x: mirna[x]['consensus precursor sequence']):
+    for m in sorted(range(len(mirna)), key=lambda x: (mirna[x]['consensus precursor sequence'],
+                                                      mirna[x]['sid'])):
+        # this sorts by the precursor sequence and the mirdeep id, e.g., 4_6597
         if mirna[m]['consensus precursor sequence'] == seqp:
             merges[-1].append(m)
 
