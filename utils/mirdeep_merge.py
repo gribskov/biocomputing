@@ -121,10 +121,31 @@ def findmerges(mirna):
     return merges
 
 
+def get_id(thismirna):
+    """---------------------------------------------------------------------------------------------
+    get the primary and alternate ID depending on whether it is a known or novel miRNA
+
+    :param thismirna: dict, one record from mirDeep2 result
+    :return: string, string - primary and alternate IDs
+    ---------------------------------------------------------------------------------------------"""
+    if thismirna['type'] == 'known':
+        id = thismirna["mature miRBase miRNA"]
+        alt = thismirna['tag id']
+    else:
+        id = thismirna['provisional id']
+        alt = thismirna['example miRBase miRNA with the same seed']
+
+    return id, alt
+
+
 # --------------------------------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
+
+    min_mirdeep_score = 0
+    min_count = 330
+
     mirna = read_mirdeep_csv('../data/result_23_01_2021_t_06_45_02.csv')
     merges = findmerges(mirna)
 
@@ -133,24 +154,52 @@ if __name__ == '__main__':
         print(f'\ngroup {i}: {merges[i]}')
         for g in merges[i]:
             m = mirna[g]
-            if m['type'] == 'known':
-                id = m["mature miRBase miRNA"]
-                alt = m['tag id']
-            else:
-                id = m['provisional id']
-                alt = m['example miRBase miRNA with the same seed']
+            id, alt = get_id(m)
 
             count = m['total read count']
             seq = m['consensus precursor sequence']
             group = m['group']
             print(f'{g}\t{group}\t{id}\t{alt}\t\t{count}\t\t{seq}')
 
-    # pre = open('precursor.fa', 'w')
-    # mat = open('mature.fa', 'w')
-    # star = open('star.fa', 'w')
-    #
-    # pre.close()
-    # mat.close()
-    # fp.close()
+    pre = open('precursor.fa', 'w')
+    mat = open('mature.fa', 'w')
+    star = open('star.fa', 'w')
+
+    count_all = {t: 0 for t in ('known', 'novel')}
+    count_undup = {t: 0 for t in ('known', 'novel')}
+    count_mirdeep = {t: 0 for t in ('known', 'novel')}
+    count_count = {t: 0 for t in ('known', 'novel')}
+    for m in mirna:
+        count_all[m['type']] += 1
+
+        if m['group']:
+            continue
+
+        count_undup[m['type']] += 1
+        if float(m['miRDeep2 score']) < min_mirdeep_score:
+            continue
+        count_mirdeep[m['type']] += 1
+
+        if int(m['total read count']) < min_count:
+            continue
+        count_count[m['type']] += 1
+
+        # write out fasta sequences for those that pass the mirdeep and count cutoffs
+        id, alt = get_id(m)
+        pre.write(f">{id} {alt}\n{m['consensus precursor sequence']}\n")
+        mat.write(f">{id} {alt}\n{m['consensus mature sequence']}\n")
+        star.write(f">{id} {alt}\n{m['consensus star sequence']}\n")
+
+    print('!summary')
+    print('!Count\tCount')
+    print('!Known\tNovel\tID')
+    print(f"{count_all['known']}\t\t{count_all['novel']}\t\t total miRNA analyzed")
+    print(f"{count_undup['known']}\t\t{count_undup['novel']}\t\t un-duplicated miRNA")
+    print(f"{count_mirdeep['known']}\t\t{count_mirdeep['novel']}\t\t mirDeep > {min_mirdeep_score}")
+    print(f"{count_count['known']}\t\t{count_count['novel']}\t\t count > {min_count}")
+
+    pre.close()
+    mat.close()
+    star.close()
 
     exit(0)
