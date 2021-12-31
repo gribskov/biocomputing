@@ -170,18 +170,19 @@ if __name__ == '__main__':
     count_mirdeep = {t: 0 for t in ('known', 'novel')}
     count_count = {t: 0 for t in ('known', 'novel')}
     for m in mirna:
-        count_all[m['type']] += 1
 
+        count_all[m['type']] += 1
         if m['group']:
             continue
 
         count_undup[m['type']] += 1
         if float(m['miRDeep2 score']) < min_mirdeep_score:
             continue
-        count_mirdeep[m['type']] += 1
 
+        count_mirdeep[m['type']] += 1
         if int(m['total read count']) < min_count:
             continue
+
         count_count[m['type']] += 1
 
         # write out fasta sequences for those that pass the mirdeep and count cutoffs
