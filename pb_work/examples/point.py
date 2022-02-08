@@ -8,11 +8,22 @@ import math
 
 class Point:
 
-    def __init__(self, x, y):
-        self._pos = [x, y]
+    def __init__(self, x=0, y=0):
+        self._pos = []
+        self.setvalues(x,y)
 
     def magnitude(self):
         return math.sqrt(self._pos[0] ** 2 + self._pos[1] ** 2)
+
+        self.setvalues(x, y)
+
+    def setvalues(self, x, y):
+        self._pos = [x, y]
+
+        return True
+
+    def getvalues(self):
+        return self._pos
 
     def add(self, other):
         self._pos[0] += other._pos[0]
@@ -20,8 +31,13 @@ class Point:
 
         return self.magnitude()
 
-    def values(self):
-        return self._pos[:]
+    def add_better(self, other):
+        x0, y0 = self.getvalues()
+        x1, y1 = other.getvalues()
+        self._pos = [x0 + x1, y0 + y1]
+
+        return self.magnitude()
+
 
 
 class Polar(Point):
@@ -51,30 +67,33 @@ class Polar(Point):
 #
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    po1 = Polar(0.0, 1.0)
-    print('po1 values = {}'.format(po1.values()))
-    po2 = Polar(90.0, 1.0)
-    print('po2 values = {}'.format(po2.values()))
-    po1.add(po2)
-    print('po1 + po2 = {}'.format(po1.values()))
+    # po1 = Polar(0.0, 1.0)
+    # print('po1 values = {}'.format(po1.values()))
+    # po2 = Polar(90.0, 1.0)
+    # print('po2 values = {}'.format(po2.values()))
+    # po1.add(po2)
+    # print('po1 + po2 = {}'.format(po1.values()))
 
-    # pt1 = Point(1, 2)
-    # pt2 = Point(4, 4)
+    pt1 = Point(1, 2)
+    pt2 = Point(4, 4)
 
-    # print('pt1 length = {}'.format(pt1.magnitude()))
-    # print('pt2 length = {}'.format(pt2.magnitude()))
-    #
-    # length = pt1.add(pt2)
-    # print('pt1 + pt2 = {}'.format(length))
-    #
-    # x, y = pt1.values()
-    # print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), x, y))
-    #
-    # xy = []
-    # xy = pt1.values()
-    # print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), xy[0], xy[1]))
-    # xy[0] = 10
-    # xy = pt1.values()
-    # print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), xy[0], xy[1]))
+    print('pt1 length = {}'.format(pt1.magnitude()))
+    print('pt2 length = {}'.format(pt2.magnitude()))
+
+    length = pt1.add(pt2)
+    print('pt1 + pt2 = {}'.format(length))
+
+    x, y = pt1.getvalues()
+    print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), x, y))
+
+    xy = []
+    xy = pt1.getvalues()
+    print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), xy[0], xy[1]))
+
+
+    print('\nchanging xy, pt1 should not change')
+    xy[0] = 10
+    xy = pt1.getvalues()
+    print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), xy[0], xy[1]))
 
     exit(0)
