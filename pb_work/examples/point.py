@@ -23,7 +23,7 @@ class Point:
         return True
 
     def getvalues(self):
-        return self._pos
+        return self._pos[:]
 
     def add(self, other):
         self._pos[0] += other._pos[0]
@@ -37,6 +37,18 @@ class Point:
         self._pos = [x0 + x1, y0 + y1]
 
         return self.magnitude()
+
+class Shape(Point):
+
+    def __init__(self, x=0, y=0, shape='circle', size=1):
+        """
+        Shape subclass adds shape and size to point
+        for now shapes are limited to circle and square
+        size can be in any arbitrary plotting units compatible with the plot
+        """
+        self.shape = shape
+        self.size = size
+        self = super().__init__(x,y)
 
 
 
@@ -95,5 +107,9 @@ if __name__ == '__main__':
     xy[0] = 10
     xy = pt1.getvalues()
     print('pt1 length = {}\tx = {}\ty = {}'.format(pt1.magnitude(), xy[0], xy[1]))
+
+    s = Shape()
+    s = Shape(1,2, 'square')
+    print(f'object:{s}   shape={s.shape}   size={s.size}   pos={s.getvalues()}   length={s.magnitude():.3f}')
 
     exit(0)
