@@ -1,5 +1,5 @@
 import sys
-from math import log2
+from math import sqrt, log2
 import pprint
 import pymongo
 from pymongo import MongoClient
@@ -10,7 +10,8 @@ from kollema.orf.orf import Orf
 
 class DB:
     """=============================================================================================
-
+    Start MongoDB server:
+    C:\Users\michael>..\..\"Program Files"\MongoDB\Server\4.4\bin\mongod --dbpath="a:\MongoDB\Server"
 
     Michael Gribskov     15 May 2021
     ============================================================================================="""
@@ -188,6 +189,33 @@ class DB:
             ],
             allowDiskUse=True)
 
+    def frequency_with_orfinfo(self):
+        """-----------------------------------------------------------------------------------------
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+
+        return self.db.longorfbygene.aggregate([
+            {
+                '$lookup': {
+                    'from':         'frequency',
+                    'localField':   '_id',
+                    'foreignField': '_id',
+                    'as':           'freq'
+                    }
+                }, {
+                '$unwind': {
+                    'path': '$freq'
+                    }
+                }, {
+                '$project': {
+                    'mxlen':      1,
+                    'freq.count': 1,
+                    'mxrf':       1
+                    }
+                }
+            ])
+
     def get_long_orfs(self, minlen=0, show=True):
 
         """-----------------------------------------------------------------------------------------
@@ -308,6 +336,135 @@ class DB:
 
         return None
 
+    # ==============================================================================================
+    # end of DB
+    # ==============================================================================================
+
+
+class Model():
+    """=============================================================================================
+    centroid models for categories
+    ============================================================================================="""
+
+    def __init__(self, template=Word, name=''):
+        """-----------------------------------------------------------------------------------------
+
+        -----------------------------------------------------------------------------------------"""
+        self.name = name
+        self.current = template.clone()
+        self.new = None
+        self.len_min = 1000000
+        self.len_max = 0
+        self.len_ave = 0.0
+        self.n = 0
+        self.error = 0.0
+
+    def classify_minmax(self, data, frac):
+        """---------------------------------------------------------------------------------------------
+        score reading frame frequencies vs a single model and classify highest score fraction, frac, as
+        model 2, the lowest scoring frac as model 1, and everything else as model 0
+
+        :param data: DB object
+        :param frac: float, fraction of top and bottom sequences to classify
+        :return: dict, key in rf ID, value is class
+        ---------------------------------------------------------------------------------------------"""
+        print('assigning to classes')
+        model = self.current
+        assign = {}
+        model_logp = model.to_logfrequency().count
+        score = []
+        block = 10000
+        n = 0
+
+        # calculate the log-likelihood that each ORF belongs to the model
+        for freq in data.db.frequency.find({}):
+            ll = 0
+            count = freq['count']
+            for word in freq['count']:
+                ll += freq['count'][word] * model_logp[word]
+            score.append((freq['_id'], ll))
+
+            n += 1
+            if not n % block:
+                print(f'+{n}')
+
+        score.sort(key=lambda v: v[1])
+        min = int(frac * len(score))
+        max = len(score) - min - 1
+
+        assign = {x[0]: 1 for x in score[:min]}  # smallest log likelihood (non-coding)
+        assign.update({x[0]: 0 for x in score[min:max]})
+        assign.update({x[0]: 2 for x in score[max:]})  # highest log likelihood (coding)
+
+        return assign
+
+    def stat_reset(self):
+        """-----------------------------------------------------------------------------------------
+        Reset statistics fields in model
+        -----------------------------------------------------------------------------------------"""
+        self.len_min = 1000000
+        self.len_max = 0
+        self.len_ave = 0.0
+        self.n = 0
+        self.error = 0.0
+
+    def stat_addlen(self, rflen):
+        """-----------------------------------------------------------------------------------------
+        add length of a reading fram to statistics
+        -----------------------------------------------------------------------------------------"""
+        self.len_min = min(self.len_min, rflen)
+        self.len_max = max(self.len_max, rflen)
+        self.len_ave += rflen
+
+    def stat_adderror(self, rf_freq):
+        """-----------------------------------------------------------------------------------------
+        
+        :param rf_freq: dict, frequencies of words
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        error = 0
+        current = self.current.count
+        new = self.new.count
+        count_total = self.new.count_total
+        count_total = 0
+        for word in rf_freq:
+            new[word] += rf_freq[word]
+            count_total += new[word]
+            delta = rf_freq[word] - current[word]
+            error += delta * delta
+
+        self.new.count_total = count_total
+        error = sqrt(error)
+        self.error += error
+
+    def stat_average(self):
+        """-----------------------------------------------------------------------------------------
+        after all counts have been accumulated, divide error and len_ave by n to get the average.
+        divide new frequencies to get an updated model
+        :return: 
+        -----------------------------------------------------------------------------------------"""
+        if self.n > 0:
+            self.error /= self.n
+            self.len_ave /= self.n
+            self.new.count_total = 0
+            for word in self.new.count:
+                self.new.count[word] /= self.n
+                self.new.count_total += self.new.count[word]
+
+    def stat_print(self):
+        """-----------------------------------------------------------------------------------------
+        format a summary of the model assessment
+        :return: 
+        -----------------------------------------------------------------------------------------"""
+        s = f'{self.name}\t{self.n}\t{self.error:.2g}\t'
+        s += f'{self.len_min}\t{self.len_ave:.1f}\t{self.len_max}'
+
+        return s
+
+    # ==============================================================================================
+    # end of model
+    # ==============================================================================================
+
 
 def checkstop(seq):
     nstop = 0
@@ -336,46 +493,86 @@ def composition_from_sequence(dbobj, alphabet='ACGT'):
     return comp
 
 
-def classify_minmax(data, model, frac):
+def update(db, template, model, assign):
     """---------------------------------------------------------------------------------------------
-    score reading frame frequencies vs a single model and classify highest score fraction, frac, as
-    model 2, the lowest scoring frac as model 1, and everything else as model 0
+    using category assignments in assign, category 0 is ignored
+    Calculate error to current model
 
+    Update model model frequencies
+    :param db: DB object
+    :param model: list of Model objects
+    :param assign: dict of reading frames (keys) and category assignments(values)
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    new = []
+    for m in model:
+        m.stat_reset()
+        m.new = template.clone()
+
+    orfinfo = db.frequency_with_orfinfo()
+    print(f'update stats and categories')
+    for orf in orfinfo:
+        seq = orf['_id']
+        rf_freq = orf['freq']['count']
+        m = model[assign[seq]]
+        m.stat_addlen(orf['mxlen'])
+        m.stat_adderror(rf_freq)
+        m.n += 1
+        # m.new.add_dict(rf_freq)   # done in adderror
+
+    print(f'\t{model[1].n}\t{model[2].n}')
+
+    for m in model:
+        m.stat_average()
+        print(m.stat_print())
+        m.current = m.new
+
+def classify_nearest(model, data):
+    """---------------------------------------------------------------------------------------------
+    score reading frame frequencies vs a set of models and reassign to model with maximum
+    log-likelihood.  Model zero is reserved for unclassified sequences so it is not tested
+
+    :param frac: list of Model
     :param data: DB object
-    :param model: Word object (log frequency form)
-    :param frac: float, fraction of top and bottom sequences to classify
     :return: dict, key in rf ID, value is class
     ---------------------------------------------------------------------------------------------"""
-    print('assigning to classes')
+    print('assigning to nearest class')
     assign = {}
-    score = []
+    logp = [None]
+
+    for i in range(1, len(model)):
+        # do not include model[0]
+        logp.append(model[i].current.to_logfrequency())
+
     block = 10000
     n = 0
-    for lfreq in data.db.frequency.find({}):
-        s = 0
-        for word in lfreq['count']:
-            s += lfreq['count'][word] * model.count[word]
-        score.append((lfreq['_id'], s))
+
+    # calculate the log-likelihood that each ORF belongs to the model
+    ccount = [0, 0, 0]
+    for freq in data.db.frequency.find({}):
+        llmax = -1000000
+        llidx = 0
+        count = freq['count']
+        for i in range(1, len(model)):
+            logprob = logp[i].count
+            ll = 0
+            for word in freq['count']:
+                ll += count[word] * logprob[word]
+
+            if ll > llmax:
+                llmax = ll
+                llidx = i
+
+        assign[freq['_id']] = llidx
+        ccount[llidx] += 1
+
+        #todo add counts to new model
 
         n += 1
         if not n % block:
-            print(f'+{n}')
-
-    score.sort(key=lambda v: v[1])
-    min = int(frac * len(score))
-    max = len(score) - min - 1
-
-    # type = 1
-    # assign = {k[0]: 1 for k in range(0, min)}  # the first min as class 1
-    # assign = {k[0]: 0 for k in range(min, max)}
-    # assign = {k[0]: 2 for k in range(max, len(score))}
-
-    assign = {x[0]: 1 for x in score[:min]}
-    assign.update({x[0]: 0 for x in score[min:max]})
-    assign.update({x[0]: 2 for x in score[max:]})
+            print(f'n+{n}\t{ccount[1]}:{ccount[2]}')
 
     return assign
-
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -394,7 +591,8 @@ if __name__ == '__main__':
     save_frequencies = False
 
     pep = DB()
-    print(pep.db.list_collection_names())
+    # print(pep.db.list_collection_names())
+    # TODO add summary of database collections
 
     if load_data:
         print('loading data')
@@ -424,21 +622,20 @@ if __name__ == '__main__':
         total_freq = pep.get_rf_frequencies(wordsize=6, background=random)
 
     # set up initial models
-    model = [
-        {'name': 'unassigned', 'count': count_template.clone()},
-        {'name': 'coding', 'count': count_template.clone()},
-        {'name': 'noncoding', 'count': count_template.clone()}
-        ]
+    model = [Model(template=count_template.clone(), name='unassigned'),
+             Model(template=count_template.clone(), name='noncoding'),
+             Model(template=count_template.clone(), name='coding'),
+             ]
 
     # coding model - assume longest ORFs are coding
-    model[1]['count'] = pep.model_from_counts(wordsize=6, initval=1)
-    model[1]['count'].to_logfrequency()
+    model[1].current = pep.model_from_counts(wordsize=6, initval=1)
+    model[1].current = model[1].current.to_frequency()
 
-    assign = classify_minmax(pep, model[1]['count'], 0.05)
-    stat = [{'n': 0, 'lenmin': 0, 'lenmax': 0, 'lenave': 0, 'count': count_template.clone()} \
-            for _ in range(3)]
-    for seq in assign:
-
+    assign = model[1].classify_minmax(pep, 0.05)
+    for i in range(4):
+        print(f'\ncycle {i}')
+        assign = update(pep, count_template, model, assign)
+        classify_nearest(model, pep)
 
     # logodds = {}
     # for word in coding.count:

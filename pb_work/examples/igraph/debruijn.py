@@ -54,7 +54,8 @@ if __name__ == '__main__':
         Or to take arms against a sea of troubles
         And by opposing end them.'''
 
-    text1 = 'To be, or not to be--that is the question: Whether tis nobler in the mind to suffer'
+    # text1 = 'To be, or not to be--that is the question: Whether tis nobler in the mind to suffer'
+    text1 = 'To be, or not to be--that is the question'
 
     text2 = 'A A T G C G C T A C G T A G G G T A A T A T A A G A C C A'
 
@@ -107,14 +108,67 @@ if __name__ == '__main__':
     Would through the airy region stream so bright
     That birds would sing and think it were not night.'''
 
+    text7 = '''ATGTGGATACGCCCATTGCAGGCGGAACTGAGCGATAACACGCTGGCCCTGTACGCGCCAAACCGTTTTG
+TCCTCGATTGGGTACGGGACAAGTACCTTAATAATATCAATGGACTGCTAACCAGTTTCTGCGGAGCGGA
+TGCCCCACAGCTGCGTTTTGAAGTCGGCACCAAACCGGTGACGCAAACGCCACAAGCGGCAGTGACGAGC
+AACGTCGCGGCCCCTGCACAGGTGGCGCAAACGCAGCCGCAACGTGCTGCGCCTTCTACGCGCTCAGGTT
+GGGATAACGTCCCGGCCCCGGCAGAACCGACCTATCGTTCTAACGTAAACGTCAAACACACGTTTGATAA
+CTTCGTTGAAGGTAAATCTAACCAACTGGCGCGCGCGGCGGCTCGCCAGGTGGCGGATAACCCTGGCGGT
+GCCTATAACCCGTTGTTCCTTTATGGCGGCACGGGTCTGGGTAAAACTCACCTGCTGCATGCGGTGGGTA
+ACGGCATTATGGCGCGCAAGCCGAATGCCAAAGTGGTTTATATGCACTCCGAGCGCTTTGTTCAGGACAT
+GGTTAAAGCCCTGCAAAACAACGCGATCGAAGAGTTTAAACGCTACTACCGTTCCGTAGATGCACTGCTG
+ATCGACGATATTCAGTTTTTTGCTAATAAAGAACGATCTCAGGAAGAGTTTTTCCACACCTTCAACGCCC
+TGCTGGAAGGTAATCAACAGATCATTCTCACCTCGGATCGCTATCCGAAAGAGATCAACGGCGTTGAGGA
+TCGTTTGAAATCCCGCTTCGGTTGGGGACTGACTGTGGCGATCGAACCGCCAGAGCTGGAAACCCGTGTG
+GCGATCCTGATGAAAAAGGCCGACGAAAACGACATTCGTTTGCCGGGCGAAGTGGCGTTCTTTATCGCCA
+AGCGTCTACGATCTAACGTACGTGAGCTGGAAGGGGCGCTGAACCGCGTCATTGCCAATGCCAACTTTAC
+CGGACGGGCGATCACCATCGACTTCGTGCGTGAGGCGCTGCGCGACTTGCTGGCATTGCAGGAAAAACTG
+GTCACCATCGACAATATTCAGAAGACGGTGGCGGAGTACTACAAGATCAAAGTCGCGGATCTCCTTTCCA
+AGCGTCGATCCCGCTCGGTGGCGCGTCCGCGCCAGATGGCGATGGCGCTGGCGAAAGAGCTGACTAACCA
+CAGTCTGCCGGAGATTGGCGATGCGTTTGGTGGCCGTGACCACACGACGGTGCTTCATGCCTGCCGTAAG
+ATCGAGCAGTTGCGTGAAGAGAGCCACGATATCAAAGAAGATTTTTCAAATTTAATCAGAACATTGTCAT
+CGTAA'''
+
+    black_dog = '''Hey hey mama said the way you move
+Gonna make you sweat, gonna make you groove
+Ah, ah, child, way you shake that thing
+Gonna make you burn, gonna make you sting.
+Hey hey baby when you walk that way
+Watch your honey drip, can't keep away
+Oh yeah, oh yeah, oh, ah, ah
+Oh yeah, oh yeah, oh, ah, ah.
+I gotta roll, can't stand still
+Got a flamin' heart, can't get my fill
+Eyes that shine, burnin' red
+Dreams of you all through my head
+Ah ah, ah ah, ah ah, ah ah, ah ah, ah ah, ahhh
+Hey, baby, whoa baby, pretty baby
+Darlin' makes 'em do me now
+Hey, baby, oh baby, pretty baby
+Move me like you're doin' now
+Didn't take too long 'fore I found out
+What people mean by down and out
+Spent my money, took my car
+Started tellin' her friends she gonna be a star
+I don't know, but I been told
+A big-legged woman ain't got no soul
+Oh yeah, oh yeah, ah, ah, ah
+Oh yeah, oh yeah, ah, ah, ah
+All I ask for when I pray
+A steady rollin' woman won't come my way
+Need a woman gonna hold my hand
+Tell me no lies, make me a happy man
+Ah ah, ah ah, ah ah, ah ah, ah ah, ah ah, ahhh.
+Ah, yeah!'''
 
 
-    kmer = KmerSet(text=text)
+
+    kmer = KmerSet(text=black_dog)
     print("original text\n", kmer.text)
     textlen = kmer.clean_text()
     print("\ncleaned text\n", kmer.text)
     print("\n{} letters".format(textlen))
-    kmer.from_text(5)
+    kmer.from_text(8)
 
     kmer.link()
     kset = kmer.set
@@ -156,15 +210,15 @@ if __name__ == '__main__':
     # g.vs["label"] = g.vs["name"]
     print(g.get_edgelist())
 
-    h = g.layout_kamada_kawai(maxiter=50, kkconst=5)
-    # h = g.layout_fruchterman_reingold(niter=50000, start_temp=1000)
+    # h = g.layout_kamada_kawai(maxiter=50, kkconst=5)
+    h = g.layout_fruchterman_reingold(niter=50000, start_temp=1000)
     # h = g.layout_drl()
     # h = g.layout_lgl(maxdelta=75, repulserad=3375000, area=22500, coolexp=1.3, maxiter=5000)
     # h = g.layout_graphopt(niter=10000, node_charge=0.0001, spring_length=10, spring_constant=0.5)
     # h = g.layout_circle()
     # h = g.layout_davidson_harel(maxiter=100, fineiter=50, weight_node_dist=1, weight_border=0, weight_edge_lengths=0.2,
     #                             weight_edge_crossings=2, weight_node_edge_dist=2, cool_fact=0.99)
-    igraph.plot(g, layout=h, bbox=(1000,1000), margin=250)
+    igraph.plot(g, layout=h, bbox=(2000,2000), margin=400)
 
 
     exit(0)
