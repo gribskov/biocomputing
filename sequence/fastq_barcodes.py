@@ -17,13 +17,15 @@ if __name__ == '__main__':
     suffix = '.fastq'
 
     target = sys.argv[1]
-    if not target.endswith('/'):
-        target += '/'
+    #if not target.endswith('/'):
+    #    target += '/'
     target += f'*{suffix}'
+    print(f'target:{target}')
 
-    codes = {}
-    counts = {}
+    best = {}
     for fastqfile in glob.glob(target):
+        codes = {}
+        counts = {}
         print(f'{fastqfile}')
         fastq = Fastq(fastqfile)
 
@@ -36,9 +38,10 @@ if __name__ == '__main__':
             spot, codestring = fastq.id.split()
 
             barcodefields = codestring.split(':')
-            barcode = barcodefields[3].replace('+', '')
-            print(f'{barcode}', end='\t')
-            print(f'{fastq.id}\t{sample}')
+            #barcode = barcodefields[3].replace('+', '')
+            barcode = barcodefields[3]
+            #print(f'{barcode}', end='\t')
+            #print(f'{fastq.id}\t{sample}')
 
             if sample in codes:
                 if barcode not in codes[sample]:
@@ -50,9 +53,17 @@ if __name__ == '__main__':
                 codes[sample] = [barcode]
                 counts[sample] = {barcode:1}
 
-    for sample in codes:
-        print(f'{sample}')
-        for barcode in codes[sample]:
-            print(f'\t{barcode}\t{counts[sample][barcode]}')
+        for sample in codes:
+            first = True
+            for barcode in sorted(codes[sample], key=lambda x:counts[sample][x], reverse=True):
+                if first:
+                    first = False
+                    counts_sum = 0
+                    for b in counts[sample]:
+                        counts_sum += counts[sample][b]
+                    best[sample] = counts[sample][barcode] / counts_sum
+                    print(f'sample\t{sample}\t{barcode}\t{best[sample]:.3f}')
+                print(f'\t{barcode}\t{counts[sample][barcode]}\t{counts[sample][barcode]/counts_sum:.3g}')
 
     exit(0)
+
