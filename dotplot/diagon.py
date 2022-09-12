@@ -52,8 +52,8 @@ statedefault = {'seq': [{'fasta': None, 'status': 'next'},
                            'mode': 'dot',
                            'random': 'True',
                            'cmp': 'identity',
-                           'width': 'True',
-                           'color': 'True',
+                           'width': 1,
+                           'color': 1,
                            'window': 20,
                            'threshold': 12,
                            'seqtype': 'DNA',
@@ -173,6 +173,8 @@ def dotplot():
     fasta2 = state['seq'][1]['fasta']
 
     match = Diagonal()
+    color = int(p['color'])
+    width = int(p['width'])
     match.mindotsize = int(p['mindotsize'])
     match.maxdotsize = int(p['maxdotsize'])
 
@@ -196,7 +198,7 @@ def dotplot():
     match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
     if mode == 'line':
         match.addSegment('dots')
-    match.bdot('dots', 'main', width=p['width'] == 'True', color=p['color'] == 'True',
+    match.bdot('dots', 'main', width=width, color=color,
                mode=p['mode'])
 
     if plottype == "forward_backward":
@@ -209,7 +211,7 @@ def dotplot():
         if mode == 'line':
             match.addSegment('dots')
         match.bdot('dots', 'main', set_colormap=False,
-                   width=p['width'] == 'True', color=p['color'] == 'True', mode=p['mode'])
+                   width=width, color=color, mode=p['mode'])
 
     # score and run distributions
     match.sortFrame('scoredist', 'score')

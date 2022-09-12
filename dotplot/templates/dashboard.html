@@ -53,8 +53,8 @@
             <input type="radio" name="plottype" value="forward_backward" {% if state.params.plottype == 'forward_backward' %}checked{% endif %}/> Forward + Backward plot
         {% endif %}
 
-        <h2>Scoring tables for {{state.seqtype}}</h2>
-        {% for table in state[state.seqtype] %}
+        <h2>Scoring tables for {{state.params.seqtype}}</h2>
+        {% for table in state[state.params.seqtype] %}
             <input type="radio" name="cmp" value="{{table}}"
                 {% if state.params.cmp == table %} checked {% endif %} > {{table}}<br/>
         {% endfor %}
@@ -79,8 +79,8 @@
 
             <h3> Advanced graphics parameters</h3>
             <input type="submit" formaction={{url_for("advanced", _anchor="advanced")}} value="Hide"> advanced parameters<br/><br/>
-            <input type="radio" name="width" value=1 {% if state.params.width == 'True' %} checked{% endif %}> Use size-based score cueing<br/>
-            <input type="radio" name="width" value=0 {% if state.params.width == 'False' %} checked{% endif %}> Do not use size-based score cueing<br/><br/>
+            <input type="radio" name="width" value=1 {% if state.params.width %} checked{% endif %}> Use size-based score cueing<br/>
+            <input type="radio" name="width" value=0 {% if state.params.width %} checked{% endif %}> Do not use size-based score cueing<br/><br/>
 
             <input type="text"  size=1 id="mindotsize" name="mindotsize"
                                  pattern="\d*" min="1" value={{state.params.mindotsize}}> Minimum dot/line size (px) <br/>

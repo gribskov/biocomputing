@@ -16,13 +16,33 @@ import textwrap as _textwrap
 
 
 class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter):
-    def _split_lines(self, text, width):
+    '''=============================================================================================
+    Custom formatter for command line argument help
+    ============================================================================================='''
+
+    def _split_lines(self, text, width=60):
+        '''-----------------------------------------------------------------------------------------
+        Gracefully split lines in command line help. lines are split at 60 characters by default
+
+        :param text: str, text to split
+        :param width: int, width to split at
+        :return:
+        -----------------------------------------------------------------------------------------'''
         text = self._whitespace_matcher.sub(' ', text).strip()
         self._max_help_position = 30
-        return _textwrap.wrap(text, 60)
+        return _textwrap.wrap(text, width)
+
+
+# end of class CustomFormatter
 
 
 def arguments_get():
+    '''---------------------------------------------------------------------------------------------
+    Set up command line arguments, read from command line, and store in argparse.ArgumentParser
+    object, cl
+
+    :return: argparse.ArgumentParser object
+    ---------------------------------------------------------------------------------------------'''
     minlen_default = 80
     loglevel_default = 1
     batch_limit_default = 20
@@ -39,53 +59,107 @@ def arguments_get():
                     help='Seconds to wait between polling batch')
     cl.add_argument('--loglevel', type=int, default=loglevel_default,
                     help='detail for reporting REST queries')
-    # poll_count should be zero so each job is polled only once per batch processing loop
-    # if poll_count = 1, poll time is not used
-    # cl.add_argument('poll_time', type=int, default=20,_default, help='Seconds to wait between polling a single job')
-    # cl.add_argument('poll_count', type=int, default=1,_default, help='Number of times to poll each job per batch loop')
     cl.add_argument('fasta_in', type=argparse.FileType('r'))
 
-    return cl.parse_args()
+    return cl.parse_args()  # parse_args  reads the command line
 
 
-def batch_process(jobs_pending, n_sequence, batch_limit, batch_wait):
+def poll_all(joblist, poll_time=61, poll_max=50):
     """---------------------------------------------------------------------------------------------
-    Poll the submitted jobs until all have finished and return the output. Outputlist is empty if
-    1) the batch limit has not been reached
-    2) the output is empty (no hits)
+    Poll the jobs in the jobs_pending list until all have finished. Finished can be
+        1) reached maximum number of polling attempts
+        2) returned a status other than success or waiting
+        3) success
 
-    :param jobs_pending: list of Interpro objects
-    :param n_sequence: int, total number of sequences submitted
-    :param batch_limit: int, number of sequences per batch
-    :return: list of string, output
+    :param joblist: list of interproscan objects that have been submitted
+    :param poll_time: int, seconds to wait between polling
+    :param poll_max: int, maximum number of times to poll
+    :return: int, number of jobs in list
     ---------------------------------------------------------------------------------------------"""
-    if (n_sequence % batch_limit):
-        return []
 
-    # batch processing loop - wait for all jobs to finish
-    # jobs_pending is False when the maximum number of sequences have been submitted
-    outputlist = []
-    while jobs_pending:
-        # poll all pending jobs (ips.status includes poll_time seconds pause). Copy jobs that
-        # have not terminated into unfinished, and make this the new list of pending jobs for
-        # the next round
-        unfinished = []
-        time.sleep(batch_wait)
+    not_all_finished = True
+    n = 0
+    while not_all_finished:
+        n += 1
+        not_all_finished = False
+        time.sleep(poll_time)
 
-        for i in range(len(jobs_pending)):
-            ips = jobs_pending[i]
-            if ips.status():
-                ips.result()
-                if ips.content:
-                    # content may be empty if there are no hits
-                    outputlist += ips.content.split('\n')
+        for ips in joblist:
+            if ips.status() == 'FINISHED':
+                joblist[ips] = 'finished'
 
             else:
-                unfinished.append(jobs_pending[i])
+                not_all_finished = True
 
-        jobs_pending = unfinished.copy()
+    return n
 
-    return outputlist
+
+def reformat(job):
+    """---------------------------------------------------------------------------------------------
+    Return a text string with the result of an interproscan job processed with ips.parse_json()
+    An example of a callback function for parsing output
+
+    :param job: interpro object, should be a finished job
+    :return: string
+    ---------------------------------------------------------------------------------------------"""
+    str = ''
+
+    parsed = job.parse_json()
+    motifs = parsed['motifs']
+    go = parsed['go']
+    path = parsed['pathway']
+
+    for m in motifs:
+        str += '{}\t{}\t{}\n'.format(m['ipr_accession'],
+                                     m['src_accession'],
+                                     m['description'])
+    for g in go:
+        str += '{}\t{}\t{}\t{}\n'.format(g, go[g]['name'], go[g]['category'], go[g]['source'])
+
+    for p in path:
+        str += '{}\t{}\t{}\n'.format(p, path[p]['name'], path[p]['source'])
+
+    return str
+
+
+def save_finished(joblist, reformat=None, fh=None, remove=True):
+    """---------------------------------------------------------------------------------------------
+    Return the output of all finished jobs as a string.
+    Reformat is a callback function used to reformat the output.  for instance, interpro.parse_json
+    If fh is True, output is written to the filehandle after reformatting.
+    If remove is true, jobs are delete from the list after saving
+
+    :param joblist: dict, ips object is key, staus is value
+    :param reformat: function, callback function for formatting job result, argument is ips object
+    :param fh: filehandle for writable file
+    :param remove: boolean, remove finished jobs after saving
+    :return: string, text of job content
+    ---------------------------------------------------------------------------------------------"""
+    delete_list = []
+    for job in joblist:
+        if joblist[job] != 'finished':
+            # skip unfinished jobs
+            continue
+
+        joblist[job] = job.result()  # retrieve the completed job
+        # text = job.content
+        if reformat:
+            text = reformat(job)
+
+        if fh:
+            if text:
+                fh.write('!{} - {}s\n'.format(job.jobname, job.jobid))
+                fh.write('{}\n'.format(text))
+            else:
+                fh.write('!{} - {} no hits\n'.format(job.jobname, job.jobid))
+
+        if remove:
+            delete_list.append(job)
+
+    for job in delete_list:
+        del joblist[job]
+
+    return text
 
 
 # ==================================================================================================
@@ -98,42 +172,54 @@ args.logfile.write('\tinput ORF file: {}\n'.format(args.fasta_in.name))
 args.logfile.write('\tminimum ORF length: {}\n\n'.format(args.minlen))
 
 fasta = Fasta(fh=args.fasta_in)
-n_sequence = 0
 
-job_list = {}
-jobs_pending = []
-outputlist = []
+# The job list keeps track of the ips object that have been created and their current status
+# the joblist is a dictionary where the ips object is the key and the value is a status string
+joblist = {}
+
+# create a template for the jobs.  The template is an interpro object with the metadata added
+template = Interpro(loglevel=1)
+template.log_fh = args.logfile
+template.email = 'gribskov@purdue.edu'
+template.application_select(['Pfam', 'Panther', 'SignalP'])
+template.output_select = 'json'
+template.poll_time = 60
+template.poll_max = 100
+
+sequence_limit = 20
+batch_limit = 5
+n_sequence = 0
+nskip = 60
+s = 0
 while fasta.next():
-    if fasta.length() >= args.minlen:
-        n_sequence += 1
-        if n_sequence < 50:
-            continue
-        ips = Interpro(loglevel=1, poll_time=5, poll_count=1)
-        ips.log_fh = args.logfile
-        ips.email = 'gribskov@purdue.edu'
-        ips.title = 'ORF{}'.format(n_sequence)
-        ips.sequence = fasta.format(linelen=60)
-        if not ips.run():
-            sys.stderr.write('Error - sequence={}\n'.format(fasta.id),flush=True)
-            continue
-        jobs_pending.append(ips)
-    else:
+    while s < nskip:
+        s += 1
+        fasta.next()
+
+    if fasta.length() < args.minlen: continue  # skip short sequences
+    if n_sequence >= sequence_limit: break  # run up to sequence_limit queries
+    n_sequence += 1
+
+    # copy the template and add the sequence information
+    ips = template.clone()
+    ips.sequence = fasta.translate().seq.rstrip('*').format(linelen=60)
+    ips.jobname = fasta.id
+    ips.title = 'ORF{}'.format(n_sequence)
+    joblist[ips] = 'new'
+
+    # submit job
+    if ips.run():
+        joblist[ips] = 'submitted'
+
+    if n_sequence % batch_limit and n_sequence < sequence_limit:
+        # keep submitting until batch_limit is reached
         continue
 
-    outputlist = batch_process(jobs_pending, n_sequence, batch_limit, batch_wait)
-    for line in outputlist:
-        sys.stdout.write('{}\n'.format(line))
-        jobs_pending = []
-
-    # if n_sequence > 50:
-    #     break
+    # polling - you only reach here if either the batch_limit or n_sequence limit has been reached
+    poll_all(joblist, template.poll_time, template.poll_max)
+    save_finished(joblist, reformat, sys.stdout, True)
 
 # end of loop over all sequences
-
-outputlist = batch_process(jobs_pending, n_sequence, 1, batch_wait)
-for line in outputlist:
-    sys.stdout.write('{}\n'.format(line))
-    jobs_pending = []
 
 args.logfile.close()
 exit(0)

@@ -218,7 +218,7 @@ class Score:
         try:
             fh = open(filename, 'r')
         except (OSError, IOError):
-            print('Score::open - file open error ({})', format(filename))
+            sys.stderr.write('Score::open - file open error ({})\n'.format(filename))
 
         return fh
 

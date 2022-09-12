@@ -17,7 +17,7 @@ class KmerSet():
         -----------------------------------------------------------------------------------------"""
         self.text = text
         self.reads = []
-        k = 0
+        self.k = 0
         self.set = {}
 
     def sample_reads(self, readlen, coverage):
@@ -147,7 +147,10 @@ class KmerSet():
         set = self.set
         words = ''
         for kmer in sorted(set):
-            words += '{}\t{}\n'.format(kmer, set[kmer]['count'])
+            words += '{}\t{}'.format(kmer, set[kmer]['count'])
+            if 'label' in set[kmer]:
+                words += f'\t{set[kmer]["label"]}'
+            words += '\n'
 
         return words
 

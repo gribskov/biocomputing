@@ -61,6 +61,7 @@ class Fasta:
             fasta.fh = fh
         elif filename:
             fasta.open(filename)
+            fasta.read()
 
     def open(fasta, filename):
         """-----------------------------------------------------------------------------------------
@@ -200,16 +201,19 @@ class Fasta:
             trim = re.compile( 'len=\d+ ' )
             doc = fasta.trimDocAfterMatch( trim )
         -----------------------------------------------------------------------------------------"""
-        fasta.doc = target.sub('', fasta.doc)
+        if target:
+            # skip if no regex is given
+            fasta.doc = target.sub('', fasta.doc)
 
         return fasta.doc
 
-    def reverseComplement(fasta):
+    @staticmethod
+    def reverseComplement(seq):
         """-----------------------------------------------------------------------------------------
         Return the sequence converted to reverse complement
         :return: string
         -----------------------------------------------------------------------------------------"""
-        seq = fasta.seq.translate(Fasta.complement)
+        seq = seq.translate(Fasta.complement)
 
         return seq[::-1]
 
@@ -239,10 +243,9 @@ class Fasta:
         trans.id = fasta.id + '_{}'.format(rf)
         trans.doc = fasta.id + ' strand={} frame={}'.format(direction, frame)
 
-        if direction == '+':
-            seq = fasta.seq
-        else:
-            seq = fasta.reverseComplement()
+        seq = fasta.seq
+        if direction == '-':
+            seq = Fasta.reverseComplement(seq)
 
         pos = frame
         while pos < len(seq) - 2:
@@ -253,6 +256,26 @@ class Fasta:
             pos += 3
 
         return trans
+
+    def translate_all(self):
+        """-----------------------------------------------------------------------------------------
+        Return all six translated reading frames as a list of Fasta.  The starting positions of
+        the reading frames are:
+        0   0
+        1   1
+        2   2
+        3 len-1
+        4 len-2
+        5 len-3
+        :return: list of Fasta, the six reading frames translated
+        -----------------------------------------------------------------------------------------"""
+        i = 0
+        rf = []
+        for direction in ('+', '-'):
+            for frame in range(3):
+                rf.append = self.translate(frame, direction)
+
+        return rf
 
     def composition(fasta, uppercase=False):
         """-----------------------------------------------------------------------------------------

@@ -609,7 +609,7 @@ class Diagonal(Score, Fasta):
         self.frame[frame] = sorted_frame
         return True
 
-    def bdot(self, dataname, figurename, width=True, color=True, mode='dot', set_colormap=True):
+    def bdot(self, dataname, figurename, width=1, color=1, mode='dot', set_colormap=True):
         """-----------------------------------------------------------------------------------------
         Bokeh plot of dots in the main panel, and colorbar in the legend panel
 
@@ -637,7 +637,7 @@ class Diagonal(Score, Fasta):
         else:
             data['size'] = [self.mindotsize for _ in range(len(data['score']))]
 
-        if color:
+        if color == 1:
             pass
         else:
             data['score'] = [scoremax for _ in range(len(data['score']))]

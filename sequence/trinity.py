@@ -27,9 +27,9 @@ class Trinity(Fasta):
         self.len = 0
         self.path = []
         self.cluster = ''
-        self.component = ''
-        self.gene = ''
-        self.isoform = ''
+        self.component = 0
+        self.gene = 0
+        self.isoform = 0
         self.shortid = ''
 
         return None
@@ -39,12 +39,12 @@ class Trinity(Fasta):
         get the sequence length from the documentation
         :return: length fread from length field in documentation
         -----------------------------------------------------------------------------------------------------------------"""
-        self.len = lenre.match(self.doc).group(1)
+        self.len = int(lenre.match(self.doc).group(1))
         return self.len
 
     def getPath(self):
         """-----------------------------------------------------------------------------------------------------------------
-        The path describes how the predicted trasncript is built from segments
+        The path describes how the predicted transcript is built from segments
         :return: list of path components from documentation
         -----------------------------------------------------------------------------------------------------------------"""
         path = pathre.match(self.doc).group(1)
@@ -62,16 +62,16 @@ class Trinity(Fasta):
          ----------------------------------------------------------------------------------------------------------------"""
         cluster, component, gene, isoform = idre.match(self.id).groups()
         self.cluster   = cluster
-        self.component = component
-        self.gene      = gene
-        self.isoform   = isoform
+        self.component = int(component)
+        self.gene      = int(gene)
+        self.isoform   = int(isoform)
         self.shortid   = '{cl}.{co}.{g}.{i}'.format(cl=cluster, co=component, g=gene, i=isoform)
 
         return self.shortid
 
     def next(self):
         """-------------------------------------------------------------------------------------------------------------
-        Overrides fasta method to add aditional attributes of Trinity class.
+        Overrides fasta method to add additional attributes of Trinity class.
         :return: True/False
         -------------------------------------------------------------------------------------------------------------"""
         if super().next():
