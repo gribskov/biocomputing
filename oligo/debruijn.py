@@ -179,20 +179,71 @@ if __name__ == '__main__':
 
     text1 = 'To be, or not to be--that is the question: Whether tis nobler in the mind to suffer'
     text2 = 'A A T G C G C T A C G T A G G G T A A T A T A A G A C C A'
+    champagne_problems = """You booked the night train for a reason
+So you could sit there in this hurt
+Bustling crowds or silent sleepers
+You're not sure which is worse
+Because I dropped your hand while dancing
+Left you out there standing
+Crestfallen on the landing
+Champagne problems
+Your mom's ring in your pocket
+My picture in your wallet
+Your heart was glass, I dropped it
+Champagne problems
+You told your family for a reason
+You couldn't keep it in
+Your sister splashed out on the bottle
+Now no one's celebrating
+Dom Perignon, you brought it
+No crowd of friends applauded
+Your hometown skeptics called it
+Champagne problems
+You had a speech, you're speechless
+Love slipped beyond your reaches
+And I couldn't give a reason
+Champagne problems"""
+# Your Midas touch on the Chevy door
+# November flush and your flannel cure
+# "This dorm was once a madhouse"
+# I made a joke, "Well, it's made for me"
+# How evergreen, our group of friends
+# Don't think we'll say that word again
+# And soon they'll have the nerve to deck the halls
+# That we once walked through
+# One for the money, two for the show
+# I never was ready so I watch you go
+# Sometimes you just don't know the answer
+# 'Til someone's on their knees and asks you
+# "She would've made such a lovely bride
+# What a shame she's fucked in the head," they said
+# But you'll find the real thing instead
+# She'll patch up your tapestry that I shred
+# ’tis the damn season
+# And hold your hand while dancing
+# Never leave you standing
+# Crestfallen on the landing
+# With champagne problems
+# Your mom's ring in your pocket
+# Her picture in your wallet
+# You won't remember all my
+# Champagne problems
+# You won't remember all my
+# Champagne problems"""
 
 
-    kmer = KmerSet(text=text)
+    kmer = KmerSet(text=champagne_problems)
     print("original text\n", kmer.text)
     textlen = kmer.clean_text()
     print("\ncleaned text\n", kmer.text)
     print("\n{} letters".format(textlen))
 
-    actual_coverage = kmer.sample_reads(8, 3)
+    actual_coverage = kmer.sample_reads(16, 3)
     print("coverage: {:.2f}".format(actual_coverage))
     for read in sorted(kmer.reads, key=lambda k: kmer.text.index(k)):
         print("\t {}".format(read))
 
-    k = 4
+    k = 6
     # kmer.from_text_random(k, int(coverage * textlen / k))
     kmer.from_text(k)
     print("\nkmer words")
