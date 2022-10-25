@@ -109,7 +109,7 @@ class Blast(object):
         -----------------------------------------------------------------------------------------"""
         line = '#'
         while line.startswith('#'):
-            #TODO needs to be improved to record the names of sequences with no hits
+            # TODO needs to be improved to record the names of sequences with no hits
             line = self.fh.readline()
 
         if line:
@@ -134,19 +134,29 @@ class Blast(object):
             # end of file
             return False
 
-    def setFormat(self, fmt):
+    def setFormat(self, fmt='', preset='diamond_doc'):
         """-----------------------------------------------------------------------------------------
         change the fields in the read format. fields is a list of the attributes available for this
         Blast search.  A instance attribute is created for each known attribute.
+
+        diamond_doc format = 'qid qlen qstart qend sid slen start send allen pid score evalue doc'
+                             for adding annotation to transcripts
+
         usage
             nfields = blast.setFormat('qid sid qcov pid len evalue')
+            nfields = blast.setFormat(preset='diamond_doc')
         -----------------------------------------------------------------------------------------"""
         # first delete all the existing fields
         for attribute in self.fields:
             del self.__dict__[attribute]
 
         # now create the new fields
-        self.format = fmt
+        if fmt:
+            self.format = fmt
+
+        else:
+            self.fmt = preset
+
         self.fields = self.format.split()
         for attribute in self.fields:
             self.__dict__[attribute] = None
