@@ -23,6 +23,10 @@ class Blast(object):
 
     or blast.read()     # read a line using the selected internal read function
 
+    TODO i think it might be better to store the column data as a simple dictionary, then it would
+    be possible to handle it as a single variable instead of each column as a instance variable
+
+
     ============================================================================================="""
 
     def __init__(self, file=''):
@@ -45,8 +49,8 @@ class Blast(object):
         self.line = ''
         self.read = self.readTabular
         self.fields = []
-        self.format = \
-            'qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore'
+        self.format = ''
+        self.setFormat(preset='blast_fmt8')
 
         # if file is provided, open it
         if file:
@@ -139,13 +143,18 @@ class Blast(object):
         change the fields in the read format. fields is a list of the attributes available for this
         Blast search.  A instance attribute is created for each known attribute.
 
-        diamond_doc format = 'qid qlen qstart qend sid slen start send allen pid score evalue doc'
-                             for adding annotation to transcripts
+        preset formats:
+        diamond_doc = 'qid qlen qstart qend sid slen start send allen pid score evalue doc'
+                             for adding annotation to transcripts, custom format
+        blast_fmt8 = 'qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore'
 
         usage
             nfields = blast.setFormat('qid sid qcov pid len evalue')
             nfields = blast.setFormat(preset='diamond_doc')
         -----------------------------------------------------------------------------------------"""
+        diamond_doc = 'qid qlen qstart qend sid slen sstart send allen pid score evalue doc'
+        blast_fmt8 = 'qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore'
+
         # first delete all the existing fields
         for attribute in self.fields:
             del self.__dict__[attribute]
@@ -155,7 +164,13 @@ class Blast(object):
             self.format = fmt
 
         else:
-            self.fmt = preset
+            if preset is 'diamond_doc':
+                self.format = diamond_doc
+            elif preset is 'blast_fmt8':
+                self.format = blast_fmt8
+            else:
+                sys.stderr.write(f'blast:setFormat unknown preset format ({preset}) using blast_fmt8')
+                self.format = blast_fmt8
 
         self.fields = self.format.split()
         for attribute in self.fields:
