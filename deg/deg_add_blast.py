@@ -1,13 +1,37 @@
 """-------------------------------------------------------------------------------------------------
 deg_add_blast
 
-Add blast search information to a tab delimited gene expression table.  The first column of the the
+Add blast search information to a tab delimited gene expression table.  The first column of the
 deg table must match the query name of the blast search
+
+usage
+
+deg_add_blast.py <list file> <blast_search>
 
 3 December 2018     Michael Gribskov
 -------------------------------------------------------------------------------------------------"""
 import sys
 from blast.blast import Blast
+
+
+def match(deginfo, blast, level=None, filter="TRINITY_"):
+    """-------------------------------------------------------------------------------------------------
+    match the query ID with the names in the DEG file
+    -------------------------------------------------------------------------------------------------"""
+    qid = blast.qid.replace(filter, '')
+    if level is None:
+        # assume names match
+        matchname = qid
+    else:
+        # assume a trinity name
+        field = qid.split('_')
+        matchname = '_'.join(field[:level + 1])
+        blast.matchname = matchname
+
+    if matchname in deginfo:
+        return True
+    return False
+
 
 # ==================================================================================================
 if __name__ == '__main__':
@@ -24,15 +48,14 @@ if __name__ == '__main__':
 
     try:
         out = open(outfile, 'w')
-    except:
+    except OSError:
         sys.stderr.write('Error opening output file ({})\n'.format(outfile))
+        exit(1)
 
     # open blastfile right away in case of error
     blast = Blast()
     blast.new(blastfile)
-    # format (diamond)
-    # nfields = blast.setFormat('qid qlen qbegin qend sid slen sbegin send len pid evalue doc')
-    nfields = blast.setFormat('qid qlen qbegin qend slen sbegin send length pident evalue doc')
+    nfields = blast.setFormat(preset='diamond_doc')
 
     # read in and store DEG file
     try:
@@ -56,45 +79,72 @@ if __name__ == '__main__':
 
     nblast = 0
     nfound = 0
-    top = 1
-    blast.read()
-    query = blast.qid
-    info = '\n{:>6d}{:>6d}{:>6d}{:>6d}{:>8.1g} {}'.format(
-        int(blast.qbegin), int(blast.qend), int(blast.sbegin),
-        int(blast.send), float(blast.evalue), blast.doc)
+    top = []
+    matched_transcripts = []
 
     while blast.next():
+        nblast += 1
 
-        if blast.qid == query:
+        if match(deginfo, blast, level=1):
             # another line of the current query
-            top += 1
-
-        else:
-            # a new query, save the old query top lines
-            if query in deginfo:
+            if len(top) == 0:
+                # start a new list of hits
                 nfound += 1
+                query = blast.matchname
+                matched_transcripts.append(query)
 
-                out.write('{}\t{}\t"{}"\n'.format(query, deginfo[query], info.lstrip('\n')))
-            nblast += 1
-            query = blast.qid
-            # info = '{}\t{}\t{}\t{}\t{}\t{}'.format(blast.qbegin, blast.qend, blast.sbegin,
-            #                                        blast.send,
-            #                                        blast.evalue, blast.doc)
+            if blast.matchname == query:
+                # another match to the current query, add to list of top hits for this query
+                top.append({'qid':    blast.qid, 'qlen': blast.qlen, 'qstart': blast.qstart, 'qend': blast.qend,
+                            'sid':    blast.sid, 'slen': blast.slen, 'sstart': blast.sstart, 'send': blast.send,
+                            'evalue': blast.evalue, 'doc': blast.doc.replace('UniRef50_', '').rstrip()})
 
-            top = 1
-            info = ''
+            else:
+                # a different query, write out the first topmax results
+                top = sorted(top, key=lambda i: float(i['evalue']))[:topmax]
+                out.write(f'{query}\t{deginfo[query]}\t')
+                s = ''
+                indent = '\t' * 12
+                for n in range(len(top)):
+                    t = top[n]
+                    s += f"q:{t['qlen']},{t['qstart']},{t['qend']}\t"
+                    s += f"s:{t['slen']},{t['sstart']},{t['send']}\t"
+                    s += f"{t['evalue']} {t['doc']}"
 
-        if top <= topmax:
-            info += '\n{:>6d}{:>6d}{:>6d}{:>6d}{:>8.1g} {}'.format(
-                int(blast.qbegin), int(blast.qend), int(blast.sbegin),
-                int(blast.send), float(blast.evalue), blast.doc)
-        # if nfound > 5:
-        #     break
+                    n += 1
+                    if n < len(top):
+                        # s += f'\n{indent}'        # for multiple lines
+                        s += '\t'
 
-    if query in deginfo:
+                out.write(f'{s}\n')
+                top = []
+
+    if top:
         nfound += 1
-        out.write('{}\t{}\t"{}"\n'.format(query, deginfo[query], info.lstrip('\n')))
+        top = sorted(top, key=lambda i: float(i['evalue']))[:topmax]
+        out.write(f'{query}\t{deginfo[query]}\t')
+        s = ''
+        indent = '\t' * 12
+        for n in range(len(top)):
+            t = top[n]
+            s += f"q:{t['qlen']},{t['qstart']},{t['qend']}\t"
+            s += f"s:{t['slen']},{t['sstart']},{t['send']}\t"
+            s += f"{t['evalue']} {t['doc']}"
+            if n < len(top):
+                # s += f'\n{indent}'        # for multiple lines
+                s += '\t'
 
-    sys.stderr.write('{} genes found in blast result {}\n'.format(nfound, blastfile))
+        out.write(f'{s}\n')
 
-exit(0)
+    # unmatched transcripts
+    for id in deginfo:
+        if id in matched_transcripts:
+            continue
+
+        out.write(f'{id}\t{deginfo[id]}\n')
+
+    out.close()
+    sys.stderr.write(f'{nblast} blast hits examined in {blastfile}\n')
+    sys.stderr.write(f'{nfound} genes found')
+
+    exit(0)
