@@ -179,9 +179,16 @@ if __name__ == '__main__':
 
     text1 = 'To be, or not to be--that is the question: Whether tis nobler in the mind to suffer'
     text2 = 'A A T G C G C T A C G T A G G G T A A T A T A A G A C C A'
+    counting_stars = """
+    Lately, I've been, I've been losing sleep
+Dreaming about the things that we could be
+But baby, I've been, I've been praying hard
+Said, "No more counting dollars, we'll be counting stars"
+Yeah, we'll be counting stars
+"""
+    example = 'hamlet said to be or not to be that is the question'
 
-
-    kmer = KmerSet(text=text)
+    kmer = KmerSet(text=example)
     print("original text\n", kmer.text)
     textlen = kmer.clean_text()
     print("\ncleaned text\n", kmer.text)
@@ -192,7 +199,7 @@ if __name__ == '__main__':
     for read in sorted(kmer.reads, key=lambda k: kmer.text.index(k)):
         print("\t {}".format(read))
 
-    k = 4
+    k = 5
     # kmer.from_text_random(k, int(coverage * textlen / k))
     kmer.from_text(k)
     print("\nkmer words")
@@ -219,10 +226,10 @@ if __name__ == '__main__':
     while len(used) < len(set):
 
         indent = 0
-        for start in sorted(set, key=lambda k: (len(set[k]['before']),set[k]['count'])):
+        for start in sorted(set, key=lambda k: (len(set[k]['before']), set[k]['count'])):
             if start in used:
                 continue
-            stack.append([start,indent])
+            stack.append([start, indent])
             break
 
         indent_current = 0
@@ -257,6 +264,5 @@ if __name__ == '__main__':
 
             for k in set[kmer]['after']:
                 stack.append([k, indent])
-
 
     exit(0)
