@@ -388,7 +388,7 @@ I really don't know clouds at all'''
     Lately, I've been, I've been losing sleep
 Dreaming about the things that we could be
 But baby, I've been, I've been praying hard
-Said, "No more counting dollars, we'll be counting stars"
+Said, "No more counting dollars, we'll be counting stars
 Yeah, we'll be counting stars"""
 # I see this life, like a swinging vine
 # Swing my heart across the line

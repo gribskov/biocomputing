@@ -83,21 +83,38 @@ if __name__ == '__main__':
 
     print(f"both: {len(present['both'])}\tf1 only: {len(present['f1only'])}\tf2 only: {len(present['f2only'])}")
 
-    f1total_count = {k:0 for k in f1data[present['both'][0]]}
-    f2total_count = {k:0 for k in f1data[present['both'][0]]}
+    f1total_count = {k: 0 for k in f1data[present['both'][0]]}
+    f2total_count = {k: 0 for k in f1data[present['both'][0]]}
+    f1onlycount = {k: 0 for k in f1data[present['both'][0]]}
+    f2onlycount = {k: 0 for k in f1data[present['both'][0]]}
     for t in present['both']:
         for c in f1data[t]:
             f1total_count[c] += f1data[t][c]
             f2total_count[c] += f2data[t][c]
             try:
                 ratio = f1data[t][c] / f2data[t][c]
+                if ratio < 0.2 and f2data[t][c] > 10000:
+                    print(f'{t}:{c}\t{f1data[t][c]}\t{f2data[t][c]}\t{ratio}')
             except ZeroDivisionError:
                 ratio = 'NA'
-            print(f'{t}:{c}\t{f1data[t][c]}\t{f2data[t][c]}\t{ratio}')
+            # print(f'{t}:{c}\t{f1data[t][c]}\t{f2data[t][c]}\t{ratio}')
+
+    for t in present['f1only']:
+        for c in f1data[t]:
+            f1onlycount[c] += f1data[t][c]
+
+    for t in present['f2only']:
+        for c in f2data[t]:
+            f2onlycount[c] += f2data[t][c]
 
     for c in f1total_count:
-        print(f'{c}\t{f1total_count[c]}\t{f2total_count[c]}')
+        print(f'{c}\tf1 both: {f1total_count[c]}\tf1 only: {f1onlycount[c]}\t'
+              f'f1 total: {f1total_count[c] + f1onlycount[c]}\t', end='')
+        print(f'{c}\tf2 both: {f2total_count[c]}\tf2 only: {f2onlycount[c]}\t'
+              f'f2 total: {f2total_count[c] + f2onlycount[c]}')
 
-
+    print(f'counts f1: {f1len}\tf2: {f2len}')
+    # print(f'f1 only\t{f1onlycount}')
+    # print(f'f2 only\t\t{f2onlycount}')
 
     exit(0)
