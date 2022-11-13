@@ -82,6 +82,7 @@ if __name__ == '__main__':
     top = []
     matched_transcripts = []
 
+    out.write(header)
     while blast.next():
         nblast += 1
 
