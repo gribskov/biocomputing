@@ -164,9 +164,9 @@ class Blast(object):
             self.format = fmt
 
         else:
-            if preset is 'diamond_doc':
+            if preset == 'diamond_doc':
                 self.format = diamond_doc
-            elif preset is 'blast_fmt8':
+            elif preset == 'blast_fmt8':
                 self.format = blast_fmt8
             else:
                 sys.stderr.write(f'blast:setFormat unknown preset format ({preset}) using blast_fmt8')
