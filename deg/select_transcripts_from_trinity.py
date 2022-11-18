@@ -19,18 +19,26 @@ if __name__ == '__main__':
         outfile = sys.argv[4]
     else:
         outfile = 'selected.fa'
-        out = open(outfile, 'w')
+    out = open(outfile, 'w')
 
     # list of names, possibly at any level, cluster, component, gene, isoform
     sys.stderr.write(f'filtered gene file: {genefile}\n')
     gene = open(genefile, 'r')
 
     genes = []
-    # prefix = '>TRINITY_'
+    genecol = 1
+    prefix = 'TRINITY_'
     for line in gene:
         if not line:
             continue
-        genes.append(line.rstrip())
+
+        if line.find('\t') > -1:
+            name = line.split('\t')[genecol]
+            name = name.replace(prefix, '')
+        else:
+            name = line.rstrip().replace(prefix, '')
+
+        genes.append(name)
 
     gene.close()
     sys.stderr.write(f'genes found: {len(genes)}\n')
@@ -43,24 +51,31 @@ if __name__ == '__main__':
     rest = ''
     nout = 0
     found = []
+    splitlevel = 5
+    shortlevel = 3
+    ntranscript = 0
     for line in trinity:
         if line.startswith('>'):
             # beginning of sequence, check name
+            ntranscript += 1
             field = line.split('_')
-            name = '_'.join(field[1:split_level])
+            lfield = field[4].split(' ')
+            del field[4]
+            field += lfield
+            name = '_'.join(field[1:splitlevel])
             keep = name in genes
             if keep:
                 nout += 1
                 if name not in found:
                     found.append(name)
-                shortname = ' '.join(line.split(' ')[:2])
-                shortname = shortname.replace('>TRINITY_','')
-                out.write(f">{shortname}\n")
+
+                shortname = '_'.join(field[1:shortlevel])
+                out.write(f">{shortname} {name} {field[5]}\n")
                 # if not nout % 1000:
                 #     print('.', end='')
                 # if not nout % 100000:
                 #     print(f' {nout}')
-                sys.stderr.write(f'\r{nout}')
+                sys.stderr.write(f'\r{nout}/{ntranscript}')
         else:
             if keep:
                 out.write(line)
