@@ -142,19 +142,100 @@ class GOset():
 
         return sorted(go)
 
+
 # --------------------------------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
+    # read GO file based on blast comparison to TAIR
     gofile = sys.argv[1]
+    sys.stderr.write(f'reading GO assignments from {gofile}\n')
+
     go = GOset(gofile)
     go.column = {'source_id': 1, 'tair': 4}
-    tags = ['GO:']
     nlines = go.load()
     sys.stderr.write(f'processed {nlines} lines from {gofile}\n')
     sys.stderr.write(f'{len(go.term)} sequence IDs\n')
-
     golist = go.golist()
     sys.stderr.write(f'{len(golist)} unique GO terms\n')
+
+    # read go file based on interproscan
+    gofile = sys.argv[2]
+    sys.stderr.write(f'\nreading GO assignments from {gofile}\n')
+    goipr = GOset(gofile)
+    goipr.column = {'source_id': 0}
+    nlines = goipr.load()
+    sys.stderr.write(f'processed {nlines} lines from {gofile}\n')
+    sys.stderr.write(f'{len(goipr.term)} sequence IDs\n')
+    golist = goipr.golist()
+    sys.stderr.write(f'{len(golist)} unique GO terms\n')
+
+    # read in list of trinity names
+    trinity = []
+    seqfile = '../sequential/filtered.names.txt'
+    seq = open(seqfile, 'r')
+    for line in seq:
+        if not line:
+            continue
+        trinity.append(line.rstrip())
+    seq.close()
+
+    sys.stderr.write(f'\n{len(trinity)} sequences read from {seqfile}\n')
+
+    # read mapping between DM_1-3_516_R44_potato.v6.1 and trinity from blastx search
+    blastfile = 'best_blast_DM_1-3_516_R44_potato.v6.1.working_models.pep_1e-5.dmndblastx'
+    blast = open(blastfile, 'r')
+    dm2trinity = {}
+    blastn = 0
+    trinityn = 0
+    dupn = 0
+    for line in blast:
+        blastn += 1
+        field = line.split()
+        if field[0] not in trinity:
+            continue
+
+        trinityn += 1
+        if field[4] in dm2trinity:
+            dm2trinity[field[4]].append(field[0])
+            dupn += 1
+            sys.stderr.write(f'\t{field[4]} is duplicate {field[0]}\n')
+        else:
+            dm2trinity[field[4]] = [field[0]]
+
+    sys.stderr.write(f'{blastn} blast results processed\n')
+    sys.stderr.write(f'{trinityn} trinity genes found\n')
+    sys.stderr.write(f'{dupn} duplicates found\n')
+    sys.stderr.write(f'{len(dm2trinity)} unique dm genes\n')
+
+    # construct a new gene to ontology mapping indexed by trinity name
+    tgo = GOset()
+    trinity2dm = {}
+    for gene in trinity:
+        tgo.term[gene] = {'GO': []}
+        trinity2dm = []
+
+    for dm in dm2trinity:
+        for trinity in dm2trinity[dm]:
+            if dm in go.term:
+                golist = set(go.term[dm]['GO'])
+            if dm in goipr.term:
+                golist.update(goipr.term[dm]['GO'])
+        tgo.term[trinity]['GO'] = list(golist)
+
+    # make sure all terms include the biological process, molecular function and cellular component roots
+    # so that the terms will never show up as significant
+    for trinity in tgo.term:
+        for go in ('GO:0008150', 'GO:0003674', 'GO:0005575'):
+            if go not in tgo.term[trinity]['GO']:
+                tgo.term[trinity]['GO'].append(go)
+
+    # write out as a read mapping: tab delimited gene followed by list of GO terms
+    tab = '\t'
+    for trinity in tgo.term:
+        sys.stdout.write(f'{trinity}')
+        for go in tgo.term[trinity]['GO']:
+            sys.stdout.write(f'{tab}{go}')
+        sys.stdout.write('\n')
 
     exit(0)
