@@ -231,11 +231,21 @@ if __name__ == '__main__':
                 tgo.term[trinity]['GO'].append(go)
 
     # write out as a read mapping: tab delimited gene followed by list of GO terms
+    # tab = '\t'
+    # mergeout = open('merged_go', 'w')
+    # for trinity in tgo.term:
+    #     mergeout.write(f'{trinity}')
+    #     for go in tgo.term[trinity]['GO']:
+    #         mergeout.write(f'{tab}{go}')
+    #     mergeout.write('\n')
+    # mergeout.close()
+
     tab = '\t'
+    mergeout = open('merged_go', 'w')
     for trinity in tgo.term:
-        sys.stdout.write(f'{trinity}')
         for go in tgo.term[trinity]['GO']:
-            sys.stdout.write(f'{tab}{go}')
-        sys.stdout.write('\n')
+            mergeout.write(f'{trinity}{tab}{go}\n')
+
+    mergeout.close()
 
     exit(0)
