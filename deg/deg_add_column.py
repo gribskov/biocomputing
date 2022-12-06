@@ -39,10 +39,46 @@ def read_column(file, key_n, value_n, maxsplit):
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
+    print(f'deg_add_columns.py')
+
     annofile = sys.argv[1]
     anno = open(annofile, 'r')
     print(f'Annotation column in {annofile}')
 
-    coldata = read_column( anno, 0, 1, 1)
+    degfile = sys.argv[2]
+    deg = open(degfile, 'r')
+    print(f'DEG data in {degfile}')
+
+    outfile = sys.argv[3]
+    out = open(outfile, 'w')
+    print(f'Output written to {outfile}')
+
+    coldata = read_column(anno, 0, 1, 1)
+    print(f'\n{len(coldata)} annotations read from {annofile}')
+    anno.close()
+
+    # add a column label to the first line
+    gene_n = 0
+    skipline = deg.readline().rstrip()
+    skipline += '\tFunctional_Annotation\n'
+    out.write(skipline)
+
+    for line in deg:
+        gene_n += 1
+        try:
+            (gene, data) = line.rstrip().split('\t', maxsplit=1)
+        except ValueError:
+            sys.stderr.write(f'too few fields to split in deg file:{line.rstrip()}\n')
+
+        try:
+            data += f'\t{coldata[gene]}'
+        except IndexError:
+            sys.stderr.write(f'gene {gene} not found in annotation\n')
+
+        out.write(f'{gene}{data}\n')
+
+    sys.stdout.write(f'{gene_n} genes read from {degfile} and written to {outfile}\n')
+    out.close()
+    deg.close()
 
     exit(0)
