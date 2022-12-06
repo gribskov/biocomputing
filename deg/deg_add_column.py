@@ -36,13 +36,20 @@ def read_column(file, key_n, value_n, maxsplit):
     return data
 
 
-def construct_output_name(infile, inname, col_n, remove=['.tsv', '.txt'], header='true',
+def construct_output_name(infile, inname, col_n, remove=['.tsv', '.txt'], header='auto',
                           dropfirst=False):
     """---------------------------------------------------------------------------------------------
     the output name is the input name minus any strings in del, plus the column name. If header is
     True, the column name in col_n position of the first line is used. otherwise the name is
     .anno_col_n. the header line is returned for re-use. If header is false, the first line is not
     read and hline is empty.
+
+    header='auto'   read first line, parse column header from field col_n
+    header='skip'   read first line, assign column as ,anno_{col_n}
+    header='other'  read first line, assign column as ,anno_other
+    header = ''     do not read first line, assign column as ,anno_{col_n}
+
+    TODO no way to not read first line and give a name, hmm
 
     :param infile: fp          open file for reading
     :param inname: string      name of the input file
@@ -63,7 +70,13 @@ def construct_output_name(infile, inname, col_n, remove=['.tsv', '.txt'], header
     if header:
         # header is a non empty string, read the header line
         hline = infile.readline().rstrip()
-        if header == 'skip' or header == '0':
+        if header == 'auto' or header == '1':
+            # split header line to get column label
+            field = hline.split()
+            if dropfirst:
+                field = field[1:]
+            col = field[col_n]
+        elif header == 'skip' or header == '0':
             # do not try to find a column name, proceed to automatic name
             header = ''
         else:
@@ -72,10 +85,7 @@ def construct_output_name(infile, inname, col_n, remove=['.tsv', '.txt'], header
 
     if not header:
         # header is empty, assign column using header (empty string is false)
-        field = hline.split()
-        if dropfirst:
-            field = field[1:]
-        col = field[col_n]
+        col = f'.anno_{col_n}'
 
     outname = f'{base}_{col}'
 
@@ -97,7 +107,7 @@ if __name__ == '__main__':
     print(f'DEG data in {degfile}')
 
     col_n = 9
-    (outfile, header) = construct_output_name(deg, degfile, col_n, header='zap')
+    (outfile, header) = construct_output_name(deg, degfile, col_n, header='junk')
     out = open(outfile, 'w')
     print(f'Output written to {outfile}')
 
