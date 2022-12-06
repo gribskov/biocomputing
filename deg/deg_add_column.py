@@ -14,6 +14,7 @@ Soltu.DM.03G026180.1 (IDs in TSV)
 Michael Gribskov     05 December 2022
 ================================================================================================="""
 import sys
+import os
 
 
 def read_column(file, key_n, value_n, maxsplit):
@@ -35,6 +36,52 @@ def read_column(file, key_n, value_n, maxsplit):
     return data
 
 
+def construct_output_name(infile, inname, col_n, remove=['.tsv', '.txt'], header='true',
+                          dropfirst=False):
+    """---------------------------------------------------------------------------------------------
+    the output name is the input name minus any strings in del, plus the column name. If header is
+    True, the column name in col_n position of the first line is used. otherwise the name is
+    .anno_col_n. the header line is returned for re-use. If header is false, the first line is not
+    read and hline is empty.
+
+    :param infile: fp          open file for reading
+    :param inname: string      name of the input file
+    :param col_n: int          column for data
+    :param remove: list        strings to delete from input file name
+    :param header: string      if 'false', header will be used for column title  (not 'False')
+    :param dropfirst: logical  drop the first token on the header line (comment symbol or tag)
+    :return outname, hline:    string, string name of output file, header line
+    ---------------------------------------------------------------------------------------------"""
+    # construct base of output file from input file
+    # get base filename and open output file
+    base = os.path.basename(inname)
+    for suffix in remove:
+        base = base.replace(suffix, '')
+
+    hline = ''
+    col = ''
+    if header:
+        # header is a non empty string, read the header line
+        hline = infile.readline().rstrip()
+        if header == 'skip' or header == '0':
+            # do not try to find a column name, proceed to automatic name
+            header = ''
+        else:
+            # header is a string to use as a column title
+            col = header
+
+    if not header:
+        # header is empty, assign column using header (empty string is false)
+        field = hline.split()
+        if dropfirst:
+            field = field[1:]
+        col = field[col_n]
+
+    outname = f'{base}_{col}'
+
+    return outname, hline
+
+
 # --------------------------------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------------------------------
@@ -49,7 +96,8 @@ if __name__ == '__main__':
     deg = open(degfile, 'r')
     print(f'DEG data in {degfile}')
 
-    outfile = sys.argv[3]
+    col_n = 9
+    (outfile, header) = construct_output_name(deg, degfile, col_n, header='zap')
     out = open(outfile, 'w')
     print(f'Output written to {outfile}')
 
