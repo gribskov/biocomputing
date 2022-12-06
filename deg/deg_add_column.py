@@ -17,6 +17,42 @@ import sys
 import os
 
 
+def read_subsplit(file, key_n, value_n, split='\t', subsplit=' '):
+    """---------------------------------------------------------------------------------------------
+    read file and create a dict by splitting each line on split. If field[key_n] is empty, no entry
+    is created. Otherwise, the field is split on subsplit, and each token added to the dictionary.
+
+    :param file: filehandle     open file for reading, must be splitable
+    :param key_n: int           column for keys
+    :param value_n: int         column for values
+    :param split: string        first key to split on
+    :param subsplit: string     second key, for splitting the desired field
+    :return: dict
+    ---------------------------------------------------------------------------------------------"""
+    data = {}
+    for line in file:
+        try:
+            field = line.rstrip('\n ').split(split)
+            # field = line.rstrip().split(split)
+        except IndexError:
+            print('Cannot split {line')
+            continue
+
+        if len(field) <= value_n:
+            continue
+
+        if field[value_n]:
+            indiv = field[value_n].split(subsplit)
+            if field[key_n] in data:
+                # existing gene
+                data[field[key_n]] += indiv
+            else:
+                # new gene
+                data[field[key_n]] = indiv
+
+    return data
+
+
 def read_column(file, key_n, value_n, maxsplit):
     """---------------------------------------------------------------------------------------------
     read file and create a dict by splitting each line split_n times and using column key_n as the
@@ -92,29 +128,16 @@ def construct_output_name(infile, inname, col_n, remove=['.tsv', '.txt'], header
     return outname, hline
 
 
-# --------------------------------------------------------------------------------------------------
-# main
-# --------------------------------------------------------------------------------------------------
-if __name__ == '__main__':
-    print(f'deg_add_columns.py')
+def write_append_deg(deg, out, coldata):
+    """---------------------------------------------------------------------------------------------
+    append to the column of interest to the end of the appropriate line of the deg file, separated
+    by a tab.
 
-    annofile = sys.argv[1]
-    anno = open(annofile, 'r')
-    print(f'Annotation column in {annofile}')
-
-    degfile = sys.argv[2]
-    deg = open(degfile, 'r')
-    print(f'DEG data in {degfile}')
-
-    col_n = 9
-    (outfile, header) = construct_output_name(deg, degfile, col_n, header='junk')
-    out = open(outfile, 'w')
-    print(f'Output written to {outfile}')
-
-    coldata = read_column(anno, 0, 1, 1)
-    print(f'\n{len(coldata)} annotations read from {annofile}')
-    anno.close()
-
+    :param deg: fp          deg file (tsv) for reading
+    :param out: fp          output file for writing
+    :param coldata: dict    genes, labels
+    :return: int            rec ords written
+    ---------------------------------------------------------------------------------------------"""
     # add a column label to the first line
     gene_n = 0
     skipline = deg.readline().rstrip()
@@ -130,12 +153,70 @@ if __name__ == '__main__':
 
         try:
             data += f'\t{coldata[gene]}'
-        except IndexError:
+        except KeyError:
+            data += f'\t'
             sys.stderr.write(f'gene {gene} not found in annotation\n')
 
         out.write(f'{gene}{data}\n')
 
-    sys.stdout.write(f'{gene_n} genes read from {degfile} and written to {outfile}\n')
+    return gene_n
+
+
+def write_filtered_columm(deg, out, coldata):
+    """---------------------------------------------------------------------------------------------
+    write the data, removing any IDs that don't occur in deg
+
+    :param deg: fp          deg data open for reading
+    :param out: fp          output file open for writing
+    :param coldata: dict    gene,label
+    :return: int            lines written
+    ---------------------------------------------------------------------------------------------"""
+    # first make a list of the desired genes (first column of DEG file)
+    accept = []
+    for line in deg:
+        field = line.split()
+        if field[0] not in accept:
+            accept.append(field[0])
+
+    row_n = 0
+    for gene in coldata:
+        if gene in accept:
+            for label in coldata[gene]:
+                out.write(f'{gene}\t{label}\n')
+                row_n += 1
+
+    return row_n
+
+
+# --------------------------------------------------------------------------------------------------
+# main
+# --------------------------------------------------------------------------------------------------
+if __name__ == '__main__':
+    print(f'deg_add_columns.py')
+
+    annofile = sys.argv[1]
+    anno = open(annofile, 'r')
+    print(f'Annotation column in {annofile}')
+
+    degfile = sys.argv[2]
+    deg = open(degfile, 'r')
+    print(f'DEG data in {degfile}')
+
+    col_n = 7
+    (outfile, header) = construct_output_name(anno, degfile, col_n, header='auto')
+    out = open(outfile, 'w')
+    print(f'Output written to {outfile}')
+
+    # coldata = read_column(anno, 0, 1, 1)
+    coldata = read_subsplit(anno, 2, col_n, split='\t', subsplit=' ')
+    print(f'\n{len(coldata)} annotations read from {annofile}')
+    anno.close()
+
+    # gene_n = write_append_deg(deg, out, coldata)
+    # sys.stdout.write(f'{gene_n} genes read from {degfile} and written to {outfile}\n')
+    row_n = write_filtered_columm(deg, out, coldata)
+    sys.stdout.write(f'{row_n} annotation labels read from {degfile} and written to {outfile}\n')
+
     out.close()
     deg.close()
 
