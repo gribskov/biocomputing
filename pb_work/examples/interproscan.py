@@ -4,7 +4,7 @@ see https://www.ebi.ac.uk/seqdb/confluence/display/WEBSERVICES/iprscan5_rest\
 ================================================================================================="""
 import requests
 
-run = 'http://www.ebi.ac.uk/Tools/services/rest/iprscan5/run/'
+run = 'https://www.ebi.ac.uk/Tools/services/rest/iprscan5/run/'
 email = 'gribskov@purdue.edu'
 title = 'globin'
 sequence = '''>sp|P69905.2|HBA_HUMAN RecName: Full=Hemoglobin subunit alpha; AltName: Full=Alpha-globin; AltName: Full=Hemoglobin alpha chain
