@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 @app.route('/<worldtype>')
 def welcome(worldtype):
-    return render_template('welcome.html', name=worldtype)
+    return render_template('Welcome.html', name=worldtype)
 
 @app.route('/login',methods = ['POST', 'GET'])
 def login():

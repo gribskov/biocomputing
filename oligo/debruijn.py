@@ -152,7 +152,9 @@ class KmerSet():
         words = ''
         for kmer in sorted(set):
             words += '{}\t{}'.format(kmer, set[kmer]['count'])
-            if 'label' in set[kmer]:
+            # if 'label' in set[kmer]:
+            #     words += f'\t{set[kmer]["label"]}'
+            if set[kmer]["label"] != kmer:
                 words += f'\t{set[kmer]["label"]}'
             words += '\n'
 
@@ -395,21 +397,73 @@ Yeah, we'll be counting stars"""
 # And in my face is flashing signs
 # Seek it out and ye shall find"""
 
-    kmer = KmerSet(text=counting_stars)
+    draggin_my_heart_around="""Baby, you'll come knocking on my front door
+Same old line you used to use before
+I said, "Hey well, what am I supposed to do?"
+I didn't know what I was getting into
+Say you've had a little trouble in town
+Say you're keeping some demons down
+Stop draggin' my
+Stop draggin' my 
+Stop draggin' my heart around, yeah
+It's hard to think about what you wanted
+It's hard to think about what you lost
+This doesn't have to be the big get even
+This doesn't have to be anything at all
+I know you really want to tell me goodbye
+I know you really want to be your own girl"""
+# And baby, you could never look me in the eye
+# Oh, when you buckle with the weight of the words
+# Stop draggin' my
+# Stop draggin' my (stop)
+# Stop draggin' my heart around, yeah
+# There's people running 'round loose in the world
+# Ain't got nothing better to do
+# They make a meal of some bright-eyed kid
+# You need someone to look after you
+# I know you really want to tell me goodbye
+# I know you really want to be your own girl
+# And baby, you could never look me in the eye
+# But why you buckle with the weight of the words (yeah)
+# Stop draggin' my
+# Stop draggin' my (stop)
+# Stop draggin' my heart around, yeah
+# Stop draggin' my heart around
+# Stop draggin' my heart around (hey, hey, hey)
+# Oh, won't you stop draggin' my heart around? (Hey, hey, hey)
+# Stop draggin' my heart around"""
+
+    kmer = KmerSet(text=draggin_my_heart_around)
     print("original text\n", kmer.text)
     textlen = kmer.clean_text()
     print("\ncleaned text\n", kmer.text)
     print("\n{} letters".format(textlen))
-    kmer.from_text(6)
+    kmer.sample_reads(30, 8)
+    nread = 0
+    for read in kmer.reads:
+        nread += 1
+        print(f'{nread}\t{read}')
+    print()
+    kmer.from_text(5)
 
     kmer.link()
     kset = kmer.set
     for v in kset:
         kset[v]['label'] = v
 
+    print(f'kmers: {len(kmer.list_by_alpha())}')
     print(kmer.list_by_alpha())
+
     kmer = debruijn_condense(kmer)
     print(kmer.list_by_alpha())
+    print(f'condensed kmers: {len(kmer.set)}')
+    ncondensed = 0
+    lcondensed = 0
+    for k in sorted(kmer.set, key=lambda x:len(kmer.set[x]['label']), reverse=True):
+        ncondensed += 1
+        lcondensed += len(kmer.set[k]["label"])
+        print( f'{ncondensed}\t{lcondensed}\t{kmer.set[k]["label"]} ')
+
     kset = kmer.set
 
     # make a vertex index
@@ -461,6 +515,6 @@ Yeah, we'll be counting stars"""
              'edge_width':        2,
              'edge_curved':       True
              }
-    igraph.plot(g, **style)
+    igraph.plot(g, "test.pdf", **style)
 
     exit(0)
