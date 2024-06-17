@@ -4,6 +4,7 @@ analyze lengths of sequences in PacBio data, optionally appy a minimum lenght th
 Michael Gribskov     17 June 2024
 ================================================================================================="""
 import sys
+import matplotlib.pylab as plt
 
 
 def get_data(fasta):
@@ -53,7 +54,7 @@ def get_bins(data, bin_size=100):
     ---------------------------------------------------------------------------------------------"""
     bins = []
     n_total = 0
-    for seq in sorted(data, key=lambda l: l['length']):
+    for seq in sorted(data, key=lambda l: l['length'], reverse=True):
 
         if n_total % bin_size:
             # add to current bin, zero means start a new bin
@@ -81,6 +82,36 @@ def get_bins(data, bin_size=100):
     return bins
 
 
+def plot(bins):
+    """---------------------------------------------------------------------------------------------
+
+    :param bins:
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    plt.xlabel('Total Length')
+    plt.ylabel('Length')
+    plt.title(f'Sequence Length Distribution')
+    plt.grid(True, linestyle='-', linewidth=0.1)
+    h = 0
+    ypos = 0
+    for b in bins:
+        h += 1
+        ypos += b['ave'] * b['n']
+        plt.vlines(ypos, b['min'], b['max'])
+
+    # plt.text(0.02, .85, 'file: {}\nMean: {:.1f}\nstandard deviation: {:.1f}'.
+    #          format(filename, lenmean, lensd), fontsize=10, transform=ax.transAxes)
+    # plt.axvline(lenmean, color='red', linewidth=1.5)
+
+    # plt.savefig('{}.pdf'.format(sample))
+    plt.show()
+
+    return
+
+
 # --------------------------------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------------------------------
@@ -95,5 +126,6 @@ if __name__ == '__main__':
     # collect into bins of fixed number of sequences (instead of fixed bin size)
 
     bins = get_bins(fasta_data, bin_size=5)
+    plot(bins)
 
     exit(0)
