@@ -12,6 +12,9 @@ usage:
     # stdout, format fasta output with 100 character lines
     fasta_select in.fa --line 100 --min 600
 
+    # select sequences from a single fasta file skipping blast matches, with min length cutoff
+    fasta_select in.fa --blast search.blastn --evalue 1e-20 --min 2000
+
     # select sequences from a multiple fasta files based minimum length and write to
     # stdout, format fasta output with 100 character lines
     fasta_select genome*.fa --line 100 --min 600
@@ -44,9 +47,11 @@ def setup_argparse():
     :return: argparse ArgumentParser
     ---------------------------------------------------------------------------------------------"""
     # defaults
-    out_default = sys.stdout
+    # out_default = sys.stdout
     minlen_default = 0
     linelen_default = 100
+    blast_default = 'search.blast'
+    evalue_default = 1e-5
 
     commandline = argparse.ArgumentParser(
         description='Select sequences from a multiple-sequence FastA file'
@@ -81,6 +86,16 @@ def setup_argparse():
                              type=int,
                              default=linelen_default)
 
+    commandline.add_argument('--blast',
+                             help=f'Filter based on blast search ({blast_default}).',
+                             type=str,
+                             default=blast_default)
+
+    commandline.add_argument('--evalue',
+                             help=f'Maximu E-value for blast filtering ({evalue_default}).',
+                             type=float,
+                             default=evalue_default)
+
     return report_args(commandline.parse_args())
 
 
@@ -105,6 +120,9 @@ def report_args(args):
         sys.stderr.write(f'\tSequence ID list: {args.list}\n')
     if args.trim:
         sys.stderr.write(f'\tDocumentation trimming regex: {args.trim}\n')
+    if args.blast:
+        sys.stderr.write(f'\tFilter using Blast file: {args.blast}\n')
+        sys.stderr.write(f'\tE-value cutoff: : {args.evalue}\n')
     sys.stderr.write('\n')
 
     return args
@@ -135,7 +153,7 @@ def get_id_list(args):
     Read a file of IDs and store in a list.  Only the first token is used
     Lines beginning ! or # are skipped, if > is the first character it is removed
 
-    :param idfile: dict, command line arguments from setup_argparse()
+    :param args: dict, command line arguments from setup_argparse()
     :return: list of strings, IDs of desired sequences
     ---------------------------------------------------------------------------------------------"""
     if not args.list:
@@ -166,6 +184,39 @@ def get_id_list(args):
     return idlist
 
 
+def blast_filter(blastfilename, evalue):
+    """---------------------------------------------------------------------------------------------
+    Based on a blast search, make a list of query sequences that have matches <= evalue. Use this to
+    remove contaminants such as matches to host sequence in a pathogen dataset
+
+    :param blastfilename: string        path to openable blast result (format=7)
+    :param evalue: float                maximum evalue
+    :return: list                       query sequence IDs
+    ---------------------------------------------------------------------------------------------"""
+    blast = opensafe(blastfilename, 'r')
+
+    seq_n = 0
+    select_n = 0
+    select = []
+    for line in blast:
+        if line.startswith('# Query:'):
+            seq_n += 1
+            continue
+        elif line.startswith('#'):
+            continue
+        else:
+            field = line.split()
+            if field[0] in select:
+                continue
+            if field[10] > evalue:
+                continue
+            select.append(field[0])
+            select_n += 1
+
+    blast.close()
+    return select
+
+
 # --------------------------------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------------------------------
@@ -180,6 +231,14 @@ if __name__ == '__main__':
 
     # idlist, idlist will be an emtpy list if none is provided
     idlist = get_id_list(args)
+
+    blastfilter = False
+    blastlist = []
+    if args.blast:
+        blastfilter = True
+        evalue = args.evalue
+        blastlist = blast_filter(args.blast, args.evalue)
+        sys.stderr.write(f'sequences filtered based on {args.blastfile}: {len(blastlist)}\n')
 
     # read the sequences and store all that match the IDs
     # duplicates in sequence files will be stored twice
@@ -209,6 +268,10 @@ if __name__ == '__main__':
         while fasta.next():
             n_sequence[fastafile] += 1
             n_total += 1
+
+            # if blastfilter is true, check if this sequence should be skipped
+            if blastfilter and fasta.id in blastlist:
+                continue
 
             if fasta.id in idlist or not idlist:
                 # desired selected sequences
