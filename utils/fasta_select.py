@@ -282,7 +282,8 @@ if __name__ == '__main__':
 
             if fasta.id in idlist or not idlist:
                 # desired selected sequences
-                fasta.trimDocByRegex(trim)
+                if args.trim:
+                    fasta.trimDocByRegex(trim)
                 seqlen = len(fasta.seq)
                 if args.minlen and seqlen < args.minlen:
                     # skip sequences shorter than minimum length, if specified
