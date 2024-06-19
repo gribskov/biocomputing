@@ -208,7 +208,7 @@ def blast_filter(blastfilename, evalue):
             field = line.split()
             if field[0] in select:
                 continue
-            if field[10] > evalue:
+            if float(field[10]) > evalue:
                 continue
             select.append(field[0])
             select_n += 1
