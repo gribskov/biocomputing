@@ -213,6 +213,9 @@ def blast_filter(blastfilename, evalue):
             select.append(field[0])
             select_n += 1
 
+        if seq_n > 100:
+            break
+
     blast.close()
     return select
 
@@ -238,7 +241,7 @@ if __name__ == '__main__':
         blastfilter = True
         evalue = args.evalue
         blastlist = blast_filter(args.blast, args.evalue)
-        sys.stderr.write(f'sequences filtered based on {args.blastfile}: {len(blastlist)}\n')
+        sys.stderr.write(f'sequences filtered based on {args.blast}: {len(blastlist)}\n')
 
     # read the sequences and store all that match the IDs
     # duplicates in sequence files will be stored twice
@@ -268,6 +271,10 @@ if __name__ == '__main__':
         while fasta.next():
             n_sequence[fastafile] += 1
             n_total += 1
+            if n_total % 1000 == 0:
+                sys.stderr.write('.')
+            if n_total % 50000 == 0:
+                sys.stderr.write(f'{n_total}\n')
 
             # if blastfilter is true, check if this sequence should be skipped
             if blastfilter and fasta.id in blastlist:
