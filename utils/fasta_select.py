@@ -92,7 +92,7 @@ def setup_argparse():
                              default=blast_default)
 
     commandline.add_argument('--evalue',
-                             help=f'Maximu E-value for blast filtering ({evalue_default}).',
+                             help=f'Maximum E-value for blast filtering ({evalue_default}).',
                              type=float,
                              default=evalue_default)
 
