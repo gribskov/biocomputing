@@ -89,6 +89,35 @@ class Gtf:
                        }
         return True
 
+    def add_ensemble_attributes(self):
+        """-----------------------------------------------------------------------------------------
+        Ensembl attributes seem to reliable come in pairs so they can be split and added to parse.
+        Some other sources have naked values in the attributes such as gene IDs, see attribute2gff,
+        below. The parsed key 'attribute' is removed after converting
+
+        Example attributes for a gene and a transcript:
+        gene_id "ENSCAFG00845015183"; gene_version "1"; gene_source "ensembl"; gene_biotype "protein_coding";
+        gene_id "ENSCAFG00845015183"; gene_version "1"; transcript_id "ENSCAFT00845027108"; transcript_version "1";
+            gene_source "ensembl"; gene_biotype "protein_coding"; transcript_source "ensembl";
+            transcript_biotype "protein_coding"; tag "Ensembl_canonical";
+
+        :return: int    number of attributes added
+        -----------------------------------------------------------------------------------------"""
+        att = self.parsed['attribute']
+        att_list = att.split(';')
+        added = 0
+        for a in att_list[:-1]:
+            # attributes end in ;, so the last one is empty
+            # ; may be followed by space, so strip the split key
+            a = a.strip()
+            key, value = a.split(' ', maxsplit=1)
+            self.parsed[key.strip()] = value.strip().replace('"', '')
+            added += 1
+
+        del self.parsed['attribute']
+
+        return added
+
     def attribute2gff(self):
         """-----------------------------------------------------------------------------------------
         Convert
@@ -104,7 +133,7 @@ class Gtf:
 
         if attr.endswith(';'):
             # remove trailing ;
-            # there should't be any , but there are
+            # there shouldn't be any , but there are
             attr = attr[:-1]
 
         if feature == 'gene':
@@ -163,7 +192,7 @@ if __name__ == '__main__':
                 if k == 'seqname':
                     underline = gtf.parsed[k].find('_')
                     gtf.parsed[k] = gtf.parsed[k][:underline]
-                    scaffold = int(gtf.parsed[k].replace('scaffold',''))
+                    scaffold = int(gtf.parsed[k].replace('scaffold', ''))
                     if scaffold < 8:
                         continue
                 out += gtf.parsed[k] + '\t'
