@@ -80,11 +80,11 @@ class Gtf:
         self.parsed = {'seqname':   field[0],
                        'source':    field[1],
                        'feature':   field[2],
-                       'start':     field[3],
-                       'end':       field[4],
-                       'score':     field[5],
+                       'start':     int(field[3]),
+                       'end':       int(field[4]),
+                       'score':     float(field[5]),
                        'strand':    field[6],
-                       'frame':     field[7],
+                       'frame':     int(field[7]),
                        'attribute': field[8],
                        }
         return True
