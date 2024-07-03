@@ -82,11 +82,18 @@ class Gtf:
                        'feature':   field[2],
                        'start':     int(field[3]),
                        'end':       int(field[4]),
-                       'score':     float(field[5]),
+                       'score':     field[5],
                        'strand':    field[6],
-                       'frame':     int(field[7]),
+                       'frame':     field[7],
                        'attribute': field[8],
                        }
+
+        # somme numeric values use '.' as a placeholder when there is no applicable value
+        if self.parsed['score'] != '.':
+            self.parsed['score'] = float(self.parsed['score'])
+        if self.parsed['frame'] != '.':
+            self.parsed['frame'] = int(self.parsed['frame'])
+
         return True
 
     def add_ensemble_attributes(self):
