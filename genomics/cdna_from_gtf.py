@@ -23,6 +23,32 @@ class Gene():
         self.strand = strand
         self.transcript = []
 
+    def transcript_add(self, transcript_id='', begin=0, end=0):
+        """-----------------------------------------------------------------------------------------
+        add a new transcript to the list of transcripts for this gene
+
+        :param transcript_id: string
+        :param begin: int
+        :param end: int
+        :return: int                        number of transcripts in list
+        -----------------------------------------------------------------------------------------"""
+        self.transcript.append({'transcript_id': transcript_id,
+                                'begin':         begin,
+                                'end':           end,
+                                'exon':          []
+                                })
+        return len(self.transcript)
+
+    def exon_add(self, begin=0, end=0):
+        """-----------------------------------------------------------------------------------------
+        Add an exon to the last transcript in the list
+        :param begin:
+        :param end:
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        self.transcript[-1]['exon'].append({'begin': begin, 'end': end})
+        return len(self.transcript[-1])
+
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -35,7 +61,6 @@ if __name__ == '__main__':
     transcript_list = []
     while gtf.next():
         gtf.parse()
-        # gtf.attribute2gff()
         gtf.add_ensemble_attributes()
 
         parsed = gtf.parsed
@@ -43,16 +68,13 @@ if __name__ == '__main__':
             print(f"{parsed['seqname']}\t{parsed['start']}\t{parsed['end']}\t{parsed['strand']}\t{parsed['gene_id']}")
             gene = Gene(parsed['seqname'], parsed['gene_id'], parsed['start'], parsed['end'])
             transcript_list.append(gene)
+
         elif parsed['feature'] == 'transcript':
             print(f"\t{parsed['start']}\t{parsed['end']}\t{parsed['transcript_id']}")
-            gene.transcript.append({'transcript_id': parsed['transcript_id'],
-                                    'begin':         parsed['start'],
-                                    'end':           parsed['end'],
-                                    'exon':          []
-                                    })
-            exon = gene.transcript[-1]['exon']
+            gene.transcript_add(parsed['transcript_id'], parsed['start'], parsed['end'])
+
         elif parsed['feature'] in ('exon', 'three_prime_utr', 'five_prime_utr'):
             print(f"\t\t{parsed['feature']}\t{parsed['start']}\t{parsed['end']}")
-            exon.append({'begin': parsed['start'], 'end': parsed['end']})
+            gene.exon_add(parsed['start'], parsed['end'])
 
     exit(0)
