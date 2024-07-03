@@ -301,14 +301,15 @@ if __name__ == '__main__':
                 # not selected sequence
                 n_notmatch[fastafile] += 1
 
-    sys.stderr.write('files read: {}\n'.format(n_file))
+    sys.stderr.write('\nfiles read: {}\n'.format(n_file))
     sys.stderr.write('total sequences read: {}\n'.format(n_total))
     sys.stderr.write('total sequences written: {}\n'.format(n_written))
 
-    sys.stderr.write('\nPer file\n')
-    for fastafile in n_sequence:
-        sys.stderr.write('{}\n'.format(fastafile))
-        sys.stderr.write('\tsequences: {}\n'.format(n_sequence[fastafile]))
-        sys.stderr.write('\tsequences matched: {}\n'.format(n_match[fastafile]))
+    if length(n_sequence) > 1:
+        sys.stderr.write('\nPer file\n')
+        for fastafile in n_sequence:
+            sys.stderr.write('{}\n'.format(fastafile))
+            sys.stderr.write('\tsequences: {}\n'.format(n_sequence[fastafile]))
+            sys.stderr.write('\tsequences matched: {}\n'.format(n_match[fastafile]))
 
 exit(0)
