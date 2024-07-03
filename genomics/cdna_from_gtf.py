@@ -73,8 +73,25 @@ if __name__ == '__main__':
             print(f"\t{parsed['start']}\t{parsed['end']}\t{parsed['transcript_id']}")
             gene.transcript_add(parsed['transcript_id'], parsed['start'], parsed['end'])
 
-        elif parsed['feature'] in ('exon', 'three_prime_utr', 'five_prime_utr'):
+        # utrs are included in exons
+        # elif parsed['feature'] in ('exon', 'three_prime_utr', 'five_prime_utr'):
+        elif parsed['feature'] in ('exon'):
             print(f"\t\t{parsed['feature']}\t{parsed['start']}\t{parsed['end']}")
             gene.exon_add(parsed['start'], parsed['end'])
+
+    print(f'Counting data')
+    sequences = []
+    transcript_n = 0
+    exon_n = 0
+    for t in transcript_list:
+        if t.seq not in sequences:
+            sequences.append( t.seq)
+        transcript_n += len(t.transcript)
+        for this_transcript in t.transcript:
+            exon_n += len(this_transcript['exon'])
+
+    print(f'{len(sequences)} sequences found')
+    print(f'{transcript_n} transcripts')
+    print(f'{exon_n} exons')
 
     exit(0)
