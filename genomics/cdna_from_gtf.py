@@ -38,6 +38,7 @@ class Gene():
         self.transcript.append({'transcript_id': transcript_id,
                                 'begin':         begin,
                                 'end':           end,
+                                'strand':        self.strand,
                                 'exon':          []
                                 })
         return len(self.transcript)
@@ -55,20 +56,30 @@ class Gene():
 
 def get_spliced(target, seq):
     """---------------------------------------------------------------------------------------------
-    Extract the spliced sequence for each transcript in t from the current sequence
+    Extract the spliced sequence for each transcript in t from the target gene
     
     :param target: Gene         transcript sequences to extract
     :param seq: string          genomic sequence
     :return: list of string     constructed spliced sequences
     ---------------------------------------------------------------------------------------------"""
     spliced = []
+    reverse = target.strand == '-'
+    if target.strand=='':
+        print(f'warning no strand')
     for t in target.transcript:
         ss = ''
         for e in t['exon']:
-            ss += seq[e[0] - 1:e[1]]
-        if t.strand == '-':
-            # reverse complement
-            ss = complement(ss[:-1])
+            if reverse:
+                ts = seq[e['end'] - 1:e['begin']:-2]
+                print(f"{reverse}\t{e['end'] - 1}:{e['begin'] - 2}\n{ts}")
+            else:
+                ts = seq[e['begin'] - 1:e['end']]
+                print(f"{reverse}\t{e['begin'] - 1}:{e['end']}\n{ts}")
+            ss += ts
+
+        if reverse:
+        #     # reverse complement
+            ss = ss[::-1]
 
         spliced.append(ss)
 
@@ -90,7 +101,7 @@ def write_out(out, target, spliced, linelen=100):
         pos = 0
         while pos < len(spliced[n]):
             out.write(f'{spliced[n][pos:pos + linelen]}\n')
-        pos += linelen
+            pos += linelen
         n += 1
 
     return
@@ -123,7 +134,7 @@ if __name__ == '__main__':
         parsed = gtf.parsed
         if parsed['feature'] == 'gene':
             print(f"{parsed['seqname']}\t{parsed['start']}\t{parsed['end']}\t{parsed['strand']}\t{parsed['gene_id']}")
-            gene = Gene(parsed['gene_id'], parsed['seqname'], parsed['start'], parsed['end'])
+            gene = Gene(parsed['gene_id'], parsed['seqname'], parsed['start'], parsed['end'], parsed['strand'])
             transcript_list.append(gene)
 
         elif parsed['feature'] == 'transcript':
@@ -166,6 +177,8 @@ if __name__ == '__main__':
     nline = 0
     for line in genome:
         print(f'{nline}:{len(seq)}\n{line}')
+        if len(seq) > 10000000:
+            break
         nline += 1
 
         if line.startswith('>'):
@@ -190,6 +203,14 @@ if __name__ == '__main__':
             seq += line.rstrip()
 
     # don't forget the last sequence
+    # if current_id != id and seq:
+    # new id and sequence exists, process all ranges
+    # content of chr_idx are  Gene objects
+    for t in chr_idx[current_id]:
+        print(f'{t.seq}:{t.gene_id}\t{t.begin}\t{t.end}\t{t.strand}')
+        print(f'{seq[t.begin:t.end+1]}')
+        spliced = get_spliced(t, seq)
+        write_out(out, t, spliced)
 
     out.close()
     exit(0)
