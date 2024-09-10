@@ -23,7 +23,9 @@
             <form action="/getSequence" method="POST"
                   enctype="multipart/form-data"
                   style="margin-top: 10px;">
-
+                {% if state.error %}
+                <p><span style="color:black;">File {{loop.index}} is {{state.error}}. Try again.</span></p>
+                {% endif %}
                 FastA formatted sequence: <input type="file" name="file{{loop.index}}"/>
                 <br/>
                 <input type="submit"  value="Load"/>
@@ -33,9 +35,7 @@
             <div class="sequence">
                 <h2>Sequence {{loop.index}}</h2>
                 <h3> {{file.fasta.id}} - {{file.fasta.doc}}</h3>
-                <pre>
-{{file.fasta.format()}}
-                </pre>
+                <pre>{{file.fasta.format()}}</pre>
             </div>
 
         {% endif %}

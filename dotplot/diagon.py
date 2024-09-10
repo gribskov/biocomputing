@@ -14,7 +14,7 @@ import copy
 from diagonal import Diagonal
 from sequence.fasta import Fasta
 
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash, url_for
 import logging
 
 from bokeh.embed import components
@@ -26,6 +26,7 @@ from bokeh.resources import INLINE
 cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None
 app = Flask(__name__)
+app.secret_key = 'secret'
 
 
 # uncomment below to turn off server log
@@ -42,6 +43,7 @@ def tf(string):
 
 statedefault = {'seq': [{'fasta': None, 'status': 'next'},
                         {'fasta': None, 'status': 'later'}],
+                'error': '',
                 'DNA': {'identity': 'table/NUCidentity.matrix',
                            'NUC4.4': 'table/NUC4.4.matrix'},
                 'protein': {'identity': 'table/PROidentity.matrix',
@@ -118,16 +120,28 @@ def getSequence():
             f = request.files['file2']
             sequence = 1
 
-        fasta = Fasta(fh=f)
-        fasta.read()
-        print(fasta.format())
-        seq = state['seq'][sequence]
-        seq['fasta'] = fasta
-        seq['status'] = 'loaded'
+        if f.content_type == 'application-x/ext-file':
+            # print(f'repr:{repr(f)}')
+            # print(f'f:{f}\tlen:{f.content_length}\ttype:{f.content_type}\tparams'
+            #                              f':{f.mimetype_params}')
+            fasta = Fasta(fh=f)
+            success = fasta.read()
+            if not success:
+                app.logger.warning('no fasta sequence found')
+            print(fasta.format())
+            state['error'] = ''
+            seq = state['seq'][sequence]
+            seq['fasta'] = fasta
+            seq['status'] = 'loaded'
+        else:
+            # flash('Error in sequence file')
+            # return render_template('dashboard.html', state=state)
+            state['error'] = 'not a valid sequence file'
+            return redirect(url_for('getSequence'))
 
         # if both sequences have been selected, check whether the sequences are DNA or protein
         state['params']['seqtype'] = 'protein'
-        if state['seq'][0]['status'] is 'loaded' and state['seq'][1]['status'] is 'loaded':
+        if state['seq'][0]['status'] == 'loaded' and state['seq'][1]['status'] == 'loaded':
             if state['seq'][0]['fasta'].isACGT() and state['seq'][1]['fasta'].isACGT():
                 state['params']['seqtype'] = 'DNA'
 
@@ -150,7 +164,7 @@ def self():
     seq2['status'] = 'loaded'
 
     state['seqtype'] = 'protein'
-    if state['seq'][0]['status'] is 'loaded' and state['seq'][1]['status'] is 'loaded':
+    if state['seq'][0]['status'] == 'loaded' and state['seq'][1]['status'] == 'loaded':
         if state['seq'][0]['fasta'].isACGT() and state['seq'][1]['fasta'].isACGT():
             state['seqtype'] = 'DNA'
 
@@ -232,8 +246,8 @@ def dotplot():
         match.brunDist('rundist', 'randomrun', color='#ff0000')
         match.single = False
 
-        match.writeFrame('scoredist', key='score')
-        match.writeFrame('rundist', key='len')
+        # match.writeFrame('scoredist', key='score')
+        # match.writeFrame('rundist', key='len')
 
     script, div = components(match.grid)
     # grab the static resources
@@ -255,6 +269,7 @@ def dotplot():
 if __name__ == '__main__':
     # print('Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)')
     app.run(debug=True)
+
     # app.run()
 
     exit(0)
