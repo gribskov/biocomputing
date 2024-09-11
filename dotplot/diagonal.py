@@ -17,7 +17,7 @@ from bokeh.plotting import figure, show  # , output_file
 from bokeh.layouts import layout
 from bokeh.transform import transform
 from bokeh.models import ColorBar, LinearColorMapper, ColumnDataSource, LinearAxis, Range1d, \
-    BoxAnnotation
+    BoxAnnotation, Scatter
 from bokeh.core.validation import silence
 # noinspection PyUnresolvedReferences
 from bokeh.core.validation.warnings import MISSING_RENDERERS
@@ -655,9 +655,13 @@ class Diagonal(Score, Fasta):
 
         source = ColumnDataSource(data)
         if mode == 'dot':
-            figure.circle(source=source, x='x', y='y', size='size',
+            # figure.circle(source=source, x='x', y='y', size='size',
+            #               line_color=transform('score', cmap), line_alpha=alpha,
+            #               fill_color=transform('score', cmap), fill_alpha=alpha)
+            glyph = Scatter(x='x', y='y', size='size',
                           line_color=transform('score', cmap), line_alpha=alpha,
                           fill_color=transform('score', cmap), fill_alpha=alpha)
+            figure.add_glyph(source, glyph)
 
         else:
             # line mode
@@ -909,8 +913,12 @@ class Diagonal(Score, Fasta):
         :param score: list
         :return: float, float
         -----------------------------------------------------------------------------------------"""
-        scoremin = score[0]
-        scoremax = score[0]
+        if score:
+            scoremin = score[0]
+            scoremax = score[0]
+        else:
+            scoremin = scoremax = 0
+
         for s in score:
             scoremin = min(scoremin, s)
             scoremax = max(scoremax, s)
