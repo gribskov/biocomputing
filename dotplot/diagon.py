@@ -206,8 +206,10 @@ def dotplot():
 
     if plottype == "reverse":
         match.seqreverse = True
+
+    # int() cannot cast a not integer string, so must use int(float('1.5'))
     match.setupCalculation(fasta1, fasta2,
-                           window=int(p['window']), threshold=int(p['threshold']))
+                           window=int(p['window']), threshold=int(float(p['threshold'])))
     match.setupBokeh(cbase=p['cbase'], clevels=256, creverse='True')
     match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
     if mode == 'line':
@@ -219,7 +221,7 @@ def dotplot():
         match.seqreverse = True
         match.resetFrame('dots')
         match.setupCalculation(fasta1, fasta2, resetstat=False,
-                               window=int(p['window']), threshold=int(p['threshold']))
+                               window=int(p['window']), threshold=int(float(p['threshold'])))
         # match.setupBokeh(cbase='Viridis', clevels=256, creverse='True')
         match.allDiagonals(select=['dots', 'scoredist', 'rundist'])
         if mode == 'line':
