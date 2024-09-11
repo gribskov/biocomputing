@@ -26,9 +26,14 @@
                 {% if state.error %}
                 <p><span style="color:black;">File {{loop.index}} is {{state.error}}. Try again.</span></p>
                 {% endif %}
-                FastA formatted sequence: <input type="file" name="file{{loop.index}}"/>
-                <br/>
-                <input type="submit"  value="Load"/>
+                Select FastA formatted sequence file:
+                   <a href="static/help-fasta.html">
+                       <img src="static/help-icon-17008.png" style="width:20px;height:20px;">
+                   </a>
+                <p style="margin-left:50px;">
+                   <input type="file" name="file{{loop.index}}">
+                </p>
+                <input type="submit"  value="Load File"/>
             </form>
 
         {% elif file.status == 'loaded' %}
