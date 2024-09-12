@@ -82,8 +82,8 @@ class Diagonal(Score, Fasta):
         Load the sequences and do some basic setup for score calculations. Sequences
         are passed as Fasta object to make it easier to use multi fasta files.
 
-        :param seq1: Fasta object
-        :param seq2: Fasta object
+        :param seq1: hash of id, doc, seq, format
+        :param seq2:
         :param window: int, length of window for calculation
         :param threshold: float, minimum score in window to plot
         :param resetstat: boolean, if False, reset score and run counts to zero
@@ -92,8 +92,8 @@ class Diagonal(Score, Fasta):
         # sequence setup
         self.s1 = seq1
         self.s2 = seq2
-        self.l1 = len(seq1.seq)
-        self.l2 = len(seq2.seq)
+        self.l1 = len(seq1['seq'])
+        self.l2 = len(seq2['seq'])
 
         # move shorter sequence to s2 if necessary
         if self.l1 < self.l2:
@@ -104,7 +104,7 @@ class Diagonal(Score, Fasta):
         # reverse sequence 2 if necessary
         yinc = 1
         if self.seqreverse:
-            self.s2.seq = self.s2.reverseComplement()
+            self.s2['seq'] = fasta.reverseComplement(self.s2['seq'])
             self.yinc = -1
 
         # setup integer array version of sequence
@@ -147,17 +147,17 @@ class Diagonal(Score, Fasta):
             titlestr = self.title
         else:
             now = date.today()
-            titlestr = 'Dotplot of {} and {} - {}'.format(self.s1.id, self.s2.id, now)
+            titlestr = 'Dotplot of {} and {} - {}'.format(self.s1['id'], self.s2['id'], now)
 
-        xlabel = '\n'.join([self.s1.id, self.s1.doc])
-        ylabel = '\n'.join([self.s2.doc, self.s2.id])
+        xlabel = '\n'.join([self.s1['id'], self.s1['doc']])
+        ylabel = '\n'.join([self.s2['doc'], self.s2['id']])
 
         # account for sequence length difference, ylen scaling affects main and legend panels
         xlen = 800
         ylen = xlen * self.l2 / self.l1
 
         # define each panel as a figure
-        label = '({}, {}, score)'.format(self.s1.id, self.s2.id)
+        label = '({}, {}, score)'.format(self.s1['id'], self.s2['id'])
         TIPS = [(label, '($x{0}, $y{0}, @score)')]
         self.figure['main'] = figure(title=titlestr, x_axis_label=xlabel, y_axis_label=ylabel,
                                      height=int(ylen), width=int(xlen), align='center',
@@ -256,8 +256,8 @@ class Diagonal(Score, Fasta):
         -----------------------------------------------------------------------------------------"""
         a2i = self.a2i
 
-        self.i1 = [a2i[c] for c in self.s1.seq]
-        self.i2 = [a2i[c] for c in self.s2.seq]
+        self.i1 = [a2i[c] for c in self.s1['seq']]
+        self.i2 = [a2i[c] for c in self.s2['seq']]
 
         return len(self.i1), len(self.i2)
 
@@ -309,6 +309,7 @@ class Diagonal(Score, Fasta):
         -----------------------------------------------------------------------------------------"""
         diaglen, pos1, pos2 = self.diagLenBegin(d)
 
+        # print(f'diagonalscore i1:{self.i1}')
         i1 = self.i1
         i2 = self.i2
 
@@ -350,6 +351,7 @@ class Diagonal(Score, Fasta):
             pos1 += 1
             pos2 += 1
 
+        # print(f'diagonal:{diagonal}')
         return diagonal
 
     def random(self, n=10000):

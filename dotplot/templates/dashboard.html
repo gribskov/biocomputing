@@ -9,7 +9,18 @@
 <h1>Diagon</h1>
 
 <div class="controlpanel">
+    {% if user %}
+    user:{{user}}
+    {%set state=session[user]['state']%}
+    {%set sid=user%}
+    state:{{state}}
+    {% else %}
+    user undefined<br/>
+    {% set sid=request.form.get("session_key") %}
+    {% set state=session[sid]['state']%}
+    {% endif %}
 
+    dashboard begin state: {{state}}
     {% for file in state.seq %}
         {% if file.status == 'next' %}
             {% if loop.index == 2 %}
@@ -23,6 +34,8 @@
             <form action="/getSequence" method="POST"
                   enctype="multipart/form-data"
                   style="margin-top: 10px;">
+                <input type="hidden" name="session_key" value="{{sid}}">
+
                 {% if state.error %}
                 <p><span style="color:black;">File {{loop.index}} is {{state.error}}. Try again.</span></p>
                 {% endif %}
@@ -40,7 +53,7 @@
             <div class="sequence">
                 <h2>Sequence {{loop.index}}</h2>
                 <h3> {{file.fasta.id}} - {{file.fasta.doc}}</h3>
-                <pre>{{file.fasta.format()}}</pre>
+                <pre>{{file.fasta.format}}</pre>
             </div>
 
         {% endif %}
@@ -51,7 +64,7 @@
 {% if state.seq.0.status=='loaded' and state.seq.1.status=='loaded' %}
 <div class="controlpanel">
     <form action="/dotplot" method="POST" style="margin-top: 0px;">
-
+        <input type="hidden" name="session_key" value="{{sid}}">
         {% if state.seqtype == 'DNA' %}
             <input type="radio" name="plottype" value="forward" {% if state.params.plottype == 'forward' %}checked{% endif %}/> Both sequences in forward orientation<br/>
             <input type="radio" name="plottype" value="reverse" {% if state.params.plottype == 'reverse' %}checked{% endif %}/> Reverse-complement sequence 2<br/>

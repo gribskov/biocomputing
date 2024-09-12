@@ -320,6 +320,7 @@ class Fasta:
 
         return count
 
+    @staticmethod
     def isACGT(fasta, threshold=0.8):
         """-----------------------------------------------------------------------------------------
         Return True if at least threshold fraction of characters in the sequence are ACGT
