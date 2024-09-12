@@ -50,7 +50,7 @@ statedefault = {'seq': [{'fasta': None, 'status': 'next'},
                            'Blosum62': 'table/BLOSUM62.matrix'},
                 'params': {'advanced': False,
                            'mindotsize': 2,
-                           'maxdotsize': 8,
+                           'maxdotsize': 4,
                            'mode': 'dot',
                            'random': 'True',
                            'cmp': 'identity',
@@ -120,24 +120,28 @@ def getSequence():
             f = request.files['file2']
             sequence = 1
 
-        if f.content_type == 'application-x/ext-file':
+        # if f.content_type == 'application-x/ext-file':
             # print(f'repr:{repr(f)}')
-            # print(f'f:{f}\tlen:{f.content_length}\ttype:{f.content_type}\tparams'
-            #                              f':{f.mimetype_params}')
-            fasta = Fasta(fh=f)
-            success = fasta.read()
-            if not success:
-                app.logger.warning('no fasta sequence found')
-            print(fasta.format())
-            state['error'] = ''
-            seq = state['seq'][sequence]
-            seq['fasta'] = fasta
-            seq['status'] = 'loaded'
-        else:
-            # flash('Error in sequence file')
-            # return render_template('dashboard.html', state=state)
+        print(f'f:{f}\tlen:{f.content_length}\ttype:{f.content_type}\tparams'
+                                     f':{f.mimetype_params}')
+        fasta = Fasta(fh=f)
+        success = fasta.read()
+        if not success:
+            app.logger.warning('Cannot read file as fasta sequence')
             state['error'] = 'not a valid sequence file'
             return redirect(url_for('getSequence'))
+        print(fasta.format())
+        state['error'] = ''
+        seq = state['seq'][sequence]
+        seq['fasta'] = fasta
+        seq['status'] = 'loaded'
+    # else:
+        #     # flash('Error in sequence file')
+        #     # return render_template('dashboard.html', state=state)
+        #     print(f'f:{f}\tlen:{f.content_length}\ttype:{f.content_type}\tparams'
+        #                                  f':{f.mimetype_params}')
+        #     state['error'] = 'not a valid sequence file'
+        #     return redirect(url_for('getSequence'))
 
         # if both sequences have been selected, check whether the sequences are DNA or protein
         state['params']['seqtype'] = 'protein'
