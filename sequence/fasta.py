@@ -105,7 +105,10 @@ class Fasta:
                 line = line.rstrip('\n\r ')
             except TypeError:
                 # in case of a byte string
-                line = line.decode()
+                try:
+                    line = line.decode()
+                except UnicodeDecodeError:
+                    return False
                 line = line.rstrip('\n\r ')
 
             if line[0] == '>':
