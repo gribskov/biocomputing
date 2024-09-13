@@ -114,10 +114,8 @@ def isACGT(fasta, threshold=0.8):
             continue
 
     if acgt / total >= threshold:
-        # print(f'isACGT=True')
         return True
 
-    # print(f'isACGT=False  total={total}    acgt={acgt}    count:{count}')
     return False
 
 
@@ -173,12 +171,9 @@ def getSequence():
     sequence = None
     if request.method == 'POST':
         sid = request.form.get("session_key")
-        # print(f'get_sequence:sid={sid}')
         state = session[sid]['state']
-        # print(f'getsequence state:{state}')
         if 'file1' in request.files:
             f = request.files['file1']
-            # print(f'sid:{sid}\n{state}')
             sequence = 0
             state['seq'][1]['status'] = 'next'
 
@@ -186,9 +181,6 @@ def getSequence():
             f = request.files['file2']
             sequence = 1
 
-        # print(f'sequence={sequence}')
-        # print(f'f:{f}\tlen:{f.content_length}\ttype:{f.content_type}\tparams'
-        #       f':{f.mimetype_params}')
         fasta = Fasta(fh=f)
         success = fasta.read()
         if not success:
@@ -203,7 +195,6 @@ def getSequence():
         print(fasta.format())
         seq = state['seq'][sequence]
         seq['fasta'] = {'id': fasta.id, 'doc': fasta.doc, 'seq': fasta.seq, 'format': fasta.format(), 'dir': 'forward'}
-        # print(f"sequence {sequence + 1}:{seq['fasta']}")
         seq['status'] = 'loaded'
 
         # else:
@@ -221,9 +212,8 @@ def getSequence():
             if isACGT(state['seq'][0]['fasta']) and isACGT(state['seq'][1]['fasta']):
                 state['params']['seqtype'] = 'DNA'
                 state['params']['cmp'] = 'identity'
-        session.modified = True
 
-        # print(f"getsequence state end: {session[sid]['state']}")
+        session.modified = True
 
     return render_template('dashboard.html')
 
@@ -237,7 +227,6 @@ def self():
     :return:
     ---------------------------------------------------------------------------------------------"""
     sid = request.form.get("session_key")
-    # print(f"self: session_key={sid}")
     state = session[sid]['state']
 
     seq1 = state['seq'][0]
@@ -262,7 +251,6 @@ def self():
 def dotplot():
     sid = request.form.get("session_key")
     state = session[sid]['state']
-    # print(f'dotplot:{sid}')
 
     getParams(request, state)
     p = state['params']
@@ -270,8 +258,6 @@ def dotplot():
     mode = p['mode']
     plottype = p['plottype']
     seqtype = p['seqtype']
-    # print(f"mode:{p['mode']}   type:{p['plottype']}   seq:{p['seqtype']}")
-    # print(f'params:{p}')
 
     fasta1 = state['seq'][0]['fasta']
     fasta2 = state['seq'][1]['fasta']
@@ -359,7 +345,6 @@ def dotplot():
 # Main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    # print('Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)')
     app.run(debug=True)
 
     exit(0)

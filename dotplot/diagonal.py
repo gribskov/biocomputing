@@ -103,7 +103,6 @@ class Diagonal(Score, Fasta):
 
         # reverse sequence 2 if necessary
 
-        # print(f's2:{self.s2}')
         if self.seqreverse:
             if self.s2['dir'] == 'forward':
                 # reverse forward sequence
@@ -319,7 +318,6 @@ class Diagonal(Score, Fasta):
         -----------------------------------------------------------------------------------------"""
         diaglen, pos1, pos2 = self.diagLenBegin(d)
 
-        # print(f'diagonalscore i1:{self.i1}')
         i1 = self.i1
         i2 = self.i2
 
@@ -361,7 +359,6 @@ class Diagonal(Score, Fasta):
             pos1 += 1
             pos2 += 1
 
-        # print(f'diagonal:{diagonal}')
         return diagonal
 
     def random(self, n=10000):
