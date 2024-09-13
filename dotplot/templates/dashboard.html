@@ -9,26 +9,24 @@
 <h1>Diagon</h1>
 
 <div class="controlpanel">
-    {% if user %}
-    user:{{user}}
-    {%set state=session[user]['state']%}
-    {%set sid=user%}
-    state:{{state}}
-    {% else %}
-    user undefined<br/>
-    {% set sid=request.form.get("session_key") %}
-    {% set state=session[sid]['state']%}
-    {% endif %}
+    {%- if user %}
+        <!-- user is set ({{user}}) -->
+        {%- set state=session[user]['state'] -%}
+        {%- set sid=user -%}
+    {%- else -%}
+        <!-- user is undefined -->
+        {%- set sid=request.form.get("session_key") -%}
+        {%- set state=session[sid]['state'] -%}
+    {%- endif -%}
 
-    dashboard begin state: {{state}}
-    {% for file in state.seq %}
-        {% if file.status == 'next' %}
-            {% if loop.index == 2 %}
+    {% for file in state.seq -%}
+        {% if file.status == 'next' -%}
+            {% if loop.index == 2 -%}
                 <form action="/self" method="POST">
                     <input type="hidden" name="session_key" value="{{sid}}">
                     <input type="submit" name="selfplot" value="Self plot">
                 </form>
-            {% endif %}
+            {%- endif %}
 
             <h2>Sequence {{loop.index}}</h2>
 
@@ -50,15 +48,15 @@
                 <input type="submit"  value="Load File"/>
             </form>
 
-        {% elif file.status == 'loaded' %}
+        {%- elif file.status == 'loaded' -%}
             <div class="sequence">
                 <h2>Sequence {{loop.index}}</h2>
                 <h3> {{file.fasta.id}} - {{file.fasta.doc}}</h3>
                 <pre>{{file.fasta.format}}</pre>
             </div>
 
-        {% endif %}
-    {% endfor %}
+        {%- endif -%}
+    {%- endfor %}
 </div>
 
 
@@ -116,15 +114,13 @@
                 <option value="Plasma" {% if state.params.cbase== 'Cividis'%}selected {% endif %}>Cividis</option>
                 <option value="Turbo" {% if state.params.cbase== 'Turbo'%}selected {% endif %}>Turbo</option>
             </select> Select palette
-        {% else %}
+        {%- else -%}
             <input type="submit" formaction={{url_for("advanced", _anchor="advanced")}} value="Show"> advanced plotting parameters
-        {% endif %}
+        {%- endif -%}
 
     </form>
 </div>
 
-{% endif %}
-
-
+{%- endif -%}
 </body>
 </html>

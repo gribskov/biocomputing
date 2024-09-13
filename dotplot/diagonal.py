@@ -103,7 +103,7 @@ class Diagonal(Score, Fasta):
 
         # reverse sequence 2 if necessary
 
-        print(f's2:{self.s2}')
+        # print(f's2:{self.s2}')
         if self.seqreverse:
             if self.s2['dir'] == 'forward':
                 # reverse forward sequence

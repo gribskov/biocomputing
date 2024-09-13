@@ -114,10 +114,10 @@ def isACGT(fasta, threshold=0.8):
             continue
 
     if acgt / total >= threshold:
-        print(f'isACGT=True')
+        # print(f'isACGT=True')
         return True
 
-    print(f'isACGT=False  total={total}    acgt={acgt}    count:{count}')
+    # print(f'isACGT=False  total={total}    acgt={acgt}    count:{count}')
     return False
 
 
@@ -127,25 +127,32 @@ def isACGT(fasta, threshold=0.8):
 
 @app.route('/')
 def index():
+    """---------------------------------------------------------------------------------------------
+    Generate a random session key and pass to dashboard.html
+
+    :return: render dashboard.html
+    ---------------------------------------------------------------------------------------------"""
     session_key = str(os.urandom(12))
-    print(f'session key:{session_key}')
-    # session[session_key] = 1
     session[session_key] = {'state': copy.deepcopy(statedefault)}
     return render_template('dashboard.html', user=session_key)
 
 
-# --------------------------------------------------------------------------------------------------
-
 @app.route('/dashboard', methods=['POST', 'GET'])
 def dashboard():
+    """---------------------------------------------------------------------------------------------
+        present the dashboard: covers all stages of sequnce entry and parameter selection
+
+        :return: render dashboard.html
+    ---------------------------------------------------------------------------------------------"""
     return render_template('dashboard.html')
 
 
-# --------------------------------------------------------------------------------------------------
-# advanced toggles showing of the advanced parameters and reloads the dashboard
-# --------------------------------------------------------------------------------------------------
 @app.route('/advanced', methods=['POST', 'GET'])
 def advanced():
+    # ----------------------------------------------------------------------------------------------
+    # advanced toggles showing of the advanced parameters and reloads the dashboard
+    # ----------------------------------------------------------------------------------------------
+
     sid = request.form.get("session_key")
     state = session[sid]['state']
     getParams(request, state)
@@ -157,20 +164,21 @@ def advanced():
     return render_template('dashboard.html', state=state)
 
 
-# --------------------------------------------------------------------------------------------------
-# main dashboard for loading sequences, scoring table and setting parameters
-# --------------------------------------------------------------------------------------------------
 @app.route('/getSequence', methods=['POST', 'GET'])
 def getSequence():
+    # ----------------------------------------------------------------------------------------------
+    # load sequences, store in session
+    # ----------------------------------------------------------------------------------------------
+
     sequence = None
     if request.method == 'POST':
         sid = request.form.get("session_key")
-        print(f'get_sequence:sid={sid}')
+        # print(f'get_sequence:sid={sid}')
         state = session[sid]['state']
-        print(f'getsequence state:{state}')
+        # print(f'getsequence state:{state}')
         if 'file1' in request.files:
             f = request.files['file1']
-            print(f'sid:{sid}\n{state}')
+            # print(f'sid:{sid}\n{state}')
             sequence = 0
             state['seq'][1]['status'] = 'next'
 
@@ -178,11 +186,9 @@ def getSequence():
             f = request.files['file2']
             sequence = 1
 
-        print(f'sequence={sequence}')
-        # if f.content_type == 'application-x/ext-file':
-        # print(f'repr:{repr(f)}')
-        print(f'f:{f}\tlen:{f.content_length}\ttype:{f.content_type}\tparams'
-              f':{f.mimetype_params}')
+        # print(f'sequence={sequence}')
+        # print(f'f:{f}\tlen:{f.content_length}\ttype:{f.content_type}\tparams'
+        #       f':{f.mimetype_params}')
         fasta = Fasta(fh=f)
         success = fasta.read()
         if not success:
@@ -196,8 +202,8 @@ def getSequence():
         # sequence is 0 or 1 for sequnece 1 and 2, respectively
         print(fasta.format())
         seq = state['seq'][sequence]
-        seq['fasta'] = {'id': fasta.id, 'doc': fasta.doc, 'seq': fasta.seq, 'format': fasta.format(), 'dir':'forward'}
-        print(f"sequence {sequence+1}:{seq['fasta']}")
+        seq['fasta'] = {'id': fasta.id, 'doc': fasta.doc, 'seq': fasta.seq, 'format': fasta.format(), 'dir': 'forward'}
+        # print(f"sequence {sequence + 1}:{seq['fasta']}")
         seq['status'] = 'loaded'
 
         # else:
@@ -217,7 +223,7 @@ def getSequence():
                 state['params']['cmp'] = 'identity'
         session.modified = True
 
-        print(f"getsequence state end: {session[sid]['state']}")
+        # print(f"getsequence state end: {session[sid]['state']}")
 
     return render_template('dashboard.html')
 
@@ -231,7 +237,7 @@ def self():
     :return:
     ---------------------------------------------------------------------------------------------"""
     sid = request.form.get("session_key")
-    print(f"self: session_key={sid}")
+    # print(f"self: session_key={sid}")
     state = session[sid]['state']
 
     seq1 = state['seq'][0]
@@ -256,7 +262,7 @@ def self():
 def dotplot():
     sid = request.form.get("session_key")
     state = session[sid]['state']
-    print(f'dotplot:{sid}')
+    # print(f'dotplot:{sid}')
 
     getParams(request, state)
     p = state['params']
@@ -264,8 +270,8 @@ def dotplot():
     mode = p['mode']
     plottype = p['plottype']
     seqtype = p['seqtype']
-    print(f"mode:{p['mode']}   type:{p['plottype']}   seq:{p['seqtype']}")
-    print(f'params:{p}')
+    # print(f"mode:{p['mode']}   type:{p['plottype']}   seq:{p['seqtype']}")
+    # print(f'params:{p}')
 
     fasta1 = state['seq'][0]['fasta']
     fasta2 = state['seq'][1]['fasta']
@@ -355,8 +361,5 @@ def dotplot():
 if __name__ == '__main__':
     # print('Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)')
     app.run(debug=True)
-    # app.permanent_session_lifetime = timedelta(minutes=60)
-
-    # app.run()
 
     exit(0)
