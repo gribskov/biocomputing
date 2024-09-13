@@ -25,6 +25,7 @@
         {% if file.status == 'next' %}
             {% if loop.index == 2 %}
                 <form action="/self" method="POST">
+                    <input type="hidden" name="session_key" value="{{sid}}">
                     <input type="submit" name="selfplot" value="Self plot">
                 </form>
             {% endif %}

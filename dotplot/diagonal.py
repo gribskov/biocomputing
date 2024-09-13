@@ -102,10 +102,20 @@ class Diagonal(Score, Fasta):
             self.l1, self.l2 = self.l2, self.l1
 
         # reverse sequence 2 if necessary
-        yinc = 1
+
+        print(f's2:{self.s2}')
         if self.seqreverse:
-            self.s2['seq'] = fasta.reverseComplement(self.s2['seq'])
+            if self.s2['dir'] == 'forward':
+                # reverse forward sequence
+                self.s2['seq'] = Fasta.reverseComplement(self.s2['seq'])
+                self.s2['dir'] = 'reverse'
             self.yinc = -1
+        else:
+            if self.s2['dir'] == 'reverse':
+                # un-reverse previously reversed
+                self.s2['seq'] = Fasta.reverseComplement(self.s2['seq'])
+                self.s2['dir'] = 'forward'
+            self.yinc = 1
 
         # setup integer array version of sequence
         self.seqToInt()

@@ -16,6 +16,8 @@ from diagonal import Diagonal
 from sequence.fasta import Fasta
 
 from flask import Flask, render_template, request, redirect, flash, url_for, session
+from flask_session import Session
+from cachelib.file import FileSystemCache
 import logging
 
 from bokeh.embed import components
@@ -26,8 +28,16 @@ from bokeh.resources import INLINE
 
 cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None
+
 app = Flask(__name__)
 app.secret_key = 'secret'
+SESSION_TYPE = 'cachelib'
+SESSION_SERIALIZATION_FORMAT = 'json'
+SESSION_CACHELIB = FileSystemCache(threshold=500, cache_dir=f"{os.path.dirname(__file__)}/sessions")
+USE_PERMANENT_SESSION = False
+
+app.config.from_object(__name__)
+Session(app)
 
 
 # uncomment below to turn off server log
@@ -73,39 +83,43 @@ def getParams(res, state):
 
     return
 
+
 def isACGT(fasta, threshold=0.8):
-        """-----------------------------------------------------------------------------------------
-        Return True if at least threshold fraction of characters in the sequence are ACGT
+    """-----------------------------------------------------------------------------------------
+    Return True if at least threshold fraction of characters in the sequence are ACGT
 
-        :param fasta: string    the sequence and nothing else
-        :param threshold: float
-        :return: Boolean
-        -----------------------------------------------------------------------------------------"""
-        total = len(fasta)
-        if not total:
-            return False
-
-        # get the composition, assum uppercase
-        count = {}
-        for ch in fasta:
-            if ch in count:
-                count[ch] += 1
-            else:
-                count[ch] = 1
-
-        # figure out fraction that are ACGT
-        acgt = 0
-        for base in 'ACGT':
-            try:
-                acgt += count[base]
-            except KeyError:
-                # ignore missing bases (but they count as non-ACGT)
-                continue
-
-        if acgt / total >= threshold:
-            return True
-
+    :param fasta: string    the sequence and nothing else
+    :param threshold: float
+    :return: Boolean
+    -----------------------------------------------------------------------------------------"""
+    total = len(fasta['seq'])
+    if not total:
         return False
+
+    # get the composition, assum uppercase
+    count = {}
+    for ch in fasta['seq']:
+        if ch in count:
+            count[ch] += 1
+        else:
+            count[ch] = 1
+
+    # figure out fraction that are ACGT
+    acgt = 0
+    for base in 'ACGT':
+        try:
+            acgt += count[base]
+        except KeyError:
+            # ignore missing bases (but they count as non-ACGT)
+            continue
+
+    if acgt / total >= threshold:
+        print(f'isACGT=True')
+        return True
+
+    print(f'isACGT=False  total={total}    acgt={acgt}    count:{count}')
+    return False
+
 
 # --------------------------------------------------------------------------------------------------
 # Flask routes
@@ -132,7 +146,9 @@ def dashboard():
 # --------------------------------------------------------------------------------------------------
 @app.route('/advanced', methods=['POST', 'GET'])
 def advanced():
-    getParams(request)
+    sid = request.form.get("session_key")
+    state = session[sid]['state']
+    getParams(request, state)
     if state['params']['advanced']:
         state['params']['advanced'] = False
     else:
@@ -180,7 +196,8 @@ def getSequence():
         # sequence is 0 or 1 for sequnece 1 and 2, respectively
         print(fasta.format())
         seq = state['seq'][sequence]
-        seq['fasta'] = {'id':fasta.id, 'doc':fasta.doc, 'seq':fasta.seq, 'format':fasta.format()}
+        seq['fasta'] = {'id': fasta.id, 'doc': fasta.doc, 'seq': fasta.seq, 'format': fasta.format(), 'dir':'forward'}
+        print(f"sequence {sequence+1}:{seq['fasta']}")
         seq['status'] = 'loaded'
 
         # else:
@@ -193,28 +210,28 @@ def getSequence():
 
         # if both sequences have been selected, check whether the sequences are DNA or protein
         state['params']['seqtype'] = 'protein'
+        state['params']['cmp'] = 'Blosum62'
         if state['seq'][0]['status'] == 'loaded' and state['seq'][1]['status'] == 'loaded':
             if isACGT(state['seq'][0]['fasta']) and isACGT(state['seq'][1]['fasta']):
                 state['params']['seqtype'] = 'DNA'
+                state['params']['cmp'] = 'identity'
         session.modified = True
 
         print(f"getsequence state end: {session[sid]['state']}")
 
-
     return render_template('dashboard.html')
 
 
-# --------------------------------------------------------------------------------------------------
-# when self dotplot is selected for the second sequence, this copies the first sequence into the
-# second and returns to the main dashboard
-# --------------------------------------------------------------------------------------------------
 @app.route('/self', methods=['POST', 'GET'])
 def self():
-    """
+    """---------------------------------------------------------------------------------------------
+    when self dotplot is selected for the second sequence, this copies the first sequence into the
+    second and returns to the main dashboard
     for a self plot, sequence 1 should already be loaded, we just have to copy it to sequence 2.
     :return:
-    """
+    ---------------------------------------------------------------------------------------------"""
     sid = request.form.get("session_key")
+    print(f"self: session_key={sid}")
     state = session[sid]['state']
 
     seq1 = state['seq'][0]
@@ -240,7 +257,6 @@ def dotplot():
     sid = request.form.get("session_key")
     state = session[sid]['state']
     print(f'dotplot:{sid}')
-
 
     getParams(request, state)
     p = state['params']
@@ -339,7 +355,7 @@ def dotplot():
 if __name__ == '__main__':
     # print('Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)')
     app.run(debug=True)
-    app.permanent_session_lifetime = timedelta(minutes=60)
+    # app.permanent_session_lifetime = timedelta(minutes=60)
 
     # app.run()
 
