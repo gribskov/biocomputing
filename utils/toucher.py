@@ -156,7 +156,7 @@ while target:
             updatable[f] = atime
 
     scale = cutoff / oldest
-    print(f'\ndirectory:{current}\tscale:{scale}\tcutoff:{cutoff}\ttoldest:{oldest}')
+    print(f'\ndirectory:{current}\tscale:{scale}\tcutoff:{cutoff}\ttoldest:{oldest}\tnow:{now}')
     for f in updatable:
         new = int(updatable[f] * scale)
         # if new > now:
