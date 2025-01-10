@@ -155,10 +155,10 @@ while target:
         if atime < cutoff:
             updatable[f] = atime
 
-    scale = cutoff / oldest
+    scale = (now - cutoff) / (now - cutoff)
     print(f'\ndirectory:{current}\tscale:{scale}\tcutoff:{cutoff}\ttoldest:{oldest}\tnow:{now}')
     for f in updatable:
-        new = int(updatable[f] * scale)
+        new = int(cutoff * updatable[f] * scale)
         # if new > now:
         #     continue
         delta = (updatable[f] - new) / 3600 / 24
