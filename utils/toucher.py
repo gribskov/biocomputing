@@ -152,17 +152,30 @@ while target:
         info = os.stat(f)
         atime = int(info.st_atime)
         oldest = min(atime, oldest)
-        if atime < cutoff:
+        if atime > cutoff:
             updatable[f] = atime
+        else:
+            print(f'not updatable\t{f.name}\t{atime}\t{cutoff}')
 
-    scale = (now - cutoff) / (now - cutoff)
-    print(f'\ndirectory:{current}\tscale:{scale}\tcutoff:{cutoff}\ttoldest:{oldest}\tnow:{now}')
+    if not updatable:
+        continue
+
+    try:
+        slope = (now - cutoff) / (now - oldest)
+    except:
+        slope = 1
+
+    intercept = cutoff - slope * oldest
+    print(f'\ndirectory:{current}\tscale:{slope}\tcutoff:{cutoff}\toldest:{oldest}\tnow:{now}')
+    #print(f'\t{updatable}')
     for f in updatable:
-        new = int(cutoff * updatable[f] * scale)
+        new = int(intercept + slope * updatable[f])
+        if new > now:
+            print(f'\tWARNING:{current}\tscale:{slope}\tcutoff:{cutoff}\toldest:{oldest}\tnow:{now}')
         # if new > now:
         #     continue
         delta = (updatable[f] - new) / 3600 / 24
-        print(f'{f}\told:{updatable[f]}\tnew:{new}\tdays:{delta}')
+        print(f'\t{f}\told:{updatable[f]}\tnew:{new}\tdays:{delta}')
 
 
 
