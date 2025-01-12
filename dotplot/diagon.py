@@ -15,11 +15,9 @@ import copy
 from diagonal import Diagonal
 from sequence.fasta import Fasta
 
-# import redis
-from cachelib.file import FileSystemCache
-
-from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import Flask, render_template, request, redirect, flash, url_for, session
 from flask_session import Session
+from cachelib.file import FileSystemCache
 import logging
 
 from bokeh.embed import components
@@ -30,22 +28,17 @@ from bokeh.resources import INLINE
 
 cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None
+
 app = Flask(__name__)
 app.secret_key = 'secret'
-# app.permanent_session_lifetime = timedelta(minutes=60)
-# app.config['SESSION_TYPE'] = 'redis'
-# app.config['SESSION_PERMANENT'] = False
-# app.config['SESSION_USE_SIGNER'] = True
-# app.config['SESSION_REDIS'] = redis.from_url('redis://127.0.0.1:6379')
-
 SESSION_TYPE = 'cachelib'
 SESSION_SERIALIZATION_FORMAT = 'json'
-SESSION_CACHELIB = FileSystemCache(threshold=500, cache_dir="/sessions"),
+SESSION_CACHELIB = FileSystemCache(threshold=500, cache_dir=f"{os.path.dirname(__file__)}/sessions")
+USE_PERMANENT_SESSION = False
+
 app.config.from_object(__name__)
 Session(app)
 
-# Create and initialize the Flask-Session object AFTER `app` has been configured
-# session = Session(app)
 
 # uncomment below to turn off server log
 # log = logging.getLogger('werkzeug')
@@ -90,39 +83,41 @@ def getParams(res, state):
 
     return
 
+
 def isACGT(fasta, threshold=0.8):
-        """-----------------------------------------------------------------------------------------
-        Return True if at least threshold fraction of characters in the sequence are ACGT
+    """-----------------------------------------------------------------------------------------
+    Return True if at least threshold fraction of characters in the sequence are ACGT
 
-        :param fasta: string    the sequence and nothing else
-        :param threshold: float
-        :return: Boolean
-        -----------------------------------------------------------------------------------------"""
-        total = len(fasta)
-        if not total:
-            return False
-
-        # get the composition, assum uppercase
-        count = {}
-        for ch in fasta:
-            if ch in count:
-                count[ch] += 1
-            else:
-                count[ch] = 1
-
-        # figure out fraction that are ACGT
-        acgt = 0
-        for base in 'ACGT':
-            try:
-                acgt += count[base]
-            except KeyError:
-                # ignore missing bases (but they count as non-ACGT)
-                continue
-
-        if acgt / total >= threshold:
-            return True
-
+    :param fasta: string    the sequence and nothing else
+    :param threshold: float
+    :return: Boolean
+    -----------------------------------------------------------------------------------------"""
+    total = len(fasta['seq'])
+    if not total:
         return False
+
+    # get the composition, assum uppercase
+    count = {}
+    for ch in fasta['seq']:
+        if ch in count:
+            count[ch] += 1
+        else:
+            count[ch] = 1
+
+    # figure out fraction that are ACGT
+    acgt = 0
+    for base in 'ACGT':
+        try:
+            acgt += count[base]
+        except KeyError:
+            # ignore missing bases (but they count as non-ACGT)
+            continue
+
+    if acgt / total >= threshold:
+        return True
+
+    return False
+
 
 # --------------------------------------------------------------------------------------------------
 # Flask routes
@@ -130,26 +125,35 @@ def isACGT(fasta, threshold=0.8):
 
 @app.route('/')
 def index():
+    """---------------------------------------------------------------------------------------------
+    Generate a random session key and pass to dashboard.html
+
+    :return: render dashboard.html
+    ---------------------------------------------------------------------------------------------"""
     session_key = str(os.urandom(12))
-    print(f'session key:{session_key}')
-    # session[session_key] = 1
     session[session_key] = {'state': copy.deepcopy(statedefault)}
     return render_template('dashboard.html', user=session_key)
 
 
-# --------------------------------------------------------------------------------------------------
-
 @app.route('/dashboard', methods=['POST', 'GET'])
 def dashboard():
+    """---------------------------------------------------------------------------------------------
+        present the dashboard: covers all stages of sequnce entry and parameter selection
+
+        :return: render dashboard.html
+    ---------------------------------------------------------------------------------------------"""
     return render_template('dashboard.html')
 
 
-# --------------------------------------------------------------------------------------------------
-# advanced toggles showing of the advanced parameters and reloads the dashboard
-# --------------------------------------------------------------------------------------------------
 @app.route('/advanced', methods=['POST', 'GET'])
 def advanced():
-    getParams(request)
+    # ----------------------------------------------------------------------------------------------
+    # advanced toggles showing of the advanced parameters and reloads the dashboard
+    # ----------------------------------------------------------------------------------------------
+
+    sid = request.form.get("session_key")
+    state = session[sid]['state']
+    getParams(request, state)
     if state['params']['advanced']:
         state['params']['advanced'] = False
     else:
@@ -158,20 +162,18 @@ def advanced():
     return render_template('dashboard.html', state=state)
 
 
-# --------------------------------------------------------------------------------------------------
-# main dashboard for loading sequences, scoring table and setting parameters
-# --------------------------------------------------------------------------------------------------
 @app.route('/getSequence', methods=['POST', 'GET'])
 def getSequence():
+    # ----------------------------------------------------------------------------------------------
+    # load sequences, store in session
+    # ----------------------------------------------------------------------------------------------
+
     sequence = None
     if request.method == 'POST':
         sid = request.form.get("session_key")
-        print(f'get_sequence:sid={sid}')
         state = session[sid]['state']
-        print(f'getsequence state:{state}')
         if 'file1' in request.files:
             f = request.files['file1']
-            print(f'sid:{sid}\n{state}')
             sequence = 0
             state['seq'][1]['status'] = 'next'
 
@@ -179,11 +181,6 @@ def getSequence():
             f = request.files['file2']
             sequence = 1
 
-        print(f'sequence={sequence}')
-        # if f.content_type == 'application-x/ext-file':
-        # print(f'repr:{repr(f)}')
-        print(f'f:{f}\tlen:{f.content_length}\ttype:{f.content_type}\tparams'
-              f':{f.mimetype_params}')
         fasta = Fasta(fh=f)
         success = fasta.read()
         if not success:
@@ -197,7 +194,7 @@ def getSequence():
         # sequence is 0 or 1 for sequnece 1 and 2, respectively
         print(fasta.format())
         seq = state['seq'][sequence]
-        seq['fasta'] = {'id':fasta.id, 'doc':fasta.doc, 'seq':fasta.seq, 'format':fasta.format()}
+        seq['fasta'] = {'id': fasta.id, 'doc': fasta.doc, 'seq': fasta.seq, 'format': fasta.format(), 'dir': 'forward'}
         seq['status'] = 'loaded'
 
         # else:
@@ -210,27 +207,25 @@ def getSequence():
 
         # if both sequences have been selected, check whether the sequences are DNA or protein
         state['params']['seqtype'] = 'protein'
+        state['params']['cmp'] = 'Blosum62'
         if state['seq'][0]['status'] == 'loaded' and state['seq'][1]['status'] == 'loaded':
             if isACGT(state['seq'][0]['fasta']) and isACGT(state['seq'][1]['fasta']):
                 state['params']['seqtype'] = 'DNA'
+                state['params']['cmp'] = 'identity'
+
         session.modified = True
-
-        print(f"getsequence state end: {session[sid]['state']}")
-
 
     return render_template('dashboard.html')
 
 
-# --------------------------------------------------------------------------------------------------
-# when self dotplot is selected for the second sequence, this copies the first sequence into the
-# second and returns to the main dashboard
-# --------------------------------------------------------------------------------------------------
 @app.route('/self', methods=['POST', 'GET'])
 def self():
-    """
+    """---------------------------------------------------------------------------------------------
+    when self dotplot is selected for the second sequence, this copies the first sequence into the
+    second and returns to the main dashboard
     for a self plot, sequence 1 should already be loaded, we just have to copy it to sequence 2.
     :return:
-    """
+    ---------------------------------------------------------------------------------------------"""
     sid = request.form.get("session_key")
     state = session[sid]['state']
 
@@ -256,8 +251,6 @@ def self():
 def dotplot():
     sid = request.form.get("session_key")
     state = session[sid]['state']
-    print(f'dotplot:{sid}')
-
 
     getParams(request, state)
     p = state['params']
@@ -265,8 +258,6 @@ def dotplot():
     mode = p['mode']
     plottype = p['plottype']
     seqtype = p['seqtype']
-    print(f"mode:{p['mode']}   type:{p['plottype']}   seq:{p['seqtype']}")
-    print(f'params:{p}')
 
     fasta1 = state['seq'][0]['fasta']
     fasta2 = state['seq'][1]['fasta']
@@ -354,17 +345,6 @@ def dotplot():
 # Main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    # print('Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)')
     app.run(debug=True)
-    app.permanent_session_lifetime = timedelta(minutes=60)
-    app.config['SESSION_TYPE'] = 'redis'
-    app.config['SESSION_PERMANENT'] = False
-    app.config['SESSION_USE_SIGNER'] = True
-    app.config['SESSION_REDIS'] = redis.from_url('redis://127.0.0.1:6379')
-
-    # Create and initialize the Flask-Session object AFTER `app` has been configured
-    Session(app)
-
-    # app.run()
 
     exit(0)
