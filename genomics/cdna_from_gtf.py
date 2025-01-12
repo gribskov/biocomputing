@@ -16,6 +16,7 @@ class Gene():
     """=============================================================================================
     Information about genes/transcripts
 
+
     ============================================================================================="""
 
     def __init__(self, gene_id='', seq='', begin=0, end=0, strand=''):
@@ -112,26 +113,39 @@ def write_out(out, target, spliced, linelen=100):
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    genomefile = 'A:/mrg\Dropbox/21dog_dlbcl/reference data/cfam112/Canis_lupus_familiaris.ROS_Cfam_1.0.dna.toplevel.fa'
+    # genomefile = 'A:/mrg\Dropbox/21dog_dlbcl/reference data/cfam112/Canis_lupus_familiaris.ROS_Cfam_1.0.dna.toplevel.fa'
+    genomefile = 'A:/data/cfam112/Canis_lupus_familiaris.ROS_Cfam_1.0.dna.toplevel.fa'
     try:
         genome = open(genomefile, 'r')
     except OSError:
         sys.stderr.write(f'Unable to open genome file ({genomefile}')
         exit(1)
 
-    gtf_file = 'A:/mrg\Dropbox/21dog_dlbcl/reference data/cfam112/Canis_lupus_familiaris.ROS_Cfam_1.0.112.gtf'
+    # gtf_file = 'A:/mrg\Dropbox/21dog_dlbcl/reference data/cfam112/Canis_lupus_familiaris.ROS_Cfam_1.0.112.gtf'
+    gtf_file='A:/data/cfam112/Canis_lupus_familiaris.ROS_Cfam_1.0.112.gtf'
     gtf = Gtf(gtf_file)
 
     transcript_list = []
+    chr_start = {}
+    # Ensembl numbers the entire genome sequentially in the GTF file, but in the DNA each sequence is a
+    # separate unitstarting at position 1. chr_start gives the lowest coordinate for each chromosome
     nt = 0
     while gtf.next():
         nt += 1
-        if nt > 50000:
+        if nt > 100000:
             break
         gtf.parse()
         gtf.add_ensemble_attributes()
-
         parsed = gtf.parsed
+
+        # check the minimum coordinate in the chromosome
+        seqid = parsed['seqname']
+        if seqid in chr_start:
+            chr_start[seqid] = min( chr_start[seqid], parsed['start'])
+        else:
+            chr_start[seqid] = parsed['start']
+
+        # check for the features of interest: gene, transcript, exon
         if parsed['feature'] == 'gene':
             print(f"{parsed['seqname']}\t{parsed['start']}\t{parsed['end']}\t{parsed['strand']}\t{parsed['gene_id']}")
             gene = Gene(parsed['gene_id'], parsed['seqname'], parsed['start'], parsed['end'], parsed['strand'])
@@ -146,6 +160,8 @@ if __name__ == '__main__':
         elif parsed['feature'] in ('exon'):
             print(f"\t\t{parsed['feature']}\t{parsed['start']}\t{parsed['end']}")
             gene.exon_add(parsed['start'], parsed['end'])
+
+    # count the total number of transcripts and exons
 
     print(f'Counting data')
     transcript_n = 0
@@ -176,7 +192,11 @@ if __name__ == '__main__':
     seq = ''
     nline = 0
     for line in genome:
-        print(f'{nline}:{len(seq)}\n{line}')
+        if not nline%1000:
+            sys.stdout.write('.')
+            if not nline%100000:
+                sys.stdout.write(f'{nline} \n')
+        # print(f'{nline}:{len(seq)}\n{line}')
         if len(seq) > 10000000:
             break
         nline += 1
@@ -196,6 +216,7 @@ if __name__ == '__main__':
             if current_id != id:
                 # new sequence
                 seq = ''
+                print(f'starting chr:{id}')
                 current_id = id
                 current_doc = doc
 
@@ -208,9 +229,11 @@ if __name__ == '__main__':
     # content of chr_idx are  Gene objects
     for t in chr_idx[current_id]:
         print(f'{t.seq}:{t.gene_id}\t{t.begin}\t{t.end}\t{t.strand}')
-        print(f'{seq[t.begin:t.end+1]}')
+        # print(f'{seq[t.begin:t.end+1]}')
         spliced = get_spliced(t, seq)
         write_out(out, t, spliced)
+        if t.begin > 10000000:
+            break
 
     out.close()
     exit(0)

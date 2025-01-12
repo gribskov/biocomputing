@@ -98,7 +98,7 @@ class Gtf:
 
     def add_ensemble_attributes(self):
         """-----------------------------------------------------------------------------------------
-        Ensembl attributes seem to reliable come in pairs so they can be split and added to parse.
+        Ensembl attributes seem to reliably come in pairs so they can be split and added to parse.
         Some other sources have naked values in the attributes such as gene IDs, see attribute2gff,
         below. The parsed key 'attribute' is removed after converting
 

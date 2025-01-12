@@ -15,7 +15,11 @@ import copy
 from diagonal import Diagonal
 from sequence.fasta import Fasta
 
-from flask import Flask, render_template, request, redirect, flash, url_for, session
+# import redis
+from cachelib.file import FileSystemCache
+
+from flask import Flask, render_template, request, redirect, flash, url_for
+from flask_session import Session
 import logging
 
 from bokeh.embed import components
@@ -28,7 +32,20 @@ cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None
 app = Flask(__name__)
 app.secret_key = 'secret'
+# app.permanent_session_lifetime = timedelta(minutes=60)
+# app.config['SESSION_TYPE'] = 'redis'
+# app.config['SESSION_PERMANENT'] = False
+# app.config['SESSION_USE_SIGNER'] = True
+# app.config['SESSION_REDIS'] = redis.from_url('redis://127.0.0.1:6379')
 
+SESSION_TYPE = 'cachelib'
+SESSION_SERIALIZATION_FORMAT = 'json'
+SESSION_CACHELIB = FileSystemCache(threshold=500, cache_dir="/sessions"),
+app.config.from_object(__name__)
+Session(app)
+
+# Create and initialize the Flask-Session object AFTER `app` has been configured
+# session = Session(app)
 
 # uncomment below to turn off server log
 # log = logging.getLogger('werkzeug')
@@ -340,6 +357,13 @@ if __name__ == '__main__':
     # print('Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)')
     app.run(debug=True)
     app.permanent_session_lifetime = timedelta(minutes=60)
+    app.config['SESSION_TYPE'] = 'redis'
+    app.config['SESSION_PERMANENT'] = False
+    app.config['SESSION_USE_SIGNER'] = True
+    app.config['SESSION_REDIS'] = redis.from_url('redis://127.0.0.1:6379')
+
+    # Create and initialize the Flask-Session object AFTER `app` has been configured
+    Session(app)
 
     # app.run()
 

@@ -39,7 +39,7 @@ class Blast(object):
                         # created from format. Default is diamond outfmt=6
             line        # last string read
         In addition, variable attributes depending on the format will be filled.  
-        In the case of tabulara format, the attributes will have the names given i
+        In the case of tabular format, the attributes will have the names given i
         in the fields list.
         usage
             blast = Blast()
