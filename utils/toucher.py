@@ -70,6 +70,7 @@ def target_split(comma_str):
     :return: list           with each directory as a target
     ---------------------------------------------------------------------------------------------"""
     target_list = comma_str.split(',')
+    
     return target_list
 
 
@@ -136,41 +137,42 @@ while target:
     oldest = now
     updatable = {}
 
-    print(f'processing files in {current}')
+    # the initial directories are not DirEntry objects so current.path will fail so we need to
+    # create a name for the directory currently being processed
+    if isinstance(current, os.DirEntry ):
+        curname = current.path
+    else:
+        curname = current
+
+    # processing files in curname
     count = 0
     skipped = 0
     for f in files:
-        print(f'\t{f}', end='\t')
+        #print(f'\t{f}', end='\t')
         count += 1
         if f.is_dir():
             # only directories get pushed on stack, and only if they have not been visited
-            print(f'dir')
+            # print(f'dir')
             visited[f] += 1
             if visited[f] <= 1:
                 target.append(f)
 
         elif f.is_file(follow_symlinks=False):
-            print(f'file')
+            pass
+            #print(f'file')
 
         else:
             # the other possibility is a symbolic link, do nothing
             skipped += 1
-            print('link')
+            # print('link')
             continue
 
         info = os.stat(f)
         atime = int(info.st_atime)
         oldest = min(atime, oldest)
         updatable[f] = atime
-        #if atime > cutoff:
-        #    updatable[f] = atime
-        #else:
-        #    print(f'not updatable\t{f.name}\t{atime}\t{cutoff}')
 
-    #if not updatable:
-    #    continue
-
-    print(f'{count} files in {current}. {len(updatable)} updatable/{skipped} skipped. stack={len(target)}')
+    print(f'\n{curname}: {len(updatable)}/{skipped} updatable/skipped. oldest file: {date.fromtimestamp(oldest)} stack={len(target)}')
     try:
         slope = (now - cutoff) / (now - oldest)
     except:
@@ -178,31 +180,28 @@ while target:
 
     intercept = cutoff - slope * oldest
     print(f'slope:{slope}\tintercept:{intercept}')
-    print(f'\niupdating directory:{current}\tscale:{slope}\tcutoff:{cutoff}\toldest:{oldest}\tnow:{now}')
+    #print(f'\nupdating directory:{current}\tscale:{slope}\tcutoff:{cutoff}\toldest:{oldest}\tnow:{now}')
     n = 0
     #print(f'\t{updatable}')
     for f in updatable:
         new = int(intercept + slope * updatable[f])
         if new > now:
-            print(f'\tWARNING:{current}\tscale:{slope}\tcutoff:{cutoff}\toldest:{oldest}\tnow:{now}')
+            print(f'\tWARNING:{curname}\tscale:{slope}\tcutoff:{cutoff}\toldest:{oldest}\tnow:{now}')
         # if new > now:
         #     continue
         delta = (updatable[f] - new) / 3600 / 24
-        print(f'\t{f}\told:{updatable[f]}\tnew:{new}\tdays:{delta}')
+        #print(f'\t{f}\told:{updatable[f]}\tnew:{new}\tdays:{delta}')
         # change access time, leave modification time (mtime) and creation time (ctime) the same
         try:
             n += 1
             status = os.stat(f)
-            print(f'new:{date.fromtimestamp(new)}')
-            print(f'created:{date.fromtimestamp(status.st_ctime)}\taccessed:{date.fromtimestamp(status.st_atime)}\tmodified:{date.fromtimestamp(status.st_mtime)}\t{f.name}')
+            #print(f'new:{date.fromtimestamp(new)}')
+            #print(f'created:{date.fromtimestamp(status.st_ctime)}\taccessed:{date.fromtimestamp(status.st_atime)}\tmodified:{date.fromtimestamp(status.st_mtime)}\t{f.name}')
             os.utime(f, (new, status.st_mtime))
             status = os.stat(f)
-            print(f'created:{date.fromtimestamp(status.st_ctime)}\taccessed:{date.fromtimestamp(status.st_atime)}\tmodified:{date.fromtimestamp(status.st_mtime)}\t{f.name}')
+            #print(f'created:{date.fromtimestamp(status.st_ctime)}\taccessed:{date.fromtimestamp(status.st_atime)}\tmodified:{date.fromtimestamp(status.st_mtime)}\t{f.name}')
         except OSError:
             sys.stderr.write('OSError:\n')
-
-        #if n > 6:
-        #    exit(1)
 
 # for path in old:
 #
