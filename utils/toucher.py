@@ -13,6 +13,7 @@ import textwrap as _textwrap
 import os
 import sys
 import time
+from datetime import date
 from collections import defaultdict
 
 
@@ -135,38 +136,50 @@ while target:
     oldest = now
     updatable = {}
 
+    print(f'processing files in {current}')
+    count = 0
+    skipped = 0
     for f in files:
-
-
+        print(f'\t{f}', end='\t')
+        count += 1
         if f.is_dir():
+            # only directories get pushed on stack, and only if they have not been visited
+            print(f'dir')
             visited[f] += 1
-            target.append(f)
+            if visited[f] <= 1:
+                target.append(f)
 
-        # elif f.is_file:
-        #     print(f'{current}\t{f.name}')
+        elif f.is_file(follow_symlinks=False):
+            print(f'file')
 
         else:
             # the other possibility is a symbolic link, do nothing
+            skipped += 1
+            print('link')
             continue
 
         info = os.stat(f)
         atime = int(info.st_atime)
         oldest = min(atime, oldest)
-        if atime > cutoff:
-            updatable[f] = atime
-        else:
-            print(f'not updatable\t{f.name}\t{atime}\t{cutoff}')
+        updatable[f] = atime
+        #if atime > cutoff:
+        #    updatable[f] = atime
+        #else:
+        #    print(f'not updatable\t{f.name}\t{atime}\t{cutoff}')
 
-    if not updatable:
-        continue
+    #if not updatable:
+    #    continue
 
+    print(f'{count} files in {current}. {len(updatable)} updatable/{skipped} skipped. stack={len(target)}')
     try:
         slope = (now - cutoff) / (now - oldest)
     except:
         slope = 1
 
     intercept = cutoff - slope * oldest
-    print(f'\ndirectory:{current}\tscale:{slope}\tcutoff:{cutoff}\toldest:{oldest}\tnow:{now}')
+    print(f'slope:{slope}\tintercept:{intercept}')
+    print(f'\niupdating directory:{current}\tscale:{slope}\tcutoff:{cutoff}\toldest:{oldest}\tnow:{now}')
+    n = 0
     #print(f'\t{updatable}')
     for f in updatable:
         new = int(intercept + slope * updatable[f])
@@ -176,8 +189,20 @@ while target:
         #     continue
         delta = (updatable[f] - new) / 3600 / 24
         print(f'\t{f}\told:{updatable[f]}\tnew:{new}\tdays:{delta}')
+        # change access time, leave modification time (mtime) and creation time (ctime) the same
+        try:
+            n += 1
+            status = os.stat(f)
+            print(f'new:{date.fromtimestamp(new)}')
+            print(f'created:{date.fromtimestamp(status.st_ctime)}\taccessed:{date.fromtimestamp(status.st_atime)}\tmodified:{date.fromtimestamp(status.st_mtime)}\t{f.name}')
+            os.utime(f, (new, status.st_mtime))
+            status = os.stat(f)
+            print(f'created:{date.fromtimestamp(status.st_ctime)}\taccessed:{date.fromtimestamp(status.st_atime)}\tmodified:{date.fromtimestamp(status.st_mtime)}\t{f.name}')
+        except OSError:
+            sys.stderr.write('OSError:\n')
 
-
+        #if n > 6:
+        #    exit(1)
 
 # for path in old:
 #
@@ -218,11 +243,11 @@ while target:
 #             time.ctime(stat.st_mtime),
 #             time.ctime(stat.st_ctime)))
 #
-#         # change access time, leave modification time (mtime) and creation time (ctime) the same
-#         try:
-#             os.utime(full_file, (newaccess, stat.st_mtime))
-#         except OSError:
-#             sys.stderr.write('OSError:\n')
+        # # change access time, leave modification time (mtime) and creation time (ctime) the same
+        # try:
+        #     os.utime(full_file, (newaccess, stat.st_mtime))
+        # except OSError:
+        #     sys.stderr.write('OSError:\n')
 
     # end of loop over files in directory
 # end of loop over directories

@@ -433,12 +433,31 @@ I know you really want to be your own girl"""
 # Oh, won't you stop draggin' my heart around? (Hey, hey, hey)
 # Stop draggin' my heart around"""
 
-    kmer = KmerSet(text=draggin_my_heart_around)
+    the_ring="""Three Rings for the Elven-kings under the sky,
+    Seven for the Dwarf-lords in their halls of stone,
+    Nine for Mortal Men doomed to die,
+    One for the Dark Lord on his dark throne;
+    In the Land of Mordor where the Shadows lie.
+    One Ring to rule them all, one Ring to find them,
+    One Ring to bring them all, and in the darkness bind them;
+    In the Land of Mordor where the Shadows lie."""
+
+    gold="""All that is gold does not glitter,
+    Not all those who wander are lost;
+    The old that is strong does not wither,
+    Deep roots are not reached by the frost.
+    
+    From the ashes a fire shall be woken,
+    A light from the shadows shall spring;
+    Renewed shall be blade that was broken,
+    The crownless again shall be king"""
+
+    kmer = KmerSet(text=gold)
     print("original text\n", kmer.text)
     textlen = kmer.clean_text()
     print("\ncleaned text\n", kmer.text)
     print("\n{} letters".format(textlen))
-    kmer.sample_reads(30, 8)
+    kmer.sample_reads(30, 7)
     nread = 0
     for read in kmer.reads:
         nread += 1
