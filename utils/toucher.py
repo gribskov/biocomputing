@@ -137,10 +137,11 @@ while target:
 
     for f in files:
 
-
         if f.is_dir():
+            # only directories get pushed on stack, and only if they have not been visited
             visited[f] += 1
-            target.append(f)
+            if visited[f] <= 1:
+                target.append(f)
 
         # elif f.is_file:
         #     print(f'{current}\t{f.name}')
@@ -163,6 +164,11 @@ while target:
         #     continue
         delta = (updatable[f] - new) / 3600 / 24
         print(f'{f}\told:{updatable[f]}\tnew:{new}\tdays:{delta}')
+        # change access time, leave modification time (mtime) and creation time (ctime) the same
+        # try:
+        #     os.utime(full_file, (newaccess, stat.st_mtime))
+        # except OSError:
+        #     sys.stderr.write('OSError:\n')
 
 
 
@@ -205,11 +211,11 @@ while target:
 #             time.ctime(stat.st_mtime),
 #             time.ctime(stat.st_ctime)))
 #
-#         # change access time, leave modification time (mtime) and creation time (ctime) the same
-#         try:
-#             os.utime(full_file, (newaccess, stat.st_mtime))
-#         except OSError:
-#             sys.stderr.write('OSError:\n')
+        # # change access time, leave modification time (mtime) and creation time (ctime) the same
+        # try:
+        #     os.utime(full_file, (newaccess, stat.st_mtime))
+        # except OSError:
+        #     sys.stderr.write('OSError:\n')
 
     # end of loop over files in directory
 # end of loop over directories
