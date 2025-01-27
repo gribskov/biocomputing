@@ -3,14 +3,25 @@ Exam transcripts clustered at bundle (DN), component (c), gene (g), and isoform 
 level best corresponds to a "gene"
 
 Search is assumed to be diamond (blast tabular), tab separated
-TRINITY_DN88428_c0_g1_i1   1146   1106   705   A0A059DJS1_EUCGR   290   1   135   135   65.2   4.2e-45   A0A059DJS1_EUCGR
-
+See data/trinity_uniref_short.dmndblast
+fields are:
 qname qlen qbegin qend
 sname slen sbegin send
 alignlen score evalue stitle
 ================================================================================================="""
 import sys
 from blast import Blast
+
+def readblock(blast, level, scores_query, skip=''):
+    """---------------------------------------------------------------------------------------------
+    read a group of sequences from the blast file that are the same at a certain level, b=bundle,
+    c=component, g=gene, i=isoform
+
+    :param blast: Blast object      Input search result with the format given in the header
+    :param level: string            b, c, g, i
+    :param skip: string             comma delimited list of keywords to skip
+    :return: list                   parsed fields from matching lines
+    ---------------------------------------------------------------------------------------------"""
 
 # ==================================================================================================
 # main/test
@@ -23,5 +34,10 @@ if __name__ == '__main__':
     # fmt = 'qname qlen qbegin qend sname slen sbegin send alignlen score evalue stitle'
     fmt = 'qname sname id alignlen mismatch gapopen qbeg qend sbeg send evalue bit_score'
     nfields = blast.setFormat(fmt)
+
+    n = 0
+    while blast.next():
+        n += 1
+        print('   ', n, blast.line)
 
     exit(0)
