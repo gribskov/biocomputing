@@ -1,0 +1,62 @@
+TRINITY_DN221290_c0_g1_i1       214     175     2       UniRef90_UPI0018E4FF94  867     429     484     58      70.7    206     3.75e-17        UniRef90_UPI0018E4FF94 FimV/HubP family polar landmark protein n=1 Tax=Simplicispira lacusdiani Tax
+ID=2213010 RepID=UPI0018E4FF94
+TRINITY_DN221290_c0_g1_i1       214     175     5       UniRef90_A0A2U1C685     843     422     480     59      67.8    189     7.51e-15        UniRef90_A0A2U1C685 Pilus assembly protein FimV n=1 Tax=Simplicispira sp. 125 TaxID=2135643 RepID=A
+0A2U1C685_9BURK
+TRINITY_DN221290_c0_g1_i1       214     151     5       UniRef90_UPI0005A722A6  861     437     485     49      73.5    187     1.40e-14        UniRef90_UPI0005A722A6 FimV/HubP family polar landmark protein n=1 Tax=Comamonas granuli TaxID=2903
+09 RepID=UPI0005A722A6
+TRINITY_DN221299_c0_g1_i1       266     3       266     UniRef90_A0A2C7A9S3     1181    701     788     88      96.6    443     7.74e-49        UniRef90_A0A2C7A9S3 DNA 3'-5' helicase n=2 Tax=Pseudoroseomonas TaxID=2870717 RepID=A0A2C7A9S3_9PRO
+T
+TRINITY_DN221299_c0_g1_i1       266     6       266     UniRef90_UPI0018DF0707  1150    671     757     87      88.5    404     1.40e-43        UniRef90_UPI0018DF0707 double-strand break repair helicase AddA n=1 Tax=Roseomonas sp. KE0001 TaxID
+=2479201 RepID=UPI0018DF0707
+TRINITY_DN221299_c0_g1_i1       266     3       266     UniRef90_D5RH43 943     686     773     88      86.4    397     1.19e-42        UniRef90_D5RH43 DNA 3'-5' helicase (Fragment) n=4 Tax=Pseudoroseomonas cervicalis TaxID=204525 RepID=D5RH43
+_9PROT
+TRINITY_DN221323_c0_g1_i1       257     257     3       UniRef90_A0A9P9QFC0     634     495     579     85      81.2    394     8.34e-43        UniRef90_A0A9P9QFC0 Six-hairpin glycosidase-like protein n=1 Tax=Phaeosphaeria sp. MPI-PUGE-AT-0046
+c TaxID=2821754 RepID=A0A9P9QFC0_9PLEO
+TRINITY_DN221323_c0_g1_i1       257     257     3       UniRef90_A0A178A972     620     481     565     85      76.5    374     5.03e-40        UniRef90_A0A178A972 Six-hairpin glycosidase n=1 Tax=Stagonospora sp. SRC1lsM3a TaxID=765868 RepID=A
+0A178A972_9PLEO
+TRINITY_DN221323_c0_g1_i1       257     257     3       UniRef90_A0A4Q4TTE7     177     38      122     85      62.4    319     2.15e-35        UniRef90_A0A4Q4TTE7 Uncharacterized protein n=1 Tax=Monosporascus sp. MC13-8B TaxID=2211646 RepID=A
+0A4Q4TTE7_9PEZI
+TRINITY_DN221287_c0_g1_i1       595     379     492     UniRef90_A0A9J5XF65     172     76      113     38      92.1    168     2.99e-11        UniRef90_A0A9J5XF65 Uncharacterized protein n=1 Tax=Solanum commersonii TaxID=4109 RepID=A0A9J5XF65
+_SOLCO
+TRINITY_DN221291_c0_g1_i1       224     3       224     UniRef90_A0A3G2RZG1     823     51      124     74      98.6    380     1.18e-40        UniRef90_A0A3G2RZG1 Protein SEY1 n=2 Tax=Malassezia TaxID=55193 RepID=A0A3G2RZG1_MALR7
+TRINITY_DN221291_c0_g1_i1       224     42      224     UniRef90_A8QAN4 894     102     162     61      82.0    265     4.47e-25        UniRef90_A8QAN4 Protein SEY1 n=1 Tax=Malassezia globosa (strain ATCC MYA-4612 / CBS 7966) TaxID=425265 RepI
+D=SEY1_MALGO
+/DN215473
+...skipping
+TRINITY_DN215487_c0_g1_i1       895     893     690     UniRef90_UPI00073A49B5  719     648     715     68      82.4    273     4.98e-23        UniRef90_UPI00073A49B5 DEAD-box ATP-dependent RNA helicase 53-like isoform X1 n=2 Tax=Solanum tuber
+osum TaxID=4113 RepID=UPI00073A49B5
+TRINITY_DN215487_c0_g1_i1       895     216     121     UniRef90_A0A9J5W3J4     82      1       32      32      100     167     2.49e-11        UniRef90_A0A9J5W3J4 Uncharacterized protein n=1 Tax=Solanum commersonii TaxID=4109 RepID=A0A9J5W3J4
+_SOLCO
+TRINITY_DN215473_c0_g1_i1       1296    81      1076    UniRef90_M1B646 333     1       333     333     98.8    1536    2.67e-212       UniRef90_M1B646 Uncharacterized protein n=15 Tax=Solanum TaxID=4107 RepID=M1B646_SOLTU
+TRINITY_DN215473_c0_g1_i1       1296    81      1076    UniRef90_A0A2G2WGL6     336     1       336     336     86.3    1348    1.20e-183       UniRef90_A0A2G2WGL6 Calpain-type cysteine protease DEK1 n=3 Tax=Capsicum TaxID=4071 RepID=A0A2G2WGL
+6_CAPBA
+TRINITY_DN215473_c0_g1_i1       1296    81      1076    UniRef90_A0A9Q1R133     342     1       342     342     83.9    1311    6.27e-178       UniRef90_A0A9Q1R133 Uncharacterized protein n=6 Tax=Solanoideae TaxID=424551 RepID=A0A9Q1R133_9SOLA
+TRINITY_DN215473_c0_g1_i3       1297    81      1076    UniRef90_M1B646 333     1       333     333     98.8    1536    2.67e-212       UniRef90_M1B646 Uncharacterized protein n=15 Tax=Solanum TaxID=4107 RepID=M1B646_SOLTU
+TRINITY_DN215473_c0_g1_i3       1297    81      1076    UniRef90_A0A2G2WGL6     336     1       336     336     86.3    1348    1.20e-183       UniRef90_A0A2G2WGL6 Calpain-type cysteine protease DEK1 n=3 Tax=Capsicum TaxID=4071 RepID=A0A2G2WGL
+6_CAPBA
+TRINITY_DN215473_c0_g1_i3       1297    81      1076    UniRef90_A0A9Q1R133     342     1       342     342     83.9    1311    6.27e-178       UniRef90_A0A9Q1R133 Uncharacterized protein n=6 Tax=Solanoideae TaxID=424551 RepID=A0A9Q1R133_9SOLA
+TRINITY_DN215495_c0_g1_i1       435     435     1       UniRef90_M1CTZ7 929     648     809     162     79.6    627     1.27e-73        UniRef90_M1CTZ7 Polyprotein n=1 Tax=Solanum tuberosum TaxID=4113 RepID=M1CTZ7_SOLTU
+TRINITY_DN215495_c0_g1_i1       435     435     49      UniRef90_UPI00073A05C5  808     606     746     143     49.0    323     1.07e-31        UniRef90_UPI00073A05C5 uncharacterized protein LOC107063387 n=1 Tax=Solanum tuberosum TaxID=4113 Re
+pID=UPI00073A05C5
+TRINITY_DN215495_c0_g1_i1       435     435     109     UniRef90_M1D8Y3 738     582     692     111     55.9    266     5.05e-24        UniRef90_M1D8Y3 Retroelement pol polyprotein n=1 Tax=Solanum tuberosum TaxID=4113 RepID=M1D8Y3_SOLTU
+TRINITY_DN215424_c0_g1_i1       367     158     3       UniRef90_A0AAF0UC38     1900    1834    1882    52      73.1    189     5.40e-14        UniRef90_A0AAF0UC38 Reverse transcriptase domain-containing protein n=1 Tax=Solanum verrucosum TaxI
+D=315347 RepID=A0AAF0UC38_SOLVR
+TRINITY_DN215424_c0_g1_i1       367     360     238     UniRef90_A0A9J5ZNY9     120     29      69      41      70.7    158     3.83e-11        UniRef90_A0A9J5ZNY9 RNase H type-1 domain-containing protein n=1 Tax=Solanum commersonii TaxID=4109
+ RepID=A0A9J5ZNY9_SOLCO
+TRINITY_DN215513_c0_g1_i1       226     225     1       UniRef90_A0AAD9L6W1     861     759     833     75      76.0    302     4.68e-30        UniRef90_A0AAD9L6W1 Membrane protein n=1 Tax=Papiliotrema laurentii TaxID=5418 RepID=A0AAD9L6W1_PAP
+LA
+TRINITY_DN215513_c0_g1_i1       226     189     1       UniRef90_A0A1Y1UGR6     851     761     823     63      76.2    263     8.67e-25        UniRef90_A0A1Y1UGR6 DUF221-domain-containing protein n=1 Tax=Kockovaella imperatae TaxID=4999 RepID
+=A0A1Y1UGR6_9TREE
+TRINITY_DN215513_c0_g1_i1       226     189     1       UniRef90_A0A1Y2B923     858     768     830     63      68.3    245     2.35e-22        UniRef90_A0A1Y2B923 DUF221-domain-containing protein n=1 Tax=Naematelia encephala TaxID=71784 RepID
+=A0A1Y2B923_9TREE
+TRINITY_DN215510_c0_g1_i1       228     226     2       UniRef90_A0A438C4I2     735     386     460     75      85.3    335     1.47e-34        UniRef90_A0A438C4I2 Retrovirus-related Pol polyprotein from transposon TNT 1-94 n=1 Tax=Vitis vinif
+era TaxID=29760 RepID=A0A438C4I2_VITVI
+TRINITY_DN215510_c0_g1_i1       228     226     2       UniRef90_UPI001893D02E  298     5       79      75      82.7    320     2.15e-34        UniRef90_UPI001893D02E uncharacterized protein LOC119370380 n=1 Tax=Jatropha curcas TaxID=180498 Re
+pID=UPI001893D02E
+TRINITY_DN215510_c0_g1_i1       228     226     2       UniRef90_UPI001894D8F2  300     5       79      75      82.7    320     2.24e-34        UniRef90_UPI001894D8F2 uncharacterized protein LOC119369277 n=1 Tax=Jatropha curcas TaxID=180498 Re
+pID=UPI001894D8F2
+TRINITY_DN215503_c0_g1_i1       734     669     1       UniRef90_P14673 380     1       223     223     99.1    1149    7.36e-156       UniRef90_P14673 Alcohol dehydrogenase 1 n=89 Tax=Pentapetalae TaxID=1437201 RepID=ADH1_SOLTU
+TRINITY_DN215503_c0_g1_i1       734     669     1       UniRef90_A0A314KKG5     380     1       223     223     96.9    1121    1.34e-151       UniRef90_A0A314KKG5 alcohol dehydrogenase n=12 Tax=lamiids TaxID=91888 RepID=A0A314KKG5_NICAT
+TRINITY_DN215503_c0_g1_i1       734     669     1       UniRef90_Q07321 281     1       222     223     95.1    1099    9.07e-150       UniRef90_Q07321 alcohol dehydrogenase (Fragment) n=2 Tax=Solanaceae TaxID=4070 RepID=Q07321_PETHY
+TRINITY_DN215516_c0_g1_i1       584     117     281     UniRef90_A0AAN8TYN0     116     62      116     55      94.5    300     1.47e-31        UniRef90_A0AAN8TYN0 Uncharacterized protein n=1 Tax=Solanum bulbocastanum TaxID=147425 RepID=A0AAN8
+TYN0_SOLBU
