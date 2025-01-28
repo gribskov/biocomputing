@@ -12,6 +12,33 @@ alignlen score evalue stitle
 import sys
 from blast import Blast
 
+
+class group:
+    """=============================================================================================
+    group holds information about a set of trinity isoforms. the main items are a list of matching
+    sequences (match) and keywords (keyword)
+
+    Michael Gribskov
+    ============================================================================================="""
+
+    def __init__(self):
+        """-----------------------------------------------------------------------------------------
+        group constructor
+        -----------------------------------------------------------------------------------------"""
+        self.id = ""
+        self.level = ""
+        self.match = []
+        self.keyword = []
+        self.n = 0
+
+
+# ==================================================================================================
+# Testing
+# ==================================================================================================
+if __name__ == '__main__':
+    exit(0)
+
+
 def readblock(blast, level, scores_query, skip=''):
     """---------------------------------------------------------------------------------------------
     read a group of sequences from the blast file that are the same at a certain level, b=bundle,
@@ -22,6 +49,7 @@ def readblock(blast, level, scores_query, skip=''):
     :param skip: string             comma delimited list of keywords to skip
     :return: list                   parsed fields from matching lines
     ---------------------------------------------------------------------------------------------"""
+
 
 # ==================================================================================================
 # main/test
