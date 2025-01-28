@@ -11,6 +11,7 @@ alignlen score evalue stitle
 ================================================================================================="""
 import sys
 import re
+from collections import defaultdict
 from blast import Blast
 
 
@@ -31,10 +32,10 @@ class Group:
         self.id = ""
         self.level = ""
         self.match = []
-        self.keyword = []
-        self.stopword = ['UniRef90_', 'n=\d+', 'protein', 'uncharacterized', 'family',
-                         'Tax=', 'TaxID=', 'RepID=']
-        self.stopre = re.compile('|'.join(self.stopword))
+        self.keyword = defaultdict(int)
+        self.stopword = ['UniRef90_[^ ]+', 'n=\d+', 'sp\.* (\d+)*', 'protein', 'uncharacterized', 'family',
+                         '-*domain-containing', 'Tax=', 'TaxID=', 'RepID=[^ ]+']
+        self.stopre = re.compile('|'.join(self.stopword), re.I)
         self.n = 0
 
     def isoform_add(self, blast, sid_prefix='UniRef90_'):
@@ -47,11 +48,23 @@ class Group:
         self.id = splitID(blast.qid)
         self.level = 3
         self.match.append(blast.sid.replace(sid_prefix, ''))
-        # filtered = self.stopre.sub('', blast.stitle)
-        self.keyword.append(self.stopre.sub('', blast.stitle).split())
+        self.keyword_update(blast.stitle)
         self.n += 1
 
         return self.n
+
+    def keyword_update(self, stitle):
+        """-----------------------------------------------------------------------------------------
+        Add keywords from stitle to the keywords dict. Example stitle from Uniref90
+        UniRef90_M1B646 Uncharacterized protein n=15 Tax=Solanum TaxID=4107 RepID=M1B646_SOLTU
+
+        :param stitle: string   stitle field from blast result
+        :return: int            number of keywords
+        -----------------------------------------------------------------------------------------"""
+        for k in (self.stopre.sub('', stitle).split()):
+            self.keyword[k] += 1
+
+        return len(self.keyword)
 
     @staticmethod
     def filter_keywords(string):
