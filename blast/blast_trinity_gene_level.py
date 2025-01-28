@@ -10,10 +10,11 @@ sname slen sbegin send
 alignlen score evalue stitle
 ================================================================================================="""
 import sys
+import re
 from blast import Blast
 
 
-class group:
+class Group:
     """=============================================================================================
     group holds information about a set of trinity isoforms. the main items are a list of matching
     sequences (match) and keywords (keyword)
@@ -31,6 +32,21 @@ class group:
         self.keyword = []
         self.n = 0
 
+    def isoform_add(self, blast):
+        """-----------------------------------------------------------------------------------------
+        Adds the information from one line of the search result to the group
+
+        :param blast: Blast object      contains one line of the search result
+        :return: int                    number of items in the group
+        -----------------------------------------------------------------------------------------"""
+        self.id = splitID(blast.qid)
+        self.level = 3
+        self.match.append(blast.sid)
+        self.keyword.append(blast.stitle.split())
+        self.n += 1
+
+        return self.n
+
 
 def readblock(blast, level, scores_query, skip=''):
     """---------------------------------------------------------------------------------------------
@@ -45,6 +61,24 @@ def readblock(blast, level, scores_query, skip=''):
     pass
 
 
+# regex for splitID()
+idre = re.compile(r'>*TRINITY_DN([^_]+)_c(\d+)_g(\d+)_i(\d+)')
+
+
+def splitID(id):
+    """---------------------------------------------------------------------------------------------
+    Breakdown the trinity ID string to give the
+    Cluster (bundle),  component, gene and isoform
+    usage
+        infohash = trinityID(trinity.id)
+
+    :param id: string
+    :return: dict       bundle, component, gene, isoform
+    ---------------------------------------------------------------------------------------------"""
+    cluster, component, gene, isoform = idre.match(id).groups()
+    return {'bundle': cluster, 'component': component, 'gene': gene, 'isoform': isoform}
+
+
 # ==================================================================================================
 # main/test
 # ==================================================================================================
@@ -54,13 +88,15 @@ if __name__ == '__main__':
     sys.stderr.write('Blast search: {}\n'.format(infile))
     blast = Blast(file=sys.argv[1])
 
-    fmt = 'qname qlen qbegin qend sname slen sbegin send alignlen pid score evalue stitle'
+    fmt = 'qid qlen qbegin qend sid slen sbegin send alignlen pid score evalue stitle'
     # fmt = 'qname sname id alignlen mismatch gapopen qbeg qend sbeg send evalue bit_score'
     nfields = blast.setFormat(fmt)
 
     n = 0
+    group = Group()
     while blast.next():
         n += 1
         print('   ', n, blast.line)
+        group.isoform_add(blast)
 
     exit(0)
