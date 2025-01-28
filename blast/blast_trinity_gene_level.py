@@ -23,7 +23,7 @@ class Group:
     Michael Gribskov
     ============================================================================================="""
     # re used for more complicated replacements (more than just a keyword)
-    stitlere = re.compile(r'(n=\d+)')
+    sidre = re.compile(r'UniRef90_')
 
     def __init__(self):
         """-----------------------------------------------------------------------------------------
@@ -31,10 +31,11 @@ class Group:
         -----------------------------------------------------------------------------------------"""
         self.id = ""
         self.level = ""
-        self.match = []
+        self.match = defaultdict(int)
         self.keyword = defaultdict(int)
-        self.stopword = ['UniRef90_[^ ]+', 'n=\d+', 'sp\.* (\d+)*', 'protein', 'uncharacterized', 'family',
-                         '-*domain-containing', 'Tax=', 'TaxID=', 'RepID=[^ ]+']
+        self.stopword = ['UniRef90_[^ ]+', 'n=\d+', 'sp\.* (\d+)*', 'protein', 'uncharacterized',
+                         'family', '-*domain-containing', '\(?fragment\)?', '\(strain[^)]*\)',
+                         'Tax=', 'TaxID=', 'RepID=[^ ]+']
         self.stopre = re.compile('|'.join(self.stopword), re.I)
         self.n = 0
 
@@ -47,24 +48,28 @@ class Group:
         -----------------------------------------------------------------------------------------"""
         self.id = splitID(blast.qid)
         self.level = 3
-        self.match.append(blast.sid.replace(sid_prefix, ''))
-        self.keyword_update(blast.stitle)
+        # self.match.append(blast.sid.replace(sid_prefix, ''))
+        self.keyword_update(Group.sidre, self.match, blast.sid)
+        self.keyword_update(self.stopre, self.keyword, blast.stitle)
         self.n += 1
 
         return self.n
 
-    def keyword_update(self, stitle):
+    @staticmethod
+    def keyword_update(compiled_re, dest, string):
         """-----------------------------------------------------------------------------------------
         Add keywords from stitle to the keywords dict. Example stitle from Uniref90
         UniRef90_M1B646 Uncharacterized protein n=15 Tax=Solanum TaxID=4107 RepID=M1B646_SOLTU
 
-        :param stitle: string   stitle field from blast result
-        :return: int            number of keywords
+        :param compiled_re      a compile regular expression
+        :param dest: dict       destination for the data (a dict)
+        :param string: str      string to be procesed
+        :return: int            number of keywords in destination
         -----------------------------------------------------------------------------------------"""
-        for k in (self.stopre.sub('', stitle).split()):
-            self.keyword[k] += 1
+        for k in (compiled_re.sub('', string).split()):
+            dest[k] += 1
 
-        return len(self.keyword)
+        return len(dest)
 
     @staticmethod
     def filter_keywords(string):
@@ -124,10 +129,29 @@ if __name__ == '__main__':
     nfields = blast.setFormat(fmt)
 
     n = 0
+    bundle = []
+    component = []
+    gene = []
+    isoform = []
+
     group = Group()
+    isoform_old = ''
+    gene_old = ''
+    component_old = ''
+    bundle_old = ''
     while blast.next():
         n += 1
         print('   ', n, blast.line)
-        group.isoform_add(blast)
+        # group.isoform_add(blast)
+        bundle_id = f'dn{group.id["bundle"]}'
+        component_id = f'{bundle_id}_c{group.id["component"]}'
+        gene_id = f'{component_id}_g{group.id["gene"]}'
+        isoform_id = f'{gene_id}_i{group.id["isoform"]}'
+
+        add_isoform( bundle_id, component_id, gene_id, isoform_id)
+        if isoform_id != isoform_old:
+            group = Group()
+            group.isoform_add(blast)
+            isoform[isoform]
 
     exit(0)
