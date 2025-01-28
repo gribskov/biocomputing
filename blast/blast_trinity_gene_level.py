@@ -21,6 +21,8 @@ class Group:
 
     Michael Gribskov
     ============================================================================================="""
+    # re used for more complicated replacements (more than just a keyword)
+    stitlere = re.compile(r'(n=\d+)')
 
     def __init__(self):
         """-----------------------------------------------------------------------------------------
@@ -30,9 +32,12 @@ class Group:
         self.level = ""
         self.match = []
         self.keyword = []
+        self.stopword = ['UniRef90_', 'n=\d+', 'protein', 'uncharacterized', 'family',
+                         'Tax=', 'TaxID=', 'RepID=']
+        self.stopre = re.compile('|'.join(self.stopword))
         self.n = 0
 
-    def isoform_add(self, blast):
+    def isoform_add(self, blast, sid_prefix='UniRef90_'):
         """-----------------------------------------------------------------------------------------
         Adds the information from one line of the search result to the group
 
@@ -41,11 +46,24 @@ class Group:
         -----------------------------------------------------------------------------------------"""
         self.id = splitID(blast.qid)
         self.level = 3
-        self.match.append(blast.sid)
-        self.keyword.append(blast.stitle.split())
+        self.match.append(blast.sid.replace(sid_prefix, ''))
+        # filtered = self.stopre.sub('', blast.stitle)
+        self.keyword.append(self.stopre.sub('', blast.stitle).split())
         self.n += 1
 
         return self.n
+
+    @staticmethod
+    def filter_keywords(string):
+        """-----------------------------------------------------------------------------------------
+        filter the stitle string
+            remove first token (subject name)
+            remove stopwords
+
+        :param string: str      the hit information string from the search
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        pass
 
 
 def readblock(blast, level, scores_query, skip=''):
