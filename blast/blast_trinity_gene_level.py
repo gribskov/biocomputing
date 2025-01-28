@@ -32,13 +32,6 @@ class group:
         self.n = 0
 
 
-# ==================================================================================================
-# Testing
-# ==================================================================================================
-if __name__ == '__main__':
-    exit(0)
-
-
 def readblock(blast, level, scores_query, skip=''):
     """---------------------------------------------------------------------------------------------
     read a group of sequences from the blast file that are the same at a certain level, b=bundle,
@@ -49,18 +42,20 @@ def readblock(blast, level, scores_query, skip=''):
     :param skip: string             comma delimited list of keywords to skip
     :return: list                   parsed fields from matching lines
     ---------------------------------------------------------------------------------------------"""
+    pass
 
 
 # ==================================================================================================
 # main/test
 # ==================================================================================================
 if __name__ == '__main__':
+
     infile = sys.argv[1]
     sys.stderr.write('Blast search: {}\n'.format(infile))
     blast = Blast(file=sys.argv[1])
 
-    # fmt = 'qname qlen qbegin qend sname slen sbegin send alignlen score evalue stitle'
-    fmt = 'qname sname id alignlen mismatch gapopen qbeg qend sbeg send evalue bit_score'
+    fmt = 'qname qlen qbegin qend sname slen sbegin send alignlen pid score evalue stitle'
+    # fmt = 'qname sname id alignlen mismatch gapopen qbeg qend sbeg send evalue bit_score'
     nfields = blast.setFormat(fmt)
 
     n = 0
