@@ -22,8 +22,15 @@ class Group:
 
     Michael Gribskov
     ============================================================================================="""
-    # re used for more complicated replacements (more than just a keyword)
+    # re used for more complicated replacements (more than just a keyword), re are class variables
+    # so they don't use memory
     sidre = re.compile(r'UniRef90_')
+    stopword = ['UniRef90_[^ ]+', r'n=\d+', r'sp\.* (\d+)*', 'protein', 'uncharacterized',
+                'family', '-*domain-containing', r'\(?fragment\)?', r'\(strain[^)]*\)',
+                'Tax=', 'TaxID=', 'RepID=[^ ]+']
+    stopre = re.compile('|'.join(stopword), re.I)
+    # regex for splitID()
+    idre = re.compile(r'>*TRINITY_DN([^_]+)_c(\d+)_g(\d+)_i(\d+)')
 
     def __init__(self):
         """-----------------------------------------------------------------------------------------
@@ -33,10 +40,7 @@ class Group:
         self.level = ""
         self.match = defaultdict(int)
         self.keyword = defaultdict(int)
-        self.stopword = ['UniRef90_[^ ]+', r'n=\d+', r'sp\.* (\d+)*', 'protein', 'uncharacterized',
-                         'family', '-*domain-containing', r'\(?fragment\)?', r'\(strain[^)]*\)',
-                         'Tax=', 'TaxID=', 'RepID=[^ ]+']
-        self.stopre = re.compile('|'.join(self.stopword), re.I)
+
         self.n = 0
 
     def clear(self):
@@ -61,7 +65,7 @@ class Group:
         -----------------------------------------------------------------------------------------"""
         self.id = blast.qid
         self.keyword_update(Group.sidre, self.match, blast.sid)
-        self.keyword_update(self.stopre, self.keyword, blast.stitle)
+        self.keyword_update(Group.stopre, self.keyword, blast.stitle)
         self.n += 1
 
         return self.n
@@ -120,7 +124,7 @@ class Group:
 
         :return: dict       bundle, component, gene, isoform
         ---------------------------------------------------------------------------------------------"""
-        cluster, component, gene, isoform = idre.match(self.id).groups()
+        cluster, component, gene, isoform = Group.idre.match(self.id).groups()
         return {'bundle': cluster, 'component': component, 'gene': gene, 'isoform': isoform}
 
 
@@ -128,8 +132,6 @@ class Group:
 # End of class Group
 # ==================================================================================================
 
-# regex for splitID()
-idre = re.compile(r'>*TRINITY_DN([^_]+)_c(\d+)_g(\d+)_i(\d+)')
 
 # ==================================================================================================
 # main/test
