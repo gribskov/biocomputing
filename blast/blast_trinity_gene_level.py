@@ -39,6 +39,20 @@ class Group:
         self.stopre = re.compile('|'.join(self.stopword), re.I)
         self.n = 0
 
+    def clear(self):
+        """-----------------------------------------------------------------------------------------
+        clear information in current instance
+
+        :return: bool   True
+        -----------------------------------------------------------------------------------------"""
+        self.id = ""
+        self.level = ""
+        self.match = defaultdict(int)
+        self.keyword = defaultdict(int)
+        self.n = 0
+
+        return True
+
     def isoform_add(self, blast, sid_prefix='UniRef90_'):
         """-----------------------------------------------------------------------------------------
         Adds the information from one line of the search result to the group
@@ -46,7 +60,7 @@ class Group:
         :param blast: Blast object      contains one line of the search result
         :return: int                    number of items in the group
         -----------------------------------------------------------------------------------------"""
-        self.id = splitID(blast.qid)
+        self.id = blast.qid
         self.level = 3
         # self.match.append(blast.sid.replace(sid_prefix, ''))
         self.keyword_update(Group.sidre, self.match, blast.sid)
@@ -55,10 +69,39 @@ class Group:
 
         return self.n
 
+    def group_add(self, group, sid_prefix='UniRef90_'):
+        """-----------------------------------------------------------------------------------------
+        Adds the information from an existing Group object to the group
+
+        :param group: Group object      contains information about an existing group
+        :return: int                    number of items in the group
+        -----------------------------------------------------------------------------------------"""
+        self.id = group.id
+        for id in group.match:
+            self.match[id] += group.match[id]
+        for key in group.keyword:
+            self.keyword[key] += group.keyword[key]
+
+        self.n += group.n
+
+        return self.n
+
+    def from_blast(self, blast):
+        """-----------------------------------------------------------------------------------------
+        remove current information and populate from one result line of a blast search
+
+        :param blast: Blast object  Blast object containing the current search result line
+        :return: bool               True
+        -----------------------------------------------------------------------------------------"""
+        self.clear()
+        self.isoform_add(blast)
+
+        return True
+
     @staticmethod
     def keyword_update(compiled_re, dest, string):
         """-----------------------------------------------------------------------------------------
-        Add keywords from stitle to the keywords dict. Example stitle from Uniref90
+        Add keywords from stitle to the keyword dict. Example stitle from Uniref90
         UniRef90_M1B646 Uncharacterized protein n=15 Tax=Solanum TaxID=4107 RepID=M1B646_SOLTU
 
         :param compiled_re      a compile regular expression
@@ -70,6 +113,18 @@ class Group:
             dest[k] += 1
 
         return len(dest)
+
+    def splitID(self):
+        """---------------------------------------------------------------------------------------------
+        Breakdown the trinity ID string to give the
+        Cluster (bundle),  component, gene and isoform
+        usage
+            infohash = working.splitID()
+
+        :return: dict       bundle, component, gene, isoform
+        ---------------------------------------------------------------------------------------------"""
+        cluster, component, gene, isoform = idre.match(self.id).groups()
+        return {'bundle': cluster, 'component': component, 'gene': gene, 'isoform': isoform}
 
     @staticmethod
     def filter_keywords(string):
@@ -83,6 +138,10 @@ class Group:
         -----------------------------------------------------------------------------------------"""
         pass
 
+
+# ==================================================================================================
+# End of class Group
+# ==================================================================================================
 
 def readblock(blast, level, scores_query, skip=''):
     """---------------------------------------------------------------------------------------------
@@ -100,26 +159,10 @@ def readblock(blast, level, scores_query, skip=''):
 # regex for splitID()
 idre = re.compile(r'>*TRINITY_DN([^_]+)_c(\d+)_g(\d+)_i(\d+)')
 
-
-def splitID(id):
-    """---------------------------------------------------------------------------------------------
-    Breakdown the trinity ID string to give the
-    Cluster (bundle),  component, gene and isoform
-    usage
-        infohash = trinityID(trinity.id)
-
-    :param id: string
-    :return: dict       bundle, component, gene, isoform
-    ---------------------------------------------------------------------------------------------"""
-    cluster, component, gene, isoform = idre.match(id).groups()
-    return {'bundle': cluster, 'component': component, 'gene': gene, 'isoform': isoform}
-
-
 # ==================================================================================================
 # main/test
 # ==================================================================================================
 if __name__ == '__main__':
-
     infile = sys.argv[1]
     sys.stderr.write('Blast search: {}\n'.format(infile))
     blast = Blast(file=sys.argv[1])
@@ -128,30 +171,35 @@ if __name__ == '__main__':
     # fmt = 'qname sname id alignlen mismatch gapopen qbeg qend sbeg send evalue bit_score'
     nfields = blast.setFormat(fmt)
 
-    n = 0
-    bundle = []
-    component = []
-    gene = []
-    isoform = []
+    # lists of aggregated information, each element is a dictionary of groups
+    # if the key for a group is missing a blank Group is created
+    aggregate = {'bundle':    defaultdict(lambda: Group()),
+                 'component': defaultdict(lambda: Group()),
+                 'gene':      defaultdict(lambda: Group()),
+                 'isoform':   defaultdict(lambda: Group())
+                 }
 
-    group = Group()
-    isoform_old = ''
-    gene_old = ''
-    component_old = ''
-    bundle_old = ''
+    # tags identifying the levels in a trinity id, e.g., DN215424_c0_g1_i1. Used to create names
+    # at each level from the split trinity ID
+    level = {'bundle':    'DN',
+             'component': '_c',
+             'gene':      '_g',
+             'isoform':   '_i'}
+
+    working = Group()
+
     while blast.next():
-        n += 1
-        print('   ', n, blast.line)
-        # group.isoform_add(blast)
-        bundle_id = f'dn{group.id["bundle"]}'
-        component_id = f'{bundle_id}_c{group.id["component"]}'
-        gene_id = f'{component_id}_g{group.id["gene"]}'
-        isoform_id = f'{gene_id}_i{group.id["isoform"]}'
+        print('   ', blast.line)
+        working.from_blast(blast)
 
-        add_isoform( bundle_id, component_id, gene_id, isoform_id)
-        if isoform_id != isoform_old:
-            group = Group()
-            group.isoform_add(blast)
-            isoform[isoform]
+        id = ''
+        splitid = working.splitID()
+        for pool in ('bundle', 'component', 'gene', 'isoform'):
+            id += f'{level[pool]}{splitid[pool]}'
+            print(id)
+            aggregate[pool][id].group_add(working, id)
+
+    for l in level:
+        print(f'{len(aggregate[l])} {l}s processed')
 
     exit(0)
