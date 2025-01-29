@@ -33,8 +33,8 @@ class Group:
         self.level = ""
         self.match = defaultdict(int)
         self.keyword = defaultdict(int)
-        self.stopword = ['UniRef90_[^ ]+', 'n=\d+', 'sp\.* (\d+)*', 'protein', 'uncharacterized',
-                         'family', '-*domain-containing', '\(?fragment\)?', '\(strain[^)]*\)',
+        self.stopword = ['UniRef90_[^ ]+', r'n=\d+', r'sp\.* (\d+)*', 'protein', 'uncharacterized',
+                         'family', '-*domain-containing', r'\(?fragment\)?', r'\(strain[^)]*\)',
                          'Tax=', 'TaxID=', 'RepID=[^ ]+']
         self.stopre = re.compile('|'.join(self.stopword), re.I)
         self.n = 0
@@ -46,7 +46,6 @@ class Group:
         :return: bool   True
         -----------------------------------------------------------------------------------------"""
         self.id = ""
-        self.level = ""
         self.match = defaultdict(int)
         self.keyword = defaultdict(int)
         self.n = 0
@@ -61,8 +60,6 @@ class Group:
         :return: int                    number of items in the group
         -----------------------------------------------------------------------------------------"""
         self.id = blast.qid
-        self.level = 3
-        # self.match.append(blast.sid.replace(sid_prefix, ''))
         self.keyword_update(Group.sidre, self.match, blast.sid)
         self.keyword_update(self.stopre, self.keyword, blast.stitle)
         self.n += 1
@@ -126,35 +123,10 @@ class Group:
         cluster, component, gene, isoform = idre.match(self.id).groups()
         return {'bundle': cluster, 'component': component, 'gene': gene, 'isoform': isoform}
 
-    @staticmethod
-    def filter_keywords(string):
-        """-----------------------------------------------------------------------------------------
-        filter the stitle string
-            remove first token (subject name)
-            remove stopwords
-
-        :param string: str      the hit information string from the search
-        :return:
-        -----------------------------------------------------------------------------------------"""
-        pass
-
 
 # ==================================================================================================
 # End of class Group
 # ==================================================================================================
-
-def readblock(blast, level, scores_query, skip=''):
-    """---------------------------------------------------------------------------------------------
-    read a group of sequences from the blast file that are the same at a certain level, b=bundle,
-    c=component, g=gene, i=isoform
-
-    :param blast: Blast object      Input search result with the format given in the header
-    :param level: string            b, c, g, i
-    :param skip: string             comma delimited list of keywords to skip
-    :return: list                   parsed fields from matching lines
-    ---------------------------------------------------------------------------------------------"""
-    pass
-
 
 # regex for splitID()
 idre = re.compile(r'>*TRINITY_DN([^_]+)_c(\d+)_g(\d+)_i(\d+)')
@@ -164,7 +136,7 @@ idre = re.compile(r'>*TRINITY_DN([^_]+)_c(\d+)_g(\d+)_i(\d+)')
 # ==================================================================================================
 if __name__ == '__main__':
     infile = sys.argv[1]
-    sys.stderr.write('Blast search: {}\n'.format(infile))
+    sys.stdout.write('Blast search: {}\n\n'.format(infile))
     blast = Blast(file=sys.argv[1])
 
     fmt = 'qid qlen qbegin qend sid slen sbegin send alignlen pid score evalue stitle'
@@ -189,16 +161,17 @@ if __name__ == '__main__':
     working = Group()
 
     while blast.next():
-        print('   ', blast.line)
+        # print('   ', blast.line)
         working.from_blast(blast)
 
         id = ''
         splitid = working.splitID()
         for pool in ('bundle', 'component', 'gene', 'isoform'):
             id += f'{level[pool]}{splitid[pool]}'
-            print(id)
+            # print(id)
             aggregate[pool][id].group_add(working, id)
 
+    print()
     for l in level:
         print(f'{len(aggregate[l])} {l}s processed')
 
