@@ -1,0 +1,44 @@
+This homework uses a file of FastQ sequence data and focuses on writing methods (functions). I
+provide an overall template and a main program your task is to write the functions
+
+Provided in the template:
+#########################
+
+next_fastq(fp) – The first argument is a file opened for reading. The second argument is a
+dictionary that is filled in with the information from the next sequence in the file. The dictionary
+has two keys: 'sequence' and 'quality'. Each time next_fastq() is called it modifies the dictionary.
+When the file is completely read, next_fastq() returns False, otherwise
+True
+
+I also include a main program that will test the functions by calculating the total number of
+bases and average quality over all the sequences. Do not change the main program.
+
+Functions for you to write:
+###########################
+
+o seqlen(fastq) – return the length of the fastq sequence entry
+
+o quality(fastq) – returns the quality of each position as a numeric list. The function must
+convert the ascii encoded to an integer. For each letter a in the quality string, the numerical
+quality is obtained by
+ord(a) – 33
+
+o add_counts
+this function does most of the work. For each Fastq sequence it receives the arguments
+(quality, stats, qmin), where quality is a list of the quality (numeric) at each position of the
+sequences, stats is a dictionary that gathers the desired statistics, and qmin is the minimus
+quality to consider "high quality" (HQ). The statistics in stats have the following keys
+
+'nbase_all', 'qual_all'         int, float
+                                the base counts and quality, summed for all positions
+'nbase_hq', 'qual_hq'           int, float
+                                the base counts and quality, summed for HQ positions only
+'nbase_trunc', 'qual_trunc'     int, float
+                                the base counts and quality, summed positions truncated at the first
+                                q < qmin
+'nbase_by_pos', 'qual_by_pos'   [list], [list] lists contain ints and floats, respectively
+                                base counts and quality, at each sequence position, averaged across
+                                all sequences
+
+
+
