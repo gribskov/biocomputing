@@ -38,8 +38,8 @@ class Group:
         -----------------------------------------------------------------------------------------"""
         self.id = ""
         self.level = ""
-        self.match = defaultdict(int)
-        self.keyword = defaultdict(int)
+        self.match = defaultdict(lambda: 1)
+        self.keyword = defaultdict(lambda: 1)
 
         self.n = 0
 
@@ -50,8 +50,8 @@ class Group:
         :return: bool   True
         -----------------------------------------------------------------------------------------"""
         self.id = ""
-        self.match = defaultdict(int)
-        self.keyword = defaultdict(int)
+        self.match = defaultdict(lambda: 1)
+        self.keyword = defaultdict(lambda: 1)
         self.n = 0
 
         return True
@@ -176,5 +176,18 @@ if __name__ == '__main__':
     print()
     for l in level:
         print(f'{len(aggregate[l])} {l}s processed')
+
+    for entry in aggregate['component']:
+        gene = aggregate['component'][entry]
+        print(f'{gene.id}\t{gene.n}')
+        # print(f'{gene.id}\t{gene.n}\n\t{gene.match}\n\t{gene.keyword}')
+        for item in sorted(gene.match,key=lambda x: gene.match[x], reverse=True):
+            print(f"\t{item}:{gene.match[item]}", end='')
+        print('\t')
+
+        for item in sorted(gene.keyword, key=lambda x: gene.keyword[x], reverse=True):
+            print(f"\t{item}:{gene.keyword[item]}", end='')
+        print('\t')
+
 
     exit(0)
