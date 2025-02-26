@@ -177,9 +177,10 @@ if __name__ == '__main__':
     for l in level:
         print(f'{len(aggregate[l])} {l}s processed')
 
-    for entry in aggregate['component']:
-        gene = aggregate['component'][entry]
-        print(f'{gene.id}\t{gene.n}')
+    for entry in aggregate['bundle']:
+        gene = aggregate['bundle'][entry]
+        print(f'{entry}\t{gene.n}')
+        # print(f'{gene.id}\t{gene.n}')
         # print(f'{gene.id}\t{gene.n}\n\t{gene.match}\n\t{gene.keyword}')
         for item in sorted(gene.match,key=lambda x: gene.match[x], reverse=True):
             print(f"\t{item}:{gene.match[item]}", end='')
