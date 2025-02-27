@@ -1,0 +1,1108 @@
+128217	Solanum	4107																						
+68730	Solanum	verrucosum	315347																					
+63860	Solanum	tuberosum	4113																					
+57121	Solanum	commersonii	4109																					
+54589	Solanoideae	424551																						
+49443	Solanaceae	4070																						
+40296	Solanum	chacoense	4108																					
+23638	Solanum	dulcamara	45834																					
+22674	Nicotiana	4085																						
+17435	Capsicum	4071																						
+17283	Solanum	lycopersicum	4081																					
+17016	Solanum	stenotomum	172797																					
+15163	Solanum	bulbocastanum	147425																					
+13316	Capsicum	annuum	4072																					
+10828	Anisodus	243963																						
+10227	Solanum	subgen.	Lycopersicon	49274																				
+10101	Lycium	24646																						
+7955	Anisodus	tanguticus	243964																					
+6767	Anisodus	acutangulus	402998																					
+6749	Nicotiana	attenuata	49451																					
+6722	Lycium	barbarum	112863																					
+6201	Nicotiana	tabacum	4097																					
+5232	Solanum	pennellii	28526																					
+5119	Lycium	ferocissimum	112874																					
+4661	Capsicum	baccatum	33114																					
+4607	Pentapetalae	1437201																						
+4274	Ipomoea	4119																						
+2982	Mesangiospermae	1437183																						
+2924	Solanum	chilense	4083																					
+2653	Nicotiana	tomentosiformis	4098																					
+2382	Solanum	demissum	50514																					
+2313	Nicotiana	sylvestris	4096																					
+1854	asterids	71274																						
+1525	lamiids	91888																						
+1484	Vitis	vinifera	29760																					
+1420	Coffea	13442																						
+1239	Davidia	involucrata	16924																					
+1225	Lamiales	4143																						
+1189	Magnoliopsida	3398																						
+1011	Solanales	4069																						
+955	cellular	organisms	131567																					
+775	Oleeae	426106																						
+752	rosids	71275																						
+697	Olea	europaea	158383
+686	Cornus	florida	4283																					
+671	Camellia	sinensis	4442																					
+611	Nyssa	sinensis	561372																					
+599	Sesamum	4181																						
+592	Nyssaceae	4289																						
+525	Handroanthus	impetiginosus	429701																					
+507	Eukaryota	2759																						
+439	Cajanus	cajan	3821																					
+433	Escallonia	23075																						
+429	Convolvulaceae	4118																						
+394	Trifolium	medium	97028																					
+379	Opuntia	streptacantha	393608																					
+365	Fagus	sylvatica	28930																					
+360	Gossypium	3633																						
+358	Liquidambar	formosana	63359																					
+355	fabids	91835																						
+336	Cuscuta	europaea	41803																					
+329	Olea	europaea    sylvestris	158386
+327	Erythranthe	guttata	4155																					
+323	Actinidia	3624																						
+314	Escallonia	herrerae	1293975																					
+288	Actinidia	rufa	165716																					
+283	Ipomoea	nil	35883																					
+283	Aegilops	tauschii    strangulata	200361
+282	Sesamum	angolense	2727404																					
+275	Phtheirospermum	japonicum	374723																					
+269	Rhizophora	mucronata	61149																					
+269	Ensete	ventricosum	4639																					
+257	Petunia	hybrida	4102267
+000	Cornales	41934
+250	Glossina	7393																						
+249	Fraxinus	pennsylvanica	56036																					
+247	Escallonia	rubra	112253																					
+242	Trifolium	pratense	57577																					
+240	Hevea	brasiliensis	3981																					
+233	Hibiscus	trionum	183268																					
+232	Hibiscus	syriacus	106335																					
+227	Spermatophyta	58024231
+000	Vitis	3603
+225	Quillaja	saponaria	32244																					
+224	Diospyros	lotus	55363																					
+221	Ipomoea	triloba	35885																					
+209	Helianthus	annuus	4232																					
+208	Dorcoceras	hygrometricum	472368																					
+201	Ericales	41945																						
+198	Nelumbo	nucifera	4432																					
+195	Maleae	721813																						
+189	Gossypium	raimondii	29730																					
+188	Citrus	sinensis	2711																					
+186	Cuscuta	campestris	132261																					
+185	Gossypium	anomalum	47600																					
+184	Centaurea	solstitialis	347529																					
+183	Malus	domestica	3750																					
+182	Sesamum	alatum	300844																					
+176	Salvia	splendens	180675																					
+174	Cuscuta	sect.	Cleistogrammica	1824901																				
+165	Mikania	micrantha	192012																					
+162	Salix	viminalis	40686																					
+162	Coffea	canephora	49390																					
+158	Vitis	rotundifolia	103349																					
+155	Prunus	dulcis	3755																					
+152	Medicago	truncatula	3880																					
+148	Rhododendron	williamsianum	262921																					
+145	malvids	91836																						
+144	Zeugodacus	cucurbitae	28588																					
+144	Brassica	cretica	69181																					
+142	Camellia	sinensis    sinensis	542762
+140	Malus	baccata	106549																					
+140	Triticum	turgidum    durum	4567
+140	Cuscuta	4128																						
+139	Punica	granatum	22663																					
+138	Zea	mays	4577																					
+138	Malvaceae	3629																						
+137	Tripterygium	wilfordii	458696																					
+137	Arachis	hypogaea	3818																					
+136	Tetracentron	sinense	13715																					
+134	Coffea	arabica	13443																					
+133	Asteraceae	4210																						
+133	Nymphaea	colorata	210225																					
+133	Vigna	mungo	3915																					
+131	Cucumis	melo    makuwa	1194695
+127	Mucuna	pruriens	157652																					
+126	Ambrosia	artemisiifolia	4212																					
+125	Artemisia	annua	35608																					
+123	Carica	papaya	3649																					
+123	Noccaea	caerulescens	107243																					
+122	Pisum	sativum	3888																					
+120	Cannabis	sativa	3483																					
+119	Populus	alba	x	Populus	x	berolinensis	444605																	
+117	Senna	tora	362788																					
+115	Solanum	nigrum	4112																					
+114	Lolium	4520114
+000	Striga	hermonthica	68872
+112	Andrographis	paniculata	175694																					
+112	Genlisea	aurea	192259																					
+112	Saliceae	238069113
+000	Solanum	virginianum	223891
+107	Tanacetum	cinerariifolium	118510																					
+106	Quercus	lobata	97700																					
+106	Asparagus	officinalis	4686																					
+106	Rhododendron	4346																						
+102	Cynara	cardunculus scolymus	59895
+102	Nicotiana	benthamiana	4100																					
+101	Manihot	esculenta	3983																					
+101	Ziziphus	jujuba	326968																					
+101	Actinidia	chinensis	1590841
+100	Daucus	carota  sativus	79200
+99	Dillenia	turbinata	194707																					
+98	Gossypium	australe	47621																					
+97	Prunus	yedoensis   nudiflora	2094558
+96	Citrus	2706																						
+96	Ricinus	communis	3988																					
+95	Morus	notabilis	981085																					
+95	Cannabaceae	3481																						
+91	Carya	illinoinensis	32201																					
+90	Gossypium	barbadense	3634																					
+90	Striga	asiatica	4170																					
+90	Malania	oleifera	397392																					
+90	Glycine	max	384791
+000	Theobroma	cacao	3641
+88	Perilla	frutescens  hirtella	608512
+88	Gossypium	hirsutum	3635																					
+88	Tagetes	erecta	13708																					
+87	Kalanchoe	fedtschenkoi	63787																					
+85	Glycine	soja	3848																					
+85	Rosa	chinensis	74649																					
+85	Solanum	habrochaites	62890																					
+85	Zingiber	officinale	94328																					
+85	Crotalaria	pallida	3830																					
+84	Nepetoideae	216706																						
+82	Thalictrum	thalictroides	46969																					
+82	Rhododendron	simsii	118357																					
+81	Prunus	3754																						
+81	Acer	saccharum	4024																					
+81	Morella	rubra	262757																					
+80	Trifolium	subterraneum	3900																					
+80	Impatiens	glandulifera	253017																					
+80	Eucalyptus	grandis	71139																					
+78	Brassica	napus	3708																					
+75	Salix	koriyanagi	2511006																					
+75	Striga	4169																						
+75	Fagales	350277
+000	Carnegiea	gigantea	171969
+74	Apioideae	241778																						
+73	Cucurbitaceae	3650																						
+73	Turnera	subulata	218843																					
+72	Pistacia	vera	55513																					
+72	Castanea	mollissima	60419																					
+71	50	kb	inversion	clade	2231393																			
+71	Solanum	stoloniferum	62892																					
+70	Populus	tomentosa	118781																					
+70	Juglans	regia	51240																					
+69	Quercus	suber	58331																					
+69	Brassica	campestris	3711																					
+69	Embryophyta	3193																						
+68	Ficus	carica	3494																					
+67	Dioscorea	zingiberensis	325984																					
+67	Gossypium	harknessii	34285																					
+67	Coptis	chinensis	26145068
+000	Poaceae	4479
+66	Lotus	japonicus	34305																					
+66	Deinandra	increscens  villosa	3103831
+66	Stephania	yunnanensis	152371																					
+66	Salvia	21880																						
+66	Rosales	3744																						
+66	Solanum	okadae	73575																					
+65	Stemphylium	lycopersici	183478																					
+65	Jatropha	curcas	180498																					
+65	Gossypium	aridum	34290																					
+63	Beta	vulgaris    vulgaris	3555
+62	Triticinae	1648030																						
+62	Phaseoleae	163735																						
+62	Glycine	subgen.	Soja	1462606																				
+62	Coffea	eugenioides	49369																					
+61	Gossypium	lobatum	34289																					
+61	Actinidia	eriantha	165200																					
+61	Phaseolus	coccineus	3886																					
+61	Citrus	clementina	85681																					
+60	Populus	3689																						
+60	Acereae	1977919																						
+59	Salix	40685																						
+59	Salvia	miltiorrhiza	226208																					
+58	Taxus	chinensis	29808																					
+58	Acer	yangbiense	1000413																					
+58	Juglandaceae	16714																						
+58	Vanilla	planifolia	51239																					
+57	Salix	purpurea	77065																					
+57	Lupinus	albus	3870																					
+57	Salix	udensis	889485																					
+57	Citrus	x	changshan-huyou	2935761																				
+57	Gossypium	armourianum	34283																					
+56	Chenopodium	quinoa	63459																					
+56	Malvoideae	214907																						
+56	Rhamnella	rubrinervis	2594499																					
+56	Oryza	sativa  japonica	39947
+56	Brassicaceae	3700																						
+55	Heracleum	sosnowskyi	360622																					
+55	Crotonoideae	235631																						
+55	Sesamum	indicum	4182																					
+55	Phaseolus	angularis	3914																					
+54	Lactuca	sativa	4236																					
+54	Cephalotus	follicularis	3775																					
+54	Aquilegia	coerulea	218851																					
+54	Papaver	somniferum	3469																					
+54	Euphyllophyta	78536																						
+53	Rhododendron	vialii	182163																					
+53	Arundo	donax	35708																					
+53	Kingdonia	uniflora	39325																					
+52	Corchorus	capsularis	210143																					
+50	Pyrus	ussuriensis communis	2448454
+50	Cucumis	melo	3656																					
+50	Papaver	nudicaule	74823																					
+49	Ananas	comosus bracteatus	296719
+49	Brassica	3705																						
+48	Gastrolobium	bilobum	150636																					
+48	Macleaya	cordata	56857																					
+47	Triticeae	147389																						
+47	Carpinus	fangiana	176857																					
+47	NPAAA	clade	2231382																					
+47	Psophocarpus	tetragonolobus	3891																					
+46	Ananas	comosus	4615																					
+46	Stephania	cephalantha	152367																					
+46	Quercus	rubra	3512																					
+46	Panicum	virgatum	38727																					
+46	Fagaceae	3503																						
+45	Prunus	armeniaca	36596																					
+45	Euphorbiaceae	3977																						
+45	Triticum	4564																						
+44	Solanum	americanum	109975																					
+44	Cryptomeria	japonica	3369																					
+44	Saxophila	tyrrhenica	1690608																					
+43	Brachypodium	distachyon	15368																					
+43	Cucurbitariaceae	221670																						
+43	Malus	3749																						
+42	Acacia	crassicarpa	499986																					
+42	Amygdaloideae	171637																						
+42	Gossypium	stocksii	47602																					
+42	Colocasia	esculenta	4460																					
+41	Gossypium	laxum	34288
+41	Picea	sitchensis	3332																					
+41	Salix	brachista	2182728																					
+40	Arabidopsis	thaliana	3702																					
+40	Prunus	persica	3760																					
+40	Corchorus	olitorius	93759																					
+40	Malpighiales	3646																						
+40	Phaseolus	vulgaris	3885
+39	Arachis	ipaensis	130454																					
+38	Gossypium	tomentosum	34277
+38	Dendrobium	catenatum	906689
+38	Dipteronia	sinensis	43782																					
+38	Humulus	lupulus	3486																					
+38	Klebsormidium	nitens	105231																					
+37	Betulaceae	3514																						
+37	Vicia	villosa	3911																					
+37	Cinnamomum	micranthum  kanehirae	337451
+37	Dipteronia	dyeriana	168575																					
+37	Hordeum	vulgare	112509
+37	Musa	troglodytarum	320322																					
+36	Amaranthus	tricolor	29722																					
+36	Rosaceae	3745																						
+35	Ipomoea	batatas	4120																					
+35	Orobanchaceae	91896																						
+34	Musa	balbisiana	52838																					
+34	Rhodamnia	argentea	178133																					
+33	Acer	negundo	4023																					
+33	Nicotiana	langsdorffii	164110
+33	Citrus	unshiu	55188																					
+33	Corethrella	appendiculata	1370023																					
+33	Durio	zibethinus	66656																					
+33	Nepenthes	gracilis	150966
+32	Arachis	3817																						
+32	Camelina	sativa	90675
+00	Capsicum	annuum	165789
+32	Clitoria	ternatea	43366																					
+32	Macadamia	integrifolia	60698																					
+32	Protea	cynaroides	273540																					
+32	Rosoideae	171638																						
+31	Cucurbitaria	berberidis		1168544
+31	Momordica	charantia	3673																					
+31	Musa	4640																						
+31	Prosopis	alba	207710																					
+31	Tarenaya	hassleriana	28532																					
+31	Triticum	urartu	4572																					
+30	Solanum	microdontum	73574																					
+30	Cocos	nucifera	13894																					
+30	Magnolia	sinica	86752																					
+30	Salix	dunnii	1413687
+29	Populus	alba	43335																					
+29	Populus	trichocarpa	3694																					
+29	Myrtoideae	1699513																						
+29	Salvia	hispanica	49212																					
+29	Stephania	japonica	461633																					
+29	Streptophytina	131221																						
+29	Tracheophyta	58023																						
+28	Alnus	glutinosa	3517																					
+28	Prunus	avium	42229																					
+28	Quercus	robur	38942																					
+28	Quercus	3511
+28	Lactuca	saligna	75948																					
+28	Triticum	aestivum	4565																					
+27	Vigna	umbellata	87088																					
+27	Canavalia	gladiata	3824
+27	Corylus	avellana	13451																					
+27	Lactuca	4235																						
+26	Populus	deltoides	3696																					
+26	Oryza	brachyantha	4533																					
+26	Brassica	carinata	52824																					
+26	Amborella	trichopoda	13333																					
+26	Nicotiana	undulata	118713																					
+26	Gossypium	gossypioides	34282																					
+26	Gossypium	klotzschianum	34286																					
+26	Gossypium	trilobum	34281																					
+26	Microthlaspi	erraticum	1685480																					
+26	Prosopis	cineraria	364024																					
+26	Spirodela	intermedia	51605																					
+26	Trapa	natans	22666																					
+26	Trifolium	3898
+26	Withania	somnifera	126910																					
+25	Arabidopsis	thaliana	1240361
+25	Brassica	oleracea	3712																					
+25	Cicer	arietinum	3827																					
+25	Cucumis	sativus	3659																					
+25	Heliantheae	alliance	911341																					
+25	Lupinus	angustifolius	3871																					
+25	Malus	sylvestris	3752																					
+25	Sapindales	41937																						
+25	Sphenostylis	stenocarpa	92480																					
+25	Zizania	palustris	103762																					
+25	Ziziphus	jujuba	714518
+24	Vigna	angularis	157739
+24	Cucurbita	pepo	3663
+23	Populus	davidiana	266767																					
+23	Anacardiaceae	4011																						
+23	Capsicum	chinense	80379																					
+23	Corchorus	93758																						
+23	IRL	clade	2233839
+23	Mangifera	indica	29780
+23	Parasponia	andersonii	3476																					
+23	Physalis	pubescens	300354																					
+23	Rhamnaceae	3608																						
+23	Spinacia	oleracea	3562																					
+23	Stephania	147243																						
+22	Caryophyllales	3524																						
+22	Tetraselmis	582737
+22	Trapa	incisa	236973																					
+21	Byttnerioideae	214909																						
+21	Nicotiana	repanda	76336																					
+21	Corymbia	citriodora	360336
+21	Dioscorea	cayennensis	55577
+21	Erigeron	canadensis	72917																					
+21	Fabaceae	3803																						
+21	Triticum	dicoccoides	85692																					
+20	Prunus	mume	102107																					
+20	Gossypium	darwinii	34276																					
+20	Dendrobium	nobile	94219																					
+20	Euphorbia	lathyris	212925																					
+20	Lolium	multiflorum	4521																					
+20	Platanthera	zijinensis	2320716																					
+20	Trema	orientale	63057																					
+19	Apostasia	shenzhenica	1088818																					
+19	Arabis	alpina	50452																					
+19	Arachis	stenosperma	217475																					
+19	Vigna	unguiculata	3917																					
+19	Gossypium	arboreum	29729																					
+19	Gossypium	davidsonii	34287																					
+19	Gossypium	mustelinum	34275																					
+19	Pyrus	x	bretschneideri	225117																				
+19	Rubiaceae	24966																						
+19	Gardenieae	complex	1968429																					
+18	Solanum	peruvianum	4082																					
+18	Arabidopsis	suecica	45249																					
+18	Arachis	duranensis	130453																					
+18	Gossypium	schwendimanii	34291																					
+18	Cucurbita	3660																						
+18	Eremoneura	480118																						
+18	Heliantheae	102814																						
+18	Lolium	perenne	4522
+18	Sorghum	bicolor	4558																					
+17	BOP	clade	359160																					
+17	Nicotiana	alata	4087																					
+17	Pyrus	3766			1305764																			
+17	Pooideae	147368																						
+17	campanulids	91882
+17	Hibiscus	47605																						
+17	Hologalegina	2233838																						
+17	Lythraceae	3928																						
+17	Myrtales	41944																						
+17	Raphanus	sativus	3726																					
+16	Solanum	pimpinellifolium	4084																					
+16	Oryza	4527																						
+16	Petunia	4101																						
+16	Digitaria	exilis	1010633																					
+16	Juglans	microcarpa	2249226
+16	Miscanthus	lutarioriparius	422564																					
+16	Phragmites	australis	29695
+16	Rhynchospora	breviuscula	2022672																					
+16	Trapa	22665																						
+15	Solanum	aethiopicum	205524																					
+15	Solanum	rostratum	45839																					
+15	Vigna	3913																						
+15	Viridiplantae	33090																						
+15	Canna	indica	4628																					
+15	Lolium	rigidum	89674																					
+15	mimosoid	clade	3807																					
+15	Musa	acuminata	214687
+15	Proteaceae	4328
+15	Telopea	speciosissima	54955																					
+14	Populus	euphratica	75702																					
+14	Aegilops	tauschii	37682																					
+14	Petunioideae	424555																						
+14	Gentianales	4055																						
+14	Physcomitrium	patens	3218																					
+14	Setaria	italica	4555																					
+14	Taylorella	asinigenitalis	14/45	1091495																				
+13	Solanum	huancabambense	856898																					
+13	Solanum	leptophyes	1128164
+13	Brassica	oleracea	109376
+13	Brassicales	3699																						
+13	Vigna	radiata	3916
+13	Carex	littledalei	544730																					
+13	indigoferoid/millettioid	clade	2233855																					
+13	Panicum	miliaceum	4540																					
+13	Rosa	3764																						
+12	Arabidopsis	3701																						
+12	Oryza	meyeriana	110450
+12	Asteroideae	102804																						
+12	Petunia	integrifolia	60698
+12	Closterium	NIES-67	2790670
+12	Cucumis	3655																						
+12	Lupinus	3869																						
+12	Musaceae	4637																						
+12	Phoenix	dactylifera	42345
+12	Poales	38820																						
+12	Prosopis	35715																						
+12	Syzygium	oleosum	219896																					
+12	Vitis	riparia	96939																					
+12	Zingiberales	4618																						
+11	Solanum	ochranthum	154974																					
+11	Arabidopsis	arenosa	38785																					
+11	Abrus	precatorius	3816																					
+11	Acalypheae	235880																						
+11	Cactaceae	3593																						
+11	Gymnema	sylvestre	4068																					
+11	Iris	germanica	34205																					
+11	Musa	acuminata	214697
+11	Olea	europaea	4146																					
+11	Paspalum	notatum	547442
+11	Petrosaviidae	1437197
+11	Utricularia	reniformis	192314																					
+10	Solanum	muricatum	205567																					
+10	Arabidopsis	lyrata	81972
+10	Picea	glauca	3330																					
+10	Pinus	taeda	3352																					
+10	Apium	graveolens	4045																					
+10	Araucariaceae	25664																						
+10	Benincasa	hispida	102211																					
+10	Betula	pendula	3505																					
+10	Brugmansia	suaveolens	905076																					
+10	Nicotiana	paniculata	62141																					
+10	Cyperoideae	986140																						
+10	Herrania	umbratica	108875																					
+10	Liliopsida	4447
+10	Marchantia	polymorpha	3197
+10	Rhynchospora	tenuis	198213																					
+10	Telluria	2895353
+9	Solanum	ptychanthum	45838																					
+9	Solanum	quitoense	227725																					
+9	Populus	nigra	3691																					
+9	Oryza	sativa  indica	39946
+9	Aegiceras	corniculatum	59970																					
+9	Araucaria	cunninghamii	56994																					
+9	Arecaceae	4710																						
+9	Brassiceae	981071																						
+9	Caesalpinioideae	3804																						
+9	Camellia	4441																						
+9	Eragrostis	curvula	38414																					
+9	Hippophae	rhamnoides	193516																					
+9	Panicum	hallii	206008																					
+9	Papaver	3468																						
+9	Phalaenopsis	equestris	78828																					
+9	Proteales	232378																						
+8	Solanum	cardiophyllum	160510																					
+8	Solanum	thomasiifolium	744128																					
+8	Acer	4022																						
+8	Ammopiptanthus	mongolicus	126911																					
+8	Buglossoides	arvensis	181181																					
+8	Hyoscyameae	424566																						
+8	Moraceae	3487																						
+8	PACMAD	clade	147370																					
+8	Papaver	atlanticum	357466																					
+8	Picea	3328																						
+8	Rehmannia	glutinosa	99300																					
+8	Rhynchospora	46332
+7	Solanum	aturense	329763																					
+7	Solanum	bukasovii	172263																					
+7	Solanum	chacoense	1017323
+7	Solanum	hjertingii	315338																					
+7	Solanum	kurtzianum	198039																					
+7	Solanum	lycopersicoides	142760																					
+7	Brassica	juncea	3707																					
+7	Brassica	rapa	51351
+7	Adiantum	capillus-veneris	13818																					
+7	Vicia	faba	3906																					
+7	Pinaceae	3318																						
+7	Pinus	koraiensis	88728																					
+7	Petunia	300558
+7	Calotropis	procera	141467																					
+7	Capsella	rubella	81985																					
+7	Chara	braunii	69332																					
+7	Citrus	paradisi	37656																					
+7	Cornus	4281																						
+7	Eutrema	salsugineum	72664																					
+7	Fragaria	vesca	101020
+7	Heterosigma	akashiwo	2829																					
+7	Oryzeae	147380																						
+7	Physaleae	424573
+7	Potentilla	anserina	57926																					
+7	Ranunculales	41768																						
+7	Silene	latifolia	37657																					
+7	Testicularia	cyperi	1882483																					
+7	Torenia	fournieri	68875																					
+7	Zygophyllum	xanthoxylum	90549																					
+6	Solanum	aureum	2801088																					
+6	Solanum	brevicaule	205532																					
+6	Solanum	nemorense	205568																					
+6	Solanum	neorickii	62891																					
+6	Oryza	meridionalis	40149																					
+6	Anthemideae	102810																						
+6	Antirrhinum	majus	4151																					
+6	Arctium	tomentosum	4218																					
+6	Pinus	subgen.	Pinus	139271																				
+6	Capsicum	pubescens	113210																					
+6	Chrysanthemum	morifolium	41568																					
+6	Coccinia	grandis	387127
+6	Coregonus	suidteri	861788																					
+6	Cucurbita	moschata	3662																					
+6	Daviesia	angulata	233804																					
+6	Dipteronia	43781
+6	Echium	pitardii	113445																					
+6	Eutypa	lata	1287681
+6	Fabeae	163743																						
+6	Gnaphalieae	102808
+6	Helianthus	4231																						
+6	Hyacinthus	orientalis	82025																					
+6	Leersia	perrieri	77586																					
+6	Nierembergia	aristata	274371																					
+6	Paniceae	147428																						
+6	Papaveroideae	1462614																						
+6	Solaneae	424574																						
+6	Tautonia	plasticadhaerens	2527974																					
+5	Solanum	aculeatissimum	267265																					
+5	Solanum	kurzii	744088																					
+5	Solanum	nigrescens	1398764																					
+5	Solanum	torvum	119830																					
+5	Oryza	rufipogon	4529																					
+5	Andropogoneae	147429																						
+5	Anoectochilus	roxburghii	569774																					
+5	Arabis	nemorensis	586526																					
+5	Avicennia	41377																						
+5	Benincaseae	1003877																						
+5	Nicotiana	forgetiana	118696																					
+5	Nicotiana	glutinosa	35889
+5	Nicotiana	knightiana	118699																					
+5	Passiflora	edulis	78168																					
+5	Callicarpa	americana	204211																					
+5	Cardueae	102818																						
+5	core	genistoids	2231385																					
+5	Dendrobium	37818																						
+5	Dioscorea	4672																						
+5	Diospyros	13492																						
+5	Eriobotrya	japonica	32224																					
+5	Fabales	72025																						
+5	Hyoscyamus	muticus	35626																					
+5	Ipomoea	trifida	35884																					
+5	Juglans	16718																						
+5	Linum	usitatissimum	4006
+5	Onosma	fuyunensis	2742969																					
+5	Phillyrea	latifolia	126558																					
+5	Phleum	pratense	15957
+5	Physalis	peruviana	126903																					
+5	Saccharata	proteae	121410
+5	Selaginella	moellendorffii	88036
+5	Setaria	4554																						
+5	Trebouxia	A1-2	2608996
+5	Trifolieae	163742																						
+5	Vaccinium	macrocarpon	13750																					
+5	Zelkova	schneideriana	172643																					
+5	Zostera	marina	29655																					
+4	Solanum	berthaultii	47970																					
+4	Solanum	cajanumense	265391																					
+4	Solanum	ehrenbergii	199469																					
+4	Solanum	imamense	2802707																					
+4	Solanum	73101
+4	Solanum	sucrense	162494																					
+4	Solanum	ternatum	743523																					
+4	Oryza	barthii	65489																					
+4	Oryza	glaberrima	4538																					
+4	Oryza	glumipatula	40148																					
+4	Oryza	punctata	4537																					
+4	Alstroemeria	ligtu	208882
+4	Angelica	sinensis	165353																					
+4	Atropa	belladonna	33113																					
+4	Beta	vulgaris	161934																					
+4	Beta	3554																						
+4	Biebersteinia	heterostemon	375289																					
+4	Brunfelsia	pauciflora	1427530
+4	Bryopsida	3214																						
+4	Prunus	salicina	88123																					
+4	Nicotiana	plumbaginifolia	4092																					
+4	Nicotiana	rustica	4093																					
+4	Camelineae	980083																						
+4	Capsicum	annuum	165789
+4	Caryophyllaceae	3568																						
+4	Castanopsis	carlesii	167382																					
+4	Chenopodiaceae	1804623																						
+4	Chenopodioideae	1307796																						
+4	Chlorella	vulgaris	3077																					
+4	Citrus	reticulata	85571																					
+4	Cucurbita	pepo	3663
+4	Diospyros	kaki	35925																					
+4	Drosera	rotundifolia	173423																					
+4	Echinocereeae	186275																						
+4	Eleocharis	46324																						
+4	Eucalypteae	1699524																						
+4	Flaveria	trinervia	4227
+4	Gentiana	rigescens	553056																					
+4	Gentiana	tongolensis	1828751																					
+4	Gordonia	2053																						
+4	Iochroma	304104			984485	945553																		
+4	Lactuca	dolichophylla	687670																					
+4	Lycium	chinense	112883																					
+4	Musa	acuminata	4641																					
+4	Oryzinae	1648021																						
+4	Paeonia	13625																						
+4	Panicoideae	147369																						
+4	Paropyrum	anemonoides	432641
+4	Phacelia	campanularia	79382																					
+4	Plantago	ovata	185002
+4	Polemoniaceae	24584																						
+4	Ranunculaceae	3440																						
+4	Rhazya	stricta	396313																					
+4	Sapindaceae	23672																						
+4	Saussurea	involucrata	200489																					
+4	Scutellaria	baicalensis	65409																					
+4	Tautonia	sociabilis	2080755																					
+4	Tepidicella	xavieri	360241																					
+4	Terfezia	boudieri	1051890
+4	Thymus	49990																						
+3	Solanum	arcanum	376710																					
+3	Solanum	mauritianum	205564																					
+3	Solanum	opacum	401002																					
+3	Solanum	sparsipilum	172796																					
+3	Solanum	urubambaense	2802716																					
+3	Populus	canescens	80863																					
+3	Oryza	sativa	4530																					
+3	Trichogramma	brassicae	86971																					
+3	Alectoria	fallacina	1903189																					
+3	Alismatales	16360																						
+3	Allium	cepa	4679																					
+3	Alloteropsis	semialata	435756																					
+3	Asclepias	syriaca	48545																					
+3	Asparagales	73496																						
+3	Avena	sativa	4498																					
+3	Bidens	bipinnata	1527831																					
+3	Bidens	parviflora	1527830																					
+3	Bignonieae	423302																						
+3	Boraginales	1538097																						
+3	Brunfelsia	australis	1170511																					
+3	Pinidae	3313																						
+3	Pinus	banksiana	3353																					
+3	Pinus	tabuliformis	88731																					
+3	Piper	nigrum	13216
+3	Nicotiana	otophora	4091																					
+3	Nicotiana	suaveolens	157071
+3	Nicotiana	tabacum	32200
+3	Petunia	parodii	55890
+3	Calycina	marina	1763456																					
+3	Caryophylleae	1141493																						
+3	Casuarina	equisetifolia	3523																					
+3	Chlamydomonas	euryale	1486919																					
+3	Clarkia	lassenensis	81941																					
+3	Colocasia	4459
+3	Coriandrum	sativum	4047																					
+3	Cupressales	1446379																						
+3	Cymbidium	sinense	112615																					
+3	Cynodon	dactylon	28909																					
+3	Datura	ferox	169103																					
+3	Dianthus	chinensis	118431																					
+3	Drosera	adelae	173387																					
+3	Dunalia	spathulata	362348																					
+3	Echinacea	angustifolia	308558																					
+3	Emilia	JYW-2018	2078973
+3	Ericoideae	217035																						
+3	Euphorbia	larica	1031526																					
+3	Fragaria	pentaphylla	101014																					
+3	Gentiana	triflora	55190																					
+3	Gordonia	paraffinivorans	175628
+3	Geraniaceae	4027																						
+3	Gynochthodes	nanlingensis	1756979																					
+3	Helanthium	bolivianum	433018																					
+3	Hymenidium	amabile	584733																					
+3	Incarvillea	arguta	291310																					
+3	Leersia	oryzoides	35712																					
+3	Limnocharis	flava	55477																					
+3	Lithospermum	erythrorhizon	34254																					
+3	Lonicera	caerulea	134520																					
+3	Lycianthes	radiata	393162																					
+3	Monoraphidium	neglectum	145388
+3	Neolamarckia	cadamba	153762																					
+3	Nepenthes	alata	4376
+3	Nothapodytes	nimmoniana	159386																					
+3	Oenothera	drummondii	260700																					
+3	Oenothera	3948
+3	Orchidaceae	4747
+3	Paeonia	lactiflora	35924																					
+3	Panax	notoginseng	44586																					
+3	Panicum	hallii	1504633
+3	Panicum	4539																						
+3	Petasites	fragrans	281178																					
+3	Phaseolus	3883																						
+3	Phragmipedium	longifolium	53134																					
+3	Physalis	24663																						
+3	Pittosporum	23129																						
+3	Plantago	major	29818																					
+3	Plukenetia	volubilis	316893
+3	Polygonoideae	1110380																						
+3	Primula	2762995
+3	Pseudotsuga	3356																						
+3	Pyramimonas	parkeae	36894
+3	Rhizophora	apiculata	106626																					
+3	Rhizophoraceae	40029																						
+3	Rhododendron	oldhamii	118358																					
+3	Rosa	rugosa	74645																					
+3	Sapotaceae	3737
+3	Saxifragales	41946																						
+3	Sedum	plumbizincicola	1532924																					
+3	Setaria	viridis	4556																					
+3	Silene	subgen.	Silene	2777008																				
+3	Solandra	grandiflora	33123																					
+3	Sonneratia	alba	122812																					
+3	Sphenoclea	zeylanica	28496																					
+3	Streptophyta	35493																						
+3	Syntrichia	caninervis	200751
+3	Tapiscia	sinensis	112844																					
+3	Taraxacum	officinale	50225																					
+3	Tectona	41395																						
+3	Tetradesmus	obliquus	3088																					
+3	Tetraselmis	chuii	63592
+3	Ulmaceae	3474																						
+3	Ulmus	laciniata	198265																					
+3	Urticaceae	3499
+3	Vachellia	nilotica	138033																					
+3	Vernicia	montana	316732																					
+3	Vincetoxicum	mongolicum	648865																					
+3	Wolffia	australiana	161112																					
+2	Solanum	agnewiorum	1097620																					
+2	Solanum	betaceum	45843																					
+2	Solanum	caripense	205537
+2	Solanum	carolinense	50511																					
+2	Solanum	confine	2802703																					
+2	Solanum	crispum	4110																					
+2	Solanum	elaeagnifolium	115664																					
+2	Solanum	gilioides	1426230																					
+2	Solanum	glutinosum	329774																					
+2	Solanum	phureja	Solanum	stenotomum	176295
+2	Solanum	phureja	172790																					
+2	Solanum	trisectum	115652																					
+2	Solanum	tuberosum   andigenum	80418
+2	Populus	deltoides maximowiczii	273903
+2	Populus	tremula	113636																					
+2	Populus	trichocarpa	deltoides	3695
+2	Oryza	nivara	4536																					
+2	Terasakiella	brassicae	1634917																					
+2	Acacia	mangium	224085																					
+2	Acer	miaotaiense	948960																					
+2	Acetabularia	acetabulum	35845																					
+2	Acnistus	arborescens	362341																					
+2	Actinidia	deliciosa	3627																					
+2	Actinodium	cunninghamii	199376																					
+2	Aizoaceae	3542																						
+2	Ajugoideae	2835904																						
+2	Allium	fistulosum	35875																					
+2	Alstroemeria	160839
+2	Amaranthus	3564																						
+2	Amaryllidoideae	703251																						
+2	Amorphochlora	amoebiformis	1561963																					
+2	Amphora	coffeiformis	265554																					
+2	Anemia	phyllitidis	12940																					
+2	Annona	squamosa	301693																					
+2	Anthurium	andraeanum	226677																					
+2	Apium	graveolens	Dulce	117781
+2	Apocynaceae	4056																						
+2	Aquilaria	sinensis	210372																					
+2	Arabis	50451																						
+2	Arachis	diogoi	170720																					
+2	Arctium	lappa	4217																					
+2	Asplundia	moritziana	796855																					
+2	Aster	yellows	phytoplasma	35779																				
+2	Asterales	4209																						
+2	Asterochloris	909298
+2	Astragalus	sinicus	47065																					
+2	Astrephomene	gubernaculifera	47775																					
+2	Aucuba	japonica	16901																					
+2	Aucuba	obcordata	2794245																					
+2	Avicennia	marina	82927																					
+2	Bixa	orellana	66672																					
+2	Blasia	1799561
+2	Brevifollis	gellanilyticus	748831																					
+2	Bridelia	tomentosa	300990																					
+2	Bromelioideae	1909378																						
+2	Burmannia	48531																						
+2	Burmanniaceae	48528																						
+2	Vigna	radiata	157791																					
+2	Prunus	salicina	armeniaca	Prunus	551137
+2	Pinus	contorta	3339																					
+2	Pinus	massoniana	88730																					
+2	Pinus	strobus	3348																					
+2	Pinus	sylvestris	3349																					
+2	Pinus	3337																						
+2	Nicotiana	africana	200302																					
+2	Nicotiana	wigandioides	200317																					
+2	Pyrus	pyrifolia	332388
+2	Pyrus	pyrifolia	3767																					
+2	Pomacea	canaliculata	400727																					
+2	Psychotria	viridis	189196																					
+2	Passiflora	incarnata	159425																					
+2	Petunia	exserta	323115
+2	Petunia	4104
+2	Rubia	cordifolia	339321																					
+2	Rubia	tinctorum	29802																					
+2	Cordia	dichotoma	992840																					
+2	Conifers	2821351
+2	Calliphora	7372
+2	Calothrix	99598
+2	Camelina	71323																						
+2	Camellia	reticulata	452972
+2	Caraganeae	1819629																						
+2	Caricaceae	3647																						
+2	Carthamus	tinctorius	4222																					
+2	Castanea	sativa	21020																					
+2	Castanea	21019																						
+2	Catharus	ustulatus	91951																					
+2	Chenopodium	album	3559																					
+2	Chlorella	clade	2511126																					
+2	Chlorella	variabilis	554065																					
+2	Chlorella	3071																						
+2	Chrysolaena	obovata	1591071																					
+2	Citrullus	lanatus	3654																					
+2	Citrus	limon	2708																					
+2	Citrus	limon	pompia	1430428
+2	Cleome	violacea	389490																					
+2	Coccomyxa	Obi	2315456
+2	Coccomyxa	subellipsoidea	1182543
+2	Coccomyxa	41891																						
+2	Codonopsis	lanceolata	103999																					
+2	Coffea	myrtifolia	339927																					
+2	Collinsia	68861																						
+2	Coluteocarpeae	1394505
+2	Corchorus	pseudo-olitorius	588206																					
+2	Crassulaceae	3781																						
+2	Cucurbita	maxima	3661																					
+2	Cupressaceae	3367																						
+2	Cymbidium	faberi	112604																					
+2	Cyperus	fuscus	529431																					
+2	Dactylis	glomerata	4509																					
+2	Datura	metel	35625																					
+2	Daucus	carota	4039																					
+2	Decalepis	hamiltonii	492000																					
+2	Deschampsia	antarctica	159298																					
+2	Dianthus	benearnensis	746741																					
+2	Dianthus	3569																						
+2	Digitalis	lanata	49450																					
+2	Dilleniaceae	24942																						
+2	Dimocarpus	longan	128017																					
+2	Dioscorea	villosa	330167																					
+2	Drimys	winteri	3419																					
+2	Dromaius	novaehollandiae	8790																					
+2	Duboisia	myoporoides	195737																					
+2	Dufourea	novaeangliae	178035																					
+2	Echinacea	7674																						
+2	Echinochloa	colona	90396																					
+2	Eclipta	prostrata	53719																					
+2	Eleocharis	palustris	110297
+2	Eleocharis	uniglumis	sterneri	754385
+2	Eperua	falcata	162769																					
+2	Ericaceae	4345
+2	Eryngium	maritimum	455077																					
+2	Erysimum	teretifolium	2662428																					
+2	Eucalyptus	camaldulensis	34316																					
+2	Eucommia	ulmoides	4392																					
+2	Euglena	gracilis	3039																					
+2	Euonymus	alatus	4307																					
+2	Euphorbia	esula	3993																					
+2	Euptelea	pleiosperma	106141																					
+2	Exbucklandia	54452																						
+2	Fagopyrum	cymosum	62329																					
+2	Fischerella	thermalis	372787
+2	Forsythia	intermedia	55183																					
+2	Forsythia	55182
+2	Fortiea	contorta	1892405																					
+2	Fragaria	ananassa	3747																					
+2	Gentiana	lawrencei	farreri	156521
+2	Gordonia	insulae	2420509																					
+2	Gordonia	pseudamarae	2831662																					
+2	Gordonia	rhizosphera	16068
+2	Gordonia	1946575
+2	Gordoniaceae	85026																						
+2	Galium	odoratum	35899																					
+2	Gardenia	jasminoides	114476																					
+2	Geranium	dissectum	326028																					
+2	Ginkgo	biloba	3311																					
+2	Gnetum	raya	242780																					
+2	Gonium	pectorale	33097																					
+2	Govania	unica	2975056																					
+2	Groenlandia	densa	55457																					
+2	Haberlea	rhodopensis	121481																					
+2	Hagenia	abyssinica	57921																					
+2	Haloragaceae	24945																						
+2	Hedera	nepalensis	sinensis	216067
+2	Helleborus	argutifolius	171909																					
+2	Helleborus	foetidus	46996																					
+2	Heracleum	persicum	360621																					
+2	Heteroplexis	impressinervia	2789018																					
+2	Hippuris	vulgaris	39321																					
+2	Hordeum	vulgare	4513
+2	Hydrangea	macrophylla	23110																					
+2	Hydrocharitaceae	26319
+2	Hyoscyamus	boveanus	540803																					
+2	Hyoscyamus	niger	4079																					
+2	Iochroma	cyaneum	362357																					
+2	Iochroma	fuchsioides	304105
+2	Ipomoea	pes-caprae	89656
+2	Ilex    meserveae	228931
+2	Ilex	4295																						
+2	Kandelia	61137																						
+2	Lamiaceae	4136																						
+2	Lathyrus	japonicus	154493																					
+2	Leeia	650341																						
+2	Lennoa	madreporoides	111108																					
+2	Ligustrum	japonicum	46072																					
+2	Lilium	longiflorum	4690																					
+2	Limnophila	sessiliflora	438425																					
+2	Lonicera	japonica	105884																					
+2	Lonicera	49606																						
+2	Mallotus	japonicus	29747																					
+2	Malus	prunifolia	106564																					
+2	Marattiaceae	3265																						
+2	Marchantiophyta	3195																						
+2	Maryna	umbrellata	638345																					
+2	Masdevallia	coccinea	125431																					
+2	Metastelma	northropiae	1254457																					
+2	Micromeria	224744																						
+2	Mirabilis	himalaica	482968
+2	Moringa	oleifera	3735																					
+2	Morus	3497																						
+2	Nannochloropsis	gaditana	1093141
+2	Narcissus	pseudonarcissus	39639																					
+2	Narthecium	californicum	479629																					
+2	Nepenthes	khasiana	122310																					
+2	Nephroselmis	olivacea	31312																					
+2	Niveispirillum	2662178
+2	Nodularia	spumigena	70799																					
+2	Noronhia	clarinerva	2491098
+2	Nostoc	2692836
+2	Nostoc	10630
+2	Nostoc	1180
+2	Oldenlandia	affinis	60225																					
+2	Ombrophytum	subterraneum	50155																					
+2	Orthotrichum	gymnostomum	478072																					
+2	Oxybasis	rubra	3560																					
+2	Pachysandra	terminalis	74825																					
+2	Panax	ginseng	4054																					
+2	Panax	quinquefolius	44588																					
+2	Parthenium	argentatum	35935																					
+2	Paspalum	vaginatum	158149																					
+2	Pedinophyceae	765719
+2	Pentasachme	caudatum	1868792																					
+2	Peponium	vogelii	387135
+2	Periploca	sepium	190712																					
+2	Persea	borbonia	3436																					
+2	Phanerodiscus	perrieri	1618142																					
+2	Phelipanche	aegyptiaca	99112																					
+2	Phelipanche	tunetana	223135																					
+2	Philonotis	fontana	67415
+2	Phyllostachys	nigra	henonis	886359
+2	Phytolacca	acinosa	3528																					
+2	Phytoplasma	33926																						
+2	Picea	engelmannii	glauca	373101
+2	Picea	wilsonii	162304																					
+2	Picrorhiza	kurrooa	195120
+2	Platanus	acerifolia	140101																					
+2	Platycodon	grandiflorus	94286
+2	Pleodorina	starrii	330485																					
+2	Podostemoideae	999643																						
+2	Polygonaceae	3615																						
+2	Polytomella	Pringsheim	37502
+2	Potamogeton	distinctus	62344																					
+2	Potentilleae	721789																						
+2	Pseudostellaria	418401																						
+2	Pseudotsuga	menziesii	3357																					
+2	Raphidocelis	subcapitata	307507																					
+2	Rauvolfia	serpentina	4060
+2	Rhizophora	mangle	40031																					
+2	Rhizophora	40030
+2	Rhododendron	micranthum	118363																					
+2	Rhus	chinensis	289753																					
+2	Rosa	roxburghii	74654																					
+2	Rosoideae	incertae	sedis	1176516																				
+2	Ruschia	rupicola	1515112																					
+2	Ryticaryum	macrocarpum	1705858																					
+2	Salix	matsudana	349989																					
+2	Salpichroa	origanifolia	374027																					
+2	Santalum	album	35974																					
+2	Sartidia	perrieri	1243769		1639000																			
+2	Sasa	qingyuanensis	863043																					
+2	Scenedesmus	929556
+2	Schizanthus	24674																						
+2	Sclerantheae	1141482																						
+2	Scrophularia	striata	1042520																					
+2	Senecioneae	102812																						
+2	Sesuvium	portulacastrum	221166																					
+2	Silene	conica	39875		(strain																			
+2	Silene	vulgaris	42043		341189																			
+2	Silene	3573																						
+2	Silurus	94992			667129
+2	Silvianthus	bracteatus	389109																					
+2	Sloanea	45190																						
+2	Sonneratia	122811
+2	Spathelia	terminalioides	935887																					
+2	Spiraeeae	721808																						
+2	Spirodela	polyrhiza	29656																					
+2	Strelitzia	reginae	255355																					
+2	Streptosolen	jamesonii	310464																					
+2	Strombosia	pustulata	350586																					
+2	Syzygium    durik-durik	2282372
+2	Thuja	plicata	3316
+2	Thujopsis	dolabrata	13727																					
+2	Torilis	scabra	79188																					
+2	Toxicodendron	diversilobum	300207																					
+2	Trachelospermum	jasminoides	69389																					
+2	Tragopogon	13730																						
+2	Tribonema	minus	303371
+2	Trifolium	repens	3899																					
+2	Triparma	columacea	722753
+2	Triparma	laevis	1534972																					
+2	Tripterospermum	membranaceum	1608371																					
+2	Tropaeolum	majus	4020																					
+2	Tsuga	heterophylla	3359																					
+2	Vaccinium	13749																						
+2	Vahlia	capensis	23278
+2	Valeriana	1520724
+2	Verbena	officinalis	79772																					
+2	Volvox	carteri	nagariensis	3068
+2	Wenchengia	alternifolia	1168069																					
+2	Withania	aristata	611795																					
+2	Withania	126908																						
+2	Xerophyta	humilis	211604																					
+2	Xylia	xylocarpa	kerrii	1489964
+2	Xylocarpus	241840																						
+2	Zabelia	486692																						
+2	Zanthoxylum	67937																						
+2	Zingiberaceae	4642																						
+2	Zinnia	elegans	34245																					
+2	Zostera	27257
