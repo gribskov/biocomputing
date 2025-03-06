@@ -2,6 +2,8 @@
 After hand editing, check taxon lists to make sure all have the scientific name (Tax) as well as
 NCBI numeric name (TaxID)
 
+TODO add counters for good and bad files
+
 26 February 2025        Michael Gribskov
 #################################################################################################"""
 from collections import defaultdict
