@@ -6,6 +6,7 @@ NCBI numeric name (TaxID)
 #################################################################################################"""
 from collections import defaultdict
 
+
 def read_tsv(fname, ):
     """---------------------------------------------------------------------------------------------
     read the hand edited tsv file of taxa and taxid, tab separated
@@ -19,22 +20,56 @@ def read_tsv(fname, ):
     :return: list of dict   data read from file
     ---------------------------------------------------------------------------------------------"""
     f = open(fname, 'r')
-    out = defaultdict(lambda: {'species':set(), 'taxid':set()})
+    out = defaultdict(lambda: {'species': set(), 'taxid': set()})
     for line in f:
         print(f'{line}')
         field = line.rstrip().split('\t')
         tax = field[1]
         this = out[tax]
 
-        for i in range(2,len(field)):
+        for i in range(2, len(field)):
             if field[i].isdigit():
                 break
             this['species'].add(field[i])
 
-        this['taxid'].add(int(field[i]))
+        try:
+            if i < len(field):
+                this['taxid'].add(int(field[i]))
+        except:
+            print(f'missing taxid')
 
-
+    f.close()
     return out
+
+
+def blast_query_block(blast):
+    """---------------------------------------------------------------------------------------------
+
+    :param blast:       blast search result
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    query_old = ''
+    qinfo = {'query': '', 'genera': []}
+
+    for line in blast:
+        field = line.split('\t')
+        query = field[0]
+        taxbegin = field[12].find("Tax") + 4
+        taxend = field[12].find("TaxID") - 1
+        taxterm = field[12][taxbegin:taxend].split()
+
+        if query == query_old:
+            # add to genera
+            qinfo['query'] = query
+            qinfo['genera'].append(taxterm[0])
+        else:
+            yield qinfo
+            query_old = qinfo['query']
+            qinfo['query'] = query
+            qinfo['genera'] = [taxterm[0]]
+
+    return False
+
 
 if __name__ == '__main__':
 
@@ -43,5 +78,30 @@ if __name__ == '__main__':
     badfile = 'data/tax_bad.txt'
 
     good = read_tsv(goodfile)
+    # manually add
+    good['Potato'] = {'species': ['species'], 'taxid': [4081]}
+
+    goodset = open('goodset.out', 'w')
+    badset = open('badset.out', 'w')
+
+    blast = open(blastfile, 'r')
+    for qinfo in blast_query_block(blast):
+        # check to see if any genus in qinfo['genera'] is in good list
+        ok = False
+        for genus in qinfo['genera']:
+            if genus in good:
+                ok = True
+                break
+
+        if ok:
+            # print(f'GOOD {qinfo}')
+            goodset.write(f"{qinfo['query']}\t{qinfo['genera']}\n")
+        else:
+            badset.write(f"{qinfo['query']}\t{qinfo['genera']}\n")
+            # if 'root' in qinfo['genera'] or 'Eukaryota' in qinfo['genera']:
+            #     print(f'BAD {qinfo}')
+
+    goodset.close()
+    badset.close()
 
     exit(0)
