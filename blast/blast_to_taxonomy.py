@@ -76,6 +76,7 @@ Michael Gribskov     13 March 2025
 import requests
 from urllib.parse import quote_plus
 from lxml import etree
+from blast import Blast
 
 
 def send_query(url, params):
@@ -131,11 +132,33 @@ def get_lineage(xml):
     return xml.xpath('//Lineage')[0].text
 
 
+def blast(blastfile):
+    """---------------------------------------------------------------------------------------------
+    generator that returns one blast result at each call
+    format
+
+    # TRINITY_DN644_c0_g2_i1	3590	894	535	UniRef90_M1BIC5	388	269	388	120	100	624	4.21e-68	UniRef90_M1BIC5 Ninja-family protein n=2 Tax=Solanum TaxID=4107 RepID=M1BIC5_SOLTU
+
+    :param blastfile: string    path to blast search result
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    blast = open(blastfile, 'r')
+    for line in blast:
+        field = line.rstrip.split('\t', masxplit=12)
+        yield {
+            'qid': field[0]
+            'qbegin': field[1]
+            'qend'
+            }
+
+    blast.close()
+    return
+
+
 # --------------------------------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-
     api_key = '645c588aed8ff727e6ed8059d10e7db2ea09'
     ncbi = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
     efetch = 'efetch.fcgi'
@@ -163,5 +186,10 @@ if __name__ == '__main__':
     xml = send_query(ncbi + efetch, params)
     lineage = get_lineage(xml)
     print(f'{target} => {lineage}')
+
+    # TRINITY_DN644_c0_g2_i1	3590	894	535	UniRef90_M1BIC5	388	269	388	120	100	624	4.21e-68	UniRef90_M1BIC5 Ninja-family protein n=2 Tax=Solanum TaxID=4107 RepID=M1BIC5_SOLTU
+    fmt = ('sname slen sbegin send qname qlen qbegin qendid alignlen mismatch gapopen qbeg qend sbeg send evalue '
+           'bit_score')
+    nfields = blast.setFormat(fmt)
 
     exit(0)
