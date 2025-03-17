@@ -74,6 +74,8 @@ Michael Gribskov     13 March 2025
 ================================================================================================="""
 
 import requests
+from collections import defaultdict
+import json
 from time import sleep
 from urllib.parse import quote_plus
 from lxml import etree
@@ -141,6 +143,66 @@ def send_query(url, params, retry):
         return None
 
     return xml
+
+
+def send_query_jgi(tax, errors):
+    """---------------------------------------------------------------------------------------------
+
+    :param tax: string      The stitle string from a blast search result
+    :param errors: list     entries record queries that returned errors
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    url = 'https://taxonomy.jgi.doe.gov/name/simple/' + tax.strip().replace(' ', '_')
+
+    try:
+        response = requests.post(url, {})
+    except Exception as err:
+        print(f'something goes wrong: {err}\n{response.text}')
+
+    j = json.loads(response.text)
+    taxstr = ''
+    try:
+        q = j[list(j)[0]]
+        taxstr = ';'.join([q[l]['name'] for l in reversed(q.keys())
+                           if l not in ('level', 'mononomial', 'name', 'tax_id')])
+
+    except Exception as err:
+        errors.append({'taxon': tax, 'error': err, 'response': response.text})
+
+    return (taxstr)
+
+def send_query_block_jgi(tax, taxa, errors):
+    """---------------------------------------------------------------------------------------------
+    send a list of seqeunces to the bbtaxonomy services as a single post query
+
+    :param qlist: list      taxonomic names from the stitle string from a blast search result
+    :param errors: list     entries record queries that returned errors
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    url = 'https://taxonomy.jgi.doe.gov/name/simple/'
+    block = ','.join(qlist)
+    query = url + block
+
+    try:
+        response = requests.post(query)
+    except Exception as err:
+        print(f'something goes wrong: {err}\n{response.text}')
+
+    j = json.loads(response.text)
+    ok_n = 0
+    for query in j:
+        taxstr = ''
+        try:
+            taxinfo = j[query]
+            taxstr = ';'.join([taxinfo[l]['name'] for l in reversed(taxinfo.keys())
+                               if l not in ('level', 'mononomial', 'name', 'tax_id')])
+            taxa[query]['lineage'] = taxstr
+            ok_n += 1
+
+        except Exception as err:
+            errors.append({'taxon': query, 'error': err, 'response':taxinfo})
+
+    return len(ok_n)
 
 
 def get_taxinfo(xml):
@@ -243,7 +305,9 @@ def get_lineage_from_taxonomydb(tax, retry):
     # query taxonomy db using taxonomic phrase from blast result
     params = {'api_key':    '645c588aed8ff727e6ed8059d10e7db2ea09',
               'db':         'taxonomy',
-              'term':       quote_plus(tax),
+              # 'term':       '"' + tax.strip() + '"',
+              'field':      'Organism',
+              'term':       quote_plus(tax.strip()),
               'usehistory': 'y'}
     xml = send_query(ncbi + esearch, params, retry)
 
@@ -277,48 +341,77 @@ def get_lineage_from_taxonomydb(tax, retry):
     return lineage
 
 
+def blast_read(blastfile):
+    """---------------------------------------------------------------------------------------------
+    Read the taxonmic string from the blast search and make a list of unique taxa. Spaces in the
+    taxon name are conveted to underlines, after filtering parenthesized phrases
+
+    :param blastfile: string    path to file with blast result
+    :return: dict               taxonomic string is the key, lineage is empty to be filled later
+    ---------------------------------------------------------------------------------------------"""
+    nline = 0
+    taxa = defaultdict(lambda: {'lineage': '', 'count': 0})
+
+    for hit in blast(blastfile):
+        nline += 1
+        tax = blast_get_tax(hit['stitle'])
+
+        print(f'{nline}\t{tax}')
+        if tax.find('(') != -1:
+            # trim off information in parentheses
+            # this information is usually not part of the actual taxonomic name
+            tax = tax[:tax.find('(') - 1]
+            # print(f'\t=> trimmed: {tax}')
+
+        # convert spaces to underline
+        tax = tax.strip().replace(' ', '_')
+        taxa[tax]['count'] += 1
+        if nline > 50000:
+            # TODO remove debugging
+            break
+
+    print(f'\nblast results processed: {nline}')
+    print(f'unique taxa {len(taxa)}')
+
+    return taxa
+
+
 # --------------------------------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     blastfile = 'data/c16c31.trinity_uniref_1e-10.dmndblastx'
-    taxa = {}
+
+    errors = []
     good_n = 0
     bad_n = 0
-    retry = []
-    nline = 0
+    unknown_n = 0
     nquery = 0
-    for hit in blast(blastfile):
-        nline += 1
-        tax = blast_get_tax(hit['stitle'])
-        print(f'{nline}\t{tax}')
-        if tax.find('(') != -1:
-            tax = tax[:tax.find('(') - 1]
-            print(f'\t=> trimmed: {tax}')
 
-        if tax in taxa:
-            # skip if lineage is already known
+    taxa = blast_read(blastfile)
+    ntop = 50
+    print(f'\ntop {ntop} taxa:')
+    n = 0
+    for t in sorted(taxa, key=lambda c: taxa[c]['count'], reverse=True):
+        print(f'{n:3d}{t:>35s}{taxa[t]['count']:10d}')
+        n += 1
+        if n == ntop:
+            break
+
+    ntaxa = 0
+    block = 100
+    qlist = []
+    for hit in taxa:
+        ntaxa += 1
+
+        if ntaxa % block:
+            qlist.append(hit)
             continue
 
-        nquery += 1
-        lineage = get_lineage_from_taxonomydb(tax, retry)
-        if lineage:
-            print(f'\t{nquery}\t{lineage[:60]}')
-        else:
-            print(f'\t{nquery}\tNone')
-        if lineage is None:
-            # query failed, go on to next line
-            continue
+        n_success = send_query_block_jgi(qlist, taxa, errors)
+        qlist = []
 
-        # print(f'tax:{tax}| {lineage}')
-        if lineage is None:
-            print(f'no such taxon: {tax}')
-            print(f'{hit}')
-            continue
 
-        elif lineage == 'unknown':
-            print(f'unknown taxon: {tax}\n{hit}')
-            continue
 
         # plants are good, everything else is bad
         try:
@@ -329,10 +422,15 @@ if __name__ == '__main__':
             taxa[tax] = {'good': 0, 'lineage': lineage}
             bad_n += 1
 
-    print(f'good taxa: {good_n}\bbad taxa: {bad_n} found in {blastfile}')
+    print(f'\ngood taxa: {good_n}\tbad taxa: {bad_n} found in {blastfile}\n')
 
+    print(f'\nUnknown taxa:')
+    for entry in errors:
+        print(f"{entry['taxon']}\t{entry['response']}")
+
+    print(f'\nGood taxa')
     for tax in sorted(taxa, key=lambda t: taxa[t]['lineage']):
-        if tax['good']:
+        if taxa[tax]['good']:
             print(f'tax:{tax}')
 
     exit(0)
