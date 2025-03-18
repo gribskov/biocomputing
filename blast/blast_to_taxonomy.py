@@ -114,6 +114,8 @@ def send_query_block_jgi(qlist, taxa, errors):
     url = 'https://taxonomy.jgi.doe.gov/name/simple/'
     block = ','.join(qlist)
     query = url + block
+    if 'Macrophomina_phaseolina' in qlist or block.find('Macrophomina_phaseolina')!=-1:
+        print(block)
 
     response = None
     j = None
@@ -126,13 +128,16 @@ def send_query_block_jgi(qlist, taxa, errors):
     ok_n = 0
     oldtlen = len(taxa)
     for query in j:
+        if query.find('phaseo') != -1:
+            print('check here')
+
         try:
             taxinfo = j[query]
             taxstr = ';'.join([taxinfo[l]['name'] for l in reversed(taxinfo.keys())
                                if l not in ('level', 'mononomial', 'name', 'tax_id')])
         except TypeError:
-            errors.append({'taxon': query, 'error': 'TypeError', 'response': taxinfo})
-            continue
+            # errors.append({'taxon': query, 'error': 'TypeError', 'response': taxinfo})
+            taxstr = 'Error;Taxon_not_found'
 
         try:
             taxa[query]['lineage'] = taxstr
@@ -140,11 +145,12 @@ def send_query_block_jgi(qlist, taxa, errors):
                 # some queries will trigger multiple responses, particularly ones with /
                 # these queries are filtered in blast_read(), but there could be other
                 # names that also do it
-                print('Error: unknown name illegally extends taxa')
+                print('Error:unknown_taxon attempting to extend taxa list. check filtering')
                 oldtlen = len(taxa)
             ok_n += 1
 
         except Exception as err:
+            # any other errors
             errors.append({'taxon': query, 'error': err, 'response': taxinfo})
 
     return ok_n
@@ -300,7 +306,7 @@ def blast_read(blastfile):
     :return: dict               taxonomic string is the key, lineage is empty to be filled later
     ---------------------------------------------------------------------------------------------"""
     nline = 0
-    taxa = defaultdict(lambda: {'lineage': '', 'count': 0, 'good': 0})
+    taxa = defaultdict(lambda: {'lineage': '', 'group': 'other', 'count': 0})
 
     for hit in blast(blastfile):
         nline += 1
@@ -333,10 +339,44 @@ def blast_read(blastfile):
         taxa[tax]['count'] += 1
         print(f'{nline}\t{tax}')
 
+        if tax=='Macrophomina_phaseolina':
+            print('tax:', taxa['Macrophomina_phaseolina'])
+
+        # TODO remove debug
+        if nline > 1000:
+            break
+
     print(f'\nblast results processed: {nline}')
     print(f'unique taxa {len(taxa)}')
 
     return taxa
+
+
+def assign_groups(taxa, group):
+    """---------------------------------------------------------------------------------------------
+    use the search terms in group to assign assemblies to defined groups. sequence not matching
+    are defined as other. error sequences are defined as 'error'
+
+    :param taxa: dict       content: {'lineage': , 'group': , 'count': }
+    :param group: dict      key is group name, value is taxonomic term to match
+    :return: None
+    ---------------------------------------------------------------------------------------------"""
+    count = defaultdict(int)
+
+    for t in taxa:
+        this = taxa[t]
+        for g in group:
+            found = False
+            if group[g] in this['lineage']:
+                this['group'] = g
+                found = True
+                break
+        if not found:
+            this['group'] = 'other'
+
+        count[g] += 1
+
+    return count
 
 
 # --------------------------------------------------------------------------------------------------
@@ -346,6 +386,11 @@ if __name__ == '__main__':
     blastfile = 'data/c16c31.trinity_uniref_1e-10.dmndblastx'
     goodfile = 'data/c16c31.trinity.goodtax.txt'
 
+    # define groups - each groups is defined by one taxonomic term, anything undefined is 'other'
+    group = {'error': 'Error', 'plant': 'Viridiplantae', 'virus': 'Viruses',
+             'arthropod': 'Arthropoda', 'fungi': 'Fungi', 'bacteria': 'Bacteria' }
+    gorder = {'error': 1, 'plant': 3, 'virus': 4, 'arthropod': 5, 'fungi': 6, 'bacteria': 7, 'other': 2 }
+
     errors = []
     good_n = 0
     bad_n = 0
@@ -353,13 +398,15 @@ if __name__ == '__main__':
     nquery = 0
 
     taxa = blast_read(blastfile)
-
+    print('tax:', taxa['Macrophomina_phaseolina'])
     ntaxa = 0
     n_success = 0
     block = 250
     qlist = []
     for hit in taxa.keys():
         ntaxa += 1
+        if hit.startswith('Macro'):
+            print('here')
 
         if ntaxa % block:
             qlist.append(hit)
@@ -371,49 +418,42 @@ if __name__ == '__main__':
     if qlist:
         n_success += send_query_block_jgi(qlist, taxa, errors)
 
+    # assign to groups based on lineage
+    groupcount = assign_groups(taxa, group)
+
     # ----------------------------------------------------------------------------------------------
     # results
     # ----------------------------------------------------------------------------------------------
+    print(f'\nCounts per group found in {blastfile}')
+    for g in groupcount:
+        print(f'\t{g}\t{groupcount[g]}')
+
     good = open(goodfile, 'w')
     # species with top counts in blast result
     ntop = 100
     good.write(f'\n! top {ntop} taxa:\n')
     print(f'\ntop {ntop} taxa:')
     n = 0
+
     for t in sorted(taxa, key=lambda c: taxa[c]['count'], reverse=True):
-        good.write(f'!{n:3d}{t:>35s}{taxa[t]['count']:10d}  {taxa[t]['lineage']}\n')
+
+        good.write(f'!{n:3d}{t:>35s}{taxa[t]['group']:>10s}{taxa[t]['count']:>10d}  {taxa[t]['lineage']}\n')
         print(f'{n:3d}{t:>35s}{taxa[t]['count']:10d}  {taxa[t]['lineage']}')
         n += 1
         if n == ntop:
             break
 
-    # categorize as good and bad for selection of trinity assemblies
-    # plants are good, everything else is bad
-    for hit in taxa.keys():
-        lineage = taxa[hit]['lineage']
-        try:
-            if lineage.index('Viridiplantae'):
-                taxa[hit]['good'] = 1
-                good_n += 1
-        except ValueError:
-            # good is initialized to zero in blast_read
-            # taxa[hit] = {'good': 0, 'lineage': lineage}
-            bad_n += 1
-
-    print(f'\ngood taxa: {good_n}\tbad taxa: {bad_n} found in {blastfile}')
-    good.write(f'\n! good taxa: {good_n}\tbad taxa: {bad_n} found in {blastfile}\n\n')
-
-    print(f'Unknown taxa: {len(errors)}')
-    good.write(f'\n! Unknown taxa: {len(errors)}, remove ! to classify as good\n')
-    for entry in sorted(errors, key=lambda e: e['taxon']):
-        good.write(f"! {entry['taxon']}\t{entry['response']}\n")
-
-    good.write(f'\n! Good taxa: {good_n}\n')
+    group_old = ''
     n = 0
-    for tax in sorted(taxa, key=lambda t: taxa[t]['lineage']):
-        if taxa[tax]['good']:
-            n += 1
-            good.write(f"{n}: {tax}\t{taxa[tax]['lineage']}\n")
+    # for tax in sorted(taxa, key=lambda t: (gorder[taxa[t]['group']],taxa[t]['lineage'])):
+    for tax in sorted(taxa):
+        if tax=='Macrophomina_phaseolina':
+            t = taxa[tax]
+            print('here')
+        n += 1
+        this = taxa[tax]
+        good.write(f"{n:5d}{this['group']:>12s}{tax:>68s}\t{this['lineage']}\n")
+
 
     print(f'\nresults written to {goodfile}')
     good.close()
