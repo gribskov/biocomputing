@@ -134,6 +134,9 @@ def send_query_block_jgi(qlist, taxa):
             taxstr = 'Error;Taxon_not_found'
 
         try:
+            taxstr = taxstr.replace(' ','_')
+            if not taxstr:
+                taxstr = 'None'
             taxa[query]['lineage'] = taxstr
             if oldtlen != len(taxa):
                 # some queries will trigger multiple responses, particularly ones with /
