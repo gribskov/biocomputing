@@ -102,20 +102,17 @@ def send_query_jgi(tax, errors):
     return taxstr
 
 
-def send_query_block_jgi(qlist, taxa, errors):
+def send_query_block_jgi(qlist, taxa):
     """---------------------------------------------------------------------------------------------
     send a list of seqeunces to the bjgi taxonomy services as a single post query
 
     :param qlist: list        taxonomic names from the stitle string from a blast search result
     :param taxa: dict       taxonomic information with blast taxa name as key; created by blast_read
-    :param errors: list     entries record queries that returned errors
     :return: int            number of queries successfully translated
     ---------------------------------------------------------------------------------------------"""
     url = 'https://taxonomy.jgi.doe.gov/name/simple/'
     block = ','.join(qlist)
     query = url + block
-    if 'Macrophomina_phaseolina' in qlist or block.find('Macrophomina_phaseolina')!=-1:
-        print(block)
 
     response = None
     j = None
@@ -128,15 +125,12 @@ def send_query_block_jgi(qlist, taxa, errors):
     ok_n = 0
     oldtlen = len(taxa)
     for query in j:
-        if query.find('phaseo') != -1:
-            print('check here')
 
         try:
             taxinfo = j[query]
             taxstr = ';'.join([taxinfo[l]['name'] for l in reversed(taxinfo.keys())
                                if l not in ('level', 'mononomial', 'name', 'tax_id')])
         except TypeError:
-            # errors.append({'taxon': query, 'error': 'TypeError', 'response': taxinfo})
             taxstr = 'Error;Taxon_not_found'
 
         try:
@@ -151,7 +145,8 @@ def send_query_block_jgi(qlist, taxa, errors):
 
         except Exception as err:
             # any other errors
-            errors.append({'taxon': query, 'error': err, 'response': taxinfo})
+            errstr = f'{err}'
+            taxa[query]['lineage'] = f'Error; {errstr.replace(' ','_')}'
 
     return ok_n
 
@@ -227,7 +222,6 @@ def get_lineage_from_taxonomydb(tax, retry):
     # query taxonomy db using taxonomic phrase from blast result
     params = {'api_key':    api_key,
               'db':         'taxonomy',
-              # 'term':       '"' + tax.strip() + '"',
               'field':      'Organism',
               'term':       quote_plus(tax.strip()),
               'usehistory': 'y'}
@@ -337,14 +331,7 @@ def blast_read(blastfile):
         # if tax.find('str.')>-1:
         #     print(tax)
         taxa[tax]['count'] += 1
-        print(f'{nline}\t{tax}')
-
-        if tax=='Macrophomina_phaseolina':
-            print('tax:', taxa['Macrophomina_phaseolina'])
-
-        # TODO remove debug
-        if nline > 1000:
-            break
+        print(f'{nline:6d}\t{tax}')
 
     print(f'\nblast results processed: {nline}')
     print(f'unique taxa {len(taxa)}')
@@ -363,6 +350,8 @@ def assign_groups(taxa, group):
     ---------------------------------------------------------------------------------------------"""
     count = defaultdict(int)
 
+    found = False
+    g = None
     for t in taxa:
         this = taxa[t]
         for g in group:
@@ -391,32 +380,28 @@ if __name__ == '__main__':
              'arthropod': 'Arthropoda', 'fungi': 'Fungi', 'bacteria': 'Bacteria' }
     gorder = {'error': 1, 'plant': 3, 'virus': 4, 'arthropod': 5, 'fungi': 6, 'bacteria': 7, 'other': 2 }
 
-    errors = []
     good_n = 0
     bad_n = 0
     unknown_n = 0
     nquery = 0
 
     taxa = blast_read(blastfile)
-    print('tax:', taxa['Macrophomina_phaseolina'])
     ntaxa = 0
     n_success = 0
     block = 250
     qlist = []
     for hit in taxa.keys():
         ntaxa += 1
-        if hit.startswith('Macro'):
-            print('here')
+        qlist.append(hit)
 
         if ntaxa % block:
-            qlist.append(hit)
             continue
 
-        n_success += send_query_block_jgi(qlist, taxa, errors)
+        n_success += send_query_block_jgi(qlist, taxa)
         qlist = []
 
     if qlist:
-        n_success += send_query_block_jgi(qlist, taxa, errors)
+        n_success += send_query_block_jgi(qlist, taxa)
 
     # assign to groups based on lineage
     groupcount = assign_groups(taxa, group)
@@ -429,6 +414,7 @@ if __name__ == '__main__':
         print(f'\t{g}\t{groupcount[g]}')
 
     good = open(goodfile, 'w')
+
     # species with top counts in blast result
     ntop = 100
     good.write(f'\n! top {ntop} taxa:\n')
@@ -436,20 +422,16 @@ if __name__ == '__main__':
     n = 0
 
     for t in sorted(taxa, key=lambda c: taxa[c]['count'], reverse=True):
-
-        good.write(f'!{n:3d}{t:>35s}{taxa[t]['group']:>10s}{taxa[t]['count']:>10d}  {taxa[t]['lineage']}\n')
-        print(f'{n:3d}{t:>35s}{taxa[t]['count']:10d}  {taxa[t]['lineage']}')
+        good.write(f'!{n:3d}{t:>40s}{taxa[t]['group']:>10s}{taxa[t]['count']:>10d}  {taxa[t]['lineage']}\n')
+        print(f'{n:3d}{t:>40s}{taxa[t]['group']:>10s}{taxa[t]['count']:10d}  {taxa[t]['lineage']}')
         n += 1
         if n == ntop:
             break
 
+    good.write(f'\n! Taxa by group\n')
     group_old = ''
     n = 0
-    # for tax in sorted(taxa, key=lambda t: (gorder[taxa[t]['group']],taxa[t]['lineage'])):
-    for tax in sorted(taxa):
-        if tax=='Macrophomina_phaseolina':
-            t = taxa[tax]
-            print('here')
+    for tax in sorted(taxa, key=lambda t: (gorder[taxa[t]['group']],taxa[t]['lineage'])):
         n += 1
         this = taxa[tax]
         good.write(f"{n:5d}{this['group']:>12s}{tax:>68s}\t{this['lineage']}\n")
