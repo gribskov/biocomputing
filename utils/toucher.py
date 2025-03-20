@@ -101,7 +101,11 @@ visited = defaultdict(int)
 while target:
     current = target.pop()
     visited[current] += 1
-    files = os.scandir(current)
+    try:
+        files = os.scandir(current)
+    except PermissionError:
+        sys.stderr.write(f'PermissionError: {current}\n')
+
     now = int(time.time())
     cutoff = now - osec
     oldest = now
@@ -162,6 +166,6 @@ while target:
             os.utime(f, (new, status.st_mtime))
             status = os.stat(f)
         except OSError:
-            sys.stderr.write('OSError:\n')
+            sys.stderr.write(f'OSError: {f}\n')
 
 exit(0)
