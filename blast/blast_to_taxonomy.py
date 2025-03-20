@@ -376,6 +376,7 @@ def assign_groups(taxa, group):
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     blastfile = 'data/c16c31.trinity_uniref_1e-10.dmndblastx'
+    blastfile = '../deg/data/c16c31.trinity_uniref_1e-4.dmndblastx'
     goodfile = 'data/c16c31.trinity.goodtax.txt'
 
     # define groups - each groups is defined by one taxonomic term, anything undefined is 'other'
@@ -437,7 +438,7 @@ if __name__ == '__main__':
     for tax in sorted(taxa, key=lambda t: (gorder[taxa[t]['group']],taxa[t]['lineage'])):
         n += 1
         this = taxa[tax]
-        good.write(f"{n:5d}{this['group']:>12s}{tax:>68s}\t{this['lineage']}\n")
+        good.write(f"{n:5d}{this['group']:>12s} {tax:>68s}\t{this['lineage']}\n")
 
 
     print(f'\nresults written to {goodfile}')
