@@ -2,7 +2,8 @@
 compare data described as linear ranges on a line, e.g., genes on a chromosome
 
 This code was developed for the practical bioinformatics class, and was formerly called
-genome_ranges. I changed the name to not cause confusion with the R package
+genome_ranges. I changed the name to not cause confusion with the R package Genomic_Ranges
+
 21 March 2025   Michael Gribskov
 ================================================================================================="""
 
