@@ -25,9 +25,10 @@ class Feature:
                     this allows all the overlapped regions to be identified after merging
     ============================================================================================="""
 
-    def __init__(self, id='', begin=0, end=0):
+    def __init__(self, label='', id='', begin=0, end=0):
+        self.label = label if label else ''
         self.id = id if id else ''
-        self.begin = begin if begin else  0
+        self.begin = begin if begin else 0
         self.end = end if end else 0
         self.source = []
 
@@ -59,7 +60,7 @@ class Range:
 
         :param data: dict       dictionary to sort
         -----------------------------------------------------------------------------------------"""
-        return (data['id'], data['begin'])
+        return (data.id, data.begin)
 
     def overlap(self, mindist=0):
         """-----------------------------------------------------------------------------------------
@@ -70,29 +71,53 @@ class Range:
         :param mindist: int     ranges with a gap > mindist do not overlap (positive integer)
         :return: int            number of ranges
         -----------------------------------------------------------------------------------------"""
+        if len(self.features) < 2:
+            return
+
+        self.features.sort(key=self.sort)
+
         feature_n = 1
         current = self.features[0]
+        remove = []
+
         for next in self.features[1:]:
-            if next['begin'] - current['end'] - 1 <= mindist:
+            if current.id != next.id:
+                # different reference sequences, overlap is impossible, next becomes current
+                current = next
+                continue
+
+            if next.begin - current.end - 1 <= mindist:
                 # merge ranges, current stays the same
-                current['begin'] = min(current['begin'], next['begin'])
-                current['end'] = max(current['end'], next['end'])
-                for s in next['source']:
-                    current['source'].append(s)
-                # merged ranges are set to point at nothing
-                next = None
+                current.begin = min(current.begin, next.begin)
+                current.end = max(current.end, next.end)
+                for s in next.source:
+                    current.source.append(s)
+                # merged ranges are added to remove list, can't remove here because it changes the list being
+                # iterated
+                remove.append(next)
             else:
+                # no overlap, next becomes current
+                current = next
                 feature_n += 1
+
+        if remove:
+            # remove merged eatures
+            for merged in remove:
+                self.features.remove(merged)
 
         return feature_n
 
     def merge(self, other):
         """-----------------------------------------------------------------------------------------
+        Add the features in other to self
 
-        :param other:
-        :return:
+        :param other: Range     an existing Range object
+        :return: int            number of features in self after merge
         -----------------------------------------------------------------------------------------"""
-        return
+        for f in other.features:
+            self.features.append(f)
+
+        return len(self.features)
 
 
 def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95):
@@ -109,7 +134,7 @@ def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95):
     # lrange will be a list of all features for this query
     all_ranges = Range()
 
-    i= 0
+    i = 0
     for block in blast_query_set(infile, columns):
         # block is the blast result lines for a single query
         lrange = Range()
@@ -196,9 +221,9 @@ def blast_query_set(infile, columns):
 if __name__ == '__main__':
     trinityfile = 'data/c16c31.trinity.stuberosum.blastn'
 
-    searchfields = {'qid': 's', 'qlen': 'i', 'qbegin': 'i', 'qend': 'i',
-                    'sid': 's', 'sbegin': 'i', 'send': 'i',
-                    'qcov': 'i', 'allen': 'i', 'pid': 'f',
+    searchfields = {'qid':   's', 'qlen': 'i', 'qbegin': 'i', 'qend': 'i',
+                    'sid':   's', 'sbegin': 'i', 'send': 'i',
+                    'qcov':  'i', 'allen': 'i', 'pid': 'f',
                     'score': 'f', 'evalue': 'f', 'stitle': 's'}
 
     # read in blastfiles and and filter by evalue
