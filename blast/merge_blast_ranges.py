@@ -26,8 +26,9 @@ class Feature:
     ============================================================================================="""
 
     def __init__(self, id='', begin=0, end=0):
-        self.id = id if id else self.id = ''
-        self.begin = begin if begin else self.begin = 0
+        self.id = id if id else ''
+        self.begin = begin if begin else  0
+        self.end = end if end else 0
         self.source = []
 
 
@@ -85,6 +86,14 @@ class Range:
 
         return feature_n
 
+    def merge(self, other):
+        """-----------------------------------------------------------------------------------------
+
+        :param other:
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        return
+
 
 def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95):
     """---------------------------------------------------------------------------------------------
@@ -97,31 +106,37 @@ def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95):
     :param pid:
     :return:
     ---------------------------------------------------------------------------------------------"""
-    lrange = Range()
+    # lrange will be a list of all features for this query
+    all_ranges = Range()
 
+    i= 0
     for block in blast_query_set(infile, columns):
         # block is the blast result lines for a single query
+        lrange = Range()
         for value in block:
             if value['pid'] < pid or value['evalue'] > evalue:
                 # both pid and evalue must be true or we go on the next entry in the block
                 continue
 
-        # passed both pid and evalue thresholds
-        thisrange = Feature(id=value['qid'], begin=value['sbegin'], end=value['send'])
-        thisrange.source.append(value)
+            # passed both pid and evalue thresholds
+            thisrange = Feature(id=value['sid'], begin=value['sbegin'], end=value['send'])
+            thisrange.source.append(value)
 
-        if value['reverse']:
-            # mark sequences on reverse strand and reverse begin and end so begin < end
-            # reverse=True is reverse strand
-            thisrange.id += 'r'
-            thisrange.begin, thisrange.end = thisrange.end, thisrange.begin
+            if value['reverse']:
+                # mark sequences on reverse strand and reverse begin and end so begin < end
+                # reverse=True is reverse strand
+                thisrange.id += 'r'
+                thisrange.begin, thisrange.end = thisrange.end, thisrange.begin
 
-        lrange.features.append(thisrange)
+            lrange.features.append(thisrange)
 
-    # all features for this query are in lrange, check for overlaps
-    lrange.overlap(mindist=10000)
+        # all features for this query are in lrange, check for overlaps and merge
+        # save merged features in all_ranges
+        lrange.overlap(mindist=10000)
+        all_ranges.merge(lrange)
+        i += 1
 
-    return lrange
+    return all_ranges
 
 
 def blast_query_set(infile, columns):
