@@ -25,12 +25,65 @@ class Feature:
                     this allows all the overlapped regions to be identified after merging
     ============================================================================================="""
 
-    def __init__(self, label='', id='', begin=0, end=0):
+    # global variables for create unique feature IDs
+    fstr = 'MFEAT'
+    fnum = 0
+
+    def __init__(self, label='', id='', begin=0, end=0, reverse=False):
         self.label = label if label else ''
         self.id = id if id else ''
         self.begin = begin if begin else 0
         self.end = end if end else 0
+        self.reverse = reverse if reverse else False
         self.source = []
+
+    def get_name_from_features(self):
+        """-----------------------------------------------------------------------------------------
+        Compare the qids of the sources and generate a name for the merged feature. This is very
+        ad hoc. The rational is to reuse the source name if there is only one, or otherwise to
+        create a new unique ID
+
+        Uses global variables fstr and fnum to create unique IDs for merged features
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        ids = {}
+        for s in self.source:
+            qid = s['qid']
+            if qid.startswith('MSTRG'):
+                # stringtie ID, remove suffix after .
+                pointpos = qid.rfind('.')
+                id = qid[:pointpos]
+
+
+            elif qid.startswith('PGSC'):
+                # potato genome ID, remove .v4.03 suffix
+                id = qid.replace('.4.03', '')
+
+            elif qid.startswith('TRIN'):
+                # trinity ID, remove TRINITY_ and isoform
+                id = qid.replace('TRINITY_', '')
+                isopoint = id.find('_i')
+                id = id[:isopoint]
+
+            if id not in ids:
+                ids[id] = 0
+
+            if len(ids) > 1:
+                break
+
+        if len(ids) > 1:
+            # components are not unique, generate new unique ID
+            id = f'{Feature.fstr}{Feature.fnum:04d}'
+            Feature.fnum += 1
+        else:
+            id = list(ids.keys())[0]
+
+
+
+        self.label = id
+
+        return None
 
 
 class Range:
@@ -114,8 +167,9 @@ class Range:
         :param other: Range     an existing Range object
         :return: int            number of features in self after merge
         -----------------------------------------------------------------------------------------"""
-        for f in other.features:
-            self.features.append(f)
+        # for f in other.features:
+        #     self.features.append(f)
+        self.features += other.features
 
         return len(self.features)
 
@@ -147,11 +201,11 @@ def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95):
             thisrange = Feature(id=value['sid'], begin=value['sbegin'], end=value['send'])
             thisrange.source.append(value)
 
-            if value['reverse']:
-                # mark sequences on reverse strand and reverse begin and end so begin < end
-                # reverse=True is reverse strand
-                thisrange.id += 'r'
-                thisrange.begin, thisrange.end = thisrange.end, thisrange.begin
+            # if value['reverse']:
+            #     # mark sequences on reverse strand and reverse begin and end so begin < end
+            #     # reverse=True is reverse strand
+            #     thisrange.id += 'r'
+            #     thisrange.begin, thisrange.end = thisrange.end, thisrange.begin
 
             lrange.features.append(thisrange)
 
@@ -160,6 +214,10 @@ def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95):
         lrange.overlap(mindist=10000)
         all_ranges.merge(lrange)
         i += 1
+        if i > 5000:
+            break
+
+        print(f'{i}\t{block[0]}')
 
     return all_ranges
 
@@ -196,6 +254,8 @@ def blast_query_set(infile, columns):
         values['reverse'] = False  # forward strand
         if values['send'] < values['sbegin']:
             values['reverse'] = True  # reverse strand
+            values['sid'] += 'r'
+            values['sbegin'], values['send'] = values['send'], values['sbegin']
 
         if values['qid'] != qid_old:
             if block:
@@ -219,7 +279,8 @@ def blast_query_set(infile, columns):
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    trinityfile = 'data/c16c31.trinity.stuberosum.blastn'
+    trinityfile = 'data/c16c31.trinity.Stuberosum.blastn'
+    stringtiefile = 'data/transcripts.Stuberosum.blastn'
 
     searchfields = {'qid':   's', 'qlen': 'i', 'qbegin': 'i', 'qend': 'i',
                     'sid':   's', 'sbegin': 'i', 'send': 'i',
@@ -230,5 +291,47 @@ if __name__ == '__main__':
     # hits may be exons if the search is transcripts vs genome so aggregate hits within maxsep
     # on the same subject sequence into a single range
     trinity = read_and_filter_blast(trinityfile, searchfields, evalue=1e-5, pid=95)
+    print(f'features read from {trinityfile}: {len(trinity.features)}')
+    stringtie = read_and_filter_blast(stringtiefile, searchfields, evalue=1e-5, pid=95)
+    print(f'features read from {stringtiefile}: {len(stringtie.features)}')
+
+    # the final overlap is done with mindist=0
+    trinity.merge(stringtie)
+    trinity.overlap(mindist=300)
+    print(f'overlapped regions: {len(trinity.features)}')
+
+    # try writing as GTF, first remove the 'r' suffix from the id so that forward and reverse sort together
+    # for f in trinity.features:
+    #     if f.id.endswith('r')
+    #         f.id = f.id.rstrip('r')
+    #         f.reverse = True
+
+    # ST4.03ch00      StringTie       transcript      519699  520653  1000    -       .       gene_id "MSTRG.5"; transcript_id "MSTRG.5.1";
+    # ST4.03ch00      StringTie       exon    519699  519899  1000    -       .       gene_id "MSTRG.5"; transcript_id "MSTRG.5.1"; exon_number "1";
+    gtf = open('merged.gtf', 'w')
+    region = 0
+    label = 0
+    for f in sorted(trinity.features, key=lambda t: (t.id.rstrip('r'), t.begin)):
+        strand = '+'
+        if f.id.endswith('r'):
+            f.id = f.id.rstrip('r')
+            f.reverse = True
+            strand = '-'
+
+        f.get_name_from_features()
+
+        gtf.write(f'{f.id}\tmerge_blast_ranges\tregion\t{f.begin}\t{f.end}\t')
+        gtf.write(f'{len(f.source)}\t{strand}\t.\tregion_id "{f.label}";\n')
+
+        for s in sorted(f.source, key=lambda s:s['sbegin']):
+            # don't need to sort by sequence because this has been done when they were merged
+            gtf.write(f"{f.id}\tmerge_blast_ranges\tsource\t{s['sbegin']}\t{s['send']}\t")
+            gtf.write(f'.\t{strand}\t.\tregion_id "{f.label}"; source_id "{s["qid"]}";\n')
+
+        # print(f'label:{f.label}\t{f.id}\t{f.begin}\t{f.end}')
+        # for s in f.source:
+        #     print(f'\t{s}')
+
+    gtf.close()
 
     exit(0)
