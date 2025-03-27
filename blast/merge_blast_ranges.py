@@ -143,20 +143,23 @@ class Range:
                 # merge ranges, current stays the same
                 current.begin = min(current.begin, next.begin)
                 current.end = max(current.end, next.end)
-                for s in next.source:
-                    current.source.append(s)
-                # merged ranges are added to remove list, can't remove here because it changes the list being
+                # for s in next.source:
+                #     current.source.append(s)
+                current.source += next.source
+                # merged ranges are added to remove list, can't remove next here because it changes the list being
                 # iterated
-                remove.append(next)
+                if next not in remove:
+                    remove.append(next)
             else:
                 # no overlap, next becomes current
                 current = next
                 feature_n += 1
 
         if remove:
-            # remove merged eatures
+            # remove merged features
             for merged in remove:
                 self.features.remove(merged)
+                print(f'removing merged region = {merged}\t{merged.id}:{merged.begin}:{merged.end}')
 
         return feature_n
 
@@ -174,7 +177,7 @@ class Range:
         return len(self.features)
 
 
-def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95):
+def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95, mindist=10000):
     """---------------------------------------------------------------------------------------------
     to make the forward and reverse regions not overlap, matches in the opposite direction have 'r'
     appended to the name of the reference sequence name. This is appropriate for stranded RNASeq
@@ -201,21 +204,16 @@ def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95):
             thisrange = Feature(id=value['sid'], begin=value['sbegin'], end=value['send'])
             thisrange.source.append(value)
 
-            # if value['reverse']:
-            #     # mark sequences on reverse strand and reverse begin and end so begin < end
-            #     # reverse=True is reverse strand
-            #     thisrange.id += 'r'
-            #     thisrange.begin, thisrange.end = thisrange.end, thisrange.begin
-
             lrange.features.append(thisrange)
 
         # all features for this query are in lrange, check for overlaps and merge
         # save merged features in all_ranges
-        lrange.overlap(mindist=10000)
+        lrange.overlap(mindist=mindist)
         all_ranges.merge(lrange)
         i += 1
-        if i > 5000:
-            break
+        # limit for testing
+        # if i > 5000:
+        #     break
 
         print(f'{i}\t{block[0]}')
 
@@ -290,28 +288,22 @@ if __name__ == '__main__':
     # read in blastfiles and and filter by evalue
     # hits may be exons if the search is transcripts vs genome so aggregate hits within maxsep
     # on the same subject sequence into a single range
-    trinity = read_and_filter_blast(trinityfile, searchfields, evalue=1e-5, pid=95)
+    trinity = read_and_filter_blast(trinityfile, searchfields, evalue=1e-10, pid=96, mindist=5000)
     print(f'features read from {trinityfile}: {len(trinity.features)}')
-    stringtie = read_and_filter_blast(stringtiefile, searchfields, evalue=1e-5, pid=95)
+    stringtie = read_and_filter_blast(stringtiefile, searchfields, evalue=1e-10, pid=96, mindist=5000)
     print(f'features read from {stringtiefile}: {len(stringtie.features)}')
 
-    # the final overlap is done with mindist=0
+    # the final overlap is done with mindist=300
     trinity.merge(stringtie)
     trinity.overlap(mindist=300)
     print(f'overlapped regions: {len(trinity.features)}')
 
-    # try writing as GTF, first remove the 'r' suffix from the id so that forward and reverse sort together
-    # for f in trinity.features:
-    #     if f.id.endswith('r')
-    #         f.id = f.id.rstrip('r')
-    #         f.reverse = True
-
     # ST4.03ch00      StringTie       transcript      519699  520653  1000    -       .       gene_id "MSTRG.5"; transcript_id "MSTRG.5.1";
     # ST4.03ch00      StringTie       exon    519699  519899  1000    -       .       gene_id "MSTRG.5"; transcript_id "MSTRG.5.1"; exon_number "1";
     gtf = open('merged.gtf', 'w')
-    region = 0
-    label = 0
+    region_n = 0
     for f in sorted(trinity.features, key=lambda t: (t.id.rstrip('r'), t.begin)):
+        # rstrip in sort function lets the forward and reverse transcripts sort together
         strand = '+'
         if f.id.endswith('r'):
             f.id = f.id.rstrip('r')
@@ -322,16 +314,14 @@ if __name__ == '__main__':
 
         gtf.write(f'{f.id}\tmerge_blast_ranges\tregion\t{f.begin}\t{f.end}\t')
         gtf.write(f'{len(f.source)}\t{strand}\t.\tregion_id "{f.label}";\n')
+        region_n += 1
 
         for s in sorted(f.source, key=lambda s:s['sbegin']):
             # don't need to sort by sequence because this has been done when they were merged
             gtf.write(f"{f.id}\tmerge_blast_ranges\tsource\t{s['sbegin']}\t{s['send']}\t")
             gtf.write(f'.\t{strand}\t.\tregion_id "{f.label}"; source_id "{s["qid"]}";\n')
 
-        # print(f'label:{f.label}\t{f.id}\t{f.begin}\t{f.end}')
-        # for s in f.source:
-        #     print(f'\t{s}')
-
     gtf.close()
+    print(f'genomic regions: {region_n}')
 
     exit(0)
