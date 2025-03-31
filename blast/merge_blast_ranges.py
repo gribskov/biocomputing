@@ -18,20 +18,25 @@ from gff.gff import Gff
 class Feature:
     """=============================================================================================
     A feature is a single linear range it must include
-    id: string      id for the range
-    begin: int      begin < end, begin is the first position included in the feature (e.g., first
-                    base of start codon
-    end: int        last base of feature, e.g., last base of stop codon
-    source: []      any kind of information to carry along, for instance the original blast hits
-                    this allows all the overlapped regions to be identified after merging
+    label: string     arbitrary label, use to give uids to merged ranges
+    active: boolean   True if feature has been merged
+    id: string        original id for the range or leader of merged group
+    begin: int        begin < end, begin is the first position included in the feature (e.g., first
+                      base of start codon
+    end: int          last base of feature, e.g., last base of stop codon
+    reverse: boolean  range is on the reverse strand
+    source: []        any kind of information to carry along, for instance the original blast hits
+                      this allows all the overlapped regions to be identified after merging
     ============================================================================================="""
 
-    # global variables for create unique feature IDs
+    # global variables for creating unique feature IDs; fstr is feature prefix, fnum is sequential
+    # uid number
     fstr = 'MFEAT'
     fnum = 0
 
-    def __init__(self, label='', id='', begin=0, end=0, reverse=False):
+    def __init__(self, label='', id='', begin=0, end=0, reverse=False, active=True):
         self.label = label if label else ''
+        self.active = active if active else True
         self.id = id if id else ''
         self.begin = begin if begin else 0
         self.end = end if end else 0
@@ -80,8 +85,6 @@ class Feature:
         else:
             id = list(ids.keys())[0]
 
-
-
         self.label = id
 
         return None
@@ -125,62 +128,56 @@ class Range:
         :param mindist: int     ranges with a gap > mindist do not overlap (positive integer)
         :return: int            number of ranges
         -----------------------------------------------------------------------------------------"""
-        if len(self.features) < 2:
+        features = self.features
+        if len(features) < 2:
             return
 
-        self.features.sort(key=self.sort)
+        features.sort(key=self.sort)
+        active_features = [f for f in features if f.active]
 
         feature_n = 1
-        current = self.features[0]
-        remove = []
-        keep = [0]
+        current = active_features[0]
+        current.active = True
 
         nidx = 0
-        for next in self.features[1:]:
-            nidx += 1       # will be 1 for the first element which is 
+        for next in active_features[1:]:
+            nidx += 1  # will be 1 for the first element since the first is made current above
             if current.id != next.id:
                 # different reference sequences, overlap is impossible, next becomes current
+                print(f"d:{feature_n}\t{current.id}/{current.source[0]['qid']} - {next.id}/{next.source[0]['qid']}")
                 current = next
-                # keep.append(nidx)
+                current.active = True
                 feature_n += 1
                 continue
 
             if next.begin - current.end - 1 <= mindist:
                 # merge ranges, current stays the same
-                print(f"o:{feature_n}\t{current.id}/{current.source[0]['qid']} - {next.id}/{next.source[0]['qid']}")
+                # print(f"o:{feature_n}\t{current.id}/{current.source[0]['qid']} - {next.id}/{next.source[0]['qid']}")
                 current.begin = min(current.begin, next.begin)
                 current.end = max(current.end, next.end)
                 current.source += next.source
-                # merged ranges are added to remove list, can't remove next here because it changes the list being
-                # iterated
-                #remove.append(nidx)
+                next.active = False
+                # merged ranges are marked inactive
+
             else:
                 # no overlap, next becomes current
+                print(f"n:{feature_n}\t{current.id}/{current.source[0]['qid']} - {next.id}/{next.source[0]['qid']}")
                 current = next
-                keep.append(nidx)
+                current.active = True
                 feature_n += 1
-
-        #if remove:
-        #    # remove merged features
-        #    features = self.features
-        #    for merged in remove:
-        #        del(features[merged])
-        #        print(f'removing merged region = {merged}\t{merged.id}:{merged.begin}:{merged.end}')
-
-        #features = [features[i] for i in keep]
 
         return feature_n
 
     def merge(self, other):
         """-----------------------------------------------------------------------------------------
-        Add the features in other to self
+        Add the features in other to self. Only active features are merged into self
 
         :param other: Range     an existing Range object
         :return: int            number of features in self after merge
         -----------------------------------------------------------------------------------------"""
-        # for f in other.features:
-        #     self.features.append(f)
-        self.features += other.features
+        # TODO only copy active features
+        # self.features += other.features
+        self.features += [f for f in other.features if f.active]
 
         return len(self.features)
 
@@ -220,7 +217,7 @@ def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95, mindist=10000):
         all_ranges.merge(lrange)
         i += 1
         # limit for testing
-        # if i > 50000:
+        # if i > 5000:
         #    break
 
         print(f'{i}\t{block[0]}')
@@ -297,7 +294,7 @@ if __name__ == '__main__':
                     'qcov':  'i', 'allen': 'i', 'pid': 'f',
                     'score': 'f', 'evalue': 'f', 'stitle': 's'}
 
-    # read in blastfiles and and filter by evalue
+    # read in blastfiles and filter by evalue
     # hits may be exons if the search is transcripts vs genome so aggregate hits within maxsep
     # on the same subject sequence into a single range
     trinity = read_and_filter_blast(trinityfile, searchfields, evalue=1e-10, pid=96, mindist=5000)
@@ -309,7 +306,10 @@ if __name__ == '__main__':
     trinity.merge(stringtie)
     print(f'merge complete\nmerged regions: {len(trinity.features)}')
     trinity.overlap(mindist=300)
-    print(f'overlapped regions: {len(trinity.features)}')
+    overlap_n = 0
+    for f in trinity.features:
+        overlap_n += 1
+    print(f'overlapped regions: {overlap_n}')
 
     # ST4.03ch00      StringTie       transcript      519699  520653  1000    -       .       gene_id "MSTRG.5"; transcript_id "MSTRG.5.1";
     # ST4.03ch00      StringTie       exon    519699  519899  1000    -       .       gene_id "MSTRG.5"; transcript_id "MSTRG.5.1"; exon_number "1";
@@ -317,6 +317,8 @@ if __name__ == '__main__':
     region_n = 0
     for f in sorted(trinity.features, key=lambda t: (t.id.rstrip('r'), t.begin)):
         # rstrip in sort function lets the forward and reverse transcripts sort together
+        if not f.active: continue
+
         strand = '+'
         if f.id.endswith('r'):
             f.id = f.id.rstrip('r')
@@ -329,7 +331,7 @@ if __name__ == '__main__':
         gtf.write(f'{len(f.source)}\t{strand}\t.\tregion_id "{f.label}";\n')
         region_n += 1
 
-        for s in sorted(f.source, key=lambda s:s['sbegin']):
+        for s in sorted(f.source, key=lambda s: s['sbegin']):
             # don't need to sort by sequence because this has been done when they were merged
             gtf.write(f"{f.id}\tmerge_blast_ranges\tsource\t{s['sbegin']}\t{s['send']}\t")
             gtf.write(f'.\t{strand}\t.\tregion_id "{f.label}"; source_id "{s["qid"]}";\n')
