@@ -6,6 +6,7 @@ Make sure biocomputing is in your import path
 
 Michael Gribskov     21 March 2025
 ================================================================================================="""
+import sys
 from blast import Blast
 # from ranges.linear_range import Range
 from gff.gff import Gff
@@ -132,34 +133,41 @@ class Range:
         feature_n = 1
         current = self.features[0]
         remove = []
+        keep = [0]
 
+        nidx = 0
         for next in self.features[1:]:
+            nidx += 1       # will be 1 for the first element which is 
             if current.id != next.id:
                 # different reference sequences, overlap is impossible, next becomes current
                 current = next
+                # keep.append(nidx)
+                feature_n += 1
                 continue
 
             if next.begin - current.end - 1 <= mindist:
                 # merge ranges, current stays the same
+                print(f"o:{feature_n}\t{current.id}/{current.source[0]['qid']} - {next.id}/{next.source[0]['qid']}")
                 current.begin = min(current.begin, next.begin)
                 current.end = max(current.end, next.end)
-                # for s in next.source:
-                #     current.source.append(s)
                 current.source += next.source
                 # merged ranges are added to remove list, can't remove next here because it changes the list being
                 # iterated
-                if next not in remove:
-                    remove.append(next)
+                #remove.append(nidx)
             else:
                 # no overlap, next becomes current
                 current = next
+                keep.append(nidx)
                 feature_n += 1
 
-        if remove:
-            # remove merged features
-            for merged in remove:
-                self.features.remove(merged)
-                print(f'removing merged region = {merged}\t{merged.id}:{merged.begin}:{merged.end}')
+        #if remove:
+        #    # remove merged features
+        #    features = self.features
+        #    for merged in remove:
+        #        del(features[merged])
+        #        print(f'removing merged region = {merged}\t{merged.id}:{merged.begin}:{merged.end}')
+
+        #features = [features[i] for i in keep]
 
         return feature_n
 
@@ -212,8 +220,8 @@ def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95, mindist=10000):
         all_ranges.merge(lrange)
         i += 1
         # limit for testing
-        # if i > 5000:
-        #     break
+        # if i > 50000:
+        #    break
 
         print(f'{i}\t{block[0]}')
 
@@ -277,8 +285,12 @@ def blast_query_set(infile, columns):
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    trinityfile = 'data/c16c31.trinity.Stuberosum.blastn'
-    stringtiefile = 'data/transcripts.Stuberosum.blastn'
+    # trinityfile = 'data/c16c31.trinity.Stuberosum.blastn'
+    # sys.argv[stringtiefile = 'data/transcripts.Stuberosum.blastn'
+    trinityfile = sys.argv[1]
+    stringtiefile = sys.argv[2]
+    print(f'trinity file: {trinityfile}')
+    print(f'stringtie file: {stringtiefile}')
 
     searchfields = {'qid':   's', 'qlen': 'i', 'qbegin': 'i', 'qend': 'i',
                     'sid':   's', 'sbegin': 'i', 'send': 'i',
@@ -295,6 +307,7 @@ if __name__ == '__main__':
 
     # the final overlap is done with mindist=300
     trinity.merge(stringtie)
+    print(f'merge complete\nmerged regions: {len(trinity.features)}')
     trinity.overlap(mindist=300)
     print(f'overlapped regions: {len(trinity.features)}')
 
