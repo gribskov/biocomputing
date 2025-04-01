@@ -7,9 +7,9 @@ Make sure biocomputing is in your import path
 Michael Gribskov     21 March 2025
 ================================================================================================="""
 import sys
-from blast import Blast
+# from blast import Blast
 # from ranges.linear_range import Range
-from gff.gff import Gff
+# from gff.gff import Gff
 
 
 # import sys
@@ -34,10 +34,10 @@ class Feature:
     fstr = 'MFEAT'
     fnum = 0
 
-    def __init__(self, label='', id='', begin=0, end=0, reverse=False, active=True):
+    def __init__(self, label='', fid='', begin=0, end=0, reverse=False, active=True):
         self.label = label if label else ''
         self.active = active if active else True
-        self.id = id if id else ''
+        self.id = fid if fid else ''
         self.begin = begin if begin else 0
         self.end = end if end else 0
         self.reverse = reverse if reverse else False
@@ -54,38 +54,39 @@ class Feature:
         :return:
         -----------------------------------------------------------------------------------------"""
         ids = {}
+        fid = None
         for s in self.source:
             qid = s['qid']
             if qid.startswith('MSTRG'):
                 # stringtie ID, remove suffix after .
                 pointpos = qid.rfind('.')
-                id = qid[:pointpos]
+                fid = qid[:pointpos]
 
 
             elif qid.startswith('PGSC'):
                 # potato genome ID, remove .v4.03 suffix
-                id = qid.replace('.4.03', '')
+                fid = qid.replace('.4.03', '')
 
             elif qid.startswith('TRIN'):
                 # trinity ID, remove TRINITY_ and isoform
-                id = qid.replace('TRINITY_', '')
-                isopoint = id.find('_i')
-                id = id[:isopoint]
+                fid = qid.replace('TRINITY_', '')
+                isopoint = fid.find('_i')
+                fid = fid[:isopoint]
 
-            if id not in ids:
-                ids[id] = 0
+            if fid not in ids:
+                ids[fid] = 0
 
             if len(ids) > 1:
                 break
 
         if len(ids) > 1:
             # components are not unique, generate new unique ID
-            id = f'{Feature.fstr}{Feature.fnum:04d}'
+            fid = f'{Feature.fstr}{Feature.fnum:04d}'
             Feature.fnum += 1
         else:
-            id = list(ids.keys())[0]
+            fid = list(ids.keys())[0]
 
-        self.label = id
+        self.label = fid
 
         return None
 
@@ -117,12 +118,12 @@ class Range:
 
         :param data: dict       dictionary to sort
         -----------------------------------------------------------------------------------------"""
-        return (data.id, data.begin)
+        return data.id, data.begin
 
     def overlap(self, mindist=0):
         """-----------------------------------------------------------------------------------------
         Merge overlapping ranges if the distance between the end of the current range and the
-        beginning of the next range is < mindist. After merging, the features list may contain
+        beginning of the nextseg range is < mindist. After merging, the features list may contain
         elements with the value None (the ranges that were merged)
 
         :param mindist: int     ranges with a gap > mindist do not overlap (positive integer)
@@ -130,7 +131,7 @@ class Range:
         -----------------------------------------------------------------------------------------"""
         features = self.features
         if len(features) < 2:
-            return
+            return None
 
         features.sort(key=self.sort)
         active_features = [f for f in features if f.active]
@@ -140,29 +141,29 @@ class Range:
         current.active = True
 
         nidx = 0
-        for next in active_features[1:]:
+        for nextseg in active_features[1:]:
             nidx += 1  # will be 1 for the first element since the first is made current above
-            if current.id != next.id:
-                # different reference sequences, overlap is impossible, next becomes current
-                print(f"d:{feature_n}\t{current.id}/{current.source[0]['qid']} - {next.id}/{next.source[0]['qid']}")
-                current = next
+            if current.id != nextseg.id:
+                # different reference sequences, overlap is impossible, nextseg becomes current
+                print(f"d:{feature_n}\t{current.id}/{current.source[0]['qid']} - {nextseg.id}/{nextseg.source[0]['qid']}")
+                current = nextseg
                 current.active = True
                 feature_n += 1
                 continue
 
-            if next.begin - current.end - 1 <= mindist:
+            if nextseg.begin - current.end - 1 <= mindist:
                 # merge ranges, current stays the same
-                # print(f"o:{feature_n}\t{current.id}/{current.source[0]['qid']} - {next.id}/{next.source[0]['qid']}")
-                current.begin = min(current.begin, next.begin)
-                current.end = max(current.end, next.end)
-                current.source += next.source
-                next.active = False
+                # print(f"o:{feature_n}\t{current.id}/{current.source[0]['qid']} - {nextseg.id}/{nextseg.source[0]['qid']}")
+                current.begin = min(current.begin, nextseg.begin)
+                current.end = max(current.end, nextseg.end)
+                current.source += nextseg.source
+                nextseg.active = False
                 # merged ranges are marked inactive
 
             else:
-                # no overlap, next becomes current
-                print(f"n:{feature_n}\t{current.id}/{current.source[0]['qid']} - {next.id}/{next.source[0]['qid']}")
-                current = next
+                # no overlap, nextseg becomes current
+                print(f"n:{feature_n}\t{current.id}/{current.source[0]['qid']} - {nextseg.id}/{nextseg.source[0]['qid']}")
+                current = nextseg
                 current.active = True
                 feature_n += 1
 
@@ -175,8 +176,6 @@ class Range:
         :param other: Range     an existing Range object
         :return: int            number of features in self after merge
         -----------------------------------------------------------------------------------------"""
-        # TODO only copy active features
-        # self.features += other.features
         self.features += [f for f in other.features if f.active]
 
         return len(self.features)
@@ -188,10 +187,12 @@ def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95, mindist=10000):
     appended to the name of the reference sequence name. This is appropriate for stranded RNASeq
     libraries where there can be different transcripts on each strand.
 
-    :param infile:
-    :param evalue:
-    :param pid:
-    :return:
+    :param infile: string   path to input blast result, passed to blast_query_set generator
+    :param columns: list    column names in blast result, passed to blast_query_set
+    :param evalue: float    selected hits must have lower evalue
+    :param pid: float       selected hits must have greater percent id
+    :param mindist:         minimum distance for separating blast hits
+    :return: list           Range objects with each selected blast hit
     ---------------------------------------------------------------------------------------------"""
     # lrange will be a list of all features for this query
     all_ranges = Range()
@@ -202,11 +203,11 @@ def read_and_filter_blast(infile, columns, evalue=1e-5, pid=95, mindist=10000):
         lrange = Range()
         for value in block:
             if value['pid'] < pid or value['evalue'] > evalue:
-                # both pid and evalue must be true or we go on the next entry in the block
+                # both pid and evalue must be true or go on the next entry in the block
                 continue
 
             # passed both pid and evalue thresholds
-            thisrange = Feature(id=value['sid'], begin=value['sbegin'], end=value['send'])
+            thisrange = Feature(fid=value['sid'], begin=value['sbegin'], end=value['send'])
             thisrange.source.append(value)
 
             lrange.features.append(thisrange)
@@ -334,7 +335,8 @@ if __name__ == '__main__':
         for s in sorted(f.source, key=lambda s: s['sbegin']):
             # don't need to sort by sequence because this has been done when they were merged
             gtf.write(f"{f.id}\tmerge_blast_ranges\tsource\t{s['sbegin']}\t{s['send']}\t")
-            gtf.write(f'.\t{strand}\t.\tregion_id "{f.label}"; source_id "{s["qid"]}";\n')
+            gtf.write(f'.\t{strand}\t.\tregion_id "{f.label}"; source_id "{s["qid"]}";')
+            gtf.write(f'evalue {s["evalue"]}; pid {s["pid"]:.1f}; allen {s["allen"]};\n')
 
     gtf.close()
     print(f'genomic regions: {region_n}')
