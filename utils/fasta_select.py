@@ -183,7 +183,7 @@ def get_id_list(args):
                 idlist.append(id)
                 nid += 1
 
-    sys.stderr.write('{nid} sequence IDs read from {args.idlist}\n')
+    sys.stderr.write(f'{nid} sequence IDs read from {args.idlist}\n')
     return idlist
 
 
