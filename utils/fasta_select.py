@@ -308,7 +308,7 @@ if __name__ == '__main__':
     sys.stderr.write('total sequences read: {}\n'.format(n_total))
     sys.stderr.write('total sequences written: {}\n'.format(n_written))
 
-    if length(n_sequence) > 1:
+    if len(n_sequence) > 1:
         sys.stderr.write('\nPer file\n')
         for fastafile in n_sequence:
             sys.stderr.write('{}\n'.format(fastafile))
