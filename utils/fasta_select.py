@@ -50,7 +50,7 @@ def setup_argparse():
     # out_default = sys.stdout
     minlen_default = 0
     linelen_default = 100
-    blast_default = 'search.blast'
+    blast_default = ''
     list_default = 'list.default'
     evalue_default = 1e-5
 
