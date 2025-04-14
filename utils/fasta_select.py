@@ -51,6 +51,7 @@ def setup_argparse():
     minlen_default = 0
     linelen_default = 100
     blast_default = 'search.blast'
+    list_default = 'list.default'
     evalue_default = 1e-5
 
     commandline = argparse.ArgumentParser(
@@ -70,7 +71,9 @@ def setup_argparse():
 
     commandline.add_argument('--list',
                              help='list of sequence names to select (all).',
-                             type=argparse.FileType('r'))
+                             type=str,
+                             default=list_default
+                             )
 
     commandline.add_argument('--trim',
                              help=f'Regular expression for trimming doc line(< none >).',
