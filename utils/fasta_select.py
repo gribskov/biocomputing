@@ -171,17 +171,18 @@ def get_id_list(args):
     for line in idfile:
         if line.startswith(('#', '!')):
             continue
-        line = line.lstrip('>')
-        if line.rstrip():
-            # remove double quotes and split
-            id = line.replace('"', '').split()[0]
-            if id == 'baseMean':
-                # this looks like it deals with input from DeSEQ2
-                continue
-            if id not in idlist:
-                # make sure IDs are unique in list
-                idlist.append(id)
-                nid += 1
+
+        line = line.lstrip('>').rstrip()
+        # remove double quotes and split
+        id = line.replace('"', '').split()[0]
+        if id == 'baseMean':
+            # this looks like it deals with input from DeSEQ2
+            continue
+
+        if id not in idlist:
+            # make sure IDs are unique in list
+            idlist.append(id)
+            nid += 1
 
     sys.stderr.write(f'{nid} sequence IDs read from {args.list}\n')
     return idlist
@@ -273,6 +274,9 @@ if __name__ == '__main__':
 
         while fasta.next():
             n_sequence[fastafile] += 1
+            # kludge to remove TRINITY_ from ids
+            fasta.id = fasta.id.replace('TRINITY_','')
+        
             n_total += 1
             if n_total % 1000 == 0:
                 sys.stderr.write('.')
