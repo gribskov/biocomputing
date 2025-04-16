@@ -39,46 +39,86 @@ def getopts():
     return cl.parse_args()
 
 
+def blast_read(data, rownames, maxeval=1e-5, nhits=3):
+    """---------------------------------------------------------------------------------------------
+    read in the blast data to add to the annotation
+    :param data: filehandle     open for reading
+    :param rownames: list       names corresponding to query id in blast result
+    :param maxeval: float       maximum evalue
+    :param nhits: int           maximum number of hits to report for each query
+    :return: dataframe
+    ---------------------------------------------------------------------------------------------"""
+    for id,hitlist in blast_get_block(data):
+        if id not in rownames:
+            continue
+
+        print(f'{id}')
+        for hit in hitlist:
+            print(f'\t{hit}')
+
+    return df
+
+def blast_get_block(data, level=3):
+    """---------------------------------------------------------------------------------------------
+    generator that returns a list of blast hit results that have a common trinity transcript id
+    level 3 is the _g level
+
+    :param data:
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    hits = []
+    jlevel = level + 1
+
+    # get the first hit
+    line = data.readline()
+    full_id = line.split(maxsplit=1)[0]
+    idfield = full_id.split('_')
+    id = '_'.join(idfield[1:jlevel])
+    hits.append(line.rstrip())
+    id_old = id
+
+    for line in data:
+        full_id = line.split(maxsplit=1)[0]
+        idfield = full_id.split('_')
+        id = '_'.join(idfield[1:jlevel])
+
+        if id == id_old:
+            # same query as last line,  add to hits
+            hits.append(line.rstrip())
+        else:
+            yield id, hits
+            hits = [line.rstrip()]
+            id_old = id
+
+    if hits:
+        yield id, hits
+
+
 # --------------------------------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     opts = getopts()
-    # xlsx = 'A:/mrg/Dropbox/colom/potato/2411_C16C31/C16C31.lfc.xlsx'
-    # wb = load_workbook(xlsx)
-    #
-    # # grab the active worksheet
-    # ws = wb.active
-    # # sheet_ranges = wb['range names']
-    # # print(sheet_ranges['D18'].value)
-    #
-    # # Data can be assigned directly to cells
-    # # ws['A1'] = 42
-    #
-    # for i in range(10):
-    #     value = ws(f'A{i}')
-    #     print(f'{i}: {value}')
 
-    # anno = open(opts.annotation, 'r')
     data = open(opts.data, 'r')
     out = open(opts.output, 'w')
 
-    # to get a lest of worksheets in workbook
+    # to get a list of worksheets in workbook
     # sheets = pd.ExcelFile(opts.annotation).sheet_names
+
+    annodf = None
     if opts.atype == 'excel':
         # read the first sheet into a dataframe with row and column labels
         annodf = pd.read_excel(opts.annotation, sheet_name=0, index_col=0)
-    # sheet = workbook[sheets[0]]
-    # print(sheet, sheets)
 
-    print(annodf.iloc[0:6, 0:3])
-    colnames = annodf.columns.tolist()
     colnames = list(annodf.columns)
     rownames = list(annodf.index)
     print(f'columns: {colnames[0:4]}')
     print(f'rows: {rownames[0:4]}')
 
-    # anno.close()
+    if opts.dtype == 'blast':
+        blastdf = blast_read(data, rownames, maxeval=1e-5, nhits=3)
+
     data.close()
     out.close()
     exit(0)
