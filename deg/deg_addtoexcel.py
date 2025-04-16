@@ -48,15 +48,39 @@ def blast_read(data, rownames, maxeval=1e-5, nhits=3):
     :param nhits: int           maximum number of hits to report for each query
     :return: dataframe
     ---------------------------------------------------------------------------------------------"""
-    for id,hitlist in blast_get_block(data):
+    selected = {}
+    for id, hitlist in blast_get_block(data):
         if id not in rownames:
             continue
 
-        print(f'{id}')
+        # split and assemble the desired data
+        unsorted = []
         for hit in hitlist:
-            print(f'\t{hit}')
+            field = hit.rstrip().split(maxsplit=12)
+            # print(f'\t{field[12]}')
+
+            hitstr = f'q:{field[2]}:{field[3]}/{field[1]}  '
+            hitstr += f's:{field[6]}:{field[7]}/{field[5]}   '
+            evalue = float(field[11])
+            hitstr += f'{field[11]}  {field[12][:field[12].find(' TaxID')].replace('Tax=', '')}'
+
+            unsorted.append([evalue, hitstr])
+
+        anno = ''
+        n = 0
+        for info in sorted(unsorted, key=lambda h: h[0]):
+            n += 1
+            if n > nhits:
+                break
+            anno += f'{info[1]}\n'
+        anno = anno[:-1]
+        # print(f'{id}\n{anno}')
+        selected[id] = [evalue, anno]
+
+    df = pd.DataFrame.from_dict(selected, orient='index',columns=["evalue", "blast_hits"])
 
     return df
+
 
 def blast_get_block(data, level=3):
     """---------------------------------------------------------------------------------------------
@@ -118,6 +142,9 @@ if __name__ == '__main__':
 
     if opts.dtype == 'blast':
         blastdf = blast_read(data, rownames, maxeval=1e-5, nhits=3)
+
+    print(blastdf.head())
+    annodf.merge(blastdf, how='left', left_index=True, right_index=True )
 
     data.close()
     out.close()
