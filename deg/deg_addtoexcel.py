@@ -44,7 +44,7 @@ def getopts():
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     opts = getopts()
-    xlsx = 'A:/mrg/Dropbox/colom/potato/2411_C16C31/C16C31.lfc.xlsx'
+    # xlsx = 'A:/mrg/Dropbox/colom/potato/2411_C16C31/C16C31.lfc.xlsx'
     # wb = load_workbook(xlsx)
     #
     # # grab the active worksheet
@@ -59,19 +59,26 @@ if __name__ == '__main__':
     #     value = ws(f'A{i}')
     #     print(f'{i}: {value}')
 
-    anno = open(opts.annotation, 'r')
+    # anno = open(opts.annotation, 'r')
     data = open(opts.data, 'r')
-    out = open(opts.out, 'w')
+    out = open(opts.output, 'w')
 
-    sheets = pd.ExcelFile(xlsx).sheet_names
-    df = pd.read_excel(xlsx, sheet_name=sheets, )
+    # to get a lest of worksheets in workbook
+    # sheets = pd.ExcelFile(opts.annotation).sheet_names
+    if opts.atype == 'excel':
+        # read the first sheet into a dataframe with row and column labels
+        annodf = pd.read_excel(opts.annotation, sheet_name=0, index_col=0)
+    # sheet = workbook[sheets[0]]
+    # print(sheet, sheets)
 
-    print(sheets)
-    print(df.head())
-    print(df.columns.tolist())
-    print(df.iloc[0:6, 0:3])
+    print(annodf.iloc[0:6, 0:3])
+    colnames = annodf.columns.tolist()
+    colnames = list(annodf.columns)
+    rownames = list(annodf.index)
+    print(f'columns: {colnames[0:4]}')
+    print(f'rows: {rownames[0:4]}')
 
-    anno.close()
+    # anno.close()
     data.close()
     out.close()
     exit(0)
