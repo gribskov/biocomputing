@@ -59,25 +59,31 @@ def blast_read(data, rownames, maxeval=1e-5, nhits=3):
             field = hit.rstrip().split(maxsplit=12)
             # print(f'\t{field[12]}')
 
-            hitstr = f'q:{field[2]}:{field[3]}/{field[1]}  '
-            hitstr += f's:{field[6]}:{field[7]}/{field[5]}   '
             evalue = float(field[11])
-            hitstr += f'{field[11]}  {field[12][:field[12].find(' TaxID')].replace('Tax=', '')}'
+            hitstr = f'{evalue}  '
+            hitstr += f'q:{field[2]}:{field[3]}/{field[1]}  '
+            hitstr += f's:{field[6]}:{field[7]}/{field[5]}   '
+            hitstr += f'{field[12][:field[12].find(' TaxID')].replace('Tax=', '')}'
 
             unsorted.append([evalue, hitstr])
 
         anno = ''
+        annolist = []
+        e_lowest = None
         n = 0
         for info in sorted(unsorted, key=lambda h: h[0]):
+            if not e_lowest:
+                e_lowest = info[0]
             n += 1
             if n > nhits:
                 break
             anno += f'{info[1]}\n'
+            annolist.append(f'{info[1]}\n')
         anno = anno[:-1]
         # print(f'{id}\n{anno}')
-        selected[id] = [evalue, anno]
+        selected[id] = [e_lowest, anno]
 
-    df = pd.DataFrame.from_dict(selected, orient='index',columns=["evalue", "blast_hits"])
+    df = pd.DataFrame.from_dict(selected, orient='index',columns=['evalue', 'blast_hits'])
 
     return df
 
@@ -134,18 +140,37 @@ if __name__ == '__main__':
     if opts.atype == 'excel':
         # read the first sheet into a dataframe with row and column labels
         annodf = pd.read_excel(opts.annotation, sheet_name=0, index_col=0)
-
-    colnames = list(annodf.columns)
+        print(f'Annotations read from {opts.annotation}: {annodf.shape}')
+    #
+    # colnames = list(annodf.columns)
     rownames = list(annodf.index)
-    print(f'columns: {colnames[0:4]}')
-    print(f'rows: {rownames[0:4]}')
+    # print(f'columns: {colnames[0:4]}')
+    # print(f'rows: {rownames[0:4]}')
+
 
     if opts.dtype == 'blast':
         blastdf = blast_read(data, rownames, maxeval=1e-5, nhits=3)
+        print(f'Blast results read from {opts.data}: {blastdf.shape}')
 
-    print(blastdf.head())
+    # print(blastdf.head())
+    # merge blast results with annotatio
     annodf.merge(blastdf, how='left', left_index=True, right_index=True )
+    annodf = annodf.merge(blastdf, how='outer', left_index=True, right_index=True)
 
+    # print(annodf.head())
+    # annodf.to_excel('test.xlsx')
+    # print(annodf.iloc[1:4,67:])
+
+    writer = pd.ExcelWriter('pandas_test.xlsx', engine='xlsxwriter')
+    annodf.to_excel(writer, sheet_name='Annotation', index=True)
+    workbook = writer.book
+    worksheet = writer.sheets['Annotation']
+
+    # Add a text wrap format and format the column with the multi-line blast info
+    text_wrap_format = workbook.add_format({'text_wrap': True})
+    worksheet.set_column(69, 69, 200, text_wrap_format)
+
+    writer.close()
     data.close()
     out.close()
     exit(0)
