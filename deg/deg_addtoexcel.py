@@ -49,8 +49,8 @@ def blast_read(data, rownames, maxeval=1e-5, nhits=3):
     :return: dataframe
     ---------------------------------------------------------------------------------------------"""
     selected = {}
-    for id, hitlist in blast_get_block(data):
-        if id not in rownames:
+    for sid, hitlist in blast_get_block(data):
+        if sid not in rownames:
             continue
 
         # split and assemble the desired data
@@ -60,6 +60,9 @@ def blast_read(data, rownames, maxeval=1e-5, nhits=3):
             # print(f'\t{field[12]}')
 
             evalue = float(field[11])
+            if evalue > maxeval:
+                continue
+
             hitstr = f'{evalue}  '
             hitstr += f'q:{field[2]}:{field[3]}/{field[1]}  '
             hitstr += f's:{field[6]}:{field[7]}/{field[5]}   '
@@ -80,8 +83,8 @@ def blast_read(data, rownames, maxeval=1e-5, nhits=3):
             anno += f'{info[1]}\n'
             annolist.append(f'{info[1]}\n')
         anno = anno[:-1]
-        # print(f'{id}\n{anno}')
-        selected[id] = [e_lowest, anno]
+        # print(f'{sid}\n{anno}')
+        selected[sid] = [e_lowest, anno]
 
     df = pd.DataFrame.from_dict(selected, orient='index',columns=['evalue', 'blast_hits'])
 
@@ -93,7 +96,8 @@ def blast_get_block(data, level=3):
     generator that returns a list of blast hit results that have a common trinity transcript id
     level 3 is the _g level
 
-    :param data:
+    :param data:filehandle  open file with blast result
+    :param level: int       level to clip the trinity id 3=_g 2=_c, 1=DN
     :return:
     ---------------------------------------------------------------------------------------------"""
     hits = []
@@ -103,25 +107,25 @@ def blast_get_block(data, level=3):
     line = data.readline()
     full_id = line.split(maxsplit=1)[0]
     idfield = full_id.split('_')
-    id = '_'.join(idfield[1:jlevel])
+    tid = '_'.join(idfield[1:jlevel])
     hits.append(line.rstrip())
-    id_old = id
+    id_old = tid
 
     for line in data:
         full_id = line.split(maxsplit=1)[0]
         idfield = full_id.split('_')
-        id = '_'.join(idfield[1:jlevel])
+        tid = '_'.join(idfield[1:jlevel])
 
-        if id == id_old:
+        if tid == id_old:
             # same query as last line,  add to hits
             hits.append(line.rstrip())
         else:
-            yield id, hits
+            yield tid, hits
             hits = [line.rstrip()]
-            id_old = id
+            id_old = tid
 
     if hits:
-        yield id, hits
+        yield tid, hits
 
 
 # --------------------------------------------------------------------------------------------------
@@ -144,6 +148,7 @@ if __name__ == '__main__':
 
     rownames = list(annodf.index)
 
+    blastdf = None
     if opts.dtype == 'blast':
         blastdf = blast_read(data, rownames, maxeval=1e-5, nhits=3)
         print(f'Blast results read from {opts.data}: {blastdf.shape}')
