@@ -141,27 +141,20 @@ if __name__ == '__main__':
         # read the first sheet into a dataframe with row and column labels
         annodf = pd.read_excel(opts.annotation, sheet_name=0, index_col=0)
         print(f'Annotations read from {opts.annotation}: {annodf.shape}')
-    #
-    # colnames = list(annodf.columns)
-    rownames = list(annodf.index)
-    # print(f'columns: {colnames[0:4]}')
-    # print(f'rows: {rownames[0:4]}')
 
+    rownames = list(annodf.index)
 
     if opts.dtype == 'blast':
         blastdf = blast_read(data, rownames, maxeval=1e-5, nhits=3)
         print(f'Blast results read from {opts.data}: {blastdf.shape}')
 
-    # print(blastdf.head())
-    # merge blast results with annotatio
+    # merge blast results with annotation
+    # uses xlsxwriter in order to create cells that contain newlines
     annodf.merge(blastdf, how='left', left_index=True, right_index=True )
     annodf = annodf.merge(blastdf, how='outer', left_index=True, right_index=True)
+    print(f'Merge completed\nWriting to {opts.output}')
 
-    # print(annodf.head())
-    # annodf.to_excel('test.xlsx')
-    # print(annodf.iloc[1:4,67:])
-
-    writer = pd.ExcelWriter('pandas_test.xlsx', engine='xlsxwriter')
+    writer = pd.ExcelWriter(opts.output, engine='xlsxwriter')
     annodf.to_excel(writer, sheet_name='Annotation', index=True)
     workbook = writer.book
     worksheet = writer.sheets['Annotation']
