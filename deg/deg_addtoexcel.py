@@ -101,20 +101,23 @@ def blast_get_block(data, level=3):
     :return:
     ---------------------------------------------------------------------------------------------"""
     hits = []
+    # jlevel = level + 1
     jlevel = level + 1
 
     # get the first hit
     line = data.readline()
     full_id = line.split(maxsplit=1)[0]
     idfield = full_id.split('_')
-    tid = '_'.join(idfield[1:jlevel])
+    # tid = '_'.join(idfield[1:jlevel])
+    tid = '_'.join(idfield[:jlevel])
     hits.append(line.rstrip())
     id_old = tid
 
     for line in data:
         full_id = line.split(maxsplit=1)[0]
         idfield = full_id.split('_')
-        tid = '_'.join(idfield[1:jlevel])
+        # tid = '_'.join(idfield[1:jlevel])
+        tid = '_'.join(idfield[:jlevel])
 
         if tid == id_old:
             # same query as last line,  add to hits
