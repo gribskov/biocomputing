@@ -66,6 +66,36 @@ def blastfmt7_ids(blastfname):
 
     return found, missing
 
+def diamond_unal(diamondfname):
+    """---------------------------------------------------------------------------------------------
+    Diamond blastx format 6 with unaligned sequences
+    format="6 qseqid qlen qstart qend sseqid slen sstart send length pident score evalue stitle"
+    There is no header in this format
+    TRINITY_DN221229_c0_g1_i1       602     -1      -1      *       -1      -1      -1      -1      -1      -1      -1      *
+    TRINITY_DN221225_c0_g1_i1       1088    -1      -1      *       -1      -1      -1      -1      -1      -1      -1      *
+    TRINITY_DN221276_c0_g1_i1       570     92      3       UniRef90_M1CTR3 997     101     130     30      96.7    150     6.77e-08        UniRef90_M1CTR3 Aconitate hydratase n=15 Tax=Pentapetalae TaxID=1437201 RepID=M1CTR3_SOLTU
+    TRINITY_DN221276_c0_g1_i1       570     92      3       UniRef90_A0AAN8TAL8     1014    104     133     30      96.7    150     6.78e-08        UniRef90_A0AAN8TAL8 Uncharacterized protein n=1 Tax=Solanum bulbocastanum TaxID=147425 RepID=A0AAN8TAL8_SOLBU
+
+    :param diamondfname:
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    blast = open(diamondfname, 'r')
+
+    found = []
+    missing = []
+    thisid = None
+    # n = 0
+    for line in blast:
+        field = line.split()
+        thisid = field[0]
+        if field[4] =='*':
+            # query did not match
+            missing.append(thisid)
+        else:
+            # there are hits
+            found.append(thisid)
+
+    return found, missing
 
 def trinity_filter_id(*args, **kwargs):
     """---------------------------------------------------------------------------------------------
@@ -173,7 +203,8 @@ if __name__ == '__main__':
     print(f'blast search (trinity vs genome): {sys.argv[2]}')
 
     # find all the query IDs that have hits (found) and do not have hits (nohits)
-    found, nohits = blastfmt7_ids(sys.argv[2])
+    # found, nohits = blastfmt7_ids(sys.argv[2])
+    found, nohits = diamond_unal(sys.argv[2])
     print(f'trinity ids: {len(found) + len(nohits)}')
     print(f'trinity ids with hits: {len(found)}')
     print(f'trinity ids with no hits {len(nohits)}')
