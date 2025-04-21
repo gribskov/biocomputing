@@ -1,7 +1,12 @@
 """=================================================================================================
-For a set of genes compared to a reference genome using blastn, separate into matchng and not
-matching sets.
-this can be used to removed contaminants IF YOU ARE SURE YOUR REFERENCE GENOME IS COMPLETE
+For a set of genes compared to a reference genome using blastn, separate into matching and not
+matching sets. The input should be trinity assemblies but could be modified for other inputs. In
+the cases of trinity, if any isoform has hits, all isoforms are considered to be matched.
+This can be used to removed contaminants IF YOU ARE SURE YOUR REFERENCE GENOME IS COMPLETE
+
+this code is designed to be flexible. you can provide different filtering functions to change the
+way sequence IDs are processed, and change the blastfmt7_ids to read different search formats. Note
+that
 
 Michael Gribskov     18 April 2025
 ================================================================================================="""
@@ -62,7 +67,7 @@ def blastfmt7_ids(blastfname):
     return found, missing
 
 
-def trinity_filter_id(tid, level=3, remove_trinity=False):
+def trinity_filter_id(*args, **kwargs):
     """---------------------------------------------------------------------------------------------
     filter a trinity id to truncate it at the desired level, and optionally drop the redundant
     TRINITY_ prefix
@@ -72,18 +77,24 @@ def trinity_filter_id(tid, level=3, remove_trinity=False):
     level 2: component, TRINITY_DN221212_c0
     level 1: bundle,    TRINITY_DN221212
 
+    Expected arguments as **kwargs
     :param tid: string                   trinity sequence ID
     :param level: int                   level to trim trinity IDs, default is gene level
     :param remove_trinity: boolean      remove the use TRINITY_ prefix if true
+
     :return: list                       strings with trinity IDs trimmed at the desired level
     ---------------------------------------------------------------------------------------------"""
     first = 0
+    tid = kwargs['tid']
+    level = kwargs['level']
+    remove_trinity = kwargs['remove_trinity']
     last = level + 1
     if remove_trinity:
         first = 1
 
     field = tid.split('_')
     return '_'.join(field[first:last])
+
 
 def trinity_filter_list(found, missing, level=3, remove_trinity=False):
     """---------------------------------------------------------------------------------------------
@@ -105,10 +116,10 @@ def trinity_filter_list(found, missing, level=3, remove_trinity=False):
     idhash = defaultdict(bool)
 
     for name in missing:
-        idhash[trinity_filter_id(name, level, remove_trinity)] = False
+        idhash[trinity_filter_id(tid=name, level=level, remove_trinity=remove_trinity)] = False
 
     for name in found:
-        idhash[trinity_filter_id(name, level, remove_trinity)] = True
+        idhash[trinity_filter_id(tid=name, level=level, remove_trinity=remove_trinity)] = True
 
     found = [k for k in idhash if idhash[k]]
     missing = [k for k in idhash if not idhash[k]]
@@ -116,27 +127,27 @@ def trinity_filter_list(found, missing, level=3, remove_trinity=False):
     return found, missing
 
 
-def getfasta(fastafname, level=3, remove_trinity=True, idfilter=lambda x:x):
+def getfasta(fastafname, idfilter, trinity_level, remove_trinity):
     """---------------------------------------------------------------------------------------------
     generator that yields the next fasta sequence in the file
 
     :param fastafname: string       path to fasta file
-    :param level: int               level to truncate trinity IDs
-    :param remove_trinity: bool     if true remove 'TRINITY_' from ID
     :param idfilter: func           function to filter trinity IDs (e.g., to remove TRINITY_)
     :yield: dict                    id, doc, sequence (sequence is not stripped)
     ---------------------------------------------------------------------------------------------"""
     fasta = open(fastafname, 'r')
 
-    entry = {'id': '', 'doc': '', 'sequence': ''}
+    entry = {'id': '', 'full_id':'', 'doc': '', 'sequence': ''}
     for line in fasta:
         if line.startswith('>'):
             if entry['sequence']:
                 yield entry
-                entry = {'id': '', 'doc': '', 'sequence': ''}
+                entry = {'id': '', 'full_id':'', 'doc': '', 'sequence': ''}
             # title line
             field = line.rstrip().split(' ')
-            entry['id'] = idfilter(field[0].lstrip('>'), level, remove_trinity)
+            entry['full_id'] = field[0].lstrip('>')
+            # TODO should remove trinity apply to full_id?
+            entry['id'] = idfilter(tid=entry['full_id'], remove_trinity=remove_trinity, level=trinity_level)
             entry['doc'] = ''
             if len(field) > 1:
                 entry['doc'] = field[1]
@@ -158,15 +169,16 @@ if __name__ == '__main__':
     trinity_level = 3
     print(f'genomefilter.py')
     print(f'trinity level: {trinity_level}')
-    print(f'blast search (trinity): {sys.argv[2]}')
-    print(f'fasta sequence file (trinity): {sys.argv[3]}')
-    print(f'blast search(genome) {sys.argv[2]}')
+    print(f'fasta sequence file (trinity): {sys.argv[1]}')
+    print(f'blast search (trinity vs genome): {sys.argv[2]}')
 
+    # find all the query IDs that have hits (found) and do not have hits (nohits)
     found, nohits = blastfmt7_ids(sys.argv[2])
     print(f'trinity ids: {len(found) + len(nohits)}')
     print(f'trinity ids with hits: {len(found)}')
     print(f'trinity ids with no hits {len(nohits)}')
 
+    # filter the IDs at the target trinity ID level (see trinity_filter_list()
     found, missing = trinity_filter_list(found, nohits, level=trinity_level, remove_trinity=True)
     print(f'\nAfter filtering at trinity level={trinity_level}:')
     print(f'ids matched: {len(found)}')
@@ -182,15 +194,25 @@ if __name__ == '__main__':
     unknown = []
     found_n = 0
     missing_n = 0
-    for fasta in getfasta(sys.argv[3], level=trinity_level, idfilter=trinity_filter_id):
+    all = 0
+    for fasta in getfasta(sys.argv[1],
+                          idfilter=trinity_filter_id,
+                          trinity_level=trinity_level,
+                          remove_trinity=True):
         if fasta['id'] in missing:
-            missingfh.write(f">{fasta['id']} {fasta['doc']}\n{fasta['sequence']}")
+            missingfh.write(f">{fasta['full_id']} {fasta['doc']}\n{fasta['sequence']}")
             missing_n += 1
+
         elif fasta['id'] in found:
-            foundfh.write(f">{fasta['id']} {fasta['doc']}\n{fasta['sequence']}")
+            foundfh.write(f">{fasta['full_id']} {fasta['doc']}\n{fasta['sequence']}")
             found_n += 1
+
         else:
             unknown.append(fasta['id'])
+
+        all += 1
+        if not all%1000:
+            print(f'{found_n}\t{missing_n}\t{len(unknown)}\t{all}')
 
     print(f'\n{found_n} sequences written to {foundout}')
     print(f'{missing_n} sequences written to {missingout}')
