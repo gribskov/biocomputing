@@ -39,7 +39,8 @@ def blastfmt7_ids(blastfname):
 
     found = []
     missing = []
-    n = 0
+    thisid = None
+    # n = 0
     for line in blast:
         if line.startswith('# Query:'):
             # query sequence ID
@@ -61,7 +62,7 @@ def blastfmt7_ids(blastfname):
     return found, missing
 
 
-def trinity_filter_id(id, level=3, remove_trinity=False):
+def trinity_filter_id(tid, level=3, remove_trinity=False):
     """---------------------------------------------------------------------------------------------
     filter a trinity id to truncate it at the desired level, and optionally drop the redundant
     TRINITY_ prefix
@@ -71,7 +72,7 @@ def trinity_filter_id(id, level=3, remove_trinity=False):
     level 2: component, TRINITY_DN221212_c0
     level 1: bundle,    TRINITY_DN221212
 
-    :param id: string                   trinity sequence ID
+    :param tid: string                   trinity sequence ID
     :param level: int                   level to trim trinity IDs, default is gene level
     :param remove_trinity: boolean      remove the use TRINITY_ prefix if true
     :return: list                       strings with trinity IDs trimmed at the desired level
@@ -81,29 +82,30 @@ def trinity_filter_id(id, level=3, remove_trinity=False):
     if remove_trinity:
         first = 1
 
-    field = id.split('_')
+    field = tid.split('_')
     return '_'.join(field[first:last])
 
 def trinity_filter_list(found, missing, level=3, remove_trinity=False):
     """---------------------------------------------------------------------------------------------
-    return a new list with the trinity IDs trimmed to the indicated level:
+    return new found and missing lists with the trinity IDs trimmed to the indicated level:
     level 4: all parts, TRINITY_DN221212_c0_g1_i1
     level 3: gene,      TRINITY_DN221212_c0_g1
     level 2: component, TRINITY_DN221212_c0
     level 1: bundle,    TRINITY_DN221212
     The names in the new list are unique
+    some sequences may have both hits and no-hits results for different isoforms, in this case, all
+    of the sequences are included in the found list
 
-    :param ids: list                    strings with trinity sequence IDs
+    :param found: list                  strings with trinity sequence IDs found
+    :param missing: list                strings with trinity sequences IDs not found
     :param level: int                   level to trim trinity IDs, default is gene level
     :param remove_trinity: boolean      remove the use TRINITY_ prefix if true
     :return: list                       strings with trinity IDs trimmed at the desired level
     ---------------------------------------------------------------------------------------------"""
     idhash = defaultdict(bool)
 
-    twice = 0
     for name in missing:
         idhash[trinity_filter_id(name, level, remove_trinity)] = False
-
 
     for name in found:
         idhash[trinity_filter_id(name, level, remove_trinity)] = True
@@ -114,11 +116,14 @@ def trinity_filter_list(found, missing, level=3, remove_trinity=False):
     return found, missing
 
 
-def getfasta(fastafname, idfilter=lambda x:x):
+def getfasta(fastafname, level=3, remove_trinity=True, idfilter=lambda x:x):
     """---------------------------------------------------------------------------------------------
     generator that yields the next fasta sequence in the file
 
     :param fastafname: string       path to fasta file
+    :param level: int               level to truncate trinity IDs
+    :param remove_trinity: bool     if true remove 'TRINITY_' from ID
+    :param idfilter: func           function to filter trinity IDs (e.g., to remove TRINITY_)
     :yield: dict                    id, doc, sequence (sequence is not stripped)
     ---------------------------------------------------------------------------------------------"""
     fasta = open(fastafname, 'r')
@@ -131,7 +136,7 @@ def getfasta(fastafname, idfilter=lambda x:x):
                 entry = {'id': '', 'doc': '', 'sequence': ''}
             # title line
             field = line.rstrip().split(' ')
-            entry['id'] = idfilter(field[0].lstrip('>'), 3, remove_trinity=True)
+            entry['id'] = idfilter(field[0].lstrip('>'), level, remove_trinity)
             entry['doc'] = ''
             if len(field) > 1:
                 entry['doc'] = field[1]
@@ -150,14 +155,20 @@ def getfasta(fastafname, idfilter=lambda x:x):
 # MAIN
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    # id_fasta = fasta_ids(sys.argv[1])
-    # print(f'fasta sequences read: {len(id_fasta)}')
+    trinity_level = 3
+    print(f'genomefilter.py')
+    print(f'trinity level: {trinity_level}')
+    print(f'blast search (trinity): {sys.argv[2]}')
+    print(f'fasta sequence file (trinity): {sys.argv[3]}')
+    print(f'blast search(genome) {sys.argv[2]}')
 
-    found, missing = blastfmt7_ids(sys.argv[2])
-    print(f'ids matched: {len(found)}')
-    print(f'ids not matched {len(missing)}')
-    found, missing = trinity_filter_list(found, missing, level=3, remove_trinity=True)
-    print(f'\nAfter removing overlaps:')
+    found, nohits = blastfmt7_ids(sys.argv[2])
+    print(f'trinity ids: {len(found) + len(nohits)}')
+    print(f'trinity ids with hits: {len(found)}')
+    print(f'trinity ids with no hits {len(nohits)}')
+
+    found, missing = trinity_filter_list(found, nohits, level=trinity_level, remove_trinity=True)
+    print(f'\nAfter filtering at trinity level={trinity_level}:')
     print(f'ids matched: {len(found)}')
     print(f'ids not matched: {len(missing)}')
 
@@ -165,13 +176,13 @@ if __name__ == '__main__':
     basename = sys.argv[1].replace('.fasta', '').replace('.fa', '')
     foundout = f'{basename}.found.fa'
     foundfh = open(foundout, 'w')
-    missingout = (f'{basename}.missing.fa')
+    missingout = f'{basename}.missing.fa'
     missingfh = open(missingout, 'w')
 
     unknown = []
     found_n = 0
     missing_n = 0
-    for fasta in getfasta(sys.argv[3], idfilter=trinity_filter_id):
+    for fasta in getfasta(sys.argv[3], level=trinity_level, idfilter=trinity_filter_id):
         if fasta['id'] in missing:
             missingfh.write(f">{fasta['id']} {fasta['doc']}\n{fasta['sequence']}")
             missing_n += 1
@@ -181,11 +192,10 @@ if __name__ == '__main__':
         else:
             unknown.append(fasta['id'])
 
-    print(f'{found_n} sequences written to {foundout}')
+    print(f'\n{found_n} sequences written to {foundout}')
     print(f'{missing_n} sequences written to {missingout}')
     if unknown:
         print(f'{len(unknown)} unclassified sequences')
-        print(unknown)
 
     foundfh.close()
     missingfh.close()
