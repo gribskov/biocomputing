@@ -2,9 +2,11 @@
 Use blast results to identify taxonomic lineage for queries. This can be used to identify
 contaminants in assemblies. Uses the JGI taxonomy service, but there is code here for NCBI as well.
 
+blast_to_taxonomy.py <blast_file> <good_sequences>
+
 Michael Gribskov     13 March 2025
 ================================================================================================="""
-
+import sys
 import json
 from collections import defaultdict
 from time import sleep
@@ -375,9 +377,8 @@ def assign_groups(taxa, group):
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    blastfile = 'data/c16c31.trinity_uniref_1e-10.dmndblastx'
-    blastfile = '../deg/data/c16c31.trinity_uniref_1e-4.dmndblastx'
-    goodfile = 'data/c16c31.trinity.goodtax.txt'
+    blastfile = sys.argv[1]
+    goodfile = sys.argv[2]
 
     # define groups - each groups is defined by one taxonomic term, anything undefined is 'other'
     group = {'error': 'Error', 'plant': 'Viridiplantae', 'virus': 'Viruses',
