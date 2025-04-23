@@ -457,6 +457,31 @@ def group_assign(merged):
 
     return count
 
+def group_choose(obs_group):
+    """---------------------------------------------------------------------------------------------
+    assign the merged isoforms to a group based on the counts of the groups (obs_group).
+    The rules are:
+    1) assign as plant if there are any plants
+    2) assign as highest count
+    3) if it's a tie, assign as other
+
+    :param merged: list of Cluster      annotated merged clusters
+    :return: string                     count of number assigned to each group
+    ---------------------------------------------------------------------------------------------"""
+    gbest = ''
+    n = 0
+    for g in sorted(obs_group, key=lambda g: obs_group[g], reverse=True):
+        if g == 'plant':
+            return 'plant'
+
+        if obs_group[g] == n:
+            return 'other'
+        else:
+            if obs_group[g] > n:
+                gbest = g
+                n = obs_group[g]
+
+    return gbest
 
 # --------------------------------------------------------------------------------------------------
 # main
@@ -499,9 +524,12 @@ if __name__ == '__main__':
     for t in taxa:
         taxa_invert[taxa[t]['taxid']] = taxa[t]
         taxa_invert[taxa[t]['taxid']]['taxstr'] = t
+        if t.find('Glarea')>-1 or taxa[t]['taxid']==1104152 or taxa[t]['taxid']==101852:
+            print(f'{taxa[t]}')
 
     for t in sorted(taxa_invert):
-        print(f'{t}\t{taxa_invert[t]}')
+        if t == 1104152:
+            print(f'{t}\t{taxa_invert[t]}')
 
     # ----------------------------------------------------------------------------------------------
     # results
@@ -540,8 +568,13 @@ if __name__ == '__main__':
     # reprocess the blast results, pooling at trinity level and summarizing taxonomic information
     trinity_cluster = blast_trinity_cluster(blastfile)
     for tc in trinity_cluster:
+        obs_group = defaultdict(int)
         for iso in trinity_cluster[tc]:
             g = taxa_invert[iso['taxid']]['group']
+            obs_group[g] += 1
+        best_group = group_choose(obs_group)
+
+
 
 
     exit(0)
