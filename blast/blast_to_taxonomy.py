@@ -366,8 +366,9 @@ if __name__ == '__main__':
         print( f"!\t{c}\t{trinity_cluster[c]['group']}\t{len(trinity_cluster[c]['member'])}")
         for m in trinity_cluster[c]['member']:
             nout += 1
-            print(f'{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['description']}')
-            good.write(f'{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['description']}\n')
+            print(f'{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['taxstr']}\
+            t{m['description']}')
+            good.write(f'{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['taxstr']}\t{m['description']}\n')
 
     print(f'\n{nout} results written to {goodfile}')
     good.close()
