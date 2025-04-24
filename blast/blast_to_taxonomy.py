@@ -202,7 +202,7 @@ def blast_trinity_cluster(blasthits):
     return cluster
 
 
-def assign_groups(taxa, group):
+def assign_groups(taxa, gorder, group):
     """---------------------------------------------------------------------------------------------
     use the search terms in group to assign assemblies to defined groups. sequences not matching
     are defined as other. error sequences are defined as 'error'
@@ -217,7 +217,7 @@ def assign_groups(taxa, group):
     g = None
     for t in taxa:
         this = taxa[t]
-        for g in group:
+        for g in gorder:
             found = False
             if group[g] in this['lineage']:
                 this['group'] = g
@@ -268,12 +268,13 @@ def group_choose(obs_group):
     ---------------------------------------------------------------------------------------------"""
     gbest = ''
     n = 0
+    
     for g in sorted(obs_group, key=lambda g: obs_group[g], reverse=True):
         if g == 'plant':
             return 'plant'
 
         if obs_group[g] == n:
-            return 'other'
+            gbest = 'other'
         else:
             if obs_group[g] > n:
                 gbest = g
@@ -290,9 +291,13 @@ if __name__ == '__main__':
     goodfile = sys.argv[2]
 
     # define groups - each groups is defined by one taxonomic term, anything undefined is 'other'
-    group = {'error':     'Error', 'plant': 'Viridiplantae', 'virus': 'Viruses',
-             'arthropod': 'Arthropoda', 'fungi': 'Fungi', 'bacteria': 'Bacteria'}
-    gorder = {'error': 1, 'plant': 3, 'virus': 4, 'arthropod': 5, 'fungi': 6, 'bacteria': 7, 'other': 2}
+    # it is important to process the most specific keywords first, gorder is the processing order
+    group = {'error': 'Error', 'plant': 'Viridiplantae', 'virus': 'Viruses', 
+            'arthropod': 'Arthropoda', 'fungi': 'Fungi', 'bacteria': 'Bacteria', 
+            'opisthokonta':'Opisthokonta', 'sar':'Sar', 'discoba':'Discoba', 
+            'amoebozoa': 'Amoebozoa', 'other':'Other'}
+    gorder = ['error', 'plant', 'other', 'virus', 'arthropod', 'fungi', 'bacteria', 
+            'opisthokonta', 'sar', 'discoba', 'amoebozoa', 'other']
 
     good_n = 0
     bad_n = 0
@@ -318,7 +323,7 @@ if __name__ == '__main__':
         n_success += send_query_block_jgi(qlist, taxa)
 
     # assign to groups based on lineage
-    groupcount = assign_groups(taxa, group)
+    groupcount = assign_groups(taxa, gorder, group)
 
     # ----------------------------------------------------------------------------------------------
     # results
@@ -337,8 +342,8 @@ if __name__ == '__main__':
 
     for t in sorted(taxa, key=lambda c: taxa[c]['count'], reverse=True):
         species = taxa[t]['lineage'].split(';')
-        good.write(f'{n:3d}{taxa[t]['count']:10d}{taxa[t]['group']:>12s}  {species[-1]}\ttaxid={t:d}\n')
-        print(f'{n:3d}{taxa[t]['count']:10d}{taxa[t]['group']:>12s}  {species[-1]}\ttaxid={t:d}')
+        good.write(f"{n:3d}{taxa[t]['count']:10d}{taxa[t]['group']:>14s}  {species[-1]}\ttaxid={t:d}\n")
+        print(f"{n:3d}{taxa[t]['count']:10d}{taxa[t]['group']:>14s}  {species[-1]}\ttaxid={t:d}")
         n += 1
         if n == ntop:
             break
@@ -365,10 +370,10 @@ if __name__ == '__main__':
         good.write(f"!\t{c}\t{trinity_cluster[c]['group']}\t{len(trinity_cluster[c]['member'])}\n")
         print( f"!\t{c}\t{trinity_cluster[c]['group']}\t{len(trinity_cluster[c]['member'])}")
         for m in trinity_cluster[c]['member']:
+            lineage = taxa[m['taxid']]['lineage']
             nout += 1
-            print(f'{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['taxstr']}\
-            t{m['description']}')
-            good.write(f'{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['taxstr']}\t{m['description']}\n')
+            print(f"{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['taxstr']}\t{m['description']}")
+            good.write(f"{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['taxstr']}\t{m['description']} {lineage[:25]}\n")
 
     print(f'\n{nout} results written to {goodfile}')
     good.close()
