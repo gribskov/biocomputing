@@ -607,36 +607,24 @@ if __name__ == '__main__':
     print(f'\nCounts per group found in {blastfile}')
     for g in groupcount:
         print(f'\t{g}\t{groupcount[g]}')
-    #
-    # good = open(goodfile, 'w')
-    #
+
+    good = open(goodfile, 'w')
+
     # species with top counts in blast result
-    good = sys.stdout
     ntop = 100
     good.write(f'\n! top {ntop} taxa:\n')
     print(f'\ntop {ntop} taxa:')
     n = 0
 
     for t in sorted(taxa, key=lambda c: taxa[c]['count'], reverse=True):
-        good.write(f'!{n:3d}{t:>40s}{taxa[t]['group']:>10s}{taxa[t]['count']:>10d}  {taxa[t]['lineage']}\n')
-        print(f'{n:3d}{t:>40s}{taxa[t]['group']:>10s}{taxa[t]['count']:10d}  {taxa[t]['lineage']}')
+        species = taxa[t]['lineage'].split(';')
+        good.write(f'{n:3d}{taxa[t]['count']:10d}{taxa[t]['group']:>12s}  {species[-1]}\ttaxid={t:d}\n')
+        print(f'{n:3d}{taxa[t]['count']:10d}{taxa[t]['group']:>12s}  {species[-1]}\ttaxid={t:d}')
         n += 1
         if n == ntop:
             break
 
-    # good.write(f'\n! Taxa by group\n')
-    # group_old = ''
-    # n = 0
-    # for tax in sorted(taxa, key=lambda t: (gorder[taxa[t]['group']],taxa[t]['lineage'])):
-    #     n += 1
-    #     this = taxa[tax]
-    #     good.write(f"{n:5d}{this['group']:>12s} {tax:>68s}\t{this['lineage']}\n")
-    #
-    #
-    # print(f'\nresults written to {goodfile}')
-    # good.close()
-
-    # reprocess the blast results, pooling at trinity level and summarizing taxonomic information
+    # assign groups to trinity clusters
     trinity_cluster = blast_trinity_cluster(blasthits)
     for tc in trinity_cluster:
         obs_group = defaultdict(int)
@@ -644,11 +632,25 @@ if __name__ == '__main__':
             g = taxa[iso['taxid']]['group']
             obs_group[g] += 1
         trinity_cluster[tc]['group'] = group_choose(obs_group)
-        # print(f'{tc}\t{trinity_cluster[tc]['group']}')
 
+    # write out by groups
+    good.write(f'\n! Taxa by group\n')
+    group_old = ''
+    nout = 0
     for c in sorted(trinity_cluster, key=lambda c: trinity_cluster[c]['group']):
+        if trinity_cluster[c]['group'] != group_old:
+            group_old = trinity_cluster[c]['group']
+            good.write(f'\n! group:{group_old}\tsequences:{groupcount[group_old]}\n')
+            print(f'\n! group:{group_old}\tsequences:{groupcount[group_old]}')
+
+        good.write(f"!\t{c}\t{trinity_cluster[c]['group']}\t{len(trinity_cluster[c]['member'])}\n")
         print( f"!\t{c}\t{trinity_cluster[c]['group']}\t{len(trinity_cluster[c]['member'])}")
         for m in trinity_cluster[c]['member']:
+            nout += 1
             print(f'{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['description']}')
+            good.write(f'{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['description']}\n')
+
+    print(f'\n{nout} results written to {goodfile}')
+    good.close()
 
     exit(0)
