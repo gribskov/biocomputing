@@ -108,13 +108,78 @@ def send_query_block_jgi(qlist, taxa):
     """---------------------------------------------------------------------------------------------
     send a list of seqeunces to the bjgi taxonomy services as a single post query
 
+    :param qlist: list      taxonomic names from the stitle string from a blast search result
+    :param taxa: dict       taxonomic information with blast taxa name as key; created by blast_read
+    :return: int            number of queries successfully translated
+    ---------------------------------------------------------------------------------------------"""
+    url_taxstr = 'https://taxonomy.jgi.doe.gov/name/simple/'
+    url_taxid = 'https://taxonomy.jgi.doe.gov/id/'
+    block = ','.join(str(taxid) for taxid in qlist)
+    query = url_taxid + block
+
+    response = None
+    j = None
+    try:
+        response = requests.post(query)
+        j = json.loads(response.text)
+    except Exception as err:
+        print(f'something goes wrong: {err}\n{response.text}')
+
+    ok_n = 0
+    if len(j) != len(qlist):
+        print(f'query and result are different lengths')
+    oldtlen = len(taxa)
+    i = 0
+    for query in j:
+        iquery =int(query)
+        if qlist[i] != iquery:
+            print(f'query/response mismatch')
+        i += 1
+
+        # try:
+        taxinfo = j[query]
+        if 'error' in taxinfo:
+            # taxids that are not found in database
+            taxa[iquery]['group'] = 'error'
+            continue
+        try:
+            taxa[iquery]['lineage'] = ';'.join([taxinfo[l]['name'] for l in reversed(taxinfo.keys())
+                           if l not in ('level', 'mononomial', 'name', 'tax_id')])
+        except Exception as err:
+            taxstr = 'Error;Taxon_not_found'
+
+        # try:
+        #     taxstr = taxstr.replace(' ', '_')
+        #     if not taxstr:
+        #         taxstr = 'None'
+        #     taxa[query]['lineage'] = taxstr
+        #     if oldtlen != len(taxa):
+        #         # some queries will trigger multiple responses, particularly ones with /
+        #         # these queries are filtered in blast_read(), but there could be other
+        #         # names that also do it
+        #         print('Error:unknown_taxon attempting to extend taxa list. check filtering')
+        #         oldtlen = len(taxa)
+        ok_n += 1
+
+        # except Exception as err:
+        #     # any other errors
+        #     errstr = f'{err}'
+        #     taxa[query]['lineage'] = f'Error; {errstr.replace(' ', '_')}'
+
+    return ok_n
+
+def send_query_block_jgi2(qlist, taxa):
+    """---------------------------------------------------------------------------------------------
+    send a list of seqeunces to the bjgi taxonomy services as a single post query
+
     :param qlist: list        taxonomic names from the stitle string from a blast search result
     :param taxa: dict       taxonomic information with blast taxa name as key; created by blast_read
     :return: int            number of queries successfully translated
     ---------------------------------------------------------------------------------------------"""
-    url = 'https://taxonomy.jgi.doe.gov/name/simple/'
-    block = ','.join(qlist)
-    query = url + block
+    url_taxstr = 'https://taxonomy.jgi.doe.gov/name/simple/'
+    url_taxid = 'https://taxonomy.jgi.doe.gov/id/'
+    block = ','.join(str(taxid) for taxid in qlist)
+    query = url_taxid + block
 
     response = None
     j = None
@@ -268,8 +333,8 @@ def blast(blastfile):
 
     # TRINITY_DN644_c0_g2_i1	3590	894	535	UniRef90_M1BIC5	388	269	388	120	100	624	4.21e-68	UniRef90_M1BIC5 Ninja-family protein n=2 Tax=Solanum TaxID=4107 RepID=M1BIC5_SOLTU
     #  qseqid qlen qstart qend sseqid slen sstart send length pident score evalue stitle
-    :param blastfile: string    path to blast search result
-    :return:
+    :param blastfile:   string    path to blast search result
+    :yield: dict        blast hit information for one hit
     ---------------------------------------------------------------------------------------------"""
     column = ['qid', 'qlen', 'qbegin', 'qend',
               'sid', 'slen', 'sbegin', 'send',
@@ -284,91 +349,115 @@ def blast(blastfile):
     return
 
 
-def blast_get_tax(stitle):
+def blast_parse_stitle(stitle):
     """---------------------------------------------------------------------------------------------
-    get the Tax string and numerical ID from the subject title field
-
+    get the Tax string and numerical TaxID from the subject title field. This is specific for 
+    information in the unir3ef databases
+    
+    UniRef90_A0A8T2XXL3 Vacuolar cation/proton exchanger n=2 Tax=Populus deltoides TaxID=3696 RepID=A0A8T2XXL3_POPDE
+    ------------------- --------------------------------   -     -----------------       ----       ----------------
+    urefid              description                        n     taxstr                  taxid      repid
+    
     :param stitle: string       subject title from blast search
-    :return: string, int        Tax string, taxid
+    :return: dict               keys: urefid, description, n, taxstr, taxid, repid
     ---------------------------------------------------------------------------------------------"""
-    # taxid is in a qualifier 'TaxID=xxx '
-    taxidpos = stitle.find('TaxID') - 1
-    taxid_end = stitle.find('RepID') - 1
-    taxid = int(stitle[taxidpos + 7:taxid_end])
+    urefid, rest = stitle.split(' ', maxsplit=1)
 
-    taxpos = stitle.find('Tax=') + 4
-    return stitle[taxpos:taxidpos], taxid
+    npos = rest.find('n=')
+    taxpos = rest.find('Tax=')
+    taxidpos = rest.find('TaxID')
+    repidpos = rest.find('RepID')
+
+    return {'urefid':      urefid,
+            'description': rest[:npos - 1],
+            'n':           int(rest[npos + 2:taxpos - 1]),
+            'taxstr':      rest[taxpos + 4:taxidpos - 1],
+            'taxid':       int(rest[taxidpos + 6:repidpos - 1]),
+            'repid':       rest[repidpos + 6:]
+            }
 
 
-def blast_read(blastfile):
+def blast_read(blastfile, trinity_level=3):
     """---------------------------------------------------------------------------------------------
     Read the taxonmic string from the blast search and make a list of unique taxa. Spaces in the
     taxon name are converted to underlines, after filtering parenthesized phrases
 
     :param blastfile: string    path to file with blast result
-    :return: dict               taxonomic string is the key, lineage is empty to be filled later
+    :return: dict               taxid is the key, lineage is empty to be filled later
     ---------------------------------------------------------------------------------------------"""
     nline = 0
-    taxa = defaultdict(lambda: {'taxid': 0, 'lineage': '', 'group': 'other', 'count': 0})
+    blasthits = []
+    taxa = defaultdict(lambda: {'taxstr': [], 'lineage': '', 'group': 'other', 'count': 0})
 
     for hit in blast(blastfile):
         nline += 1
-        tax, taxid = blast_get_tax(hit['stitle'])
 
-        # trim some unecessary/confusing parts from the taxonomy string
-        if tax.find('(') != -1:
-            # trim off information in parentheses
-            # this information is usually not part of the actual taxonomic name
-            tax = tax[:tax.find('(') - 1]
-            # print(f'\t=> trimmed: {tax}')
+        # save blast hit with truncated trinity ID and parsed information from stitle
+        blasthits.append(hit)
+        blasthits[-1]['truncated_id'] = trinity_filter_id(hit['qid'], trinity_level)
 
-        # convert spaces to underline
-        tax = tax.strip().replace(' ', '_')
-        tax = tax.replace('/', '_')
+        info = blast_parse_stitle(hit['stitle'])
+        for k in info:
+            blasthits[-1][k] = info[k]
 
-        # remove strain information (sometimes causes multiple returns from taxonomy server)
-        strain = tax.find('_str.')
-        if strain > -1:
-            tax = tax[:strain]
-        # sp = tax.find('_sp.')
-        # if sp > -1:
-        #     tax = tax[:sp]
-        uncultured = tax.find('uncultured_')
-        if uncultured > -1:
-            tax = tax[uncultured + 11:]
-        unclassifed = tax.find('unclassified_')
-        if unclassifed > -1:
-            tax = tax[unclassifed + 13:]
-        # if tax.find('str.')>-1:
-        #     print(tax)
-        taxa[tax]['count'] += 1
-        taxa[tax]['taxid'] = taxid
-        print(f'{nline:6d}\t{tax}')
+        taxid = info['taxid']
+        taxstr = info['taxstr']
+
+        taxa[taxid]['count'] += 1
+        if taxstr not in taxa[taxid]['taxstr']:
+            taxa[taxid]['taxstr'].append(taxstr)
+        print(f'{nline:6d}\t{taxid}\t{taxstr}')
 
         # debug
         if nline > 10000:
             break
+        # save the taxid and taxstr for getting lineage and assigning to taxonomic groups
+
+        # # trim some unecessary/confusing parts from the taxonomy string
+        # if tax.find('(') != -1:
+        #     # trim off information in parentheses
+        #     # this information is usually not part of the actual taxonomic name
+        #     tax = tax[:tax.find('(') - 1]
+        #     # print(f'\t=> trimmed: {tax}')
+        #
+        # # convert spaces to underline
+        # tax = tax.strip().replace(' ', '_')
+        # tax = tax.replace('/', '_')
+        #
+        # # remove strain information (sometimes causes multiple returns from taxonomy server)
+        # strain = tax.find('_str.')
+        # if strain > -1:
+        #     tax = tax[:strain]
+        # # sp = tax.find('_sp.')
+        # # if sp > -1:
+        # #     tax = tax[:sp]
+        # uncultured = tax.find('uncultured_')
+        # if uncultured > -1:
+        #     tax = tax[uncultured + 11:]
+        # unclassifed = tax.find('unclassified_')
+        # if unclassifed > -1:
+        #     tax = tax[unclassifed + 13:]
+        # # if tax.find('str.')>-1:
+        # #     print(tax)
+
 
     print(f'\nblast results processed: {nline}')
     print(f'unique taxa {len(taxa)}')
 
-    return taxa
+    return taxa, blasthits
 
 
-def blast_trinity_cluster(blastfile):
+def blast_trinity_cluster(blasthits):
     """---------------------------------------------------------------------------------------------
     gather results for trinity ids clustered at a specified level. each truncated trinity id is a
     list of blast results (dicts) with the taxid extracted and added to the dicts
 
-    :param blastfile: string        path to blast result file
+    :param blasthits: list          dict of each blasthit from the search, see blast_read()
     :return: dict                   key is truncated trinity ID, value is list of hits
     ---------------------------------------------------------------------------------------------"""
-    cluster = defaultdict(lambda: [])
-    for hit in blast(blastfile):
-        tid = trinity_filter_id(hit['qid'], 3, True)
-        taxstr, taxid = blast_get_tax(hit['stitle'])
-        hit['taxid'] = taxid
-        cluster[tid].append(hit)
+    cluster = defaultdict(lambda: {'group':'', 'member':[]})
+    for hit in blasthits:
+        cluster[hit['truncated_id']]['member'].append(hit)
 
     return cluster
 
@@ -444,18 +533,8 @@ def group_assign(merged):
             count['plant'] += 1
             continue
 
-        # gsort = sorted(this.ngroup, key=lambda g: this.ngroup[g], reverse=True)
-        # if len(gsort) == 1:
-        #     gbest = gsort[0]
-        # elif gsort[0] > gsort[1]:
-        #     gbest = gsort[0]
-        # else:
-        #     gbest = 'other'
-        #
-        # this.group = gbest
-        # count[gbest] += 1
-
     return count
+
 
 def group_choose(obs_group):
     """---------------------------------------------------------------------------------------------
@@ -483,6 +562,7 @@ def group_choose(obs_group):
 
     return gbest
 
+
 # --------------------------------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------------------------------
@@ -500,7 +580,7 @@ if __name__ == '__main__':
     unknown_n = 0
     nquery = 0
 
-    taxa = blast_read(blastfile)
+    taxa, blasthits = blast_read(blastfile)
     ntaxa = 0
     n_success = 0
     block = 250
@@ -520,39 +600,30 @@ if __name__ == '__main__':
 
     # assign to groups based on lineage
     groupcount = assign_groups(taxa, group)
-    taxa_invert = {}
-    for t in taxa:
-        taxa_invert[taxa[t]['taxid']] = taxa[t]
-        taxa_invert[taxa[t]['taxid']]['taxstr'] = t
-        if t.find('Glarea')>-1 or taxa[t]['taxid']==1104152 or taxa[t]['taxid']==101852:
-            print(f'{taxa[t]}')
-
-    for t in sorted(taxa_invert):
-        if t == 1104152:
-            print(f'{t}\t{taxa_invert[t]}')
 
     # ----------------------------------------------------------------------------------------------
     # results
     # ----------------------------------------------------------------------------------------------
-    # print(f'\nCounts per group found in {blastfile}')
-    # for g in groupcount:
-    #     print(f'\t{g}\t{groupcount[g]}')
+    print(f'\nCounts per group found in {blastfile}')
+    for g in groupcount:
+        print(f'\t{g}\t{groupcount[g]}')
     #
     # good = open(goodfile, 'w')
     #
-    # # species with top counts in blast result
-    # ntop = 100
-    # good.write(f'\n! top {ntop} taxa:\n')
-    # print(f'\ntop {ntop} taxa:')
-    # n = 0
-    #
-    # for t in sorted(taxa, key=lambda c: taxa[c]['count'], reverse=True):
-    #     good.write(f'!{n:3d}{t:>40s}{taxa[t]['group']:>10s}{taxa[t]['count']:>10d}  {taxa[t]['lineage']}\n')
-    #     print(f'{n:3d}{t:>40s}{taxa[t]['group']:>10s}{taxa[t]['count']:10d}  {taxa[t]['lineage']}')
-    #     n += 1
-    #     if n == ntop:
-    #         break
-    #
+    # species with top counts in blast result
+    good = sys.stdout
+    ntop = 100
+    good.write(f'\n! top {ntop} taxa:\n')
+    print(f'\ntop {ntop} taxa:')
+    n = 0
+
+    for t in sorted(taxa, key=lambda c: taxa[c]['count'], reverse=True):
+        good.write(f'!{n:3d}{t:>40s}{taxa[t]['group']:>10s}{taxa[t]['count']:>10d}  {taxa[t]['lineage']}\n')
+        print(f'{n:3d}{t:>40s}{taxa[t]['group']:>10s}{taxa[t]['count']:10d}  {taxa[t]['lineage']}')
+        n += 1
+        if n == ntop:
+            break
+
     # good.write(f'\n! Taxa by group\n')
     # group_old = ''
     # n = 0
@@ -566,15 +637,18 @@ if __name__ == '__main__':
     # good.close()
 
     # reprocess the blast results, pooling at trinity level and summarizing taxonomic information
-    trinity_cluster = blast_trinity_cluster(blastfile)
+    trinity_cluster = blast_trinity_cluster(blasthits)
     for tc in trinity_cluster:
         obs_group = defaultdict(int)
-        for iso in trinity_cluster[tc]:
-            g = taxa_invert[iso['taxid']]['group']
+        for iso in trinity_cluster[tc]['member']:
+            g = taxa[iso['taxid']]['group']
             obs_group[g] += 1
-        best_group = group_choose(obs_group)
+        trinity_cluster[tc]['group'] = group_choose(obs_group)
+        # print(f'{tc}\t{trinity_cluster[tc]['group']}')
 
-
-
+    for c in sorted(trinity_cluster, key=lambda c: trinity_cluster[c]['group']):
+        print( f"!\t{c}\t{trinity_cluster[c]['group']}\t{len(trinity_cluster[c]['member'])}")
+        for m in trinity_cluster[c]['member']:
+            print(f'{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['description']}')
 
     exit(0)
