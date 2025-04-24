@@ -1,6 +1,7 @@
 """=================================================================================================
 Use blast results to identify taxonomic lineage for queries. This can be used to identify
-contaminants in assemblies. Uses the JGI taxonomy service, but there is code here for NCBI as well.
+contaminants in assemblies. Uses the JGI taxonomy servicelook at version before 4/24/2025 for
+NCBI code (did not use because to excessive number of server errors)
 
 blast_to_taxonomy.py <blast_file> <good_sequences>
 
@@ -16,67 +17,11 @@ import requests
 from lxml import etree
 
 
-def send_query(url, params, retry):
-    """---------------------------------------------------------------------------------------------
-    Send query and decode XML response
-    :param url: string      URL of endpoint
-    :param params: dict     parameters for query
-    :param retry: list      list of failed queries
-    :return: etree          parsed xml response
-    ---------------------------------------------------------------------------------------------"""
-    sleep(0.12)
-
-    try:
-        response = requests.post(url, params)
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as err:
-        print("HTTP Error: {err}")
-        print(err.args[0])
-        retry.append(params)
-        return None
-    except requests.exceptions.ConnectionError as err:
-        print(f"Connection error: {err}")
-        retry.append(params)
-        return None
-    except requests.exceptions.Timeout as err:
-        print(f"Timeout error: {err}")
-        retry.append(params)
-        return None
-    except requests.exceptions.RequestException as err:
-        print(f"request error: {err}")
-        retry.append(params)
-        return None
-
-    if response.status_code != 200:
-        print(f'something wrong')
-        retry.append(params)
-        return None
-
-    try:
-        print(f'Send_query status: {response.status_code}\t{response.text}')
-    except Exception as err:
-        print(f'send_query exception: {err}')
-        return None
-
-    # remove the encoding and doc type information before parsing with etree
-    xmlstring = response.text[response.text.find('.dtd">') + 6:]
-    xml = etree.fromstring(xmlstring)
-    if xml is None:
-        print(f'send_query: no xml document found {params}\n{xmlstring}')
-
-    # check if search term not found
-    notfound = xml.xpath('//PhraseNotFound')
-    if len(notfound):
-        print(f'not found: {xml}')
-        retry.append(params)
-        return None
-
-    return xml
-
-
 def send_query_jgi(tax, errors):
     """---------------------------------------------------------------------------------------------
-    send a single query to the jgi taxonomy server (usually you want to send in blocks, see
+    Deprecated. Not updated to query based on taxid
+    send a single query to the jgi taxonomy server (usually you want to
+    send in blocks, see
     send_query_block_jgi())
 
     :param tax: string      The stitle string from a blast search result
@@ -106,7 +51,7 @@ def send_query_jgi(tax, errors):
 
 def send_query_block_jgi(qlist, taxa):
     """---------------------------------------------------------------------------------------------
-    send a list of seqeunces to the bjgi taxonomy services as a single post query
+    send a list of sequences to the bjgi taxonomy services as a single post query
 
     :param qlist: list      taxonomic names from the stitle string from a blast search result
     :param taxa: dict       taxonomic information with blast taxa name as key; created by blast_read
@@ -148,189 +93,13 @@ def send_query_block_jgi(qlist, taxa):
         except Exception as err:
             taxstr = 'Error;Taxon_not_found'
 
-        # try:
-        #     taxstr = taxstr.replace(' ', '_')
-        #     if not taxstr:
-        #         taxstr = 'None'
-        #     taxa[query]['lineage'] = taxstr
-        #     if oldtlen != len(taxa):
-        #         # some queries will trigger multiple responses, particularly ones with /
-        #         # these queries are filtered in blast_read(), but there could be other
-        #         # names that also do it
-        #         print('Error:unknown_taxon attempting to extend taxa list. check filtering')
-        #         oldtlen = len(taxa)
-        ok_n += 1
-
-        # except Exception as err:
-        #     # any other errors
-        #     errstr = f'{err}'
-        #     taxa[query]['lineage'] = f'Error; {errstr.replace(' ', '_')}'
-
     return ok_n
-
-def send_query_block_jgi2(qlist, taxa):
-    """---------------------------------------------------------------------------------------------
-    send a list of seqeunces to the bjgi taxonomy services as a single post query
-
-    :param qlist: list        taxonomic names from the stitle string from a blast search result
-    :param taxa: dict       taxonomic information with blast taxa name as key; created by blast_read
-    :return: int            number of queries successfully translated
-    ---------------------------------------------------------------------------------------------"""
-    url_taxstr = 'https://taxonomy.jgi.doe.gov/name/simple/'
-    url_taxid = 'https://taxonomy.jgi.doe.gov/id/'
-    block = ','.join(str(taxid) for taxid in qlist)
-    query = url_taxid + block
-
-    response = None
-    j = None
-    try:
-        response = requests.post(query)
-        j = json.loads(response.text)
-    except Exception as err:
-        print(f'something goes wrong: {err}\n{response.text}')
-
-    ok_n = 0
-    oldtlen = len(taxa)
-    for query in j:
-
-        try:
-            taxinfo = j[query]
-            taxstr = ';'.join([taxinfo[l]['name'] for l in reversed(taxinfo.keys())
-                               if l not in ('level', 'mononomial', 'name', 'tax_id')])
-        except TypeError:
-            taxstr = 'Error;Taxon_not_found'
-
-        try:
-            taxstr = taxstr.replace(' ', '_')
-            if not taxstr:
-                taxstr = 'None'
-            taxa[query]['lineage'] = taxstr
-            if oldtlen != len(taxa):
-                # some queries will trigger multiple responses, particularly ones with /
-                # these queries are filtered in blast_read(), but there could be other
-                # names that also do it
-                print('Error:unknown_taxon attempting to extend taxa list. check filtering')
-                oldtlen = len(taxa)
-            ok_n += 1
-
-        except Exception as err:
-            # any other errors
-            errstr = f'{err}'
-            taxa[query]['lineage'] = f'Error; {errstr.replace(' ', '_')}'
-
-    return ok_n
-
-
-def get_taxinfo(xml):
-    """---------------------------------------------------------------------------------------------
-    Not used
-    look up the target taxonomic name at the NCBI taxonomy database
-    :param xml: etree       parsed xml response
-    :return: int            NCBI TaxID
-    ---------------------------------------------------------------------------------------------"""
-    taxidlist = xml.xpath('//IdList/Id')
-
-    taxid = None
-    if taxidlist:
-        taxid = int(taxidlist[0].text)
-        # print(f'taxid:{taxid}')
-
-    if not taxid:
-        print(f'taxid:{taxid}\nxml:[{xml.text}]')
-    return taxid
-
-
-def get_webenv(xml):
-    """---------------------------------------------------------------------------------------------
-    Not used
-    get the webenv ID and QueryKey from the xml
-
-    :param xml: etree       parsed xml response
-    :return: str, int       webenvID, QueryKey
-    ---------------------------------------------------------------------------------------------"""
-    webenv = xml.xpath('//WebEnv')[0].text
-    querykey = int(xml.xpath('//QueryKey')[0].text)
-
-    return webenv, querykey
-
-
-def get_lineage(xml):
-    """---------------------------------------------------------------------------------------------
-    Not used
-    get the lineage from the NCBI efetch xml result
-
-    :param xml:
-    :return:
-    ---------------------------------------------------------------------------------------------"""
-    lineage = 'unknown'
-
-    try:
-        lineage = xml.xpath('//Lineage')[0].text
-    except Exception as err:
-        print(f'{xml.text}\n{err}')
-
-    return lineage
-
-
-def get_lineage_from_taxonomydb(tax, retry):
-    """---------------------------------------------------------------------------------------------
-    Not used
-    Give a taxonomy string such as Solanum commersonii or Solanoideae, get the taxonomic lineage
-    from the NCBI taxonomy database
-
-    This code works but the NCBI servers generate too many errors to use it for thousands of queries
-
-    :param tax: string      taxonomic description
-    :param retry: list      list for failed queries (search parameters are stored)
-    :return: string         compleate lineage (comma separated)
-    ---------------------------------------------------------------------------------------------"""
-    api_key = 'f6646b2e3140e28ec200c579b03f21759107'
-    ncbi = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
-    efetch = 'efetch.fcgi'
-    esearch = 'esearch.fcgi?'
-
-    # query taxonomy db using taxonomic phrase from blast result
-    params = {'api_key':    api_key,
-              'db':         'taxonomy',
-              'field':      'Organism',
-              'term':       quote_plus(tax.strip()),
-              'usehistory': 'y'}
-    xml = send_query(ncbi + esearch, params, retry)
-
-    # if xml is None, the query did not succeed, it is stored in retry, skip to next query
-    if xml is None:
-        return None
-
-    if xml.findtext('PhraseNotFound'):
-        print(f'1 Not found ({tax}). \n{xml}')
-
-    taxid = get_taxinfo(xml)
-    webenv, querykey = get_webenv(xml)
-
-    # retrieve full information from taxonomy db
-
-    params = {'api_key':    '645c588aed8ff727e6ed8059d10e7db2ea09',
-              'db':         'taxonomy',
-              'TaxID':      taxid,
-              'usehistory': 'y',
-              'WebEnv':     webenv,
-              'query_key':  querykey}
-    xml = send_query(ncbi + efetch, params, retry)
-    if xml is None:
-        return None
-
-    lineage = get_lineage(xml)
-    if lineage == 'unknown':
-        print(f'taxid:{taxid}\nxml:|{xml.text}|')
-
-    return lineage
 
 
 def blast(blastfile):
     """---------------------------------------------------------------------------------------------
     generator that returns one blast result at each call
-    format
-
+    format:
     # TRINITY_DN644_c0_g2_i1	3590	894	535	UniRef90_M1BIC5	388	269	388	120	100	624	4.21e-68	UniRef90_M1BIC5 Ninja-family protein n=2 Tax=Solanum TaxID=4107 RepID=M1BIC5_SOLTU
     #  qseqid qlen qstart qend sseqid slen sstart send length pident score evalue stitle
     :param blastfile:   string    path to blast search result
@@ -408,38 +177,9 @@ def blast_read(blastfile, trinity_level=3):
             taxa[taxid]['taxstr'].append(taxstr)
         print(f'{nline:6d}\t{taxid}\t{taxstr}')
 
-        # debug
-        if nline > 10000:
-            break
-        # save the taxid and taxstr for getting lineage and assigning to taxonomic groups
-
-        # # trim some unecessary/confusing parts from the taxonomy string
-        # if tax.find('(') != -1:
-        #     # trim off information in parentheses
-        #     # this information is usually not part of the actual taxonomic name
-        #     tax = tax[:tax.find('(') - 1]
-        #     # print(f'\t=> trimmed: {tax}')
-        #
-        # # convert spaces to underline
-        # tax = tax.strip().replace(' ', '_')
-        # tax = tax.replace('/', '_')
-        #
-        # # remove strain information (sometimes causes multiple returns from taxonomy server)
-        # strain = tax.find('_str.')
-        # if strain > -1:
-        #     tax = tax[:strain]
-        # # sp = tax.find('_sp.')
-        # # if sp > -1:
-        # #     tax = tax[:sp]
-        # uncultured = tax.find('uncultured_')
-        # if uncultured > -1:
-        #     tax = tax[uncultured + 11:]
-        # unclassifed = tax.find('unclassified_')
-        # if unclassifed > -1:
-        #     tax = tax[unclassifed + 13:]
-        # # if tax.find('str.')>-1:
-        # #     print(tax)
-
+        # # debug
+        # if nline > 10000:
+        #     break
 
     print(f'\nblast results processed: {nline}')
     print(f'unique taxa {len(taxa)}')
@@ -513,27 +253,6 @@ def trinity_filter_id(tid, level=3, remove_trinity=True):
 
     field = tid.split('_')
     return '_'.join(field[first:last])
-
-
-def group_assign(merged):
-    """---------------------------------------------------------------------------------------------
-    assign the merged isoforms to a group based on the counts of the groups of each constituent
-    isoform. The rules are:
-    1) assign as plant if there are any plants
-    2) assign as highest count
-    3) if it's a tie, assign as other
-
-    :param merged: list of Cluster      annotated merged clusters
-    :return: string                     count of number assigned to each group
-    ---------------------------------------------------------------------------------------------"""
-    count = defaultdict(int)
-    group = 'other'
-    for iso in merged:
-        if iso['group'] == 'plant':
-            count['plant'] += 1
-            continue
-
-    return count
 
 
 def group_choose(obs_group):
