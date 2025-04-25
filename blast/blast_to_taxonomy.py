@@ -76,7 +76,7 @@ def send_query_block_jgi(qlist, taxa):
     oldtlen = len(taxa)
     i = 0
     for query in j:
-        iquery =int(query)
+        iquery = int(query)
         if qlist[i] != iquery:
             print(f'query/response mismatch')
         i += 1
@@ -89,7 +89,7 @@ def send_query_block_jgi(qlist, taxa):
             continue
         try:
             taxa[iquery]['lineage'] = ';'.join([taxinfo[l]['name'] for l in reversed(taxinfo.keys())
-                           if l not in ('level', 'mononomial', 'name', 'tax_id')])
+                                                if l not in ('level', 'mononomial', 'name', 'tax_id')])
         except Exception as err:
             taxstr = 'Error;Taxon_not_found'
 
@@ -177,9 +177,9 @@ def blast_read(blastfile, trinity_level=3):
             taxa[taxid]['taxstr'].append(taxstr)
         print(f'{nline:6d}\t{taxid}\t{taxstr}')
 
-        # # debug
-        # if nline > 10000:
-        #     break
+        # debug
+        if nline > 10000:
+            break
 
     print(f'\nblast results processed: {nline}')
     print(f'unique taxa {len(taxa)}')
@@ -195,7 +195,7 @@ def blast_trinity_cluster(blasthits):
     :param blasthits: list          dict of each blasthit from the search, see blast_read()
     :return: dict                   key is truncated trinity ID, value is list of hits
     ---------------------------------------------------------------------------------------------"""
-    cluster = defaultdict(lambda: {'group':'', 'member':[]})
+    cluster = defaultdict(lambda: {'group': '', 'member': []})
     for hit in blasthits:
         cluster[hit['truncated_id']]['member'].append(hit)
 
@@ -268,17 +268,20 @@ def group_choose(obs_group):
     ---------------------------------------------------------------------------------------------"""
     gbest = ''
     n = 0
-    
+
     for g in sorted(obs_group, key=lambda g: obs_group[g], reverse=True):
+        if 'plant' in obs_group and obs_group['plant']<len(obs_group):
+            print('stop here')
         if g == 'plant':
             return 'plant'
 
-        if obs_group[g] == n:
+        if obs_group[g] > n:
+            # largest group comes first
+            gbest = g
+            n = obs_group[g]
+        elif obs_group[g] == n:
+            # two groups are tied
             gbest = 'other'
-        else:
-            if obs_group[g] > n:
-                gbest = g
-                n = obs_group[g]
 
     return gbest
 
@@ -292,12 +295,12 @@ if __name__ == '__main__':
 
     # define groups - each groups is defined by one taxonomic term, anything undefined is 'other'
     # it is important to process the most specific keywords first, gorder is the processing order
-    group = {'error': 'Error', 'plant': 'Viridiplantae', 'virus': 'Viruses', 
-            'arthropod': 'Arthropoda', 'fungi': 'Fungi', 'bacteria': 'Bacteria', 
-            'opisthokonta':'Opisthokonta', 'sar':'Sar', 'discoba':'Discoba', 
-            'amoebozoa': 'Amoebozoa', 'other':'Other'}
-    gorder = ['error', 'plant', 'other', 'virus', 'arthropod', 'fungi', 'bacteria', 
-            'opisthokonta', 'sar', 'discoba', 'amoebozoa', 'other']
+    group = {'error':        'Error', 'plant': 'Viridiplantae', 'virus': 'Viruses',
+             'arthropod':    'Arthropoda', 'fungi': 'Fungi', 'bacteria': 'Bacteria',
+             'opisthokonta': 'Opisthokonta', 'sar': 'Sar', 'discoba': 'Discoba',
+             'amoebozoa':    'Amoebozoa', 'other': 'Other'}
+    gorder = ['error', 'plant', 'other', 'virus', 'arthropod', 'fungi', 'bacteria',
+              'opisthokonta', 'sar', 'discoba', 'amoebozoa', 'other']
 
     good_n = 0
     bad_n = 0
@@ -368,12 +371,14 @@ if __name__ == '__main__':
             print(f'\n! group:{group_old}\tsequences:{groupcount[group_old]}')
 
         good.write(f"!\t{c}\t{trinity_cluster[c]['group']}\t{len(trinity_cluster[c]['member'])}\n")
-        print( f"!\t{c}\t{trinity_cluster[c]['group']}\t{len(trinity_cluster[c]['member'])}")
+        print(f"!\t{c}\t{trinity_cluster[c]['group']}\t{len(trinity_cluster[c]['member'])}")
         for m in trinity_cluster[c]['member']:
             lineage = taxa[m['taxid']]['lineage']
             nout += 1
-            print(f"{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['taxstr']}\t{m['description']}")
-            good.write(f"{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['taxstr']}\t{m['description']} {lineage[:25]}\n")
+            print(
+                f"{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['taxstr']}\t{m['description']}")
+            good.write(
+                f"{m['qid']}\t{trinity_cluster[c]['group']}\t{m['sid']}\t{m['evalue']}\t{m['taxstr']}\t{m['description']} {lineage[:25]}\n")
 
     print(f'\n{nout} results written to {goodfile}')
     good.close()
