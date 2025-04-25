@@ -97,7 +97,7 @@ def setup_argparse():
                              )
 
     commandline.add_argument('--idcol',
-                             help=f'Column of sequence ID in selection list ({idcol_default}',
+                             help=f'Column of sequence ID in selection list ({idcol_default})',
                              type=int,
                              default=idcol_default
                              )
@@ -254,6 +254,10 @@ def idlist_filter(args, idlist):
     :param idlist: list         IDs from input selection list
     :return: None
     ---------------------------------------------------------------------------------------------"""
+    if not args.trimid:
+        # no trimming regex
+        return
+
     trimre = args.trimid
     for i in range(len(idlist)):
         idlist[i] = trimre.sub('', idlist[i])
