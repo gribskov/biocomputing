@@ -60,6 +60,7 @@ def setup_argparse():
     # defaults
     # out_default = sys.stdout
     idcol_default = 0
+    trinity_level_default = 0
     minlen_default = 0
     linelen_default = 100
     list_default = 'list.txt'
@@ -101,6 +102,11 @@ def setup_argparse():
                              type=int,
                              default=idcol_default
                              )
+
+    commandline.add_argument('--trinity',
+                             help=f'Trim database ids at specified level, zero means do not trim'
+                                  f'({trinity_level_default}).',
+                             default='trinity_level_default')
 
     commandline.add_argument('--evalue',
                              help=f'Filter blast search by e-value: max_evalue,column ({evalue_default}).',
@@ -264,6 +270,22 @@ def idlist_filter(args, idlist):
 
     return None
 
+def trinity_filter(idstr, level):
+    """---------------------------------------------------------------------------------------------
+    return a trinity id truncated at level. if level==0 return the original ID
+    level   id
+        4   TRINITY_DN11933_c17_g1_i1
+        3   TRINITY_DN11933_c17_g1
+        2   TRINITY_DN11933_c17
+        1   TRINITY_DN11933
+
+    :param idstr: str   trinity ID
+    :param level: int   truncation level
+    :return: str        truncated ID
+    ---------------------------------------------------------------------------------------------"""
+    field = idstr.split('_')
+    return '_'.join(field[:level+1])
+
 
 def blast_read(args, verbose=True):
     """---------------------------------------------------------------------------------------------
@@ -368,7 +390,8 @@ if __name__ == '__main__':
             # if blastfilter and fasta.id in blastlist:
             #     continue
 
-            if fasta.id in idlist or not idlist:
+            id = trinity_filter(fasta.id, args.trinity_level)
+            if id in idlist or not idlist:
                 # desired selected sequences
                 if args.trimdoc:
                     fasta.trimDocByRegex(args.trimdoc)
