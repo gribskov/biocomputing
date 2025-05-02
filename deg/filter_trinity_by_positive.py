@@ -12,7 +12,7 @@ if __name__ == '__main__':
     basefile = 'data/selected.txt'
     posfile = 'data/goodset.out'
 
-    # read positive file into a list of valid IDs, these are the taxonomicall valid trinity IDs
+    # read positive file into a list of valid IDs, these are the taxonomically valid trinity IDs
     positive = open(posfile, 'r')
     valid_id = []
     for line in positive:
