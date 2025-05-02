@@ -70,8 +70,8 @@ class Feature:
             elif qid.startswith('TRIN'):
                 # trinity ID, remove TRINITY_ and isoform
                 fid = qid.replace('TRINITY_', '')
-                isopoint = fid.find('_i')
-                fid = fid[:isopoint]
+            #    isopoint = fid.find('_i')
+            #    fid = fid[:isopoint]
 
             if fid not in ids:
                 ids[fid] = 0
@@ -328,14 +328,14 @@ if __name__ == '__main__':
 
         f.get_name_from_features()
 
-        gtf.write(f'{f.id}\tmerge_blast_ranges\tregion\t{f.begin}\t{f.end}\t')
-        gtf.write(f'{len(f.source)}\t{strand}\t.\tregion_id "{f.label}";\n')
+        gtf.write(f'{f.id}\tmerge_blast_ranges\ttranscript\t{f.begin}\t{f.end}\t')
+        gtf.write(f'{len(f.source)}\t{strand}\t.\ttranscript_id "{f.label}";\n')
         region_n += 1
 
         for s in sorted(f.source, key=lambda s: s['sbegin']):
             # don't need to sort by sequence because this has been done when they were merged
             gtf.write(f"{f.id}\tmerge_blast_ranges\tsource\t{s['sbegin']}\t{s['send']}\t")
-            gtf.write(f'.\t{strand}\t.\tregion_id "{f.label}"; source_id "{s["qid"]}";')
+            gtf.write(f'.\t{strand}\t.\ttranscript_id "{f.label}"; source_id "{s["qid"]}";')
             gtf.write(f'evalue {s["evalue"]}; pid {s["pid"]:.1f}; allen {s["allen"]};\n')
 
     gtf.close()
