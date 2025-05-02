@@ -106,7 +106,8 @@ def setup_argparse():
     commandline.add_argument('--trinity',
                              help=f'Trim database ids at specified level, zero means do not trim'
                                   f'({trinity_level_default}).',
-                             default='trinity_level_default')
+                             type=int, 
+                             default=trinity_level_default)
 
     commandline.add_argument('--evalue',
                              help=f'Filter blast search by e-value: max_evalue,column ({evalue_default}).',
@@ -166,7 +167,7 @@ def report_args(args):
     ---------------------------------------------------------------------------------------------"""
     now = time.asctime(time.localtime(time.time()))
     sys.stderr.write(f'fasta_select.py {now}\n')
-    sys.stderr.write(f'\tFastA filet: {args.input_filename}\n')
+    sys.stderr.write(f'\tFastA file: {args.input_filename}\n')
     if args.format == 'list':
         sys.stderr.write(f'\tSelection IDs read from list: {args.list}\n')
     if args.format == 'blast':
@@ -283,6 +284,9 @@ def trinity_filter(idstr, level):
     :param level: int   truncation level
     :return: str        truncated ID
     ---------------------------------------------------------------------------------------------"""
+    if level == 0:
+        return idstr
+
     field = idstr.split('_')
     return '_'.join(field[:level+1])
 
@@ -390,7 +394,7 @@ if __name__ == '__main__':
             # if blastfilter and fasta.id in blastlist:
             #     continue
 
-            id = trinity_filter(fasta.id, args.trinity_level)
+            id = trinity_filter(fasta.id, args.trinity)
             if id in idlist or not idlist:
                 # desired selected sequences
                 if args.trimdoc:
