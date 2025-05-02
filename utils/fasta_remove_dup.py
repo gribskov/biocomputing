@@ -75,7 +75,7 @@ if __name__ == '__main__':
                 n += 1
                 id = f['id'] + f'.{n}'
             fastaout.write(f">{id} {f['doc']}\n{f['seq']}")
-            seqs['id'] = f['len']
+            seqs[id] = f['len']
 
         else:
             fastaout.write(f">{f['id']} {f['doc']}\n{f['seq']}")
