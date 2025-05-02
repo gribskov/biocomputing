@@ -177,9 +177,9 @@ def blast_read(blastfile, trinity_level=3):
             taxa[taxid]['taxstr'].append(taxstr)
         print(f'{nline:6d}\t{taxid}\t{taxstr}')
 
-        # debug
-        if nline > 10000:
-            break
+        ## debug
+        #if nline > 10000:
+        #    break
 
     print(f'\nblast results processed: {nline}')
     print(f'unique taxa {len(taxa)}')
