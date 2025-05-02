@@ -1,6 +1,6 @@
 """=================================================================================================
-trinity predicted transcripts may be very large due to the presence of many short predicted
-transcripts, and transcripts that have few or no counts.
+the number of trinity predicted transcripts may be very large due to the presence of many short
+predicted transcripts, and transcripts that have few or no counts.
 
 Make a histogram based on salmon counts
 cut at a minimum length and merge counts at the desired level: gene, component, or bundle
