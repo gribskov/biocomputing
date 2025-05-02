@@ -66,7 +66,7 @@ def blast_query_block(blast):
             qinfo['genera'].append(taxterm[0])
         else:
             yield qinfo
-            query_old = qinfo['query']
+            query_old = query
             qinfo['query'] = query
             qinfo['genera'] = [taxterm[0]]
 
@@ -80,8 +80,8 @@ if __name__ == '__main__':
     badfile = 'data/tax_bad.txt'
 
     good = read_tsv(goodfile)
-    # manually add
-    good['Potato'] = {'species': ['species'], 'taxid': [4081]}
+    # manually add. No this is Potato Virus
+    # good['Potato'] = {'species': ['species'], 'taxid': [4081]}
 
     goodset = open('goodset.out', 'w')
     badset = open('badset.out', 'w')
