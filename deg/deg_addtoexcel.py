@@ -66,7 +66,7 @@ def blast_read(data, rownames, maxeval=1e-5, nhits=3):
             hitstr = f'{evalue}  '
             hitstr += f'q:{field[2]}:{field[3]}/{field[1]}  '
             hitstr += f's:{field[6]}:{field[7]}/{field[5]}   '
-            hitstr += f'{field[12][:field[12].find(' TaxID')].replace('Tax=', '')}'
+            hitstr += f"{field[12][:field[12].find(' TaxID')].replace('Tax=', '')}"
 
             unsorted.append([evalue, hitstr])
 
