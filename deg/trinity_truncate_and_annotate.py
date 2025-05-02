@@ -20,12 +20,13 @@ import sys
 from collections import defaultdict
 
 
-def annotation_read():
+def annotation_read(fname):
     """---------------------------------------------------------------------------------------------
     read the annotation file
-    :return:
+    :param fname: str       path to file with annotation data
+    :return: dict           indexed by truncated trinity id
     ---------------------------------------------------------------------------------------------"""
-    infile = open(sys.argv[1], 'r')
+    infile = open(fname, 'r')
     anno = defaultdict(lambda: defaultdict(int))
     for line in infile:
         if line.startswith('!'):
@@ -39,12 +40,29 @@ def annotation_read():
     return anno
 
 
-def count_read():
+def count_read(fname):
     """---------------------------------------------------------------------------------------------
     read the annotation file
-    :return:
+
+    :param fname: str       path to file with count data
+    :return: dict           indexed by truncated trinity id
     ---------------------------------------------------------------------------------------------"""
-    pass
+    infile = open(fname, 'r')
+
+    # get number of columns from header
+    field = infile.readline().split()
+    ncol = len(field) - 1
+
+    count = defaultdict(lambda: [0 for _ in range(ncol)])
+    for line in infile:
+        field = line.rstrip().split('\t')
+        tid = trinity_truncate(field[0], 3)
+
+        for i in range(ncol):
+            count[tid][i] += round(float(field[i + 1]), 1)
+
+    infile.close()
+    return count
 
 
 def trinity_truncate(idstr, level=3):
@@ -70,7 +88,54 @@ def trinity_truncate(idstr, level=3):
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    anno = annotation_read()
-    count = count_read()
+    anno = annotation_read(sys.argv[1])
+    print(f'annotations read from {sys.argv[1]}: {len(anno)}')
+    count = count_read(sys.argv[2])
+    print(f'counts read from {sys.argv[2]}: {len(anno)}')
 
+    out = open(sys.argv[3], 'w')
+
+    virus = defaultdict(int)
+    for tid in anno:
+        for v in anno[tid]:
+            virus[v] += anno[tid][v]
+
+    print(f'\nCommon virus labels')
+    out.write(f'\nCommon virus labels\n')
+    n = 0
+    ascii = 97
+    common = defaultdict(lambda: '')
+    for v in sorted(virus, key=lambda v: virus[v], reverse=True):
+    # print(f'{v}: {virus[v]}')
+        common[v] = chr(ascii)
+        n += 1
+        if n > 6:
+            ascii = 111
+        else:
+            print(f'{common[v]}\t {v}')
+            out.write(f'{common[v]}\t {v}\n')
+        ascii += 1
+
+    print()
+    out.write('\n')
+
+    rowsum = defaultdict(int)
+    for tid in count:
+        rowsum[tid] = sum(count[tid])
+
+    for tid in sorted(rowsum, key=lambda k: rowsum[k], reverse=True):
+    # construct an abbreviated annotation string using the common virus
+    # abbreviations from above
+        vstr = ''
+        for v in sorted(anno[tid], key=lambda x: anno[tid][x], reverse=True):
+            vstr += f'{common[v]}{anno[tid][v]}'
+
+        values = ''
+        for v in count[tid]:
+            values += f'\t{round(v, 1)}'
+
+        print(f'{tid}\t{vstr}\t{round(rowsum[tid], 1)}\t{values}')
+        out.write(f'{tid}\t{vstr}\t{round(rowsum[tid], 1)}\t{values}\n')
+
+    out.close()
     exit(0)
