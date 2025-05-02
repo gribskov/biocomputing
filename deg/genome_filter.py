@@ -203,8 +203,8 @@ if __name__ == '__main__':
     print(f'blast search (trinity vs genome): {sys.argv[2]}')
 
     # find all the query IDs that have hits (found) and do not have hits (nohits)
-    # found, nohits = blastfmt7_ids(sys.argv[2])
-    found, nohits = diamond_unal(sys.argv[2])
+    found, nohits = blastfmt7_ids(sys.argv[2])
+    # found, nohits = diamond_unal(sys.argv[2])
     print(f'trinity ids: {len(found) + len(nohits)}')
     print(f'trinity ids with hits: {len(found)}')
     print(f'trinity ids with no hits {len(nohits)}')
