@@ -4,7 +4,7 @@ breed [ sharks shark ]
 fishes-own [ love hate backstab panic-amt energy age ]
 
 ; globals defined in interface
-;    fish_n
+;    fish_n view_limit
 globals [ fishcount maxpanic mutation_rate energy_increment fishspeed sharkspeed]
 
 ;--------------------------------------------------------------------------------
@@ -13,7 +13,7 @@ to set-parameters
   set maxpanic  100
   set mutation_rate 0.1
   set energy_increment 0.04
-  set fishspeed 0.5
+  set fishspeed 0.9
   set sharkspeed 1.0
 end
 
@@ -68,6 +68,11 @@ to make-fish
     set backstab ( random-float 180 )
     set panic-amt 0.25
     set energy 10
+
+    let r 255 * (love + 1) / 2
+    let g 255 * hate
+    let b 255 * panic-amt
+    set color rgb r g b
 end
 
 ;--------------------------------------------------------------------------------
@@ -184,6 +189,10 @@ to breed-fish
         if panic-amt < 0.0 [ set panic-amt 0.0 ]
 
       ]
+      let r 255 * (love + 1) / 2
+      let b 255 * hate
+      let g 255 * panic-amt
+      set color rgb r g b
       fd fishspeed
     ]
   ]
