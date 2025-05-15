@@ -1,4 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Conway's game of life
 ; active patches are red; neighboring patches are colored according to the
 ; number of active patches
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -18,9 +19,9 @@ to go
   ][
     ask patches [set nbors 0]
     count-neighbors
-    color-patches
-    update-cells
+    update-cells-conway
     tick
+    if single-step [ stop ]
   ]
 
 end
@@ -57,34 +58,29 @@ to count-neighbors
   ]
 end
 
-to color-patches
-  ask patches [
-    ifelse pcolor = red
-      [ ]
-      [ set pcolor scale-color green nbors 0 8 ]
-  ]
-end
-
-to update-cells
+;--------------------------------------------------------------------------------
+; conway's original rules
+; if you have less than 2 or greater than 3 neighbors you die
+; empty patches with 3 neighbors become a new cell
+;--------------------------------------------------------------------------------
+to update-cells-conway
   ask patches [
     ifelse nbors > 1 and nbors < 4
-      [ ifelse pcolor = red
-        [ ]
+      [ if pcolor != red
         [ if nbors > 2 [ set pcolor red ] ]
       ]
-      [set pcolor scale-color green nbors 0 8 ]
+      [set pcolor scale-color blue nbors 0 8 ]
     ]
-
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-647
-448
+1023
+824
 -1
 -1
-13.0
+5.0
 1
 10
 1
@@ -94,10 +90,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--16
-16
--16
-16
+-80
+80
+-80
+80
 0
 0
 1
@@ -148,6 +144,17 @@ NIL
 NIL
 NIL
 1
+
+SWITCH
+32
+151
+149
+184
+single-step
+single-step
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
