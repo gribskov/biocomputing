@@ -18,6 +18,8 @@ Maximum sum after some operations (modulo 1_000_000_007)
 
 Michael Gribskov     19 May 2025
 ================================================================================================="""
+stack = []
+seen = []
 
 
 def do_test(ns, expected):
@@ -31,9 +33,36 @@ def do_test(ns, expected):
     return
 
 
-def divide_and_multiply(ns):
+def parse(raw):
+    """---------------------------------------------------------------------------------------------
+
+    :param raw:
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    div = []
+    mult = []
+    for i in range(len(raw)):
+        if (raw[i] % 2):
+            div.append(i)
+        mult.append(i)
+
+    def divide_and_multiply(ns):
+
     # Let the force be with you, warrior
-    pass
+    stack.append(ns)
+    total = 0
+    while stack:
+        current = stack.pop()
+        current.sort()
+        test = sum(current)
+        if test > total:
+            total = test
+
+        if current not in seen:
+            seen.append(current)
+            even, odd = parse(current)
+
+            #TODO add mult div combos to stack
 
 
 # --------------------------------------------------------------------------------------------------
