@@ -18,8 +18,6 @@ Maximum sum after some operations (modulo 1_000_000_007)
 
 Michael Gribskov     19 May 2025
 ================================================================================================="""
-stack = []
-seen = []
 
 
 def do_test(ns, expected):
@@ -42,27 +40,73 @@ def parse(raw):
     div = []
     mult = []
     for i in range(len(raw)):
-        if (raw[i] % 2):
+        if (not raw[i] % 2):
             div.append(i)
         mult.append(i)
 
-    def divide_and_multiply(ns):
+    return div, mult
 
-    # Let the force be with you, warrior
+
+def divide_and_multiply_stack(ns):
+    if len(ns) < 2:
+        # must have two or more digits
+        return sum(ns)
+
+    # div = None
+    # mult = None
+    stack = []
+    seen = []
+    ns.sort()
     stack.append(ns)
-    total = 0
+    maxsum = 0
     while stack:
         current = stack.pop()
-        current.sort()
-        test = sum(current)
-        if test > total:
-            total = test
+        maxsum = max(maxsum, sum(current))
+        print(f'stack:{len(stack)}\t{current}\t{maxsum}')
 
-        if current not in seen:
+        if current in seen:
+            continue
+        else:
             seen.append(current)
-            even, odd = parse(current)
+            div, mult = parse(current)
+            if len(div) == 0:
+                # cannot apply divide and multiply operation
+                continue
 
-            #TODO add mult div combos to stack
+            # add mult div combos to stack
+            for d in div:
+                tmp = current[:]
+                tmp[d] = current[d] // 2
+                save = tmp[:]
+                for m in mult:
+                    if m == d:
+                        continue
+                    tmp[m] = current[m] * 2
+                    tmp.sort()
+                    if tmp.sort() not in seen:
+                        stack.append(tmp)
+                    tmp = save
+
+    return maxsum
+
+
+def divide_and_multiply(ns):
+    """---------------------------------------------------------------------------------------------
+    the largest sum is the largest non-2 factor times the product of all the 2-factors, plus the
+    other non-2 factors
+
+    :param ns: list of int      starting list of numbers to maximize
+    :return: int                largest sum of positions in ns mod 1_000_000_007
+    ---------------------------------------------------------------------------------------------"""
+    multiplier = 1
+    for i in range(len(ns)):
+        while not ns[i] % 2:
+            ns[i] = ns[i] // 2
+            multiplier *= 2
+
+    ns.sort()
+    ns[-1] *= multiplier
+    return sum(ns) % 1_000_000_007
 
 
 # --------------------------------------------------------------------------------------------------
