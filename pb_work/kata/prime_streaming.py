@@ -20,8 +20,8 @@ class Primes:
 
                 for val in stack[i]:
                     stack[val + i].append(val)
-                del stack[i]
-            #                 stack.pop(i)
+                # del stack[i]
+                stack.pop(i)
 
             else:
                 # prime, add multiple value and increment to stack
