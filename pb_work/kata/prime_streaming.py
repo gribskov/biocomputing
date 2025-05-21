@@ -14,26 +14,24 @@ class Primes:
         stack = defaultdict(lambda: [])
         yield 2
         yield 3
-        stack[6] = [3]
+        stack[9] = [6]
+        next_composite = 9
         i = 5
         while True:
-            next_composite = min(stack)
+
+            while i >= next_composite:
+                for val in stack[next_composite]:
+                    stack[val + next_composite].append(val)
+                del stack[next_composite]
+                next_composite = min(stack)
+                i += 2
+
             while i < next_composite:
-                # add primes up to the next composite
+                # emit prime
                 yield i
-                # stack[i * i].append(i * 2)
-                stack[i * 2].append(i)
+                stack[i * i].append(i * 2)
                 i += 2
 
-
-            # update stack with composite
-            for val in stack[next_composite]:
-                stack[val + next_composite].append(val)
-            del stack[next_composite]
-            if i == next_composite:
-                i += 2
-
-            # sys.stderr.write(f'{i}  min={min(stack)}\n')
 
         return
 
@@ -51,7 +49,7 @@ def verify(from_n, *vals):
             ok = False
             break
 
-    # print(f'test:{from_n}:{','.join(str(v) for v in vals)}\t{ok}')
+    print(f'test:{from_n}:{','.join(str(v) for v in vals)}\t{ok}')
 
 elapse = 0.0
 elapse_min = 10000
