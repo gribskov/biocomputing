@@ -13,27 +13,98 @@ class Primes:
     def stream():
         stack = defaultdict(lambda: [])
         yield 2
-        yield 3
-        stack[9] = [6]
-        next_composite = 9
-        i = 5
+        i = 3
         while True:
+            if i in stack:
+                # not prime, remove from stack and replace with incremented
 
-            while i >= next_composite:
-                for val in stack[next_composite]:
-                    stack[val + next_composite].append(val)
-                del stack[next_composite]
-                next_composite = min(stack)
-                i += 2
+                for val in stack[i]:
+                    stack[val + i].append(val)
+                del stack[i]
+            #                 stack.pop(i)
 
-            while i < next_composite:
-                # emit prime
+            else:
+                # prime, add multiple value and increment to stack
                 yield i
                 stack[i * i].append(i * 2)
-                i += 2
 
+            i += 2
+            # sys.stderr.write(f'{i}  min={min(stack)}\n')
 
         return
+
+
+@staticmethod
+def stream4():
+    stack = defaultdict(lambda: [])
+    yield 2
+    i = 3
+    while True:
+        if i in stack:
+            # not prime, remove from stack and replace with incremented
+
+            for val in stack[i]:
+                stack[val + i].append(val)
+        #                 del stack[i]
+        #                 stack.pop(i)
+
+        else:
+            # prime, add multiple value and increment to stack
+            yield i
+            stack[i * i].append(i * 2)
+
+        i += 2
+        # sys.stderr.write(f'{i}  min={min(stack)}\n')
+
+    return
+
+
+@staticmethod
+def stream3():
+    stack = defaultdict(lambda: [])
+    yield 2
+    i = 3
+    while True:
+        #             print(i, file=sys.stderr, flush=True)
+        #             print(f'{i}\t{repr(stack)}:', file=sys.stderr)
+        #             found = True
+        if i in stack:
+            # not prime, remove from stack and replace with incremented
+            #                 print(f'{i}\t{stack[i]}\t{stack}:', file=sys.stderr)
+
+            for val in stack[i]:
+                stack[val + i].append(val)
+            del stack[i]
+        #                 stack.pop(i)
+
+        else:
+            # prime, add multiple value and increment to stack
+            yield i
+            stack[i * i].append(i * 2)
+
+        i += 2
+        sys.stderr.write(f'{i}  min={min(stack)}\n')
+
+    return
+
+
+def stream2():
+    yield 2
+    yield 3
+
+    queue = []
+    next_composite, skip = 9, 6
+
+    for odd_number in count(5, 2):
+        if odd_number < next_composite:
+            yield odd_number
+            heappush(queue, (odd_number ** 2, 2 * odd_number))
+
+        else:
+            while odd_number == next_composite:
+                next_composite, skip = heappushpop(queue, (next_composite + skip, skip))
+
+        sys.stderr.write(f'{odd_number}\n')
 
 
 # --------------------------------------------------------------------------------------------------
