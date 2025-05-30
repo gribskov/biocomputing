@@ -1,0 +1,36 @@
+class CustomInt(int):
+    def __call__(self, v):
+        print(f'v={v}')
+        return CustomInt(self + v)
+
+def add(v):
+    return CustomInt(v)
+
+
+def aaa():
+    current = yield
+    while True:
+        value = yield current
+        current = value + current
+
+def abb(*args):
+    return sum(args)
+
+print(f'add{add(1)(2)}')
+# print(f'aaa{abb(1)(2)}')
+
+l = 3
+alpha = 'ab'
+c = [alpha[i%2] for i in range(l)]
+print(c)
+
+n = 5
+c = 'abcdef'
+o = []
+for i in range(n):
+
+    # o.append(min(i,n-i-1)%len(c))
+    print(f'i:{i}  i//(n//2):{i//(n//2)}  mod(2i,n):{i%n//2}')
+    o.append(i - i//n//2*i*2%n)
+print(o)
+

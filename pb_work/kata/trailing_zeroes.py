@@ -36,7 +36,7 @@ def count_factors(num, factors):
     for each factor in the base , count how many occur in num
     :param num: int                 number to generate factorial
     :param factors: defaultdict     count of prime factors in base
-    :return: defayultdict           count of base factors in num
+    :return: defaultdict           count of base factors in num
     """
     count = defaultdict(int)
     for f in factors:
