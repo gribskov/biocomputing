@@ -52,6 +52,7 @@ def blast_read(data, rownames, maxeval=1e-5, nhits=3):
     for sid, hitlist in blast_get_block(data):
         if sid not in rownames:
             continue
+        print(f'{sid}\t{hitlist}')
 
         # split and assemble the desired data
         unsorted = []
@@ -87,6 +88,7 @@ def blast_read(data, rownames, maxeval=1e-5, nhits=3):
         selected[sid] = [e_lowest, anno]
 
     df = pd.DataFrame.from_dict(selected, orient='index',columns=['evalue', 'blast_hits'])
+    # print(df.loc['MFEAT142438', ['evalue', 'blast_hits']])
 
     return df
 
@@ -123,7 +125,7 @@ def blast_get_block(data, level=3):
             # same query as last line,  add to hits
             hits.append(line.rstrip())
         else:
-            yield tid, hits
+            yield id_old, hits
             hits = [line.rstrip()]
             id_old = tid
 
@@ -137,6 +139,9 @@ def blast_get_block(data, level=3):
 if __name__ == '__main__':
     opts = getopts()
 
+    print(f'Annotation file: {opts.annotation}')
+    print(f'Blast data: {opts.data}')
+    print(f'Output: {opts.output}\n')
     data = open(opts.data, 'r')
     out = open(opts.output, 'w')
 
