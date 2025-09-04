@@ -182,7 +182,7 @@ class Gtf:
 if __name__ == '__main__':
 
     gtf = Gtf('C:/Users/michael/Desktop/augustus.hints.gtf')
-    gff = open('Hp.augustus.hints.gff', 'w')
+    gff = open('data/Hp.augustus.hints.gff', 'w')
 
     target = ['gene', 'transcript', 'CDS', 'stop_codon', 'start_codon']
 
