@@ -103,7 +103,12 @@ class Gff:
         parsed = {}
         for i in range(len(field)):
             # extract the 9 defined columns
-            parsed[Gff.column[i]] = field[i]
+            if i in [3, 4]:
+                # change begin, end, and score to int
+                # should score be float?
+                parsed[Gff.column[i]] = int(field[i])
+            else:
+                parsed[Gff.column[i]] = field[i]
 
         # split the attributs on ; and restore as a hash
 
@@ -114,10 +119,8 @@ class Gff:
 
         for f in field:
             (key, value) = f.strip().split(self.attr_sep, maxsplit=1)
-            # parsed[key] = value.replace('"', '')
             parsed[key] = value.strip('"')
 
-        # self.data.append(parsed)
         if self.del_attr:
             del parsed['attribute']
 
@@ -148,7 +151,7 @@ class Gff:
 
     def get_by_value(self, column, key, start=0, stop=0):
         """-----------------------------------------------------------------------------------------
-        A generator that returns rows where the speicified column matches the specified value.
+        A generator that returns rows where the specified column matches the specified value.
         Rows missing columns, e.g., those generated from attributes, are skipped
 
         :param column: str, predefined or attribute column
@@ -169,6 +172,35 @@ class Gff:
                 yield n, data[n]
 
         raise StopIteration
+
+    def get_by_sequence_range(self, targetfeature, targetseq, begin, end):
+        """-----------------------------------------------------------------------------------------
+
+        :param targetseq: list      list of valid sequences
+        :param begin: int           begin of feature must be >= begin
+        :param end: int             end of feature must be <= end
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        count = 0
+        for self.line in self.gff_in:
+            if self.line:
+                if self.line.startswith('#'):
+                    self.comment_parse()
+                else:
+                    parsed = self.feature_parse()
+                    if parsed['feature'] not in targetfeature:
+                        continue
+                    if parsed['sequence'] not in targetseq:
+                        continue
+                    if parsed['begin'] < begin:
+                        continue
+                    if parsed['end'] > end:
+                        continue
+
+                    self.data.append(parsed)
+                    count += 1
+        return count
+
 
     def replace_by_column(self, column, find, replace):
         """-----------------------------------------------------------------------------------------
