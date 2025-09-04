@@ -3,11 +3,14 @@ import re
 
 
 class Gff:
-    ####################################################################################################
-    # gff.py
-    #
-    # 9 October 2019    Michael Gribskov
-    ####################################################################################################
+    """#############################################################################################
+    gff.py
+    attr_sep    separator between tag and value in attributes column; gtf:<space>, gff3:'='
+    del_attr    remove 'attribute' key after parsing tag/value pairs (feature_parse())
+
+    9 October 2019    Michael Gribskov
+    #############################################################################################"""
+
 
     column = ['sequence', 'method', 'feature', 'begin', 'end', 'score', 'strand', 'frame',
               'attribute']
@@ -16,6 +19,7 @@ class Gff:
         self.data = []
         self.gff_in = None
         self.attr_sep = ' '
+        self.del_attr = None
 
         if file:
             fh = self.open(file)
@@ -57,7 +61,7 @@ class Gff:
             # EOF
             return False
 
-    def read_all(self):
+    def read_all(self, limit):
         """-----------------------------------------------------------------------------------------
         read the entire file into memory
 
@@ -90,7 +94,9 @@ class Gff:
 
     def feature_parse(self):
         """-----------------------------------------------------------------------------------------
-        parse a feature line
+        parse a feature line. This works for gtf  if self.attr_sep is ';' should work for GFF3 if
+        self.attr_sep is '='. the latter is not well tested
+
         :return:
         -----------------------------------------------------------------------------------------"""
         field = self.line.split(maxsplit=8)
@@ -108,13 +114,20 @@ class Gff:
 
         for f in field:
             (key, value) = f.strip().split(self.attr_sep, maxsplit=1)
-            parsed[key] = value.replace('"', '')
+            # parsed[key] = value.replace('"', '')
+            parsed[key] = value.strip('"')
 
         # self.data.append(parsed)
+        if self.del_attr:
+            del parsed['attribute']
 
         return parsed
 
     def comment_parse(self):
+        """-----------------------------------------------------------------------------------------
+        intended for parsing comments; not implemented
+        :return:
+        -----------------------------------------------------------------------------------------"""
         pass
         return True
 
