@@ -1,5 +1,6 @@
 """=================================================================================================
-plot transcripts from GTF file
+plot transcripts from GTF file. This is a pretty generic version that should be modifiable for a
+specific purpose
 
 Michael Gribskov     04 September 2025
 ================================================================================================="""
@@ -24,7 +25,7 @@ def split_attributes_gtf(anno):
 
 
 # --------------------------------------------------------------------------------------------------
-#
+# main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     gtf = 'data/merged.gtf'
@@ -48,13 +49,12 @@ if __name__ == '__main__':
     ypos = []
     label = []
     color = []
-    # for feature in sorted(anno.data, key=lambda x: x['begin']):
+
     for feature in anno.data:
-        # if feature['feature'] == 'transcript':
-        #     continue
+        # plot desired features in groups of transcipt_id with all exons on a
+        # single line
         if feature['transcript_id'] != current:
             if current:
-                # ax.barh(ypos, width=width, left=left, tick_label=label)
                 ax.barh(ypos, width=width, left=left, color=color)
             current = feature['transcript_id']
             width = []
@@ -64,13 +64,13 @@ if __name__ == '__main__':
             # label = []
             y += 2
 
-        print(f'{feature['sequence']}\t{feature['feature']}\t{feature['transcript_id']}\t{feature['begin']}',end='')
+        print(f'{feature['sequence']}\t{feature['feature']}\t{feature['transcript_id']}\t{feature['begin']}', end='')
         print(f'\t{feature['end']}\t{feature['strand']}')
         width.append(feature['end'] - feature['begin'] + 1)
         left.append(feature['begin'])
 
         if feature['feature'] == 'transcript':
-            ypos.append(y+1)
+            ypos.append(y + 1)
             label.append('')
             color.append('0.75')
             label.append(feature['transcript_id'])
@@ -78,7 +78,6 @@ if __name__ == '__main__':
             ypos.append(y)
             color.append('r')
 
-    # ax.barh(ypos, width=width, left=left, tick_label=label)
     ax.barh(ypos, width=width, left=left, color=color)
     plt.yticks(range(len(label)), labels=label)
 
@@ -87,4 +86,5 @@ if __name__ == '__main__':
 
     # fig.savefig("test.png")
     plt.show()
+
     exit(0)
