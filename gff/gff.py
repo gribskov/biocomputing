@@ -208,6 +208,54 @@ class Gff:
                     count += 1
         return count
 
+    def get_gene_id_groups_by_generic_selector(self, selector, groupby):
+        """-----------------------------------------------------------------------------------------
+        selector is a dict that specifies the columns of self.data that must match for a selection
+        selectable fields:
+            sequence    list of one or more sequences (field 0)
+            feature     list of one of more features (field 2)
+            begin       int, begin of feature must be >= begin
+            end         int, begin of feature must be <= end
+
+        :param selector: dict   see above
+        :param groupby: str     indicated attribute must exist
+        :return: int            number of regions selected
+        -----------------------------------------------------------------------------------------"""
+        count = 0
+        n_group = 0
+        self.data = {}
+        for self.line in self.gff_in:
+            if self.line:
+                if self.line.startswith('#'):
+                    continue
+                else:
+                    parsed = self.feature_parse()
+                    selected = False
+                    for s in selector:
+                        if s == 'feature':
+                            if not parsed['feature'] in selector[s]:
+                                break
+                        if s == 'sequence':
+                            print(f'sequence:{parsed['sequence']}\tselector:{selector[s]}')
+                            if not parsed['sequence'] in selector[s]:
+                                break
+                        if s == 'begin':
+                            if parsed['begin'] < selector[s]:
+                                break
+                        if s == 'end':
+                            if parsed['begin'] > selector[s]:
+                                break
+
+                        # if you reach here you are selected
+                        count += 1
+                        group = parsed[groupby]
+                        if group in self.data:
+                            self.data[group].append(parsed)
+                        else:
+                            self.data[group] = [parsed]
+                            n_group += 1
+
+        return count
 
     def replace_by_column(self, column, find, replace):
         """-----------------------------------------------------------------------------------------
