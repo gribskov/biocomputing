@@ -192,10 +192,10 @@ class Gff:
                         continue
                     if parsed['sequence'] not in targetseq:
                         continue
-                    if parsed['begin'] < begin:
+                    if parsed['begin'] < begin or parsed['begin'] > end:
                         continue
-                    if parsed['end'] > end:
-                        continue
+                    # if parsed['end'] > end:
+                    #     continue
 
                     self.data.append(parsed)
                     count += 1
