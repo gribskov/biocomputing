@@ -4,14 +4,21 @@ import re
 
 class Gff:
     """#############################################################################################
-    gff.py
+    Manipulate GFF3 and GTF annotation files.
+    For GFF3 use
+        anno = Gff(file=gtf)
+        anno.attr_sep = '='
+    For GTF (and probably GFF2)
+        anno = Gff(file=gtf)
+        anno.attr_sep = ' ' ; <space>, space is the default so normally you won't need to change
+
     attr_sep    separator between tag and value in attributes column; gtf:<space>, gff3:'='
     del_attr    remove 'attribute' key after parsing tag/value pairs (feature_parse())
 
     9 October 2019    Michael Gribskov
     #############################################################################################"""
 
-
+    # predefined columns 0-7 in the file
     column = ['sequence', 'method', 'feature', 'begin', 'end', 'score', 'strand', 'frame',
               'attribute']
 
