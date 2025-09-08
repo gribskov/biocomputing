@@ -1,3 +1,5 @@
+from numpy.f2py.crackfortran import previous_context
+
 from sequence.fasta import Fasta
 from sequence.score import Score
 
@@ -21,7 +23,7 @@ class Alignment:
 
     def index(self, i1=True, i2=True):
         """-----------------------------------------------------------------------------------------
-        cretae an integer array version of the sequences.  this makes it easier to lookup scores.
+        create an integer array version of the sequences.  this makes it easier to lookup scores.
         i1  and i2 indicate whether sequence 1 and sequence 2 should be indexed.
 
         :param self:
@@ -73,6 +75,133 @@ class Alignment:
 
         return s
 
+    def nw(self, ):
+        """-----------------------------------------------------------------------------------------
+        Real Needlman Wunsch algorithm with gaps as single steps. To get real NW without gap length
+        penalty set self.gd = 0
+
+        s1 is horizontal, s2 is vertical. Origin is upper left (beginning of both sequences)
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        s1 = self.i1
+        s2 = self.i2
+        gd = self.gd
+        gi = - self.gi
+        s = align.score.table
+
+        # initialize
+        current = [0 for _ in len(s1)]
+        previous = [0 for _ in len(s1)]
+
+        # previous row initialize with penalties to gap to [0,0]
+        previous[0] = gi
+
+        for i in range(1,len(s1)):
+            previous[i] += previous[i-1] + gd
+            bestcol[i] = current[i] - gd
+
+        for col in range(1, len(s1)):
+            current[col] = max( s[s1[0]][s2[0]])
+        bestcol = [0, self.gi]
+        for i in range(2, len[s1]):
+            bestcol[i] = bestcol[i - 1] + gd
+        best_row = None
+
+        # main calculation
+        for row in range(len(s2)):
+            previous, current = current, previous = current
+            bestrow = gi + (row - 1) * gd
+
+            for col in range(len(s1)):
+
+                # find best score
+                current[col] = max( bestrow, bestcol[col-1], previous[col-1])
+
+                # update bestrow and bestcol
+                if previous[col-1]-gi > bestrow - gd:
+                    bestrow = previous[col-1]-gi
+                if previous[col-1] - gi > bestcol[col-1] - gd:
+                    bestcol[col-1] = previous[col-1] - gi
+
+
+
+        return True
+
+    def nwmod(self):
+        """-----------------------------------------------------------------------------------------
+        cur and paste from working version in main. not tested
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        # three pointer directions
+        d = 1
+        h = 2
+        v = 4
+
+        # score and path matrix are sequence length + 2
+        align.smat = [[0 for c in range(len(align.i2) + 2)] for r in range(len(align.i1) + 2)]
+        align.pmat = [[0 for c in range(len(align.i2) + 2)] for r in range(len(align.i1) + 2)]
+
+        # fill first row (including end gap penalties)
+        r = 0
+        c = 0
+        s = align.score.table
+        i1 = align.i1
+        i2 = align.i2
+        gi = align.gi
+        gd = align.gd
+        smat = align.smat
+        pmat = align.pmat
+
+        # top and left edge conditions (end gaps)
+        for c in range(1, len(align.i2) + 2):
+            smat[r][c] = gi + c * gd
+            pmat[r][c] = h
+        c = 0
+        for r in range(1, len(align.i1) + 2):
+            smat[r][c] = gi + r * gd
+            pmat[r][c] = v
+
+        # body of comparison
+        i = 0
+        for r in range(1, len(align.i1) + 1):
+            j = 0
+            print()
+            for c in range(1, len(align.i2) + 1):
+
+                diag = smat[r - 1][c - 1] + s[i1[i]][i2[j]]
+                left = smat[r][c - 1] + gd
+                up = smat[r - 1][c] + gd
+                best = max(diag, left, up)
+                smat[r][c] = best
+                print('r:{} c:{} i:{} j:{} s:{},{},{} diag:{} left:{} up:{} best:{}'.format(
+                    r, c, i, j, i1[i], i2[j], s[i1[i]][i2[j]], diag, left, up, best))
+
+                # set pointers
+                if diag == best:
+                    pmat[r][c] += d
+                if left == best:
+                    pmat[r][c] += h
+                if up == best:
+                    pmat[r][c] += v
+
+                j += 1
+
+            i += 1
+
+        # final edge conditions (end gaps on right)
+        r = len(align.i1) + 1
+        end = len(align.i2)
+        for c in range(1, len(align.i2) + 2):
+            smat[r][c] = smat[r - 1][c - 1] + gi + (end - c + 1) * gd
+            pmat[r][c] = d
+        c = len(align.i2) + 1
+        end = len(align.i1)
+        for r in range(1, len(align.i1) + 2):
+            smat[r][c] = smat[r - 1][c - 1] + gi + (end - r + 1) * gd
+            pmat[r][c] = d
+
+        print(align.matString())
+
 
 # ==================================================================================================
 # main/test
@@ -94,74 +223,6 @@ if __name__ == '__main__':
     align.gi = -1
     align.gd = -1
 
-    # three pointer directions
-    d = 1
-    h = 2
-    v = 4
-
-    # score and path matrix are sequence length + 2
-    align.smat = [[0 for c in range(len(align.i2) + 2)] for r in range(len(align.i1) + 2)]
-    align.pmat = [[0 for c in range(len(align.i2) + 2)] for r in range(len(align.i1) + 2)]
-
-    # fill first row (including end gap penalties)
-    r = 0
-    c = 0
-    s = align.score.table
-    i1 = align.i1
-    i2 = align.i2
-    gi = align.gi
-    gd = align.gd
-    smat = align.smat
-    pmat = align.pmat
-
-    # top and left edge conditions (end gaps)
-    for c in range(1, len(align.i2) + 2):
-        smat[r][c] = gi + c * gd
-        pmat[r][c] = h
-    c = 0
-    for r in range(1, len(align.i1) + 2):
-        smat[r][c] = gi + r * gd
-        pmat[r][c] = v
-
-    # body of comparison
-    i = 0
-    for r in range(1, len(align.i1) + 1):
-        j = 0
-        print()
-        for c in range(1, len(align.i2) + 1):
-
-            diag = smat[r - 1][c - 1] + s[i1[i]][i2[j]]
-            left = smat[r][c - 1] + gd
-            up = smat[r - 1][c] + gd
-            best = max(diag, left, up)
-            smat[r][c] = best
-            print('r:{} c:{} i:{} j:{} s:{},{},{} diag:{} left:{} up:{} best:{}'.format(
-                r, c, i, j, i1[i], i2[j], s[i1[i]][i2[j]], diag, left, up, best))
-
-            # set pointers
-            if diag == best:
-                pmat[r][c] += d
-            if left == best:
-                pmat[r][c] += h
-            if up == best:
-                pmat[r][c] += v
-
-            j += 1
-
-        i += 1
-
-    # final edge conditions (end gaps on right)
-    r = len(align.i1) + 1
-    end = len(align.i2)
-    for c in range(1, len(align.i2) + 2):
-        smat[r][c] = smat[r - 1][c - 1] + gi + (end - c + 1) * gd
-        pmat[r][c] = d
-    c = len(align.i2) + 1
-    end = len(align.i1)
-    for r in range(1, len(align.i1) + 2):
-        smat[r][c] = smat[r - 1][c - 1] + gi + (end - r + 1) * gd
-        pmat[r][c] = d
-
-    print(align.matString())
+    align.nw()
 
 exit(0)
