@@ -90,29 +90,24 @@ class Alignment:
         s = align.score.table
 
         # initialize
-        current = [0 for _ in len(s1)]
-        previous = [0 for _ in len(s1)]
+        current = [0 for _ in range(len[s1])]
+        previous = [0 for _ in range(len[s1])]
+        bestcol = [ gi + j * gd for j in range(len[s1])]
 
         # previous row initialize with penalties to gap to [0,0]
         previous[0] = gi
 
-        for i in range(1,len(s1)):
-            previous[i] += previous[i-1] + gd
-            bestcol[i] = current[i] - gd
-
-        for col in range(1, len(s1)):
-            current[col] = max( s[s1[0]][s2[0]])
-        bestcol = [0, self.gi]
-        for i in range(2, len[s1]):
-            bestcol[i] = bestcol[i - 1] + gd
         best_row = None
 
         # main calculation
         for row in range(len(s2)):
-            previous, current = current, previous = current
-            bestrow = gi + (row - 1) * gd
+            previous, current = current, previous
 
-            for col in range(len(s1)):
+            # first position in row
+            current[0] = s[s1[0]][s2[row]] + gi + gd * (row-1)
+            bestrow = gi
+
+            for col in range(1,len(s1)):
 
                 # find best score
                 current[col] = max( bestrow, bestcol[col-1], previous[col-1])
@@ -208,14 +203,14 @@ class Alignment:
 # ==================================================================================================
 if __name__ == '__main__':
     align = Alignment()
-    # align.s1.seq = 'AGGC'
+    align.s1.seq = 'AGGC'
     # align.s1.seq = 'ACGTAAC'
-    align.s1.seq = "TAGATTTATCAT"
+    # align.s1.seq = "TAGATTTATCAT"
     print(align.s1.format())
 
-    # align.s2.seq = "AGCGT"
+    align.s2.seq = "AGCGT"
     # align.s2.seq = "CGAAGTC"
-    align.s2.seq = 'TATCATATGGT'
+    # align.s2.seq = 'TATCATATGGT'
     print(align.s2.format())
 
     align.index()
