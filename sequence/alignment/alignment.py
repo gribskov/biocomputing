@@ -79,6 +79,7 @@ class Alignment:
         """-----------------------------------------------------------------------------------------
         Real Needlman Wunsch algorithm with gaps as single steps. To get real NW without gap length
         penalty set self.gd = 0
+        assumes that gap penalties gi and gd are negative
 
         s1 is horizontal, s2 is vertical. Origin is upper left (beginning of both sequences)
         :return:
@@ -86,39 +87,47 @@ class Alignment:
         s1 = self.i1
         s2 = self.i2
         gd = self.gd
-        gi = - self.gi
-        s = align.score.table
+        gi = self.gi
+        s = self.score.table
+        not_possible = gi + max(len(s1), len(s2))
 
         # initialize
-        current = [0 for _ in range(len[s1])]
-        previous = [0 for _ in range(len[s1])]
-        bestcol = [ gi + j * gd for j in range(len[s1])]
+        previous = [0 for _ in range(len(s1))]
+        current = [gi + j * gd for j in range(len(s1))]
+        bestcol = [not_possible for _ in range(len(s1))]
 
         # previous row initialize with penalties to gap to [0,0]
         previous[0] = gi
-
-        best_row = None
 
         # main calculation
         for row in range(len(s2)):
             previous, current = current, previous
 
-            # first position in row
-            current[0] = s[s1[0]][s2[row]] + gi + gd * (row-1)
-            bestrow = gi
+            # first position in row. first position in row can only make a gap in horizontal direction (bestrow)
+            if row == 0:
+                current[0] = s[s1[0]][s2[row]]
+            else:
+                current[0] = s[s1[0]][s2[row]] + gi
 
-            for col in range(1,len(s1)):
+            bestrow = gi + gd * (row - 1)
+            bestcol[0] = max( current[0] - gi, bestcol[0])
+
+            for col in range(1, len(s1)):
 
                 # find best score
-                current[col] = max( bestrow, bestcol[col-1], previous[col-1])
+                current[col] = s[s1[col]][s2[row]] + max(bestrow, bestcol[col - 1], previous[col - 1])
 
-                # update bestrow and bestcol
-                if previous[col-1]-gi > bestrow - gd:
-                    bestrow = previous[col-1]-gi
-                if previous[col-1] - gi > bestcol[col-1] - gd:
-                    bestcol[col-1] = previous[col-1] - gi
+                # update bestrow for  next column in the current row
+                if previous[col - 1] + gi > bestrow + gd:
+                    bestrow = previous[col - 1] + gi
+                else:
+                    bestrow += gd
 
-
+                # update bestcol for the next row
+                if previous[col - 1] + gi > bestcol[col - 1] + gd:
+                    bestcol[col - 1] = previous[col - 1] + gi
+                else:
+                    bestcol[col - 1] += gd
 
         return True
 
@@ -133,8 +142,8 @@ class Alignment:
         v = 4
 
         # score and path matrix are sequence length + 2
-        align.smat = [[0 for c in range(len(align.i2) + 2)] for r in range(len(align.i1) + 2)]
-        align.pmat = [[0 for c in range(len(align.i2) + 2)] for r in range(len(align.i1) + 2)]
+        align.smat = [[0 for c in range(len(align.i2) + 2)] for r in range(len(self.i1) + 2)]
+        align.pmat = [[0 for c in range(len(align.i2) + 2)] for r in range(len(self.i1) + 2)]
 
         # fill first row (including end gap penalties)
         r = 0
