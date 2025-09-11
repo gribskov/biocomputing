@@ -89,7 +89,7 @@ class Alignment:
         gd = self.gd
         gi = self.gi
         s = self.score.table
-        not_possible = gi + max(len(s1), len(s2))
+        not_possible = gi * max(len(s1), len(s2))
 
         # initialize
         previous = [0 for _ in range(len(s1))]
@@ -103,14 +103,17 @@ class Alignment:
         for row in range(len(s2)):
             previous, current = current, previous
 
-            # first position in row. first position in row can only make a gap in horizontal direction (bestrow)
-            if row == 0:
-                current[0] = s[s1[0]][s2[row]]
-            else:
-                current[0] = s[s1[0]][s2[row]] + gi
 
-            bestrow = gi + gd * (row - 1)
-            bestcol[0] = max( current[0] - gi, bestcol[0])
+            if row == 0:
+                # first row, only gaps in the horizontal direction are possible so bestcol doesn't
+                # need to be updated
+                current[0] = s[s1[0]][s2[row]]
+                bestrow = gi
+            else:
+                # all other rows,
+                current[0] = s[s1[0]][s2[row]] + gi + gd * ( row - 1)
+                bestrow = not_possible
+                bestcol[0] = max( previous[0] + gi, bestcol[0] + gd)
 
             for col in range(1, len(s1)):
 
