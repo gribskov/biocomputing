@@ -86,46 +86,34 @@ class Alignment:
         -----------------------------------------------------------------------------------------"""
         s1 = self.i1
         s2 = self.i2
+        l1 = len(s1)
+        l2 = len(s2)
         gd = self.gd
         gi = self.gi
         s = self.score.table
-        not_possible = gi * max(len(s1), len(s2))
+        not_possible = gi * max(l1, l2)
 
-        # initialize
-        previous = [0 for _ in range(len(s1))]
-        current = [not_possible for _ in range(len(s1))]
-        current[0] = 0
-        bestcol= [not_possible for _ in range(len(s1))]
-        # bestcol = [gi + gd * (j-1) for j in range(len(s1))]
-        # bestcol[0] = 0
-        # bestcol[1] = gi
-
-        # previous row initialize with penalties to gap to [0,0]
-        # previous[0] = gi
+        # initialize current with the penalty for a gap from col+1 to the end. this gets swapped in for the best
+        # score at the beginning of the loop over rows, allowing it to be used as the added on the first row. Initialize
+        # bestcol, the best score achievable by a gap in each column with a large negative value because no vertical
+        # gaps are possible on row 1
+        previous = [0 for _ in range(l1)]
+        current = [gi + gd * c for c in range(l1)]
+        current[0] = gi
+        bestcol = [not_possible for _ in range(l1)]
 
         # main calculation
+        ledge = 0
         for row in range(len(s2)):
+            # make the current row the previous row to use as the diagonal element
             previous, current = current, previous
 
-            # if row == 0:
-            #     # first row, only gaps in the horizontal direction are possible so bestcol doesn't
-            #     # need to be updated
-            #     current[0] = s[s1[0]][s2[row]]
-            #     bestrow = gi
-            # else:
-            #     # all other rows,
-            #     current[0] = s[s1[0]][s2[row]] + gi + gd * ( row - 1)
-            #     bestrow = not_possible
-            #     bestcol[0] = max( previous[0] + gi, bestcol[0] + gd)
-            if row:
-                # all rows except row zero
-                bestrow = not_possible
-                current[0] = s[s1[0]][s2[row]] + bestrow
-
-            else:
-                # row zero
-                current[0] = s[s1[0]][s2[row]]
-                bestrow = gi
+            # first cell requires special treatment because it represents a vertical gap (previous characters in the
+            # vertical sequence are unused
+            current[0] = s[s1[0]][s2[row]] + ledge
+            ledge = gi + gd * row
+            redge = gi + gd * (l2 - row - 2)
+            bestrow = gi
 
             for col in range(1, len(s1)):
 
@@ -143,6 +131,9 @@ class Alignment:
                     bestcol[col - 1] = previous[col - 1] + gi
                 else:
                     bestcol[col - 1] += gd
+
+            # the last cell in the row requires a gap for unused characters in the vertical sequence
+            final = current[-1] + redge
 
         return True
 
