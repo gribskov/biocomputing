@@ -34,3 +34,4 @@ for i in range(n):
     o.append(i - i//n//2*i*2%n)
 print(o)
 
+def palindrome(n,c):l=n//2;c*=n;return c[:l]+c[l-n%2::-1]
