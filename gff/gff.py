@@ -3,12 +3,22 @@ import re
 
 
 class Gff:
-    ####################################################################################################
-    # gff.py
-    #
-    # 9 October 2019    Michael Gribskov
-    ####################################################################################################
+    """#############################################################################################
+    Manipulate GFF3 and GTF annotation files.
+    For GFF3 use
+        anno = Gff(file=gtf)
+        anno.attr_sep = '='
+    For GTF (and probably GFF2)
+        anno = Gff(file=gtf)
+        anno.attr_sep = ' ' ; <space>, space is the default so normally you won't need to change
 
+    attr_sep    separator between tag and value in attributes column; gtf:<space>, gff3:'='
+    del_attr    remove 'attribute' key after parsing tag/value pairs (feature_parse())
+
+    9 October 2019    Michael Gribskov
+    #############################################################################################"""
+
+    # predefined columns 0-7 in the file
     column = ['sequence', 'method', 'feature', 'begin', 'end', 'score', 'strand', 'frame',
               'attribute']
 
@@ -16,6 +26,7 @@ class Gff:
         self.data = []
         self.gff_in = None
         self.attr_sep = ' '
+        self.del_attr = None
 
         if file:
             fh = self.open(file)
@@ -57,7 +68,7 @@ class Gff:
             # EOF
             return False
 
-    def read_all(self):
+    def read_all(self, limit):
         """-----------------------------------------------------------------------------------------
         read the entire file into memory
 
@@ -90,14 +101,21 @@ class Gff:
 
     def feature_parse(self):
         """-----------------------------------------------------------------------------------------
-        parse a feature line
+        parse a feature line. This works for gtf  if self.attr_sep is ';' should work for GFF3 if
+        self.attr_sep is '='. the latter is not well tested
+
         :return:
         -----------------------------------------------------------------------------------------"""
         field = self.line.split(maxsplit=8)
         parsed = {}
         for i in range(len(field)):
             # extract the 9 defined columns
-            parsed[Gff.column[i]] = field[i]
+            if i in [3, 4]:
+                # change begin, end, and score to int
+                # should score be float?
+                parsed[Gff.column[i]] = int(field[i])
+            else:
+                parsed[Gff.column[i]] = field[i]
 
         # split the attributs on ; and restore as a hash
 
@@ -108,13 +126,18 @@ class Gff:
 
         for f in field:
             (key, value) = f.strip().split(self.attr_sep, maxsplit=1)
-            parsed[key] = value.replace('"', '')
+            parsed[key] = value.strip('"')
 
-        # self.data.append(parsed)
+        if self.del_attr:
+            del parsed['attribute']
 
         return parsed
 
     def comment_parse(self):
+        """-----------------------------------------------------------------------------------------
+        intended for parsing comments; not implemented
+        :return:
+        -----------------------------------------------------------------------------------------"""
         pass
         return True
 
@@ -135,7 +158,7 @@ class Gff:
 
     def get_by_value(self, column, key, start=0, stop=0):
         """-----------------------------------------------------------------------------------------
-        A generator that returns rows where the speicified column matches the specified value.
+        A generator that returns rows where the specified column matches the specified value.
         Rows missing columns, e.g., those generated from attributes, are skipped
 
         :param column: str, predefined or attribute column
@@ -156,6 +179,83 @@ class Gff:
                 yield n, data[n]
 
         raise StopIteration
+
+    def get_by_sequence_range(self, targetfeature, targetseq, begin, end):
+        """-----------------------------------------------------------------------------------------
+
+        :param targetseq: list      list of valid sequences
+        :param begin: int           begin of feature must be >= begin
+        :param end: int             end of feature must be <= end
+        :return:
+        -----------------------------------------------------------------------------------------"""
+        count = 0
+        for self.line in self.gff_in:
+            if self.line:
+                if self.line.startswith('#'):
+                    self.comment_parse()
+                else:
+                    parsed = self.feature_parse()
+                    if parsed['feature'] not in targetfeature:
+                        continue
+                    if parsed['sequence'] not in targetseq:
+                        continue
+                    if parsed['begin'] < begin or parsed['begin'] > end:
+                        continue
+                    # if parsed['end'] > end:
+                    #     continue
+
+                    self.data.append(parsed)
+                    count += 1
+        return count
+
+    def get_gene_id_groups_by_generic_selector(self, selector, groupby):
+        """-----------------------------------------------------------------------------------------
+        selector is a dict that specifies the columns of self.data that must match for a selection
+        selectable fields:
+            sequence    list of one or more sequences (field 0)
+            feature     list of one of more features (field 2)
+            begin       int, begin of feature must be >= begin
+            end         int, begin of feature must be <= end
+
+        :param selector: dict   see above
+        :param groupby: str     indicated attribute must exist
+        :return: int            number of regions selected
+        -----------------------------------------------------------------------------------------"""
+        count = 0
+        n_group = 0
+        self.data = {}
+        for self.line in self.gff_in:
+            if self.line:
+                if self.line.startswith('#'):
+                    continue
+                else:
+                    parsed = self.feature_parse()
+                    selected = False
+                    for s in selector:
+                        if s == 'feature':
+                            if not parsed['feature'] in selector[s]:
+                                break
+                        if s == 'sequence':
+                            print(f'sequence:{parsed['sequence']}\tselector:{selector[s]}')
+                            if not parsed['sequence'] in selector[s]:
+                                break
+                        if s == 'begin':
+                            if parsed['begin'] < selector[s]:
+                                break
+                        if s == 'end':
+                            if parsed['begin'] > selector[s]:
+                                break
+
+                        # if you reach here you are selected
+                        count += 1
+                        group = parsed[groupby]
+                        if group in self.data:
+                            self.data[group].append(parsed)
+                        else:
+                            self.data[group] = [parsed]
+                            n_group += 1
+
+        return count
 
     def replace_by_column(self, column, find, replace):
         """-----------------------------------------------------------------------------------------

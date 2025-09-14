@@ -34,4 +34,7 @@ for i in range(n):
     o.append(i - i//n//2*i*2%n)
 print(o)
 
-def palindrome(n,c):l=n//2;c*=n;return c[:l]+c[l-n%2::-1]
+l=(n+1)//2;d=c*n;e=d[:l]+d[l-1-n%2::-1]
+l=(n+1)//2;d=c*n;e=d[:l]+d[l-1-n%2::-1]
+def palindrome(n,c):str("".join([c[min(i,n-i-1)%len(c)] for i in range(n)]))
+def palindrome(n,c):l=n//2;d=c*n;return d[:l]+d[l-1+n%2::-1]
