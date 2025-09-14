@@ -93,6 +93,12 @@ class Alignment:
         s = self.score.table
         not_possible = gi * max(l1, l2)
 
+        # initialize best with a completely unaligned score
+        # aaaa.....
+        # ....bbbbb
+        best = gi * 2 + gd * (l1 + l2 - 2)
+        bestpos = [l1, 0]
+
         # initialize current with the penalty for a gap from col+1 to the end. this gets swapped in for the best
         # score at the beginning of the loop over rows, allowing it to be used as the added on the first row. Initialize
         # bestcol, the best score achievable by a gap in each column with a large negative value because no vertical
@@ -115,7 +121,7 @@ class Alignment:
             redge = gi + gd * (l2 - row - 2)
             bestrow = gi
 
-            for col in range(1, len(s1)):
+            for col in range(1, l1):
 
                 # find best score
                 current[col] = s[s1[col]][s2[row]] + max(bestrow, bestcol[col - 1], previous[col - 1])
@@ -134,6 +140,23 @@ class Alignment:
 
             # the last cell in the row requires a gap for unused characters in the vertical sequence
             final = current[-1] + redge
+            if final > best:
+                best = final
+                bestpos = [col, row]
+
+        # final row also needs to have penalties for unused characters added
+        redge = gi + gd * (l1 - 2)
+        for col in range(l1):
+            final = current[col] + redge
+            if final > best:
+                best = final
+                bestpos = [col, row]
+            redge -= gd
+
+        final = final + gd - gi
+        if final > best:
+            best = final
+            bestpos = [col, row]
 
         return True
 
