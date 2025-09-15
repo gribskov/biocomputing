@@ -246,22 +246,22 @@ class Alignment:
 # main/test
 # ==================================================================================================
 if __name__ == '__main__':
-    self = Alignment()
-    self.s1.seq = 'AGGC'
-    # self.s1.seq = 'ACGTAAC'
-    # self.s1.seq = "TAGATTTATCAT"
-    print(self.s1.format())
+    align = Alignment()
+    align.s1.seq = 'AGGC'
+    # align.s1.seq = 'ACGTAAC'
+    # align.s1.seq = "TAGATTTATCAT"
+    print(align.s1.format())
 
-    self.s2.seq = "AGCGT"
-    # self.s2.seq = "CGAAGTC"
-    # self.s2.seq = 'TATCATATGGT'
-    print(self.s2.format())
+    align.s2.seq = "AGCGT"
+    # align.s2.seq = "CGAAGTC"
+    # align.s2.seq = 'TATCATATGGT'
+    print(align.s2.format())
 
-    self.index()
-    self.score.identity(pos=4, neg=-2)
-    self.gi = -1
-    self.gd = -1
+    align.index()
+    align.score.identity(pos=4, neg=-2)
+    align.gi = -1
+    align.gd = -1
 
-    self.nw()
+    bestscore, bestposition = align.nw()
 
 exit(0)
