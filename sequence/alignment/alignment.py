@@ -1,4 +1,4 @@
-from numpy.f2py.crackfortran import previous_context
+# from numpy.f2py.crackfortran import previous_context
 
 from sequence.fasta import Fasta
 from sequence.score import Score
@@ -6,7 +6,8 @@ from sequence.score import Score
 
 class Alignment:
     """=============================================================================================
-    Sequence alignment class
+    Sequence Alignment class
+    older nwmod code may not work
 
     ============================================================================================="""
 
@@ -27,7 +28,9 @@ class Alignment:
         i1  and i2 indicate whether sequence 1 and sequence 2 should be indexed.
 
         :param self:
-        :return:
+        :param i1: bool     if True create integer version of sequence 1
+        :param i2: bool     if True create integer version of sequence 2
+        :return: int, int   length of sequence1, length of sequence 2
         -----------------------------------------------------------------------------------------"""
         score = self.score
         if i1:
@@ -41,15 +44,16 @@ class Alignment:
 
         return len(self.i1), len(self.i2)
 
-    def matString(align, width=2):
+    def mat_string(self, width=2):
         """-----------------------------------------------------------------------------------------
         return a string with the formatted score and path matrices
-        :param width: int, field width of columns
+        
+        :param width: int, field width of columns, currently unused
         :return: string
         -----------------------------------------------------------------------------------------"""
         # pad the sequences with a gap at the ends
-        p1 = '.' + align.s1.seq + '.'
-        p2 = '.' + align.s2.seq + '.'
+        p1 = '.' + self.s1.seq + '.'
+        p2 = '.' + self.s2.seq + '.'
 
         s = 'score\n\n  '
 
@@ -57,20 +61,20 @@ class Alignment:
             s += "{} ".format(p2[j])
         s += '\n'
 
-        for r in range(0, len(align.i1) + 2):
-            j = 0
+        for r in range(0, len(self.i1) + 2):
+            # j = 0
             s += '{} '.format(p1[r])
 
-            for c in range(0, len(align.i2) + 2):
-                s += "{} ".format(align.smat[r][c])
+            for c in range(0, len(self.i2) + 2):
+                s += "{} ".format(self.smat[r][c])
             s += "\n"
 
         s += '\npath\n\n'
-        for r in range(0, len(align.i1) + 2):
-            j = 0
+        for r in range(0, len(self.i1) + 2):
+            # j = 0
             print()
-            for c in range(0, len(align.i2) + 2):
-                s += "{} ".format(align.pmat[r][c])
+            for c in range(0, len(self.i2) + 2):
+                s += "{} ".format(self.pmat[r][c])
             s += "\n"
 
         return s
@@ -86,48 +90,43 @@ class Alignment:
         -----------------------------------------------------------------------------------------"""
         s1 = self.i1
         s2 = self.i2
+        l1 = len(s1)
+        l2 = len(s2)
         gd = self.gd
         gi = self.gi
         s = self.score.table
-        not_possible = gi * max(len(s1), len(s2))
+        not_possible = gi * 2 + gd * (l1 + l2 - 2)
 
-        # initialize
-        previous = [0 for _ in range(len(s1))]
-        current = [not_possible for _ in range(len(s1))]
-        current[0] = 0
-        bestcol= [not_possible for _ in range(len(s1))]
-        # bestcol = [gi + gd * (j-1) for j in range(len(s1))]
-        # bestcol[0] = 0
-        # bestcol[1] = gi
+        # initialize best with a completely unselfed score
+        # aaaa.....
+        # ....bbbbb
+        best = not_possible
+        bestpos = [l1, 0]
 
-        # previous row initialize with penalties to gap to [0,0]
-        # previous[0] = gi
+        # initialize current with the penalty for a gap from col+1 to the end. this gets swapped in for the best
+        # score at the beginning of the loop over rows, allowing it to be used as the added on the first row. Initialize
+        # bestcol, the best score achievable by a gap in each column with a large negative value because no vertical
+        # gaps are possible on row 1
+        previous = [0 for _ in range(l1)]
+        current = [gi + gd * c for c in range(l1)]
+        current[0] = gi
+        bestcol = [not_possible for _ in range(l1)]
 
         # main calculation
+        ledge = 0
+        final = 0
         for row in range(len(s2)):
+            # make the current row the previous row to use as the diagonal element
             previous, current = current, previous
 
-            # if row == 0:
-            #     # first row, only gaps in the horizontal direction are possible so bestcol doesn't
-            #     # need to be updated
-            #     current[0] = s[s1[0]][s2[row]]
-            #     bestrow = gi
-            # else:
-            #     # all other rows,
-            #     current[0] = s[s1[0]][s2[row]] + gi + gd * ( row - 1)
-            #     bestrow = not_possible
-            #     bestcol[0] = max( previous[0] + gi, bestcol[0] + gd)
-            if row:
-                # all rows except row zero
-                bestrow = not_possible
-                current[0] = s[s1[0]][s2[row]] + bestrow
+            # first cell requires special treatment because it represents a vertical gap (previous characters in the
+            # vertical sequence are unused
+            current[0] = s[s1[0]][s2[row]] + ledge
+            ledge = gi + gd * row
+            redge = gi + gd * (l2 - row - 2)
+            bestrow = gi
 
-            else:
-                # row zero
-                current[0] = s[s1[0]][s2[row]]
-                bestrow = gi
-
-            for col in range(1, len(s1)):
+            for col in range(1, l1):
 
                 # find best score
                 current[col] = s[s1[col]][s2[row]] + max(bestrow, bestcol[col - 1], previous[col - 1])
@@ -144,7 +143,27 @@ class Alignment:
                 else:
                     bestcol[col - 1] += gd
 
-        return True
+            # the last cell in the row requires a gap for unused characters in the vertical sequence
+            final = current[-1] + redge
+            if final > best:
+                best = final
+                bestpos = [l1 - 1, row]
+
+        # final row also needs to have penalties for unused characters added
+        redge = gi + gd * (l1 - 2)
+        for col in range(l1):
+            final = current[col] + redge
+            if final > best:
+                best = final
+                bestpos = [col, l2 - 1]
+            redge -= gd
+
+        final = final + gd - gi
+        if final > best:
+            best = final
+            bestpos = [l1 - 1, l2 - 1]
+
+        return best, bestpos
 
     def nwmod(self):
         """-----------------------------------------------------------------------------------------
@@ -157,35 +176,34 @@ class Alignment:
         v = 4
 
         # score and path matrix are sequence length + 2
-        align.smat = [[0 for c in range(len(align.i2) + 2)] for r in range(len(self.i1) + 2)]
-        align.pmat = [[0 for c in range(len(align.i2) + 2)] for r in range(len(self.i1) + 2)]
+        self.smat = [[0 for _ in range(len(self.i2) + 2)] for _ in range(len(self.i1) + 2)]
+        self.pmat = [[0 for _ in range(len(self.i2) + 2)] for _ in range(len(self.i1) + 2)]
 
         # fill first row (including end gap penalties)
-        r = 0
-        c = 0
-        s = align.score.table
-        i1 = align.i1
-        i2 = align.i2
-        gi = align.gi
-        gd = align.gd
-        smat = align.smat
-        pmat = align.pmat
+        s = self.score.table
+        i1 = self.i1
+        i2 = self.i2
+        gi = self.gi
+        gd = self.gd
+        smat = self.smat
+        pmat = self.pmat
 
         # top and left edge conditions (end gaps)
-        for c in range(1, len(align.i2) + 2):
+        r = 0
+        for c in range(1, len(self.i2) + 2):
             smat[r][c] = gi + c * gd
             pmat[r][c] = h
         c = 0
-        for r in range(1, len(align.i1) + 2):
+        for r in range(1, len(self.i1) + 2):
             smat[r][c] = gi + r * gd
             pmat[r][c] = v
 
         # body of comparison
         i = 0
-        for r in range(1, len(align.i1) + 1):
+        for r in range(1, len(self.i1) + 1):
             j = 0
             print()
-            for c in range(1, len(align.i2) + 1):
+            for c in range(1, len(self.i2) + 1):
 
                 diag = smat[r - 1][c - 1] + s[i1[i]][i2[j]]
                 left = smat[r][c - 1] + gd
@@ -208,18 +226,20 @@ class Alignment:
             i += 1
 
         # final edge conditions (end gaps on right)
-        r = len(align.i1) + 1
-        end = len(align.i2)
-        for c in range(1, len(align.i2) + 2):
+        r = len(self.i1) + 1
+        end = len(self.i2)
+        for c in range(1, len(self.i2) + 2):
             smat[r][c] = smat[r - 1][c - 1] + gi + (end - c + 1) * gd
             pmat[r][c] = d
-        c = len(align.i2) + 1
-        end = len(align.i1)
-        for r in range(1, len(align.i1) + 2):
+        c = len(self.i2) + 1
+        end = len(self.i1)
+        for r in range(1, len(self.i1) + 2):
             smat[r][c] = smat[r - 1][c - 1] + gi + (end - r + 1) * gd
             pmat[r][c] = d
 
-        print(align.matString())
+        print(self.mat_string())
+
+        return True
 
 
 # ==================================================================================================
@@ -242,6 +262,6 @@ if __name__ == '__main__':
     align.gi = -1
     align.gd = -1
 
-    align.nw()
+    bestscore, bestposition = align.nw()
 
 exit(0)
