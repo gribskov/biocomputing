@@ -75,14 +75,25 @@ class Sequence():
 
         return idx
 
-    def fasta(self, outfh, linelen=100):
+    def fasta(self, id, outfh, linelen=100):
         """-----------------------------------------------------------------------------------------
         write sequence to outfh in Fasta format
 
-        :param outfh:
-        :param linelen: int
+        : param id: int         position of sequence in self.item
+        :param outfh:           filehandle open for output
+        :param linelen: int     length of lines for sequence
         :return:
         -----------------------------------------------------------------------------------------"""
+        seq = self.item[id]
+        sequence = seq['sequence']
+        name, rest = seq['attr']['organism_name'].split(' ', maxsplit=1)
+        outfh.write(f'>{name} {seq['attr']['og_name']} {seq['attr']['organism_name']}\n')
+        pos = 0
+        while pos < len(sequence):
+            outfh.write(f'{sequence[pos:pos + linelen]}\n')
+            pos += linelen
+
+        return True
 
 
 # --------------------------------------------------------------------------------------------------
@@ -98,6 +109,8 @@ if __name__ == '__main__':
 
     pro = Sequence(inpro)
     nuc = Sequence(innuc)
+    inpro.close()
+    innuc.close()
 
     genusn = nuc.index('organism_name', 1)
     genusp = pro.index('organism_name', 1)
@@ -118,6 +131,9 @@ if __name__ == '__main__':
 
 
     # sourcep = pro.index('pub_gene_id', 1)
+
+    outpro = open('protein.out.fa', 'w')
+    outnuc = open('nuc.out.fa', 'w')
 
     n_g = 0
     for g in genusp:
@@ -155,7 +171,11 @@ if __name__ == '__main__':
                 # skip other protein entries
                 print(f'match {pid}\t{g}\t{pro.item[pid]['attr']['organism_name']}\tlen:',end=' ')
                 print(f'{len(pro.item[pid]['sequence'])},{len(nuc.item[pid]['sequence'])}')
+                pro.fasta(pid, outpro)
+                nuc.fasta(pid, outnuc)
+
                 break
+
             else:
                 # nucleotide is not ok, try another protein
                 continue
@@ -172,5 +192,7 @@ if __name__ == '__main__':
         #     nstr = f'\t{genusn[g]}'
         #
         # print(f'{n_g}\t{g}\tp:{pstr}\tn:{nstr}')
+    outpro.close()
+    outnuc.close()
 
     exit(0)
