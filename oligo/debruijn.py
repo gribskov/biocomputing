@@ -44,7 +44,7 @@ class KmerSet():
 
     def add(self, kmer):
         """-----------------------------------------------------------------------------------------
-        If unknown add a new kmer to the dict.  ir known, increment count
+        If unknown add a new kmer to the dict.  if known, increment count
         :param kmer: string
         :return: int, count of kmer
         -----------------------------------------------------------------------------------------"""
@@ -70,6 +70,28 @@ class KmerSet():
                 kmer = text[i:i + k]
                 self.add(kmer)
 
+        return len(self.set.keys())
+
+    def from_file(self, filename):
+        """-----------------------------------------------------------------------------------------
+        open file and read kmers, kmers can be any number per line, space delimited. tokens that are
+        only digits are skipped.
+
+        :param filename: string     path to file
+        :return: int                number of kmers read
+        -----------------------------------------------------------------------------------------"""
+        infile = open(filename, 'r')
+
+        for line in infile:
+            token = line.rstrip().split()
+            for kmer in token:
+                if kmer.isdigit():
+                    continue
+                self.add(kmer)
+                l = len(kmer)
+
+        infile.close()
+        self.k = l
         return len(self.set.keys())
 
     def from_text_random(self, k, n):
@@ -145,8 +167,10 @@ class KmerSet():
 
     def list_by_alpha(self):
         """-----------------------------------------------------------------------------------------
-        return a string listing the words alphabetically
-        :return:
+        return a string listing the words alphabetically, if label is defferent than the key, for
+        instance, after condensing, show the labell as well
+
+        :return: string     printable list of kmers
         -----------------------------------------------------------------------------------------"""
         set = self.set
         words = ''
@@ -185,24 +209,51 @@ def debruijn_condense(kmerset):
     k = kmerset.k
 
     while ids:
-        v1 = ids.pop()
+        v1 = ids[-1]
+        # print(f'v1:{set[v1]}')
         if len(set[v1]['after']) == 1:
+            # v1 has only one outgoing edge, may be mergable
             v2 = set[v1]['after'][0]
-            if v2 == 'tobe':
-                print('tobe')
+            # print(f'     v2:{set[v2]}')
             if v2 not in set:
                 continue
-            if len(set[v2]['before']) == 1:
 
-                new = set[v1]['label'] + set[v2]['label'][k - 1:]
+            if len(set[v2]['before']) == 1:
+                # v2 has only one incoming edge, mergable
+                newlabel = set[v1]['label'] + set[v2]['label'][k - 1:]
                 set[v1]['after'] = set[v2]['after']
-                set[v1]['label'] = new
+                set[v1]['label'] = newlabel
 
                 del set[v2]
                 if v2 in ids:
                     ids.remove(v2)
+            else:
+                # can't extend v1, remove from list
+                ids.pop()
+
+        else:
+            # if v1 has multiple after nodes, remove from the list
+            ids.pop()
 
     return kmerset
+
+
+def remove_overlap(kmer):
+    """---------------------------------------------------------------------------------------------
+    remove the overlap between words by removing the last k-1 characters of each label. Be sure k is
+    set in KmerSet object
+
+    :param kmer: KmerSet
+    :return:int             sum of lengths of labels
+    ---------------------------------------------------------------------------------------------"""
+    remove = kmer.k - 1
+    total_len = 0
+    for k in kmer.set:
+        if kmer.set[k]['after']:
+            kmer.set[k]['label'] = kmer.set[k]['label'][:-remove]
+            total_len += len(kmer.set[k]['label'])
+
+    return total_len
 
 
 # --------------------------------------------------------------------------------------------------
@@ -392,12 +443,12 @@ Dreaming about the things that we could be
 But baby, I've been, I've been praying hard
 Said, "No more counting dollars, we'll be counting stars
 Yeah, we'll be counting stars"""
-# I see this life, like a swinging vine
-# Swing my heart across the line
-# And in my face is flashing signs
-# Seek it out and ye shall find"""
+    # I see this life, like a swinging vine
+    # Swing my heart across the line
+    # And in my face is flashing signs
+    # Seek it out and ye shall find"""
 
-    draggin_my_heart_around="""Baby, you'll come knocking on my front door
+    draggin_my_heart_around = """Baby, you'll come knocking on my front door
 Same old line you used to use before
 I said, "Hey well, what am I supposed to do?"
 I didn't know what I was getting into
@@ -412,28 +463,28 @@ This doesn't have to be the big get even
 This doesn't have to be anything at all
 I know you really want to tell me goodbye
 I know you really want to be your own girl"""
-# And baby, you could never look me in the eye
-# Oh, when you buckle with the weight of the words
-# Stop draggin' my
-# Stop draggin' my (stop)
-# Stop draggin' my heart around, yeah
-# There's people running 'round loose in the world
-# Ain't got nothing better to do
-# They make a meal of some bright-eyed kid
-# You need someone to look after you
-# I know you really want to tell me goodbye
-# I know you really want to be your own girl
-# And baby, you could never look me in the eye
-# But why you buckle with the weight of the words (yeah)
-# Stop draggin' my
-# Stop draggin' my (stop)
-# Stop draggin' my heart around, yeah
-# Stop draggin' my heart around
-# Stop draggin' my heart around (hey, hey, hey)
-# Oh, won't you stop draggin' my heart around? (Hey, hey, hey)
-# Stop draggin' my heart around"""
+    # And baby, you could never look me in the eye
+    # Oh, when you buckle with the weight of the words
+    # Stop draggin' my
+    # Stop draggin' my (stop)
+    # Stop draggin' my heart around, yeah
+    # There's people running 'round loose in the world
+    # Ain't got nothing better to do
+    # They make a meal of some bright-eyed kid
+    # You need someone to look after you
+    # I know you really want to tell me goodbye
+    # I know you really want to be your own girl
+    # And baby, you could never look me in the eye
+    # But why you buckle with the weight of the words (yeah)
+    # Stop draggin' my
+    # Stop draggin' my (stop)
+    # Stop draggin' my heart around, yeah
+    # Stop draggin' my heart around
+    # Stop draggin' my heart around (hey, hey, hey)
+    # Oh, won't you stop draggin' my heart around? (Hey, hey, hey)
+    # Stop draggin' my heart around"""
 
-    the_ring="""Three Rings for the Elven-kings under the sky,
+    the_ring = """Three Rings for the Elven-kings under the sky,
     Seven for the Dwarf-lords in their halls of stone,
     Nine for Mortal Men doomed to die,
     One for the Dark Lord on his dark throne;
@@ -442,7 +493,7 @@ I know you really want to be your own girl"""
     One Ring to bring them all, and in the darkness bind them;
     In the Land of Mordor where the Shadows lie."""
 
-    gold="""All that is gold does not glitter,
+    gold = """All that is gold does not glitter,
     Not all those who wander are lost;
     The old that is strong does not wither,
     Deep roots are not reached by the frost.
@@ -452,18 +503,56 @@ I know you really want to be your own girl"""
     Renewed shall be blade that was broken,
     The crownless again shall be king"""
 
-    kmer = KmerSet(text=gold)
-    print("original text\n", kmer.text)
-    textlen = kmer.clean_text()
-    print("\ncleaned text\n", kmer.text)
-    print("\n{} letters".format(textlen))
-    kmer.sample_reads(30, 7)
-    nread = 0
-    for read in kmer.reads:
-        nread += 1
-        print(f'{nread}\t{read}')
-    print()
-    kmer.from_text(5)
+    only_human = """
+    I'm only human, I'm only, I'm only
+    I'm only human, human
+    Maybe I'm foolish, maybe I'm blind
+    Thinking I can see through this and see what's behind
+    Got no way to prove it so maybe I'm lying
+    But I'm only human after all, I'm only human after all
+    Don't put your blame on me, don't put your blame on me
+    Take a look in the mirror and what do you see
+    Do you see it clearer or are you deceived, in what you believe
+    'Cause I'm only human after all, you're only human after all
+    Don't put the blame on me
+    Don't put your blame on me
+    # Some people got the real problems
+    # Some people out of luck
+    # Some people think I can solve them
+    # Lord heavens above
+    # I'm only human after all, I'm only human after all
+    # Don't put the blame on me
+    # Don't put the blame on me
+    # Don't ask my opinion, don't ask me to lie
+    # Then beg for forgiveness for making you cry, making you cry
+    # 'Cause I'm only human after all, I'm only human after all
+    # Don't put your blame on me, don't put the blame on me
+"""
+
+    generate_kmers = True
+    k = 10
+
+    if generate_kmers:
+        # generate new kmers from text
+        kmer = KmerSet(text=only_human)
+        print("original text\n", kmer.text)
+        textlen = kmer.clean_text()
+        print("\ncleaned text\n", kmer.text)
+        print("\n{} letters".format(textlen))
+        kmer.sample_reads(30, 4)
+        nread = 0
+        for read in kmer.reads:
+            nread += 1
+            print(f'{nread}\t{read}')
+        print()
+        kmer.from_text(k)
+    else:
+        # read kmers from list
+        kmer = KmerSet()
+        kmerfile = 'kmerlist.txt'
+        print(f'kmers read from {kmerfile}')
+        kmer_n = kmer.from_file(kmerfile)
+        print(f'kmers read: {kmer_n}')
 
     kmer.link()
     kset = kmer.set
@@ -474,14 +563,33 @@ I know you really want to be your own girl"""
     print(kmer.list_by_alpha())
 
     kmer = debruijn_condense(kmer)
+    total_len = remove_overlap(kmer)
     print(kmer.list_by_alpha())
-    print(f'condensed kmers: {len(kmer.set)}')
+    print(f'condensed kmers: {len(kmer.set)} assembly_length: {total_len}')
+    half_len = total_len / 2.0
     ncondensed = 0
     lcondensed = 0
-    for k in sorted(kmer.set, key=lambda x:len(kmer.set[x]['label']), reverse=True):
+    prev_lsum = 0
+    prev_l = 0
+    n50_notfound = True
+    for k in sorted(kmer.set, key=lambda x: len(kmer.set[x]['label']), reverse=True):
         ncondensed += 1
-        lcondensed += len(kmer.set[k]["label"])
-        print( f'{ncondensed}\t{lcondensed}\t{kmer.set[k]["label"]} ')
+        this_len = len(kmer.set[k]["label"])
+        lcondensed += this_len
+
+        if n50_notfound and lcondensed > half_len:
+            # found N50
+            n50_notfound = False
+            frac = (half_len - prev_lsum) / (lcondensed - prev_lsum)
+            n50 = prev_l + frac * (this_len - prev_l)
+            print(f'\t\t\t--> N50 {half_len:.1f} = {n50:.1f}')
+
+        prev_lsum = lcondensed
+        prev_l = this_len
+
+        print(f'{ncondensed}\t{this_len}\t{lcondensed}\t{kmer.set[k]["label"]} ')
+
+    print(f'N50:{n50:.1f}')
 
     kset = kmer.set
 
@@ -497,7 +605,7 @@ I know you really want to be your own girl"""
         label.append(kset[v]['label'])
         i += 1
     print(label)
-    print(f'{i} vertices found')
+    print(f'\n{i} vertices found')
 
     # create the edge list
     edges = []
@@ -517,17 +625,17 @@ I know you really want to be your own girl"""
     print(g.get_edgelist())
 
     # h = g.layout_kamada_kawai(maxiter=50, kkconst=5)
-    h = g.layout_fruchterman_reingold(niter=50000, start_temp=1000)
+    # h = g.layout_fruchterman_reingold(niter=50000, start_temp=1000)
     # h = g.layout_drl()
     # h = g.layout_lgl(maxdelta=75, repulserad=3375000, area=22500, coolexp=1.3, maxiter=5000)
-    # h = g.layout_graphopt(niter=10000, node_charge=0.0001, spring_length=10, spring_constant=0.5)
+    h = g.layout_graphopt(niter=10000, node_charge=0.0001, spring_length=10, spring_constant=0.5)
     # h = g.layout_circle()
     # h = g.layout_davidson_harel(maxiter=100, fineiter=50, weight_node_dist=1, weight_border=0, weight_edge_lengths=0.2,
     #                             weight_edge_crossings=2, weight_node_edge_dist=2, cool_fact=0.99)
     style = {'layout':            h,
              'bbox':              (2500, 2500),
              'margin':            600,
-             'vertex_label_dist': 5,
+             'vertex_label_dist': 2,
              'vertex_label_size': 20,
              'edge_arrow_size':   1,
              'edge_arrow_width':  0.7,
