@@ -251,290 +251,299 @@ def remove_overlap(kmer):
     for k in kmer.set:
         if kmer.set[k]['after']:
             kmer.set[k]['label'] = kmer.set[k]['label'][:-remove]
-            total_len += len(kmer.set[k]['label'])
+        total_len += len(kmer.set[k]['label'])
 
     return total_len
+
+def get_text(name, length=0):
+    """---------------------------------------------------------------------------------------------
+    A bunch of text stored as a dictionary
+
+    :param name: string     key to look up text
+    :param length: int        how many characters to return from the text (after cleaning)
+    :return: string         selected text
+    ---------------------------------------------------------------------------------------------"""
+    library = {
+        'hamlet': """
+            To be, or not to be--that is the question:
+            Whether 'tis nobler in the mind to suffer
+            The slings and arrows of outrageous fortune
+            Or to take arms against a sea of troubles
+            And by opposing end them.""",
+        'dna1': 'A A T G C G C T A C G T A G G G T A A T A T A A G A C C A',
+        'dna2': """
+            ATGTGGATACGCCCATTGCAGGCGGAACTGAGCGATAACACGCTGGCCCTGTACGCGCCAAACCGTTTTG
+            TCCTCGATTGGGTACGGGACAAGTACCTTAATAATATCAATGGACTGCTAACCAGTTTCTGCGGAGCGGA
+            TGCCCCACAGCTGCGTTTTGAAGTCGGCACCAAACCGGTGACGCAAACGCCACAAGCGGCAGTGACGAGC
+            AACGTCGCGGCCCCTGCACAGGTGGCGCAAACGCAGCCGCAACGTGCTGCGCCTTCTACGCGCTCAGGTT
+            GGGATAACGTCCCGGCCCCGGCAGAACCGACCTATCGTTCTAACGTAAACGTCAAACACACGTTTGATAA
+            CTTCGTTGAAGGTAAATCTAACCAACTGGCGCGCGCGGCGGCTCGCCAGGTGGCGGATAACCCTGGCGGT
+            GCCTATAACCCGTTGTTCCTTTATGGCGGCACGGGTCTGGGTAAAACTCACCTGCTGCATGCGGTGGGTA
+            ACGGCATTATGGCGCGCAAGCCGAATGCCAAAGTGGTTTATATGCACTCCGAGCGCTTTGTTCAGGACAT
+            GGTTAAAGCCCTGCAAAACAACGCGATCGAAGAGTTTAAACGCTACTACCGTTCCGTAGATGCACTGCTG
+            ATCGACGATATTCAGTTTTTTGCTAATAAAGAACGATCTCAGGAAGAGTTTTTCCACACCTTCAACGCCC
+            TGCTGGAAGGTAATCAACAGATCATTCTCACCTCGGATCGCTATCCGAAAGAGATCAACGGCGTTGAGGA
+            TCGTTTGAAATCCCGCTTCGGTTGGGGACTGACTGTGGCGATCGAACCGCCAGAGCTGGAAACCCGTGTG
+            GCGATCCTGATGAAAAAGGCCGACGAAAACGACATTCGTTTGCCGGGCGAAGTGGCGTTCTTTATCGCCA
+            AGCGTCTACGATCTAACGTACGTGAGCTGGAAGGGGCGCTGAACCGCGTCATTGCCAATGCCAACTTTAC
+            CGGACGGGCGATCACCATCGACTTCGTGCGTGAGGCGCTGCGCGACTTGCTGGCATTGCAGGAAAAACTG
+            GTCACCATCGACAATATTCAGAAGACGGTGGCGGAGTACTACAAGATCAAAGTCGCGGATCTCCTTTCCA
+            AGCGTCGATCCCGCTCGGTGGCGCGTCCGCGCCAGATGGCGATGGCGCTGGCGAAAGAGCTGACTAACCA
+            CAGTCTGCCGGAGATTGGCGATGCGTTTGGTGGCCGTGACCACACGACGGTGCTTCATGCCTGCCGTAAG
+            ATCGAGCAGTTGCGTGAAGAGAGCCACGATATCAAAGAAGATTTTTCAAATTTAATCAGAACATTGTCAT
+            CGTAA""",
+        'romeo': """
+            O Romeo, Romeo, wherefore art thou Romeo?
+            Deny thy father and refuse thy name.
+            Or if thou wilt not, be but sworn my love
+            And I’ll no longer be a Capulet.
+            ‘Tis but thy name that is my enemy:
+            Thou art thyself, though not a Montague.
+            What’s Montague? It is nor hand nor foot
+            Nor arm nor face nor any other part
+            Belonging to a man. O be some other name.
+            What’s in a name? That which we call a rose
+            By any other name would smell as sweet;
+            So Romeo would, were he not Romeo call’d,
+            Retain that dear perfection which he owes
+            Without that title. Romeo, doff thy name,
+            And for that name, which is no part of thee,
+            Take all myself.""",
+        'gettysburg': """
+            Fourscore and seven years ago our fathers brought forth, on this continent, a new 
+            nation, conceived in liberty, and dedicated to the proposition that all men are created 
+            equal. Now we are engaged in a great civil war, testing whether that nation, or any 
+            nation so conceived, and so dedicated, can long endure. We are met on a great 
+            battle-field of that war. We have come to dedicate a portion of that field, as a final 
+            resting-place for those who here gave their lives, that that nation might live.
+            It is altogether fitting and proper that we should do this. But, in a larger sense, we 
+            cannot dedicate, we cannot consecrate — we cannot hallow—this ground. The brave men, 
+            living and dead, who struggled here, have consecrated it far above our poor power to 
+            add or detract.
+            The world will little note, nor long remember what we say here, but it can never forget 
+            what they did here. It is for us the living, rather, to be dedicated here to the 
+            unfinished work which they who fought here have thus far so nobly advanced. It is 
+            rather for us to be here dedicated to the great task remaining before us—that from 
+            these honored dead we take increased devotion to that cause for which they here gave 
+            the last full measure of devotion—that we here highly resolve that these dead shall 
+            not have died in vain—that this nation, under God, shall have a new birth of freedom, 
+            and that government of the people, by the people, for the people, shall not perish 
+            from the earth.""",
+        'butsoft': """
+            But soft, what light through yonder window breaks?
+            It is the east, and Juliet is the sun.
+            Arise, fair sun, and kill the envious moon,
+            Who is already sick and pale with grief
+            That thou, her maid, art far more fair than she. . . .
+            The brightness of her cheek would shame those stars
+            As daylight doth a lamp; her eye in heaven
+            Would through the airy region stream so bright
+            That birds would sing and think it were not night.""",
+        'black_dog': """
+            Hey hey mama said the way you move
+            Gonna make you sweat, gonna make you groove
+            Ah, ah, child, way you shake that thing
+            Gonna make you burn, gonna make you sting.
+            Hey hey baby when you walk that way
+            Watch your honey drip, can't keep away
+            Oh yeah, oh yeah, oh, ah, ah
+            Oh yeah, oh yeah, oh, ah, ah.
+            I gotta roll, can't stand still
+            Got a flamin' heart, can't get my fill
+            Eyes that shine, burnin' red
+            Dreams of you all through my head
+            Ah ah, ah ah, ah ah, ah ah, ah ah, ah ah, ahhh
+            Hey, baby, whoa baby, pretty baby
+            Darlin' makes 'em do me now
+            Hey, baby, oh baby, pretty baby
+            Move me like you're doin' now
+            Didn't take too long 'fore I found out
+            What people mean by down and out
+            Spent my money, took my car
+            Started tellin' her friends she gonna be a star
+            I don't know, but I been told
+            A big-legged woman ain't got no soul
+            Oh yeah, oh yeah, ah, ah, ah
+            Oh yeah, oh yeah, ah, ah, ah
+            All I ask for when I pray
+            A steady rollin' woman won't come my way
+            Need a woman gonna hold my hand
+            Tell me no lies, make me a happy man
+            Ah ah, ah ah, ah ah, ah ah, ah ah, ah ah, ahhh.
+            Ah, yeah!""",
+        'both_sides_now': """
+            Rows and flows of angel hair
+            And ice cream castles in the air
+            And feather canyons everywhere
+            Looked at clouds that way
+            But now they only block the sun
+            They rain and they snow on everyone
+            So many things I would have done
+            But clouds got in my way
+            I've looked at clouds from both sides now
+            From up and down and still somehow
+            It's cloud illusions I recall
+            I really don't know clouds at all""",
+        'champagne_problems': """
+            You booked the night train for a reason
+            So you could sit there in this hurt
+            Bustling crowds or silent sleepers
+            You're not sure which is worse
+            Because I dropped your hand while dancing
+            Left you out there standing
+            Crestfallen on the landing
+            Champagne problems
+            Your mom's ring in your pocket
+            My picture in your wallet
+            Your heart was glass, I dropped it
+            You told your family for a reason
+            You couldn't keep it in
+            Your sister splashed out on the bottle
+            Now no one's celebrating
+            Dom Perignon, you brought it
+            No crowd of friends applauded
+            Your hometown skeptics called it
+            Champagne problems.
+            You had a speech, you're speechless
+            Love slipped beyond your reaches
+            And I couldn't give a reason
+            Your Midas touch on the Chevy door
+            November flush and your flannel cure
+            "This dorm was once a madhouse"
+            I made a joke, "Well, it's made for me"
+            How evergreen, our group of friends
+            Don't think we'll say that word again
+            And soon they'll have the nerve to deck the halls
+            That we once walked through
+            One for the money, two for the show
+            I never was ready so I watch you go
+            Sometimes you just don't know the answer
+            'Til someone's on their knees and asks you
+            "She would've made such a lovely bride
+            What a shame she's fucked in the head," they said
+            But you'll find the real thing instead
+            She'll patch up your tapestry that I shred
+            ’tis the damn season
+            And hold your hand while dancing
+            Never leave you standing
+            Crestfallen on the landing
+            With champagne problems
+            Your mom's ring in your pocket
+            Her picture in your wallet
+            You won't remember all my
+            Champagne problems
+            You won't remember all my
+            Champagne problems""",
+        'counting_stars': """
+            Lately, I've been, I've been losing sleep
+            Dreaming about the things that we could be
+            But baby, I've been, I've been praying hard
+            Said, "No more counting dollars, we'll be counting stars
+            Yeah, we'll be counting stars
+            I see this life, like a swinging vine
+            Swing my heart across the line
+            And in my face is flashing signs
+            Seek it out and ye shall find""",
+        'draggin_my_heart_around': """
+            Baby, you'll come knocking on my front door
+            Same old line you used to use before
+            I said, "Hey well, what am I supposed to do?"
+            I didn't know what I was getting into
+            Say you've had a little trouble in town
+            Say you're keeping some demons down
+            Stop draggin' my
+            Stop draggin' my 
+            Stop draggin' my heart around, yeah
+            It's hard to think about what you wanted
+            It's hard to think about what you lost
+            This doesn't have to be the big get even
+            This doesn't have to be anything at all
+            I know you really want to tell me goodbye
+            I know you really want to be your own girl
+            And baby, you could never look me in the eye
+            Oh, when you buckle with the weight of the words
+            Stop draggin' my
+            Stop draggin' my (stop)
+            Stop draggin' my heart around, yeah
+            There's people running 'round loose in the world
+            Ain't got nothing better to do
+            They make a meal of some bright-eyed kid
+            You need someone to look after you
+            I know you really want to tell me goodbye
+            I know you really want to be your own girl
+            And baby, you could never look me in the eye
+            But why you buckle with the weight of the words (yeah)
+            Stop draggin' my
+            Stop draggin' my (stop)
+            Stop draggin' my heart around, yeah
+            Stop draggin' my heart around
+            Stop draggin' my heart around (hey, hey, hey)
+            Oh, won't you stop draggin' my heart around? (Hey, hey, hey)
+            Stop draggin' my heart around""",
+        'one_ring': """
+            Three Rings for the Elven-kings under the sky,
+            Seven for the Dwarf-lords in their halls of stone,
+            Nine for Mortal Men doomed to die,
+            One for the Dark Lord on his dark throne;
+            In the Land of Mordor where the Shadows lie.
+            One Ring to rule them all, one Ring to find them,
+            One Ring to bring them all, and in the darkness bind them;
+            In the Land of Mordor where the Shadows lie.""",
+        'gold': """
+            All that is gold does not glitter,
+            Not all those who wander are lost;
+            The old that is strong does not wither,
+            Deep roots are not reached by the frost.
+    
+            From the ashes a fire shall be woken,
+            A light from the shadows shall spring;
+            Renewed shall be blade that was broken,
+            The crownless again shall be king""",
+        'only_human': """
+            I'm only human, I'm only, I'm only
+            I'm only human, human
+            Maybe I'm foolish, maybe I'm blind
+            Thinking I can see through this and see what's behind
+            Got no way to prove it so maybe I'm lying
+            But I'm only human after all, I'm only human after all
+            Don't put your blame on me, don't put your blame on me
+            Take a look in the mirror and what do you see
+            Do you see it clearer or are you deceived, in what you believe
+            'Cause I'm only human after all, you're only human after all
+            Don't put the blame on me
+            Don't put your blame on me
+            Some people got the real problems
+            Some people out of luck
+            Some people think I can solve them
+            Lord heavens above
+            I'm only human after all, I'm only human after all
+            Don't put the blame on me
+            Don't put the blame on me
+            Don't ask my opinion, don't ask me to lie
+            Then beg for forgiveness for making you cry, making you cry
+            'Cause I'm only human after all, I'm only human after all
+            Don't put your blame on me, don't put the blame on me"""
+        }
+    if not length:
+        # default length is the entire quote
+        length = len(library[name])
+
+    return library[name][:length]
 
 
 # --------------------------------------------------------------------------------------------------
 #
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    text = '''To be, or not to be--that is the question:
-        Whether 'tis nobler in the mind to suffer
-        The slings and arrows of outrageous fortune
-        Or to take arms against a sea of troubles
-        And by opposing end them.'''
-
-    # text1 = 'To be, or not to be--that is the question: Whether tis nobler in the mind to suffer'
-    text1 = 'To be, or not to be--that is the question'
-
-    text2 = 'A A T G C G C T A C G T A G G G T A A T A T A A G A C C A'
-
-    text3 = '''O Romeo, Romeo, wherefore art thou Romeo?
-        Deny thy father and refuse thy name.
-        Or if thou wilt not, be but sworn my love
-        And I’ll no longer be a Capulet.
-        ‘Tis but thy name that is my enemy:
-        Thou art thyself, though not a Montague.
-        What’s Montague? It is nor hand nor foot
-        Nor arm nor face nor any other part
-        Belonging to a man. O be some other name.
-        What’s in a name? That which we call a rose
-        By any other name would smell as sweet;
-        So Romeo would, were he not Romeo call’d,
-        Retain that dear perfection which he owes
-        Without that title. Romeo, doff thy name,
-        And for that name, which is no part of thee,
-        Take all myself.'''
-
-    text4 = '''Fourscore and seven years ago our fathers brought forth, on this continent, a new nation, conceived in 
-    liberty, and dedicated to the proposition that all men are created equal. Now we are engaged in a great civil war, 
-    testing whether that nation, or any nation so conceived, and so dedicated, can long endure. We are met on a great 
-    battle-field of that war. We have come to dedicate a portion of that field, as a final resting-place for those who 
-    here gave their lives, that that nation might live.
-    It is altogether fitting and proper that we should do this.
-    But, in a larger sense, we cannot dedicate, we cannot consecrate—we cannot hallow—this ground. The brave men, 
-    living and dead, who struggled here, have consecrated it far above our poor power to add or detract.
-    The world will little note, nor long remember what we say here, but it can never forget what they did here.
-    It is for us the living, rather, to be dedicated here to the unfinished work which they who fought here have thus 
-    far so nobly advanced. It is rather for us to be here dedicated to the great task remaining before us—that from 
-    these honored dead we take increased devotion to that cause for which they here gave the last full measure of 
-    devotion—that we here highly resolve that these dead shall not have died in vain—that this nation, under God, shall 
-    have a new birth of freedom, and that government of the people, by the people, for the people, shall not perish 
-    from the earth.'''
-
-    text5 = '''Fourscore and seven years ago our fathers brought forth, on this continent, a new nation, conceived in 
-        liberty, and dedicated to the proposition that all men are created equal. Now we are engaged in a great civil war, 
-        testing whether that nation, or any nation so conceived, and so dedicated, can long endure. We are met on a great 
-        battle-field of that war. We have come to dedicate a portion of that field, as a final resting-place for those who 
-        here gave their lives, that that nation might live.'''
-
-    text6 = '''But soft, what light through yonder window breaks?
-    It is the east, and Juliet is the sun.
-    Arise, fair sun, and kill the envious moon,
-    Who is already sick and pale with grief
-    That thou, her maid, art far more fair than she. . . .
-    The brightness of her cheek would shame those stars
-    As daylight doth a lamp; her eye in heaven
-    Would through the airy region stream so bright
-    That birds would sing and think it were not night.'''
-
-    text7 = '''ATGTGGATACGCCCATTGCAGGCGGAACTGAGCGATAACACGCTGGCCCTGTACGCGCCAAACCGTTTTG
-TCCTCGATTGGGTACGGGACAAGTACCTTAATAATATCAATGGACTGCTAACCAGTTTCTGCGGAGCGGA
-TGCCCCACAGCTGCGTTTTGAAGTCGGCACCAAACCGGTGACGCAAACGCCACAAGCGGCAGTGACGAGC
-AACGTCGCGGCCCCTGCACAGGTGGCGCAAACGCAGCCGCAACGTGCTGCGCCTTCTACGCGCTCAGGTT
-GGGATAACGTCCCGGCCCCGGCAGAACCGACCTATCGTTCTAACGTAAACGTCAAACACACGTTTGATAA
-CTTCGTTGAAGGTAAATCTAACCAACTGGCGCGCGCGGCGGCTCGCCAGGTGGCGGATAACCCTGGCGGT
-GCCTATAACCCGTTGTTCCTTTATGGCGGCACGGGTCTGGGTAAAACTCACCTGCTGCATGCGGTGGGTA
-ACGGCATTATGGCGCGCAAGCCGAATGCCAAAGTGGTTTATATGCACTCCGAGCGCTTTGTTCAGGACAT
-GGTTAAAGCCCTGCAAAACAACGCGATCGAAGAGTTTAAACGCTACTACCGTTCCGTAGATGCACTGCTG
-ATCGACGATATTCAGTTTTTTGCTAATAAAGAACGATCTCAGGAAGAGTTTTTCCACACCTTCAACGCCC
-TGCTGGAAGGTAATCAACAGATCATTCTCACCTCGGATCGCTATCCGAAAGAGATCAACGGCGTTGAGGA
-TCGTTTGAAATCCCGCTTCGGTTGGGGACTGACTGTGGCGATCGAACCGCCAGAGCTGGAAACCCGTGTG
-GCGATCCTGATGAAAAAGGCCGACGAAAACGACATTCGTTTGCCGGGCGAAGTGGCGTTCTTTATCGCCA
-AGCGTCTACGATCTAACGTACGTGAGCTGGAAGGGGCGCTGAACCGCGTCATTGCCAATGCCAACTTTAC
-CGGACGGGCGATCACCATCGACTTCGTGCGTGAGGCGCTGCGCGACTTGCTGGCATTGCAGGAAAAACTG
-GTCACCATCGACAATATTCAGAAGACGGTGGCGGAGTACTACAAGATCAAAGTCGCGGATCTCCTTTCCA
-AGCGTCGATCCCGCTCGGTGGCGCGTCCGCGCCAGATGGCGATGGCGCTGGCGAAAGAGCTGACTAACCA
-CAGTCTGCCGGAGATTGGCGATGCGTTTGGTGGCCGTGACCACACGACGGTGCTTCATGCCTGCCGTAAG
-ATCGAGCAGTTGCGTGAAGAGAGCCACGATATCAAAGAAGATTTTTCAAATTTAATCAGAACATTGTCAT
-CGTAA'''
-
-    black_dog = '''Hey hey mama said the way you move
-Gonna make you sweat, gonna make you groove
-Ah, ah, child, way you shake that thing
-Gonna make you burn, gonna make you sting.
-Hey hey baby when you walk that way
-Watch your honey drip, can't keep away
-Oh yeah, oh yeah, oh, ah, ah
-Oh yeah, oh yeah, oh, ah, ah.
-I gotta roll, can't stand still
-Got a flamin' heart, can't get my fill
-Eyes that shine, burnin' red
-Dreams of you all through my head
-Ah ah, ah ah, ah ah, ah ah, ah ah, ah ah, ahhh
-Hey, baby, whoa baby, pretty baby
-Darlin' makes 'em do me now
-Hey, baby, oh baby, pretty baby
-Move me like you're doin' now
-Didn't take too long 'fore I found out
-What people mean by down and out
-Spent my money, took my car
-Started tellin' her friends she gonna be a star
-I don't know, but I been told
-A big-legged woman ain't got no soul
-Oh yeah, oh yeah, ah, ah, ah
-Oh yeah, oh yeah, ah, ah, ah
-All I ask for when I pray
-A steady rollin' woman won't come my way
-Need a woman gonna hold my hand
-Tell me no lies, make me a happy man
-Ah ah, ah ah, ah ah, ah ah, ah ah, ah ah, ahhh.
-Ah, yeah!'''
-
-    both_sides_now = '''Rows and flows of angel hair
-And ice cream castles in the air
-And feather canyons everywhere
-Looked at clouds that way
-But now they only block the sun
-They rain and they snow on everyone
-So many things I would have done
-But clouds got in my way
-I've looked at clouds from both sides now
-From up and down and still somehow
-It's cloud illusions I recall
-I really don't know clouds at all'''
-
-    champagne_problems = """You booked the night train for a reason
-    So you could sit there in this hurt
-    Bustling crowds or silent sleepers
-    You're not sure which is worse
-    Because I dropped your hand while dancing
-    Left you out there standing
-    Crestfallen on the landing
-    Champagne problems
-    Your mom's ring in your pocket
-    My picture in your wallet
-    Your heart was glass, I dropped it
-    Champagne problems"""
-    # You told your family for a reason
-    # You couldn't keep it in
-    # Your sister splashed out on the bottle
-    # Now no one's celebrating
-    # Dom Perignon, you brought it
-    # No crowd of friends applauded
-    # Your hometown skeptics called it
-    # Champagne problems"""
-    # You had a speech, you're speechless
-    # Love slipped beyond your reaches
-    # And I couldn't give a reason
-    # Champagne problems"""
-    # Your Midas touch on the Chevy door
-    # November flush and your flannel cure
-    # "This dorm was once a madhouse"
-    # I made a joke, "Well, it's made for me"
-    # How evergreen, our group of friends
-    # Don't think we'll say that word again
-    # And soon they'll have the nerve to deck the halls
-    # That we once walked through
-    # One for the money, two for the show
-    # I never was ready so I watch you go
-    # Sometimes you just don't know the answer
-    # 'Til someone's on their knees and asks you
-    # "She would've made such a lovely bride
-    # What a shame she's fucked in the head," they said
-    # But you'll find the real thing instead
-    # She'll patch up your tapestry that I shred
-    # ’tis the damn season
-    # And hold your hand while dancing
-    # Never leave you standing
-    # Crestfallen on the landing
-    # With champagne problems
-    # Your mom's ring in your pocket
-    # Her picture in your wallet
-    # You won't remember all my
-    # Champagne problems
-    # You won't remember all my
-    # Champagne problems"""
-    counting_stars = """
-    Lately, I've been, I've been losing sleep
-Dreaming about the things that we could be
-But baby, I've been, I've been praying hard
-Said, "No more counting dollars, we'll be counting stars
-Yeah, we'll be counting stars"""
-    # I see this life, like a swinging vine
-    # Swing my heart across the line
-    # And in my face is flashing signs
-    # Seek it out and ye shall find"""
-
-    draggin_my_heart_around = """Baby, you'll come knocking on my front door
-Same old line you used to use before
-I said, "Hey well, what am I supposed to do?"
-I didn't know what I was getting into
-Say you've had a little trouble in town
-Say you're keeping some demons down
-Stop draggin' my
-Stop draggin' my 
-Stop draggin' my heart around, yeah
-It's hard to think about what you wanted
-It's hard to think about what you lost
-This doesn't have to be the big get even
-This doesn't have to be anything at all
-I know you really want to tell me goodbye
-I know you really want to be your own girl"""
-    # And baby, you could never look me in the eye
-    # Oh, when you buckle with the weight of the words
-    # Stop draggin' my
-    # Stop draggin' my (stop)
-    # Stop draggin' my heart around, yeah
-    # There's people running 'round loose in the world
-    # Ain't got nothing better to do
-    # They make a meal of some bright-eyed kid
-    # You need someone to look after you
-    # I know you really want to tell me goodbye
-    # I know you really want to be your own girl
-    # And baby, you could never look me in the eye
-    # But why you buckle with the weight of the words (yeah)
-    # Stop draggin' my
-    # Stop draggin' my (stop)
-    # Stop draggin' my heart around, yeah
-    # Stop draggin' my heart around
-    # Stop draggin' my heart around (hey, hey, hey)
-    # Oh, won't you stop draggin' my heart around? (Hey, hey, hey)
-    # Stop draggin' my heart around"""
-
-    the_ring = """Three Rings for the Elven-kings under the sky,
-    Seven for the Dwarf-lords in their halls of stone,
-    Nine for Mortal Men doomed to die,
-    One for the Dark Lord on his dark throne;
-    In the Land of Mordor where the Shadows lie.
-    One Ring to rule them all, one Ring to find them,
-    One Ring to bring them all, and in the darkness bind them;
-    In the Land of Mordor where the Shadows lie."""
-
-    gold = """All that is gold does not glitter,
-    Not all those who wander are lost;
-    The old that is strong does not wither,
-    Deep roots are not reached by the frost.
-    
-    From the ashes a fire shall be woken,
-    A light from the shadows shall spring;
-    Renewed shall be blade that was broken,
-    The crownless again shall be king"""
-
-    only_human = """
-    I'm only human, I'm only, I'm only
-    I'm only human, human
-    Maybe I'm foolish, maybe I'm blind
-    Thinking I can see through this and see what's behind
-    Got no way to prove it so maybe I'm lying
-    But I'm only human after all, I'm only human after all
-    Don't put your blame on me, don't put your blame on me
-    Take a look in the mirror and what do you see
-    Do you see it clearer or are you deceived, in what you believe
-    'Cause I'm only human after all, you're only human after all
-    Don't put the blame on me
-    Don't put your blame on me
-    # Some people got the real problems
-    # Some people out of luck
-    # Some people think I can solve them
-    # Lord heavens above
-    # I'm only human after all, I'm only human after all
-    # Don't put the blame on me
-    # Don't put the blame on me
-    # Don't ask my opinion, don't ask me to lie
-    # Then beg for forgiveness for making you cry, making you cry
-    # 'Cause I'm only human after all, I'm only human after all
-    # Don't put your blame on me, don't put the blame on me
-"""
 
     generate_kmers = True
-    k = 10
+    k = 6
+    text_len = 700
+    text = get_text('only_human')
 
     if generate_kmers:
         # generate new kmers from text
-        kmer = KmerSet(text=only_human)
+        kmer = KmerSet(text=text)
         print("original text\n", kmer.text)
         textlen = kmer.clean_text()
         print("\ncleaned text\n", kmer.text)
