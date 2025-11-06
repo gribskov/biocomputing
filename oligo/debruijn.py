@@ -178,8 +178,8 @@ class KmerSet():
             words += '{}\t{}'.format(kmer, set[kmer]['count'])
             # if 'label' in set[kmer]:
             #     words += f'\t{set[kmer]["label"]}'
-            if set[kmer]["label"] != kmer:
-                words += f'\t{set[kmer]["label"]}'
+            # if set[kmer]["label"] != kmer:
+            words += f'\t{set[kmer]["label"]}'
             words += '\n'
 
         return words
@@ -522,7 +522,14 @@ def get_text(name, length=0):
             Don't ask my opinion, don't ask me to lie
             Then beg for forgiveness for making you cry, making you cry
             'Cause I'm only human after all, I'm only human after all
-            Don't put your blame on me, don't put the blame on me"""
+            Don't put your blame on me, don't put the blame on me""",
+        'declaration': """
+        We hold these truths to be self-evident, 
+        that all men are created equal, 
+        that they are endowed by their Creator with certain unalienable Rights, 
+        that among these are Life, Liberty and the pursuit of Happiness.""",
+        'holmes': """
+        Crime is common. Logic is rare. Therefore it is upon the logic rather than upon the crime that you should dwell"""
         }
     if not length:
         # default length is the entire quote
@@ -537,9 +544,9 @@ def get_text(name, length=0):
 if __name__ == '__main__':
 
     generate_kmers = True
-    k = 6
-    text_len = 700
-    text = get_text('only_human')
+    k = 5
+    text_len = 0
+    text = get_text('holmes')
 
     if generate_kmers:
         # generate new kmers from text
