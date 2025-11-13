@@ -82,12 +82,15 @@ class KmerSet():
         -----------------------------------------------------------------------------------------"""
         infile = open(filename, 'r')
 
+        lastkmer = ''
         for line in infile:
             token = line.rstrip().split()
             for kmer in token:
                 if kmer.isdigit():
+                    self.set[lastkmer]['count'] = int(kmer)
                     continue
                 self.add(kmer)
+                lastkmer = kmer
                 l = len(kmer)
 
         infile.close()
@@ -543,8 +546,8 @@ def get_text(name, length=0):
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    generate_kmers = True
-    k = 5
+    generate_kmers = False
+    k = 6
     text_len = 0
     text = get_text('holmes')
 
@@ -575,10 +578,17 @@ if __name__ == '__main__':
     for v in kset:
         kset[v]['label'] = v
 
-    print(f'kmers: {len(kmer.list_by_alpha())}')
+    # get total number of kmers
+    kmer_total = 0
+    for k in kmer.set:
+        kmer_total += kmer.set[k]['count']
+
+    print(f'total kmer count: {kmer_total}')
     print(kmer.list_by_alpha())
 
     kmer = debruijn_condense(kmer)
+    print(f'kmers: {len(kmer.list_by_alpha())}')
+    print(kmer.list_by_alpha())
     total_len = remove_overlap(kmer)
     print(kmer.list_by_alpha())
     print(f'condensed kmers: {len(kmer.set)} assembly_length: {total_len}')
