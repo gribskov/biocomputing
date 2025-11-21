@@ -178,7 +178,7 @@ class Gff:
             if data[n][column] == key:
                 yield n, data[n]
 
-        raise StopIteration
+        return
 
     def get_by_sequence_range(self, targetfeature, targetseq, begin, end):
         """-----------------------------------------------------------------------------------------
@@ -236,7 +236,7 @@ class Gff:
                             if not parsed['feature'] in selector[s]:
                                 break
                         if s == 'sequence':
-                            print(f'sequence:{parsed['sequence']}\tselector:{selector[s]}')
+                            # print(f'sequence:{parsed['sequence']}\tselector:{selector[s]}')
                             if not parsed['sequence'] in selector[s]:
                                 break
                         if s == 'begin':
