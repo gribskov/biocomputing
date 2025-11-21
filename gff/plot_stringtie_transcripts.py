@@ -10,7 +10,7 @@ import matplotlib.pylab as plt
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    gtf = 'data/merged.gtf'
+    gtf = 'data/stringtie_merged_jm.gtf'
     target_feature = ['transcript', 'exon']
     sequence = ['LG01']
     selector = {'sequence': ['LG01'],
