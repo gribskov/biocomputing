@@ -1,5 +1,5 @@
 """=================================================================================================
-compare data described as linear ranges on a line, e.g., genes on a chromosome
+compare and merge data described as linear ranges on a line, e.g., genes on a chromosome
 
 This code was developed for the practical bioinformatics class, and was formerly called
 genome_ranges. I changed the name to not cause confusion with the R package Genomic_Ranges
@@ -90,7 +90,7 @@ class Range:
         for line in self.file:
             field = line.split('\t')
             if len(field) < 9:
-                # skip records with less than 9 fiels (not data records)
+                # skip records with less than 9 fields (not data records)
                 continue
 
             # all features
