@@ -1,5 +1,6 @@
 from gff import Gff
 
+
 class Bundle:
 
     def __init__(self):
@@ -11,7 +12,8 @@ class Bundle:
         self.sequence = ''
         self.transcript = []
 
-def make_bundle(gff,id_column='transcript_id'):
+
+def make_bundle(gff, id_column='transcript_id'):
     """---------------------------------------------------------------------------------------------
 
     :param gff: Gff object
@@ -32,7 +34,7 @@ def make_bundle(gff,id_column='transcript_id'):
             # new bundle
             b = Bundle()
             b.begin = begin
-            b.end = max(b.end,end)
+            b.end = max(b.end, end)
             b.sequence = sequence
             b.transcript.append(t)
             bundle_list.append(b)
@@ -46,6 +48,7 @@ def make_bundle(gff,id_column='transcript_id'):
         b_stop = end
 
     return bundle_list
+
 
 def overlap2(t1, t2):
     """-----------------------------------------------------------------------------------------
@@ -61,7 +64,7 @@ def overlap2(t1, t2):
     x1 = int(t2['end']) - int(t1['begin'])
     x2 = int(t2['begin']) - int(t1['end'])
 
-    test = ((left<0)<<3) + ((right<=0)<<2) + ((x1<0)<<1) + (x2<0)
+    test = ((left < 0) << 3) + ((right <= 0) << 2) + ((x1 < 0) << 1) + (x2 < 0)
     if test == 15:
         status = 'None'
     elif test == 13:
@@ -78,6 +81,7 @@ def overlap2(t1, t2):
         print('Error unknown overlap status ({}'.format(test))
 
     return left, right, status
+
 
 def overlap(t1, t2):
     """-----------------------------------------------------------------------------------------
@@ -126,13 +130,14 @@ def overlap(t1, t2):
 
     return lextend, rextend, type
 
+
 def merge(merge, t):
-    """
+    """-----------------------------------------------------------------------------------------
     
     :param merge: 
     :param t: 
     :return: 
-    """
+    -----------------------------------------------------------------------------------------"""
     print('C {}\t{}\t{}'.format(t['transcript_id'], t['begin'], t['end']))
     if t['transcript_id'] not in merge['names']:
         if merge['strand'] != t['strand']:
@@ -141,10 +146,14 @@ def merge(merge, t):
         merge['end'] = min(merge['end'], t['end'])
         merge['member'].append(t)
         merge['names'].append(t['transcript_id'])
-    
+
+
+# ##################################################################################################
+# main program
+# ##################################################################################################
 if __name__ == '__main__':
 
-    sgff = Gff(file="stranded.merged.stringtie.gff")
+    sgff = Gff(file="data/stringtie_merged_jm.gtf")
     transcript_n = sgff.read_feature('transcript')
     print('{} stranded features read'.format(transcript_n))
     sgff.replace_columns_re(['sequence'], 'lcl\|', r'')
@@ -173,19 +182,19 @@ if __name__ == '__main__':
     set = []
     set_end = 0
     set_seq = ''
-    for b in sorted(ubundle+sbundle, key=lambda k: (k.sequence, k.begin)):
+    for b in sorted(ubundle + sbundle, key=lambda k: (k.sequence, k.begin)):
 
         if b.begin > set_end or b.sequence != set_seq:
             # new set
             set_seq = b.sequence
             set_end = b.end
-            set.append( {'begin'   : b.begin,
-                        'end'     : set_end,
+            set.append({'begin':    b.begin,
+                        'end':      set_end,
                         'sequence': set_seq,
-                        'member'  : [b]} )
+                        'member':   [b]})
 
         else:
-        # continue current set
+            # continue current set
             set[-1]['end'] = max(set[-1]['end'], b.end)
             set[-1]['member'].append(b)
             set_end = set[-1]['end']
@@ -201,7 +210,7 @@ if __name__ == '__main__':
             for transcript in b.transcript:
                 trans.append(transcript)
 
-        trans.sort(key=lambda k: (k['transcript_id'][0]=='C',k['transcript_id'][0]=='S'))
+        trans.sort(key=lambda k: (k['transcript_id'][0] == 'C', k['transcript_id'][0] == 'S'))
 
         # if the C (genome) and S (stranded RNA) agree on the strand, the unstranded reads need to
         # be merged on to the known strand
@@ -228,11 +237,9 @@ if __name__ == '__main__':
 
             names.append(t['transcript_id'])
 
-
-        print( 'mergetype: {}'.format(dir))
+        print('mergetype: {}'.format(dir))
         for name in names:
             print('\t{}'.format(name))
-
 
         if s['sequence'] == 'Ctg0003':
             break
