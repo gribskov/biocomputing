@@ -4,13 +4,15 @@ classes. This should make it easier reuse.
 
 Michael Gribskov     21 November 2025
 #################################################################################################"""
-from scipy.fft import fhtoffset
 
 version = '2.0.0'
 
 
 class GxfRecord:
     """=============================================================================================
+    The nine standard columns appear as attributes of the GxfRecord object.
+    The standard columns are available in the class variable GxfRecord.column
+
     The GFF standard defines columns 0-7, column 8 is used for any attributes the project defines
     For details see https://useast.ensembl.org/info/website/upload/gff.html or
     https://agat.readthedocs.io/en/latest/gxf.html
@@ -68,7 +70,6 @@ class GxfRecord:
 
       For attributes with predefined meanings see
       https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md
-
     ============================================================================================="""
     # Predefined keys for columns 0-8, agrees with GFF3
     column = {'seqid': '', 'source': '', 'type': '', 'start': '0', 'end': '0',
@@ -76,16 +77,14 @@ class GxfRecord:
 
     def __init__(self, row, format="gtf"):
         """-----------------------------------------------------------------------------------------
-        format          GFF3 is the default, use gtf or gff2 for GTF
-        # del_attr        if true, delete the attribute field after parsing attributes
-        :param row:
-        :param format:
+        :param row: string      a string that can be parsed as gff3 or gtf
+        :param format: string   GFF3 is the default, use 'gtf' or 'gff2' for GTF
         -----------------------------------------------------------------------------------------"""
-
         for key, value in GxfRecord.column.items():
+            # set up the standard columns as attributes
             setattr(self, key, value)
 
-        # attr_sep separates the key/value pairs in attribute
+        # attr_sep separates the key/value pairs in attribute column
         self.attr_sep = '='
         if format == 'gtf' or 'gff2':
             self.attr_sep = ' '
@@ -98,7 +97,8 @@ class GxfRecord:
         parse a feature line. Attributes are split on semicolons, and key/value pairs split on
         attr_sep character.
 
-        :return:
+        :param row: string      string to parse
+        :return: True
         -----------------------------------------------------------------------------------------"""
         field = row.split(maxsplit=8)
         col_n = 0
@@ -200,6 +200,5 @@ if __name__ == '__main__':
     gtf = GxfSet(file=gtfin)
     feature_n = gtf.feature_get(['transcript'])
     print(f'{feature_n} features read from {gtfin}')
-
 
     exit(0)
