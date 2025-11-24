@@ -86,11 +86,19 @@ if __name__ == '__main__':
     merged = overlap(gtf)
     print(f'merged: {len(merged)}')
 
-    # created merged names and write out as gtf
+    # create merged names and write out as gtf
 
     output = 'merged.out'
     mout = open(output, 'w')
-    for f in merged:
-        mout.write(f'{f.seqid}\tStringTie\ttranscript\t{f.start}\t{f.end}\t.\t{f.strand}\t.\n')
+    for f in sorted(merged, key=lambda x:(x.seqid, x.start)):
+        attr_out = {'gene_id':f.members[0].attribute['gene_id'], 'transcript_id':f.members[0].attribute['transcript_id']}
+        mlist = []
+        for ff in f.members:
+            mlist.append(ff.attribute['transcript_id'])
+        attr_out['attribute'] = ','.join(mlist)
+        attr_str = '; '.join(attr_out)
+        print()
+
+        mout.write(f'{f.seqid}\tStringTie\ttranscript\t{f.start}\t{f.end}\t.\t{f.strand}\t.\t{attr_str}\n')
 
     exit(0)
