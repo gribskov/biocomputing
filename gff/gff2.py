@@ -4,6 +4,8 @@ classes. This should make it easier reuse.
 
 Michael Gribskov     21 November 2025
 #################################################################################################"""
+from scipy.fft import fhtoffset
+
 version = '2.0.0'
 
 
@@ -69,59 +71,63 @@ class GxfRecord:
 
     ============================================================================================="""
     # Predefined keys for columns 0-8, agrees with GFF3
-    column = ['seqid', 'source', 'type', 'start', 'end', 'score', 'strand', 'phase', 'attribute']
+    column = {'seqid': '', 'source': '', 'type': '', 'start': '0', 'end': '0',
+              'score': '', 'strand': '', 'phase': '', 'attribute': None}
 
     def __init__(self, row, format="gtf"):
+        """-----------------------------------------------------------------------------------------
+        format          GFF3 is the default, use gtf or gff2 for GTF
+        # del_attr        if true, delete the attribute field after parsing attributes
+        :param row:
+        :param format:
+        -----------------------------------------------------------------------------------------"""
 
-        self.parsed = ''
-        self.del_attr = None
+        for key, value in GxfRecord.column.items():
+            setattr(self, key, value)
 
         # attr_sep separates the key/value pairs in attribute
         self.attr_sep = '='
         if format == 'gtf' or 'gff2':
             self.attr_sep = ' '
 
-    def feature_parse(self):
+        if row:
+            self.feature_parse(row)
+
+    def feature_parse(self, row):
         """-----------------------------------------------------------------------------------------
         parse a feature line. Attributes are split on semicolons, and key/value pairs split on
         attr_sep character.
 
         :return:
         -----------------------------------------------------------------------------------------"""
-        field = self.row.split(maxsplit=8)
-        parsed = {}
-        for i in 9:
+        field = row.split(maxsplit=8)
+        col_n = 0
+        for key in GxfRecord.column:
             # extract the 9 defined columns
-            if i in [3, 4]:
-                # change begin, end, and score to int
+            if col_n in [3, 4]:
+                # change begin, end to int
                 # should score be float?
-                parsed[GxfRecord.column[i]] = int(field[i])
+                setattr(self, key, int(field[col_n]))
+
             else:
-                parsed[GxfRecord.column[i]] = field[i]
+                setattr(self, key, field[col_n])
 
-        # split the attributes on ; and save as a hash
+            # split the attributes on ; and save as a hash in self.attributes
+            attrs = {}
+            if key == 'attribute':
+                field = field[col_n].rstrip().split(';')
+                # attribute may end in; so last field may be blank
+                if not field[-1]:
+                    field.pop()
 
-        field = parsed['attribute'].rstrip().split(';')
-        # attribute may end in; so last field may be blank
-        if not field[-1]:
-            field.pop()
+                for f in field:
+                    (key, value) = f.strip().split(self.attr_sep, maxsplit=1)
+                    attrs[key] = value
 
-        for f in field:
-            (key, value) = f.strip().split(self.attr_sep, maxsplit=1)
-            parsed[key] = value.strip('"')
+                setattr(self, 'attribute', attrs)
 
-        if self.del_attr:
-            del parsed['attribute']
+            col_n += 1
 
-        self.parsed = parsed
-        return parsed
-
-    def comment_parse(self):
-        """-----------------------------------------------------------------------------------------
-        intended for parsing comments; not implemented
-        :return:
-        -----------------------------------------------------------------------------------------"""
-        pass
         return True
 
 
@@ -131,9 +137,69 @@ class GxfSet:
 
     ============================================================================================="""
 
+    def __init__(self, file=''):
+        """-----------------------------------------------------------------------------------------
+        file        string          path to data file
+        fh          filehandle      open file (read or write)
+        features    list            list of GxfRecord
+        -----------------------------------------------------------------------------------------"""
+        self.fh = None
+        self.features = []
+
+        if file:
+            self.fh = self.opensafe(file)
+        else:
+            self.file = 'in.gtf'
+
+    def opensafe(self, file, mode='r'):
+        """-----------------------------------------------------------------------------------------
+        Open file with check for whether the file exists. If the file cannot be opened, exit with
+        status=1
+
+        :param file: string     path to file
+        :param mode: string     r|w (or any valid mode)
+        :return: filehandle     opened file, also stored in self.fh
+        -----------------------------------------------------------------------------------------"""
+        if file:
+            self.file = file
+
+        try:
+            fh = open(file, mode)
+        except OSError:
+            print(f'GxfSet::opensafe - Error opening file ({file})')
+            exit(1)
+
+        self.fh = fh
+        return fh
+
+    def feature_get(self, choice):
+        """-----------------------------------------------------------------------------------------
+        Read all matching features from self.fh. choice is a list of desired features
+
+        :param choice: list     features to select
+        :return: int            number of features read
+        -----------------------------------------------------------------------------------------"""
+        fh = self.fh
+        for line in fh:
+            if line.startswith('#'):
+                # skip comments
+                continue
+
+            record = GxfRecord(line)
+            if record.type in choice:
+                self.features.append(record)
+
+        return len(self.features)
+
 
 # ##################################################################################################
 # Testing
 # #################################################################################################
-if __name__  ## '__main__':
+if __name__ == '__main__':
+    gtfin = ('data/stringtie_merged_jm.gtf')
+    gtf = GxfSet(file=gtfin)
+    feature_n = gtf.feature_get(['transcript'])
+    print(f'{feature_n} features read from {gtfin}')
+
+
     exit(0)
