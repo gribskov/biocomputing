@@ -23,7 +23,7 @@ class GxfRecord:
       escape any characters not in the set [a-zA-Z0-9.:^*$@!+_?-|]. In particular, IDs may not
       contain unescaped whitespace and must not begin with an unescaped ">".
     Column 1: "source"
-      Free text describing the origin of the feature annotation. Typically this is the name of
+      Free text describing the origin of the feature annotation. Typically, this is the name of
       program, such as "Genescan" or a database name, such as "Genbank."
     Column 2: "type"
       The feature type. This is constrained to be either a term from the Sequence Ontology. Common
@@ -75,29 +75,48 @@ class GxfRecord:
     column = {'seqid': '', 'source': '', 'type': '', 'start': '0', 'end': '0',
               'score': '', 'strand': '', 'phase': '', 'attribute': None}
 
-    def __init__(self, row, format="gtf"):
+    def __init__(self, row, fmt="gtf"):
         """-----------------------------------------------------------------------------------------
-        :param row: string      a string that can be parsed as gff3 or gtf
-        :param format: string   GFF3 is the default, use 'gtf' or 'gff2' for GTF
+        format is not a class variable because you may want to have both gff3 and gtf formats
+        active at the same time
+
+        :param row: string  a string that can be parsed as gff3 or gtf
+        :param fmt: string  GTF is the default, use gff3 for GFF3
         -----------------------------------------------------------------------------------------"""
         for key, value in GxfRecord.column.items():
             # set up the standard columns as attributes
             setattr(self, key, value)
 
         # attr_sep separates the key/value pairs in attribute column
-        self.attr_sep = '='
-        if format == 'gtf' or 'gff2':
-            self.attr_sep = ' '
+        self.format = None
+        self.attr_sep = None
+        self.format_set(fmt)
 
         if row:
             self.feature_parse(row)
+
+    def format_set(self, fmt):
+        """-----------------------------------------------------------------------------------------
+        Set up GFF3 or GTF format. GFF2 is the same as GTF.
+
+        :param fmt: str      format for attributes gff3|gtf|gff2
+        :return: str         format
+        -----------------------------------------------------------------------------------------"""
+        if fmt == 'gff3':
+            self.format = 'gff3'
+            self.attr_sep = '='
+        else:
+            self.format = 'gtf'
+            self.attr_sep = ' '  # space
+
+        return self.format
 
     def feature_parse(self, row):
         """-----------------------------------------------------------------------------------------
         parse a feature line. Attributes are split on semicolons, and key/value pairs split on
         attr_sep character.
 
-        :param row: string      string to parse
+        :param row: str     string to parse
         :return: True
         -----------------------------------------------------------------------------------------"""
         field = row.split(maxsplit=8)
@@ -122,13 +141,37 @@ class GxfRecord:
 
                 for f in field:
                     (key, value) = f.strip().split(self.attr_sep, maxsplit=1)
-                    attrs[key] = value
+                    # TODO check this works for GFF3
+                    attrs[key] = value.strip('"')
 
                 setattr(self, 'attribute', attrs)
 
             col_n += 1
 
         return True
+
+    @staticmethod
+    def attribute_format(attr_dict, fmt):
+        """-----------------------------------------------------------------------------------------
+        Return a string containing the attributes (column 8) formatted as GTF or GFF3 according to
+
+        :param attr_dict: dict      attributes to be formatted
+        :param fmt: str             gtf|gff3
+        :return: str                formatted string ready to write in column 8
+        -----------------------------------------------------------------------------------------"""
+        attr_str = ''
+        if fmt == 'gff3':
+            for attr in sorted(attr_dict, key=lambda x: (x != 'transcript_id', x != 'gene_id', x)):
+                attr_str += f'{attr}={attr_dict[attr]}; '
+
+        elif fmt == 'gtf' or fmt == 'gff2':
+            for attr in sorted(attr_dict, key=lambda x: (x != 'transcript_id', x != 'gene_id', x)):
+                attr_str += f'{attr} "{attr_dict[attr]}"; '
+
+        else:
+            print(f'GxfRecord:attribute_format - unknown format ({fmt})')
+
+        return attr_str
 
 
 class GxfSet:
@@ -196,7 +239,7 @@ class GxfSet:
 # Testing
 # #################################################################################################
 if __name__ == '__main__':
-    gtfin = ('data/stringtie_merged_jm.gtf')
+    gtfin = 'data/stringtie_merged_jm.gtf'
     gtf = GxfSet(file=gtfin)
     feature_n = gtf.feature_get(['transcript'])
     print(f'{feature_n} features read from {gtfin}')
