@@ -6,15 +6,23 @@ Merge overlapping transcripts in GTF file to produce transcripts suitable for us
 2. merged features begin at the earliest beginning and end at the latest end point
 ================================================================================================="""
 from gff2 import GxfSet
-from ranges.linear_range import Range
 
 
 class Lrange:
-    """---------------------------------------------------------------------------------------------
-
-    ---------------------------------------------------------------------------------------------"""
+    """#############################################################################################
+    simple holder for information about merged features. member contains pointers to original
+    features
+    #############################################################################################"""
 
     def __init__(self):
+        """---------------------------------------------------------------------------------------------
+        name: str       arbitrary ID for merged feature
+        seqid: str      source sequence ID
+        start: int      beginning of merged feature
+        end: int        end of merged feature
+        strand: str     +/- strand of feature
+        members:list    original GxfRecord features incorporated in this feature
+        ---------------------------------------------------------------------------------------------"""
         self.name = ''
         self.seqid = ''
         self.start = None
@@ -27,26 +35,22 @@ def overlap(flist, space=1000):
     """---------------------------------------------------------------------------------------------
     find overlap between features
     
-    :param features: GxfSet     collection of GxfRecord features
-    :return: list               merged features, collection of Lrange
+    :param flist: GxfSet     collection of GxfRecord features
+    :param space: int        features separated by < space are merged
+    :return: list            merged features, collection of Lrange
     ---------------------------------------------------------------------------------------------"""
-    merged = []
+    combined = []
     current = Lrange()
 
     range_n = 0
-    feature_n = 0
     for f in sorted(flist.features, key=lambda x: (x.seqid, x.strand, x.start)):
-        # if f.seqid != 'LG01':
-        #     continue
-
-        feature_n += 1
         if (f.seqid != current.seqid or
                 f.strand != current.strand or
                 f.start - current.end > space):
 
             # start new range
             if current.name:
-                merged.append(current)
+                combined.append(current)
             current = Lrange()
             current.name = f'range_{range_n}'
             range_n += 1
@@ -61,9 +65,7 @@ def overlap(flist, space=1000):
         current.end = max(current.end, f.end)
         current.members.append(f)
 
-        print(f)
-
-    return merged
+    return combined
 
 
 # ##################################################################################################
@@ -80,24 +82,28 @@ if __name__ == '__main__':
     # read in gtf with selected features
     gtf = GxfSet(file=gtffile)
     feature_n = gtf.feature_get(features)
-    print(f'{feature_n} features read from {gtffile}')
+    print(f'\nfeatures read from {gtffile}: {feature_n} ')
 
     # overlap
     merged = overlap(gtf)
     print(f'merged: {len(merged)}')
 
     # create merged names and write out as gtf
-
     output = 'merged.out'
     mout = open(output, 'w')
-    for f in sorted(merged, key=lambda x:(x.seqid, x.start)):
-        attr_out = {'gene_id':f.members[0].attribute['gene_id'], 'transcript_id':f.members[0].attribute['transcript_id']}
-        mlist = []
+    print(f'output: {output}')
+    for f in sorted(merged, key=lambda x: (x.seqid, x.start)):
+        # attributes: gene_id and transcript_id taken from the first member, members attribute is list of transcripts
+        # TODO features written in GTF format
+        value = f.members[0].attribute['gene_id']
+        attr_str = f'gene_id "{value}"; '
+        value = f.members[0].attribute['transcript_id']
+        attr_str += f'transcript_id "{value}"; '
+        member_str = ''
         for ff in f.members:
-            mlist.append(ff.attribute['transcript_id'])
-        attr_out['attribute'] = ','.join(mlist)
-        attr_str = '; '.join(attr_out)
-        print()
+            member_str += f"{ff.attribute['transcript_id']},"
+        member_str = member_str.rstrip(',')
+        attr_str += f'members "{member_str}"; '
 
         mout.write(f'{f.seqid}\tStringTie\ttranscript\t{f.start}\t{f.end}\t.\t{f.strand}\t.\t{attr_str}\n')
 
