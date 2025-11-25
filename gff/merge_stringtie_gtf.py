@@ -5,6 +5,7 @@ Merge overlapping transcripts in GTF file to produce transcripts suitable for us
 1. Only records with the desired feature(s), usually gene or transcript
 2. merged features begin at the earliest beginning and end at the latest end point
 ================================================================================================="""
+from gff2 import GxfRecord
 from gff2 import GxfSet
 
 
@@ -94,17 +95,16 @@ if __name__ == '__main__':
     print(f'output: {output}')
     for f in sorted(merged, key=lambda x: (x.seqid, x.start)):
         # attributes: gene_id and transcript_id taken from the first member, members attribute is list of transcripts
-        # TODO features written in GTF format
-        value = f.members[0].attribute['gene_id']
-        attr_str = f'gene_id "{value}"; '
-        value = f.members[0].attribute['transcript_id']
-        attr_str += f'transcript_id "{value}"; '
         member_str = ''
         for ff in f.members:
             member_str += f"{ff.attribute['transcript_id']},"
         member_str = member_str.rstrip(',')
-        attr_str += f'members "{member_str}"; '
 
+        attr = {'gene_id':f.members[0].attribute['gene_id'],
+                'transcript_id': f.members[0].attribute['transcript_id'],
+                'members': member_str}
+
+        attr_str = GxfRecord.attribute_format(attr, f.members[0].format)
         mout.write(f'{f.seqid}\tStringTie\ttranscript\t{f.start}\t{f.end}\t.\t{f.strand}\t.\t{attr_str}\n')
 
     exit(0)
