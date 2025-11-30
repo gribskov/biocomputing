@@ -73,7 +73,7 @@ def overlap(flist, space=1000):
 # main program
 # ##################################################################################################
 if __name__ == '__main__':
-    gtffile = 'data/stringtie_merged_jm.gtf'
+    gtffile = 'data/merged.gtf'
     features = ['transcript']
 
     print(f'merge_stringtie.py')
