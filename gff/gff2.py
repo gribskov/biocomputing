@@ -102,7 +102,7 @@ class GxfRecord:
         :param fmt: str      format for attributes gff3|gtf|gff2
         :return: str         format
         -----------------------------------------------------------------------------------------"""
-        if fmt == 'gff3':
+        if fmt == 'gff3' or fmt == 'gff':
             self.format = 'gff3'
             self.attr_sep = '='
         else:
@@ -129,7 +129,10 @@ class GxfRecord:
                 setattr(self, key, int(field[col_n]))
 
             else:
-                setattr(self, key, field[col_n])
+                try:
+                    setattr(self, key, field[col_n])
+                except:
+                    print('error')
 
             # split the attributes on ; and save as a hash in self.attributes
             attrs = {}
@@ -140,7 +143,10 @@ class GxfRecord:
                     field.pop()
 
                 for f in field:
-                    (key, value) = f.strip().split(self.attr_sep, maxsplit=1)
+                    try:
+                        (key, value) = f.strip().split(self.attr_sep, maxsplit=1)
+                    except:
+                        print('error - shold be fixed')
                     # TODO check this works for GFF3
                     attrs[key] = value.strip('"')
 
@@ -180,7 +186,7 @@ class GxfSet:
 
     ============================================================================================="""
 
-    def __init__(self, file=''):
+    def __init__(self, file='', fmt='gtf'):
         """-----------------------------------------------------------------------------------------
         file        string          path to data file
         fh          filehandle      open file (read or write)
@@ -188,6 +194,7 @@ class GxfSet:
         -----------------------------------------------------------------------------------------"""
         self.fh = None
         self.features = []
+        self.format = fmt
 
         if file:
             self.fh = self.opensafe(file)
@@ -224,11 +231,11 @@ class GxfSet:
         -----------------------------------------------------------------------------------------"""
         fh = self.fh
         for line in fh:
-            if line.startswith('#'):
+            if line.startswith('#') or line.startswith(chr(0)):
                 # skip comments
                 continue
 
-            record = GxfRecord(line)
+            record = GxfRecord(line, fmt=self.format)
             if record.type in choice:
                 self.features.append(record)
 
