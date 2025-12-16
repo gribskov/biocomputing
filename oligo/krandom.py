@@ -23,44 +23,43 @@ class Word:
         -----------------------------------------------------------------------------------------"""
         self.label = ''
         self.out = []
+        self.in_tree = False
 
         if label:
             self.label = label
 
-    def randomtreewithroot(self):
-        """-----------------------------------------------------------------------------------------
-        pseudocode in
-        Jiang, M., Anderson, J., Gillespie, J. et al. uShuffle: A useful tool for shuffling
-        biological sequences while preserving the k-let counts. BMC Bioinformatics 9, 192 (2008).
-        https://doi.org/10.1186/1471-2105-9-192
+def randomtreewithroot(nodelist):
+    """-----------------------------------------------------------------------------------------
+    pseudocode in
+    Jiang, M., Anderson, J., Gillespie, J. et al. uShuffle: A useful tool for shuffling
+    biological sequences while preserving the k-let counts. BMC Bioinformatics 9, 192 (2008).
+    https://doi.org/10.1186/1471-2105-9-192
 
-        :return:
-        -----------------------------------------------------------------------------------------"""
+    :return:
+    -----------------------------------------------------------------------------------------"""
 
-        in_tree = []
-        next = []
-        for i in range(0,n):
-            in_tree[i] = False
+    for i in nodelist:
+        i.in_tree = False
 
-        next[r] = None
-        in_tree[r] = True
-        for i in range(0,n):
-            u = i
-
-        while not in_tree[u]:
-            next[u] = self.randomsuccessor(u)
-            u = next[u]
-
-  
+    next[r] = None
+    in_tree[r] = True
+    for i in nodelist:
         u = i
-        while not in_tree[u]:
-            in_tree[u] = True
-            u = next[u]
-        
-        return next
 
-    def randomsuccessor(self):
-        return
+        while not u.in_tree:
+            next[u] = randomsuccessor(u)
+            u = next[u]
+
+
+    u = i
+    while not u.in_tree:
+        u.in_tree = True
+        u = next[u]
+
+    return next
+
+def randomsuccessor(self):
+    return
         
 # ==================================================================================================
 # Testing
