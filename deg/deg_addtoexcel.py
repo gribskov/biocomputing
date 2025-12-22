@@ -54,6 +54,9 @@ def blast_read(data, rownames, maxeval=1e-5, nhits=3):
             continue
         print(f'{sid}\t{hitlist}')
 
+
+
+
         # split and assemble the desired data
         unsorted = []
         for hit in hitlist:

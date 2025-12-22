@@ -140,7 +140,7 @@ if __name__ == '__main__':
         print(f'x sequences used: {len(xused)}')
         print(f'y sequences used: {len(yused)}')
 
-    if plot:
+
         fig, ax = plt.subplots()
         n = 0
         for m in match:

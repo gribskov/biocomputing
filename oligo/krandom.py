@@ -23,44 +23,66 @@ class Word:
         -----------------------------------------------------------------------------------------"""
         self.label = ''
         self.out = []
+        self.next = None
         self.in_tree = False
 
         if label:
             self.label = label
 
-def randomtreewithroot(nodelist):
-    """-----------------------------------------------------------------------------------------
+def randomtreewithroot(nodelist,rnode):
+    """---------------------------------------------------------------------------------------------
     pseudocode in
     Jiang, M., Anderson, J., Gillespie, J. et al. uShuffle: A useful tool for shuffling
     biological sequences while preserving the k-let counts. BMC Bioinformatics 9, 192 (2008).
     https://doi.org/10.1186/1471-2105-9-192
 
     :return:
-    -----------------------------------------------------------------------------------------"""
+    ---------------------------------------------------------------------------------------------"""
 
-    for i in nodelist:
+    for n in nodelist:
+        # mark all nodes as available (not in_tree)
+        i = nodelist[n]
         i.in_tree = False
 
-    next[r] = None
-    in_tree[r] = True
-    for i in nodelist:
-        u = i
+    rnode.next = None
+    rnode.in_tree = True
+
+    for n in nodelist:
+        u = nodelist[n]
+        if u.in_tree:
+            continue
+
+        start = u
 
         while not u.in_tree:
-            next[u] = randomsuccessor(u)
-            u = next[u]
+            u.next = random.choice(u.out)
+            dumptree(u)
+            u = u.next
 
+        u = start
+        while not u.in_tree:
+            u.in_tree = True
+            u = u.next
 
-    u = i
-    while not u.in_tree:
-        u.in_tree = True
-        u = next[u]
+    return True
 
-    return next
+def dumptree(node):
+    """---------------------------------------------------------------------------------------------
+    Trace a tree of nodes by their next pointer starting at node
 
-def randomsuccessor(self):
-    return
-        
+    :param node: Word       Root node of tree
+    :return: True
+    ---------------------------------------------------------------------------------------------"""
+    while node.next:
+        nextnode = node.next
+        print(f'node:{node.label} => \t{nextnode.label}',end='\t')
+        for i in nextnode.out:
+            print(f'{i.label}', end=' ')
+        print()
+        node = node.next
+
+    return True
+
 # ==================================================================================================
 # Testing
 # ==================================================================================================
@@ -72,19 +94,35 @@ if __name__ == '__main__':
     for l in range(len):
         base = random.choice(alpha)
         sequence += base
-        print(f'{base}:{sequence}')
+        # print(f'{base}:{sequence}')
 
-    # overlap = defaultdict(Word)
+    sequence = ('TTGATGGGAACGTATGTGAT')
+    print(sequence)
+
+    # Generate De Bruijn graph
     words = defaultdict(Word)
     prev = ''
     for pos in range(0, len - k + 1):
         kmer = sequence[pos:pos + k]
-        print(kmer)
+        # print(kmer)
 
         words[kmer].label = kmer
         # overlap[kmer[1:-1]].out.append(words[kmer])
         if prev:
             words[prev].out.append(words[kmer])
             # overlap[prev[1:-1]].out.append(words[kmer])
+
+        prev = kmer
+
+    # print(words.keys())
+    # wordkeys = list(words.keys())
+    # randomkey = random.choice(wordkeys)
+    # rnode = words[randomkey]
+    # end node
+    end = words[sequence[-k:]]
+    randomtreewithroot(words,end)
+    while rnode.next:
+        print(rnode.label)
+        rnode = rnode.next
 
     exit(0)
