@@ -4,6 +4,7 @@ Exact kmer preserving randomization
 Michael Gribskov     15 December 2025
 ================================================================================================="""
 import random
+import copy
 from collections import defaultdict
 
 
@@ -181,22 +182,33 @@ class DBG:
 # ==================================================================================================
 if __name__ == '__main__':
     k = 3
+    seqlen = 30
     alpha = 'ACGT'
+    sequence = ''
+    for l in range(seqlen):
+        base = random.choice(alpha)
+        sequence += base
+        # print(f'{base}:{sequence}')
     # sequence = ('AAAACCCAAAA')
-    sequence = ('AAAACCCAAAA')
-    g = DBG(sequence, 3)
-    g.arborescence()
-    g.shuffle()
-    shuffled = g.traverse()
-    print(f'{sequence} -> {shuffled}')
+    sequence = ('AAACACAACACAAAAAAAAAAAAAAAAAA')
+
+    print(f'{sequence}')
+    res = [sequence]
+    for trials in range(20):
+        g = DBG(sequence, 3)
+        g.arborescence()
+        g.shuffle()
+        shuffled = g.traverse()
+        print(f'\t{shuffled}')
+        res.append(shuffled)
+
+    for r in sorted(res):
+        print(r)
 
     exit(0)
 
 
-    # for l in range(len):
-    #     base = random.choice(alpha)
-    #     sequence += base
-    #     print(f'{base}:{sequence}')
+
 
     # overlap = defaultdict(Word)
     # words = defaultdict(Word)
