@@ -75,21 +75,27 @@ class Sequence():
 
         return idx
 
-    def fasta(self, id, outfh, linelen=100):
+    def fasta(self, id, outfh, linelen=100, maxlen=1000000, long=True):
         """-----------------------------------------------------------------------------------------
         write sequence to outfh in Fasta format
 
         : param id: int         position of sequence in self.item
         :param outfh:           filehandle open for output
         :param linelen: int     length of lines for sequence
-        :return:
+        :param maxlen: int      maximum sequence length (truncate at this length)
+        :param long: bool       if true write the og group in the title
+        :return: True
         -----------------------------------------------------------------------------------------"""
         seq = self.item[id]
         sequence = seq['sequence']
         name, rest = seq['attr']['organism_name'].split(' ', maxsplit=1)
-        outfh.write(f'>{name} {seq['attr']['og_name']} {seq['attr']['organism_name']}\n')
+        if long:
+            outfh.write(f'>{name} {seq['attr']['og_name']} {seq['attr']['organism_name']}\n')
+        else:
+            outfh.write(f'>{name} {seq['attr']['organism_name']}\n')
         pos = 0
-        while pos < len(sequence):
+        seq_end = min(len(sequence), maxlen)
+        while pos < seq_end:
             outfh.write(f'{sequence[pos:pos + linelen]}\n')
             pos += linelen
 
@@ -100,9 +106,12 @@ class Sequence():
 # main
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    lenfrac = 0.1
+    lenfrac = 0.05
     lower = 1.0 - lenfrac
     upper = 1.0 + lenfrac
+    max_select = 200
+    max_pro = 2000
+    max_nuc = 6000
 
     inpro = open(sys.argv[1], 'r')
     innuc = open(sys.argv[2], 'r')
@@ -136,6 +145,7 @@ if __name__ == '__main__':
     outnuc = open('nuc.out.fa', 'w')
 
     n_g = 0
+    n_selected = 0
     for g in genusp:
         n_g += 1
 
@@ -169,10 +179,11 @@ if __name__ == '__main__':
                 # nucleotide length is ok
                 # write out pro and nuc
                 # skip other protein entries
+                n_selected += 1
                 print(f'match {pid}\t{g}\t{pro.item[pid]['attr']['organism_name']}\tlen:',end=' ')
                 print(f'{len(pro.item[pid]['sequence'])},{len(nuc.item[pid]['sequence'])}')
-                pro.fasta(pid, outpro)
-                nuc.fasta(pid, outnuc)
+                pro.fasta(pid, outpro, maxlen=max_pro, long=False)
+                nuc.fasta(pid, outnuc, maxlen=max_nuc, long=False)
 
                 break
 
@@ -180,18 +191,13 @@ if __name__ == '__main__':
                 # nucleotide is not ok, try another protein
                 continue
 
+            if n_selected >= max_select:
+                break
+
         # end of loop over proteins in genus
 
+    print(f'{n_selected} sequences selected')
 
-
-        # pstr = '\t'
-        # if g in genusp:
-        #     pstr = f'\t{genusp[g]}'
-        # nstr = '\t'
-        # if g in genusn:
-        #     nstr = f'\t{genusn[g]}'
-        #
-        # print(f'{n_g}\t{g}\tp:{pstr}\tn:{nstr}')
     outpro.close()
     outnuc.close()
 

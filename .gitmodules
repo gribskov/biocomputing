@@ -1,0 +1,3 @@
+[submodule "blast_tools"]
+	path = blast_tools
+	url = https://github.com/gribskov/blast_tools
