@@ -4,8 +4,7 @@ Exact kmer preserving randomization
 Michael Gribskov     15 December 2025
 ================================================================================================="""
 import random
-import copy
-from collections import defaultdict
+from collections import defaultdict, deque
 
 
 class Word:
@@ -29,6 +28,7 @@ class Word:
         if label:
             self.label = label
 
+
 def randomtreewithroot(nodelist):
     """-----------------------------------------------------------------------------------------
     pseudocode in
@@ -51,7 +51,6 @@ def randomtreewithroot(nodelist):
             next[u] = randomsuccessor(u)
             u = next[u]
 
-
     u = i
     while not u.in_tree:
         u.in_tree = True
@@ -59,8 +58,10 @@ def randomtreewithroot(nodelist):
 
     return next
 
+
 def randomsuccessor(self):
     return
+
 
 # another try
 class DBG:
@@ -76,12 +77,11 @@ class DBG:
         self.sequence = sequence
         self.nodes = set()
         self.root = ''
-        self.adj = defaultdict(list)
+        self.adj = defaultdict(deque)
         self.last_exit = defaultdict(str)
 
         if sequence:
             self.build_graph()
-
 
     def build_graph(self):
         """-----------------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ class DBG:
             nodes.add(u)
             nodes.add(v)
 
-        self.root = u
+        self.root = sequence[len(sequence) - k + 1 :]
         return len(nodes)
 
     def arborescence(self):
@@ -123,7 +123,7 @@ class DBG:
             while curr not in in_tree:
                 # Pick a random neighbor from the original transition list
                 # Note: For exact k-mer counts, pick from available edges
-                next_node = random.choice(adj[curr])
+                next_node = random.choice(list(adj[curr]))
                 path[curr] = next_node
                 curr = next_node
 
@@ -145,19 +145,15 @@ class DBG:
         last_exit = self.last_exit
 
         for u in adj:
-            edges = adj[u]
+            edges = list(adj[u])
             if u in last_exit:
-                # Move the last_exit edge to the end of the list
-                lastpos = edges.index(last_exit[u])
-                edges[lastpos], edges[-1] = edges[-1],edges[lastpos]
-                random.shuffle(edges[:-1])
-                # edges.remove(last_exit[u])
-                # random.shuffle(edges)
-                # edges.append(last_exit[u])
+                edges.remove(last_exit[u])
+                random.shuffle(edges)
+                edges.append(last_exit[u])
             else:
                 random.shuffle(edges)
 
-            adj[u] = edges
+            adj[u] = deque(edges)
 
         return
 
@@ -166,8 +162,8 @@ class DBG:
 
         :return:
         -----------------------------------------------------------------------------------------"""
-        adj = self .adj
-        curr = self.sequence[:k-1]
+        adj = self.adj
+        curr = self.sequence[:k - 1]
         result = [curr]
 
         while adj[curr]:
@@ -177,50 +173,75 @@ class DBG:
             curr = next_node
 
         return "".join(result)
+
+
+def random_sequence(alphabet, seqlen):
+    """---------------------------------------------------------------------------------------------
+
+    :param alphabet:
+    :param seqlen:
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    sequence = ''
+    for l in range(seqlen):
+        letter = random.choice(alphabet)
+        sequence += letter
+
+    return sequence
+
+def kmer_count(sequence, k):
+    """---------------------------------------------------------------------------------------------
+
+    :param sequence:
+    :return:
+    ---------------------------------------------------------------------------------------------"""
+    count = defaultdict(int)
+    hist = [0]
+    hlen = 1
+    for i in range(len(sequence) - k + 1):
+        kmer = sequence[i:i+k]
+        count[kmer] += 1
+        c = count[kmer]
+
+        # increase histogram size if necessary
+        if c == hlen:
+            hist.append(0)
+            hlen += 1
+
+        # update histogram counts, if it's the first observation zero will get decremented but that
+        # value is not used
+        hist[c-1] -= 1
+        hist[c] += 1
+
+    hist[0] = 0
+    return count, hist
+
 # ==================================================================================================
 # Testing
 # ==================================================================================================
 if __name__ == '__main__':
     k = 3
-    seqlen = 30
+    seqlen = 100
     alpha = 'ACGT'
-    sequence = ''
-    for l in range(seqlen):
-        base = random.choice(alpha)
-        sequence += base
-        # print(f'{base}:{sequence}')
-    # sequence = ('AAAACCCAAAA')
-    sequence = ('AAACACAACACAAAAAAAAAAAAAAAAAA')
+    sequence = random_sequence(alpha, seqlen)
 
-    print(f'{sequence}')
+    # sequence = ('AAACACAACACAAAAAAAAAAAAAAAAAA')
+
+    print(f'\t{sequence}\n')
     res = [sequence]
-    for trials in range(20):
+    for trials in range(1):
         g = DBG(sequence, 3)
         g.arborescence()
         g.shuffle()
         shuffled = g.traverse()
-        print(f'\t{shuffled}')
+        # print(f'\t{shuffled}')
         res.append(shuffled)
+        count, histogram = kmer_count(shuffled, k)
+        for kmer in sorted(count, key=lambda x: count[x], reverse=True):
+            print(f'\t{kmer}: {count[kmer]}')
 
     for r in sorted(res):
-        print(r)
+        print(f'\t{r}')
 
     exit(0)
 
-
-
-
-    # overlap = defaultdict(Word)
-    # words = defaultdict(Word)
-    # prev = ''
-    # for pos in range(0, len - k + 1):
-    #     kmer = sequence[pos:pos + k]
-    #     print(kmer)
-    #
-    #     words[kmer].label = kmer
-    #     # overlap[kmer[1:-1]].out.append(words[kmer])
-    #     if prev:
-    #         words[prev].out.append(words[kmer])
-    #         # overlap[prev[1:-1]].out.append(words[kmer])
-
-    exit(0)
