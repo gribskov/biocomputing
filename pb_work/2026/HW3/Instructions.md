@@ -7,23 +7,27 @@ for your convenience, but it is identical.
 
 Make sure to include headers and follow PEP8 coding conventions.
 
-## For each sequence in scaffolds_short.fa
-
+## Read the sequences
  * Read the sequence file only once, and store the sequences
  * Use the same file opening and line-by-line reading method as in HW2
- * Using a for loop, break each sequence into the segments that begin with 'A'.
-   * Each segment should contain the initial A so the minimum length will be 1 base
-   * Output (see hw3_example.output)
-     * Print the number of sequences read: e.g.,35 sequences read from scaffolds_short.fa
-     * For each sequence, report the sequence of each segment in fasta format
-       * add a sequentially incrementing suffix (beginning at _1) to the sequence name indicating which segment it is
-       from, for instance </br>
+ * Print the number of sequences and the total number of bases read: e.g.,
+_35 sequences with 16934 bases read from scaffolds_short.fa_
+## For each sequence in scaffolds_short.fa
+ * Loop over all sequences using a while loop (outer loop)
+ * For each sequence. Use an inner loop to break the sequence each at each 'A' in the sequence
+ * Each segment should either end in 'A' or at the end of the sequence
+ * Output for each sequence (see hw3_example.output)
+   * For each sequence, report the sequence of each segment in fasta format
+   * Add a sequentially incrementing suffix (beginning at _0) to the sequence name indicating 
+   which segment it is from
+   * Drop the documentation part of the original title line </br>
+   * Example of sequence output: this is FastA format with no comment. See the hw3_example_output for details.</br>
 _&gt;test0_1</br>
 A_
-        * Drop the documentation part of the original title line </br>
-        * See the hw3_example_output for details.
-      * After the complete set of sequence segments, print a line indicating how many total segments 
-were found, for instance:</br> 5793 subsequences read from 35 sequences
-      * Check the spacing in your output to make 
-sure it is the same as the example
- * Using a while loop, do the same as above
+
+    * After the complete set of sequence segments, print a line indicating how many total segments 
+were found, for instance:</br> _5793 subsequences with 16934 bases read from 35 sequences_
+    *  If your code is correct, the number of bases in the original sequences should be the same as in the segments
+    * Check the spacing in your output to make sure it is exactly the same as the example. PyCharm can
+   compare two files and see if there are differences
+ * Using a for loop for the inner loop, repeat the above. Do not re-read the sequences.
