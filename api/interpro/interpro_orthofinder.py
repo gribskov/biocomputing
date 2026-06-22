@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 import argparse
 from sequence.fasta import Fasta
-from api.interpro.interpro import Interpro
+from api.interpro.interpro import InterproscanQuery, InterproscanAPI
 import textwrap as _textwrap
 
 
@@ -44,55 +44,28 @@ def arguments_get():
 
     :return: argparse.ArgumentParser object
     ---------------------------------------------------------------------------------------------'''
-    minlen_default = 50
+    minlen_default = 50  # not implemented
     log_level_default = 1
-    batch_limit_default = 30
-    batch_wait_default = 60
+    sequences_per_query_default = 30
+    poll_delay = 60
+    simultaneous_jobs_default = 1
     cl = argparse.ArgumentParser(description='Interproscan of ORF sequences',
                                  formatter_class=CustomFormatter)
     cl.add_argument('--logfile', type=argparse.FileType('w'), default=sys.stderr,
                     help='Output file for log information')
     cl.add_argument('-m', '--minlen', type=int, default=minlen_default,
                     help='Minimum length ORF to run')
-    cl.add_argument('--batch_limit', type=int, default=batch_limit_default,
+    cl.add_argument('--sequences_per_query', type=int, default=sequences_per_query_default,
                     help='Number of sequences to submit per batch')
-    cl.add_argument('--batch_wait', type=int, default=batch_wait_default,
-                    help='Seconds to wait between polling batch')
+    cl.add_argument('--simultaneous_jobs', type=int, default=simultaneous_jobs_default,
+                    help='Number of sequences to submit per batch')
+    cl.add_argument('--poll_delay', type=int, default=poll_delay,
+                    help='Seconds to wait between polling jobs')
     cl.add_argument('--log_level', type=int, default=log_level_default,
                     help='detail for reporting REST queries')
     cl.add_argument('--og_dir', type=str)
 
     return cl.parse_args()  # parse_args  reads the command line
-
-
-def poll_all(joblist, poll_time=61, poll_max=50):
-    """---------------------------------------------------------------------------------------------
-    Poll the jobs in the jobs_pending list until all have finished. Finished can be
-        1) reached maximum number of polling attempts
-        2) returned a status other than success or waiting
-        3) success
-
-    :param joblist: list of interproscan objects that have been submitted
-    :param poll_time: int, seconds to wait between polling
-    :param poll_max: int, maximum number of times to poll
-    :return: int, number of jobs in list
-    ---------------------------------------------------------------------------------------------"""
-
-    not_all_finished = True
-    n = 0
-    while not_all_finished:
-        n += 1
-        not_all_finished = False
-        time.sleep(poll_time)
-
-        for ips in joblist:
-            if ips.status() == 'finished':
-                joblist[ips] = 'finished'
-
-            else:
-                not_all_finished = True
-
-    return n
 
 
 def reformat(job):
@@ -224,16 +197,14 @@ args.logfile.write('\tminimum ORF length: {}\n\n'.format(args.minlen))
 # the joblist is a dictionary where the ips object is the key and the value is a status string
 joblist = {}
 
-# create a template for the jobs.  The template is an interpro object with the metadata added
-template = Interpro(log_level=1)
-template.log_fh = args.logfile
-template.email = 'gribskov@purdue.edu'
-template.application_select(['Pfam', 'Panther', 'SignalP-Euk'])
-template.output_select = 'gff'
-template.poll_time = 10
-template.poll_max = 25
-sequence_per_query = 30
-simultaneous_jobs = 1
+# manager handles the specifics of submitting jobs, polling, and retrieving results. Manager
+# is reused for each query (which is an InterproscanQuery object)
+manager = InterproscanAPI()
+query = InterproscanQuery(log_level=1)
+# query.log_fh = args.logfile
+query.email = 'gribskov@purdue.edu'
+query.application_select(['Pfam', 'Panther', 'SignalP-Euk'])
+query.output_select = 'gff'
 
 ogfiles = [f.name for f in Path(args.og_dir).iterdir() if f.is_file()]
 for f in ogfiles:
@@ -245,20 +216,21 @@ for f in ogfiles:
     fasta = fasta_read(og, f'OG: {f}')
     og.close()
 
-    batch_seq = fasta_to_batch(fasta, sequence_per_query)
+    batch_seq = fasta_to_batch(fasta, args.sequences_per_query)
 
     for seq in batch_seq:
         # copy the template and add the sequence information
-        ips = template.clone()
-        ips.sequence = seq
-        ips.jobname = "{f.replace('.fa', '')}"
-        ips.title = "{f.replace('.fa', '')}"
-        ips.submit()
-        joblist[ips] = 'submitted'
+        query.sequence = seq
+        query.jobname = "{f.replace('.fa', '')}"
+        query.title = "{f.replace('.fa', '')}"
 
-        # polling - wait for the job to finish before submitting another
-        poll_all(joblist, template.poll_time, template.poll_max)
-        save_finished(joblist, reformat, sys.stdout, True)
+        # Iprscan service says to wait for the job to finish before submitting
+        # another
+        manager.submit(query)
+        manager.poll(manager.poll_delay, manager.poll_maxcount)
+
+        # all jobs should be done or failed
+        save_finished(query, reformat, sys.stdout, True)
         exit(1)
 
     # end of loop over sequence batches
