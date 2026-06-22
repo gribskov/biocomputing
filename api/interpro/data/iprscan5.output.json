@@ -1,0 +1,632 @@
+"interproscan-version": "5.50-84.0",
+"results": [ {
+  "sequence" : "MAPSRKFFVGGNWKMNGRKQSLGELIGTLNAAKVPADTEVVCAPPTAYIDFARQKLDPKIAVAAQNCYKVTNGAFTGEISPGMIKDCGATWVVLGHSERRHVFGESDELIGQKVAHALAEGLGVIACIGEKLDEREAGITEKVVFEQTKVIADNVKDWSKVVLAYEPVWAIGTGKTATPQQAQEVHEKLRGWLKSNVSDAVAQSTRIIYGGSVTGATCKELASQPDVDGFLVGGASLKPEFVDIINAKQ",
+  "md5" : "a8d44fc2c980a7677a3b54788d0fa323",
+  "matches" : [ {
+    "signature" : {
+      "accession" : "PTHR21139",
+      "name" : "TRIOSEPHOSPHATE ISOMERASE",
+      "description" : null,
+      "signatureLibraryRelease" : {
+        "library" : "PANTHER",
+        "version" : "15.0"
+      },
+      "entry" : {
+        "accession" : "IPR000652",
+        "name" : "Triosephosphate_isomerase",
+        "description" : "Triosephosphate isomerase",
+        "type" : "FAMILY",
+        "goXRefs" : [ {
+          "name" : "triose-phosphate isomerase activity",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0004807"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "Glycolysis",
+          "databaseName" : "Reactome",
+          "id" : "R-DME-70171"
+        }, {
+          "name" : "Glycolysis",
+          "databaseName" : "Reactome",
+          "id" : "R-GGA-70171"
+        }, {
+          "name" : "Gluconeogenesis",
+          "databaseName" : "Reactome",
+          "id" : "R-DME-70263"
+        }, {
+          "name" : "Inositol phosphate metabolism",
+          "databaseName" : "KEGG",
+          "id" : "00562"
+        }, {
+          "name" : "glycolysis IV",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-1042"
+        }, {
+          "name" : "glycolysis II (from fructose 6-phosphate)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-5484"
+        }, {
+          "name" : "Microbial metabolism in diverse environments",
+          "databaseName" : "KEGG",
+          "id" : "01120"
+        }, {
+          "name" : "Gluconeogenesis",
+          "databaseName" : "Reactome",
+          "id" : "R-MMU-70263"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 249,
+      "hmmStart" : 1,
+      "hmmEnd" : 249,
+      "hmmLength" : 249,
+      "hmmBounds" : "COMPLETE",
+      "envelopeStart" : 1,
+      "envelopeEnd" : 249,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 249,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "familyName" : "Not available",
+    "score" : 585.3,
+    "model-ac" : "PTHR21139"
+  }, {
+    "signature" : {
+      "accession" : "PS51440",
+      "name" : "TIM_2",
+      "description" : "Triosephosphate isomerase (TIM) family profile.",
+      "signatureLibraryRelease" : {
+        "library" : "PROSITE_PROFILES",
+        "version" : "2019_11"
+      },
+      "entry" : {
+        "accession" : "IPR000652",
+        "name" : "Triosephosphate_isomerase",
+        "description" : "Triosephosphate isomerase",
+        "type" : "FAMILY",
+        "goXRefs" : [ {
+          "name" : "triose-phosphate isomerase activity",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0004807"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "Glycolysis",
+          "databaseName" : "Reactome",
+          "id" : "R-DME-70171"
+        }, {
+          "name" : "Glycolysis",
+          "databaseName" : "Reactome",
+          "id" : "R-GGA-70171"
+        }, {
+          "name" : "Gluconeogenesis",
+          "databaseName" : "Reactome",
+          "id" : "R-MMU-70263"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 6,
+      "end" : 247,
+      "score" : 81.047,
+      "alignment" : "KFFVGGNWKMNGRKQSLGELIGTLNAaKVPAD--TEVVCAPPTAYIDFARQKLdPKIAVAAQNCYKVTNGAFTGEISPGMIKDCGATWVVLGHSERRHVFGESDELIGQKVAHALAEGLGVIACIGEKLDEREAGITEKVVFEQTKVIADNVKD-WSKVVLAYEPVWAIGTGKTATPQQAQEVHEKLRGWLKSNVSDAVAQSTRIIYGGSVTGATCKELASQPDVDGFLVGGASLK-PEFVDIINA",
+      "location-fragments" : [ {
+        "start" : 6,
+        "end" : 247,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "model-ac" : "PS51440"
+  }, {
+    "signature" : {
+      "accession" : "MF_00147_B",
+      "name" : "TIM_B",
+      "description" : "Triosephosphate isomerase [tpiA].",
+      "signatureLibraryRelease" : {
+        "library" : "HAMAP",
+        "version" : "2020_05"
+      },
+      "entry" : {
+        "accession" : "IPR022896",
+        "name" : "TrioseP_Isoase_bac/euk",
+        "description" : "Triosephosphate isomerase, bacterial/eukaryotic",
+        "type" : "FAMILY",
+        "goXRefs" : [ {
+          "name" : "triose-phosphate isomerase activity",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0004807"
+        }, {
+          "name" : "glycolytic process",
+          "databaseName" : "GO",
+          "category" : "BIOLOGICAL_PROCESS",
+          "id" : "GO:0006096"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "Microbial metabolism in diverse environments",
+          "databaseName" : "KEGG",
+          "id" : "01120"
+        }, {
+          "name" : "glycolysis IV",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-1042"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 5,
+      "end" : 247,
+      "score" : 58.311584,
+      "alignment" : "Not available",
+      "location-fragments" : [ {
+        "start" : 5,
+        "end" : 247,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "model-ac" : "MF_00147_B"
+  }, {
+    "signature" : {
+      "accession" : "PS00171",
+      "name" : "TIM_1",
+      "description" : "Triosephosphate isomerase active site.",
+      "signatureLibraryRelease" : {
+        "library" : "PROSITE_PATTERNS",
+        "version" : "2019_11"
+      },
+      "entry" : {
+        "accession" : "IPR020861",
+        "name" : "Triosephosphate_isomerase_AS",
+        "description" : "Triosephosphate isomerase, active site",
+        "type" : "ACTIVE_SITE",
+        "goXRefs" : [ {
+          "name" : "triose-phosphate isomerase activity",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0004807"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "gluconeogenesis II (Methanobacterium thermoautotrophicum)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6142"
+        }, {
+          "name" : "Glycolysis",
+          "databaseName" : "Reactome",
+          "id" : "R-DDI-70171"
+        }, {
+          "name" : "Gluconeogenesis",
+          "databaseName" : "Reactome",
+          "id" : "R-MMU-70263"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 164,
+      "end" : 174,
+      "level" : "STRONG",
+      "cigarAlignment" : "11M",
+      "alignment" : "AYEPVWAIGTG",
+      "location-fragments" : [ {
+        "start" : 164,
+        "end" : 174,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "model-ac" : "PS00171"
+  }, {
+    "signature" : {
+      "accession" : "G3DSA:3.20.20.70",
+      "name" : "Aldolase class I",
+      "description" : null,
+      "signatureLibraryRelease" : {
+        "library" : "GENE3D",
+        "version" : "4.2.0"
+      },
+      "entry" : {
+        "accession" : "IPR013785",
+        "name" : "Aldolase_TIM",
+        "description" : "Aldolase-type TIM barrel",
+        "type" : "HOMOLOGOUS_SUPERFAMILY",
+        "goXRefs" : [ {
+          "name" : "catalytic activity",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0003824"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "2-chloroacrylate degradation II",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7428"
+        }, {
+          "name" : "Geraniol degradation",
+          "databaseName" : "KEGG",
+          "id" : "00281"
+        }, {
+          "name" : "meleagrin biosynthesis",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-7607"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 2,
+      "end" : 249,
+      "hmmStart" : 3,
+      "hmmEnd" : 247,
+      "hmmLength" : 248,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.3E-108,
+      "score" : 363.1,
+      "envelopeStart" : 2,
+      "envelopeEnd" : 249,
+      "postProcessed" : true,
+      "location-fragments" : [ {
+        "start" : 2,
+        "end" : 249,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 2.1E-108,
+    "score" : 363.3,
+    "model-ac" : "1r2rB00"
+  }, {
+    "signature" : {
+      "accession" : "SSF51351",
+      "name" : "Triosephosphate isomerase (TIM)",
+      "description" : null,
+      "signatureLibraryRelease" : {
+        "library" : "SUPERFAMILY",
+        "version" : "1.75"
+      },
+      "entry" : {
+        "accession" : "IPR035990",
+        "name" : "TIM_sf",
+        "description" : "Triosephosphate isomerase superfamily",
+        "type" : "HOMOLOGOUS_SUPERFAMILY",
+        "goXRefs" : [ {
+          "name" : "triose-phosphate isomerase activity",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0004807"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "1-butanol autotrophic biosynthesis (engineered)",
+          "databaseName" : "MetaCyc",
+          "id" : "PWY-6886"
+        }, {
+          "name" : "Gluconeogenesis",
+          "databaseName" : "Reactome",
+          "id" : "R-DME-70263"
+        }, {
+          "name" : "Biosynthesis of secondary metabolites",
+          "databaseName" : "KEGG",
+          "id" : "01110"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 3,
+      "end" : 247,
+      "hmmLength" : 257,
+      "location-fragments" : [ {
+        "start" : 3,
+        "end" : 247,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 9.69E-96,
+    "model-ac" : "0048198"
+  }, {
+    "signature" : {
+      "accession" : "PF00121",
+      "name" : "TIM",
+      "description" : "Triosephosphate isomerase",
+      "signatureLibraryRelease" : {
+        "library" : "PFAM",
+        "version" : "33.1"
+      },
+      "entry" : {
+        "accession" : "IPR000652",
+        "name" : "Triosephosphate_isomerase",
+        "description" : "Triosephosphate isomerase",
+        "type" : "FAMILY",
+        "goXRefs" : [ {
+          "name" : "triose-phosphate isomerase activity",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0004807"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "Glycolysis",
+          "databaseName" : "Reactome",
+          "id" : "R-DME-70171"
+        }, {
+          "name" : "Glycolysis",
+          "databaseName" : "Reactome",
+          "id" : "R-GGA-70171"
+        }, {
+          "name" : "Gluconeogenesis",
+          "databaseName" : "Reactome",
+          "id" : "R-MMU-70263"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 8,
+      "end" : 245,
+      "hmmStart" : 2,
+      "hmmEnd" : 243,
+      "hmmLength" : 243,
+      "hmmBounds" : "C_TERMINAL_COMPLETE",
+      "evalue" : 1.8E-86,
+      "score" : 289.4,
+      "envelopeStart" : 7,
+      "envelopeEnd" : 245,
+      "postProcessed" : true,
+      "location-fragments" : [ {
+        "start" : 8,
+        "end" : 245,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 1.6E-86,
+    "score" : 289.6,
+    "model-ac" : "PF00121"
+  }, {
+    "signature" : {
+      "accession" : "TIGR00419",
+      "name" : "TIGR00419",
+      "description" : "tim: triose-phosphate isomerase",
+      "signatureLibraryRelease" : {
+        "library" : "TIGRFAM",
+        "version" : "15.0"
+      },
+      "entry" : {
+        "accession" : "IPR000652",
+        "name" : "Triosephosphate_isomerase",
+        "description" : "Triosephosphate isomerase",
+        "type" : "FAMILY",
+        "goXRefs" : [ {
+          "name" : "triose-phosphate isomerase activity",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0004807"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "Glycolysis",
+          "databaseName" : "Reactome",
+          "id" : "R-DME-70171"
+        }, {
+          "name" : "Glycolysis",
+          "databaseName" : "Reactome",
+          "id" : "R-GGA-70171"
+        }, {
+          "name" : "Gluconeogenesis",
+          "databaseName" : "Reactome",
+          "id" : "R-MMU-70263"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 8,
+      "end" : 240,
+      "hmmStart" : 1,
+      "hmmEnd" : 228,
+      "hmmLength" : 228,
+      "hmmBounds" : "COMPLETE",
+      "evalue" : 2.2E-77,
+      "score" : 257.9,
+      "envelopeStart" : 8,
+      "envelopeEnd" : 240,
+      "postProcessed" : false,
+      "location-fragments" : [ {
+        "start" : 8,
+        "end" : 240,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 2.0E-77,
+    "score" : 258.0,
+    "model-ac" : "TIGR00419"
+  }, {
+    "signature" : {
+      "accession" : "cd00311",
+      "name" : "TIM",
+      "description" : "TIM",
+      "signatureLibraryRelease" : {
+        "library" : "CDD",
+        "version" : "3.18"
+      },
+      "entry" : {
+        "accession" : "IPR000652",
+        "name" : "Triosephosphate_isomerase",
+        "description" : "Triosephosphate isomerase",
+        "type" : "FAMILY",
+        "goXRefs" : [ {
+          "name" : "triose-phosphate isomerase activity",
+          "databaseName" : "GO",
+          "category" : "MOLECULAR_FUNCTION",
+          "id" : "GO:0004807"
+        } ],
+        "pathwayXRefs" : [ {
+          "name" : "Glycolysis",
+          "databaseName" : "Reactome",
+          "id" : "R-DME-70171"
+          "name" : "Gluconeogenesis",
+          "databaseName" : "Reactome",
+          "id" : "R-SCE-70263"
+        }, {
+          "name" : "Gluconeogenesis",
+          "databaseName" : "Reactome",
+          "id" : "R-MMU-70263"
+        } ]
+      }
+    },
+    "locations" : [ {
+      "start" : 7,
+      "end" : 246,
+      "sites" : [ {
+        "description" : "catalytic triad",
+        "numLocations" : 3,
+        "siteLocations" : [ {
+          "start" : 166,
+          "end" : 166,
+          "residue" : "E"
+        }, {
+          "start" : 96,
+          "end" : 96,
+          "residue" : "H"
+        }, {
+          "start" : 14,
+          "end" : 14,
+          "residue" : "K"
+        } ]
+      }, {
+        "description" : "dimer interface",
+        "numLocations" : 13,
+        "siteLocations" : [ {
+          "start" : 83,
+          "end" : 83,
+          "residue" : "M"
+        }, {
+          "start" : 50,
+          "end" : 50,
+          "residue" : "D"
+        }, {
+          "start" : 47,
+          "end" : 47,
+          "residue" : "A"
+        }, {
+          "start" : 53,
+          "end" : 53,
+          "residue" : "R"
+        }, {
+          "start" : 86,
+          "end" : 86,
+          "residue" : "D"
+        }, {
+          "start" : 46,
+          "end" : 46,
+          "residue" : "T"
+        }, {
+          "start" : 99,
+          "end" : 99,
+          "residue" : "R"
+        }, {
+          "start" : 65,
+          "end" : 65,
+          "residue" : "Q"
+        }, {
+          "start" : 48,
+          "end" : 48,
+          "residue" : "Y"
+        }, {
+          "start" : 87,
+          "end" : 87,
+          "residue" : "C"
+        }, {
+          "start" : 98,
+          "end" : 98,
+          "residue" : "E"
+        }, {
+          "start" : 15,
+          "end" : 15,
+          "residue" : "M"
+        }, {
+          "start" : 12,
+          "end" : 12,
+          "residue" : "N"
+        } ]
+      }, {
+        "description" : "substrate binding site",
+        "numLocations" : 9,
+        "siteLocations" : [ {
+          "start" : 172,
+          "end" : 172,
+          "residue" : "G"
+        }, {
+          "start" : 231,
+          "end" : 231,
+          "residue" : "L"
+        }, {
+          "start" : 233,
+          "end" : 233,
+          "residue" : "G"
+        }, {
+          "start" : 166,
+          "end" : 166,
+          "residue" : "E"
+        }, {
+          "start" : 234,
+          "end" : 234,
+          "residue" : "G"
+        }, {
+          "start" : 212,
+          "end" : 212,
+          "residue" : "S"
+        }, {
+          "start" : 96,
+          "end" : 96,
+          "residue" : "H"
+        }, {
+          "start" : 14,
+          "end" : 14,
+          "residue" : "K"
+        }, {
+          "start" : 12,
+          "end" : 12,
+          "residue" : "N"
+        } ]
+      } ],
+      "evalue" : 1.8089E-130,
+      "score" : 366.476,
+      "location-fragments" : [ {
+        "start" : 7,
+        "end" : 246,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "model-ac" : "cd00311"
+  }, {
+    "signature" : {
+      "accession" : "PTHR21139:SF24",
+      "name" : "TRIOSEPHOSPHATE ISOMERASE",
+      "description" : null,
+      "signatureLibraryRelease" : {
+        "library" : "PANTHER",
+        "version" : "15.0"
+      },
+      "entry" : null
+    },
+    "locations" : [ {
+      "start" : 1,
+      "end" : 249,
+      "hmmStart" : 1,
+      "hmmEnd" : 249,
+      "hmmLength" : 249,
+      "hmmBounds" : "COMPLETE",
+      "envelopeStart" : 1,
+      "envelopeEnd" : 249,
+      "location-fragments" : [ {
+        "start" : 1,
+        "end" : 249,
+        "dc-status" : "CONTINUOUS"
+      } ]
+    } ],
+    "evalue" : 0.0,
+    "familyName" : "Not available",
+    "score" : 585.3,
+    "model-ac" : "PTHR21139:SF24"
+  } ],
+  "xref" : [ {
+    "name" : "CAA49379.1 triosephosphate isomerase [Homo sapiens]",
+    "id" : "CAA49379.1"
+  } ]
+} ]
+}
