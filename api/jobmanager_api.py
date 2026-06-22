@@ -48,7 +48,8 @@ class JobManagerAPI(ABC):
 
         :return: copy of object
         -----------------------------------------------------------------------------------------"""
-        copy = __class__()
+        # type(self)() correctly targets the subclass (e.g., Interpro)
+        copy = type(self)()
         for v in vars(self):
             setattr(copy, v, getattr(self, v))
 
