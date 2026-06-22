@@ -52,7 +52,8 @@ class Interpro(JobManagerAPI):
         self.output = 'json'
         self.parameters = {}
 
-        self.url = u'https://www.ebi.ac.uk/Tools/services/rest/iprscan5/'
+        # self.url = u'https://www.ebi.ac.uk/Tools/services/rest/iprscan5/'
+        self.url = u'https://www.ebi.ac.uk/Tools/services/rest/iprscan6/run'
         self.jobid = ''
         self.jobname = ''
         self.jobstatus = ''
