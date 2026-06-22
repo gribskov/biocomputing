@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import time
 
 
 class JobManagerAPI(ABC):
@@ -22,6 +23,9 @@ class JobManagerAPI(ABC):
     Michael Gribskov     19 April 2021
     ============================================================================================="""
 
+    # ----------------------------------------------------------------------------------------------
+    # concrete methods available to all subclasses
+    # ----------------------------------------------------------------------------------------------
     def __init_subclass__(cls):
         """-----------------------------------------------------------------------------------------
         called when subclass is instantiated.
@@ -33,11 +37,17 @@ class JobManagerAPI(ABC):
             finished
             retrieved
             server_error
+
+            joblist: dict   key is a unique id, value is status
         :return:
         -----------------------------------------------------------------------------------------"""
         cls.jobname = ''
-        cls.message = {}
+        cls.message = []
         cls.content = ''
+        cls.poll_delay = 10
+        cls.poll_maxcount = 25
+        cls.simultaneous_jobs = 1
+        cls.joblist = []
 
     def clone(self):
         """-----------------------------------------------------------------------------------------
@@ -57,7 +67,7 @@ class JobManagerAPI(ABC):
 
     def poke(self):
         """-----------------------------------------------------------------------------------------
-        Return a signature string.  Useful to identify the when class it is used as a callback
+        Return a signature string.  Useful to identify the class when it is used as a callback
 
         INHERITABLE
 
@@ -65,35 +75,70 @@ class JobManagerAPI(ABC):
         -----------------------------------------------------------------------------------------"""
         return self.__class__.__name__
 
+    # ----------------------------------------------------------------------------------------------
+    # abstract methods to be supplied by the subclass
+    # ----------------------------------------------------------------------------------------------
+
     @abstractmethod
-    def result(self):
+    def result(self, *args, **kwds):
         """-----------------------------------------------------------------------------------------
         Retrieve the result
 
-        :return: None
         -----------------------------------------------------------------------------------------"""
-        # return None
 
     @abstractmethod
-    def status(self):
+    def status(self, *args, **kwds):
         """-----------------------------------------------------------------------------------------
         Checks to see if job is complete.  Often this means polling the server and getting the
         status of the job in self.rid.
 
-        self.status is set as running, unknown, or finished, respectively
+        self.status is set as running, unknown, or finished
 
-        :param wait: boolean, if True wait for self.poll_time before sending request
-        :return: string, status running | unknown | finished
+        :return: string     status: running | unknown | finished
         -----------------------------------------------------------------------------------------"""
-        return self.jobstatus
 
     @abstractmethod
-    def submit(self):
+    def submit(self, *args, **kwds):
         """-----------------------------------------------------------------------------------------
         Start the job, usually by submitting to the service
         :return: string, request ID (rid)
         -----------------------------------------------------------------------------------------"""
-        # return self.rid
+
+    # -----------------------------------------------------------------------------------------------
+    # high level methods built on the methods supplied by the subclass
+    # ----------------------------------------------------------------------------------------------
+
+    def poll(self):
+        """-----------------------------------------------------------------------------------------
+        Poll the jobs in the jobs_pending list until all have finished. Finished can be
+            1) reached maximum number of polling attempts
+            2) returned a status other than success or waiting
+            3) success
+
+        uses class variables:
+            joblist: list of interproscan objects that have been submitted
+            poll_delay: int, seconds to wait between polling
+            poll_maxcount: int, maximum number of times to poll
+            ntries: int, number of polling trials
+        -----------------------------------------------------------------------------------------"""
+        joblist = self.joblist
+        ntries = 0
+        jobs_running = True
+        while jobs_running:
+            ntries += 1
+            jobs_running = False
+            time.sleep(self.poll_delay)
+
+            for job in self.joblist:
+                if joblist[job] != 'finished':
+                    status = self.status()
+                    self.joblist[job] = status
+                    if status == 'running':
+                        jobs_running = True
+                        # no need to keep checking after one running job is found
+                        break
+
+        return ntries
 
 
 # --------------------------------------------------------------------------------------------------
@@ -115,7 +160,8 @@ if __name__ == '__main__':
         def result(self):
             pass
 
-    # should fail
+
+    # should fail, does not implement abstract methods
     class fail(JobManagerAPI):
 
         def __init__(self):
