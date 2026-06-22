@@ -13,10 +13,11 @@ class Interpro(JobManagerAPI):
     25 December 2018    Michael Gribskov
     ============================================================================================="""
     # availble options/parameters taken from
-    # https://www.ebi.ac.uk/Tools/services/rest/iprscan5/parameterdetails/appl
+    # https://www.ebi.ac.uk/jdispatcher/docs/webservices/
 
     # available outputs
     # from https://www.ebi.ac.uk/Tools/services/rest/iprscan5/resulttypes
+    #ipr6  gff3, json, jsonl, tsv, and xml
     # log - The output from the tool itself
     # out - The results of the job (XML format)
     # tsv - The results of the job in text format, tab separated values
@@ -26,17 +27,16 @@ class Interpro(JobManagerAPI):
     # htmltarball - The results of the job in a tarball zip file
     # sequence - Input sequence as seen by the tool
     # submission - The submission details which were submitted as a job
-    available = {'applications':['TIGRFAM', 'SFLD', 'Phobius', 'SignalP', 'SignalP_EUK',
-                                 'SignalP_GRAM_POSITIVE', 'SignalP_GRAM_NEGATIVE', 'SUPERFAMILY',
-                                 'Panther', 'Gene3d', 'HAMAP', 'PrositeProfiles',
-                                 'PrositePatterns', 'Coils', 'SMART', 'CDD', 'PRINTS', 'PfamA',
-                                 'MobiDBLite', 'PIRSF', 'TMHMM', ],
+    available = {'applications': ['AntiFam', 'CATH-Gene3D', 'CATH-FunFam', 'CDD', 'COILS', 'HAMAP',
+                                  'MobiDB-lite', 'NCBIFAM', 'PANTHER', 'Pfam', 'Phobius', 'PIRSF',
+                                  'PRINTS', 'PROSITE-patterns', 'PROSITE-profiles', 'SFLD', 'SMART',
+                                  'SUPERFAMILY', 'SignalP-Euk', 'SignalP-Prok'],
                  'commands':    ['run', 'status', 'result'],
-                 'outputs':     ['out', 'log', 'tsv', 'xml', 'gff', 'json',
-                                 'htmltarball', 'sequence', 'submission']
+                 'outputs':     ['out', 'log', 'tsv', 'xml', 'gff', 'gff3', 'error', 'json', 'jsonl',
+                                 'submission', 'zip']
                  }
 
-    def __init__(self):
+    def __init__(self, log_level=1):
         """-----------------------------------------------------------------------------------------
         interpro query/response constructor
 
@@ -51,9 +51,9 @@ class Interpro(JobManagerAPI):
         self.applications = []
         self.output = 'json'
         self.parameters = {}
+        self.log_level = log_level
 
-        # self.url = u'https://www.ebi.ac.uk/Tools/services/rest/iprscan5/'
-        self.url = u'https://www.ebi.ac.uk/Tools/services/rest/iprscan6/run'
+        self.url = u'https://www.ebi.ac.uk/Tools/services/rest/iprscan6/'
         self.jobid = ''
         self.jobname = ''
         self.jobstatus = ''
@@ -75,8 +75,8 @@ class Interpro(JobManagerAPI):
             self.applications = []
 
         for app in selected:
-            if app == 'Pfam':
-                app = 'PfamA'
+            # if app == 'Pfam':
+            #     app = 'PfamA'
             if app in Interpro.available['applications']:
                 self.applications.append(app)
             else:
@@ -212,14 +212,15 @@ class Interpro(JobManagerAPI):
         is_success = False
 
         # general fields for all queries
-        param = {u'email': self.email, u'title':self.title, u'sequence':self.sequence,
-                 u'output':self.output}
+        param = {u'program': 'iprscan6', u'email': self.email, u'title':self.title, u'sequence':self.sequence,
+                 u'output':self.output, u'stype':'p'}
 
         if self.applications:
             # add selected applications
             param['appl'] = ','.join(self.applications)
 
         if self.parameters:
+            # add the goterms and pathways parameters
             for para in self.parameters:
                 param[para] = self.parameters[para]
 
@@ -247,7 +248,7 @@ class Interpro(JobManagerAPI):
 
     def status(self, log=True):
         """-----------------------------------------------------------------------------------------
-        Poll job status at the server. The job is polled only once so it you want to poll
+        Poll job status at the server. The job is polled only once so if you want to poll
         multiple times call this method in a loop
 
         :return: string, status of job at server
@@ -1023,10 +1024,11 @@ AAGG
     ips.email = 'gribskov@purdue.edu'
     ips.title = 'BRI1'
     ips.sequence = testseq[1]
-    ips.application_select(['TIGRFAM', 'CDD', 'PfamA'])
+    ips.application_select(['AntiFam', 'SignalP-Euk', 'Pfam'])
+    # ips.application_select(['Pfam'])
     # ips.application_select(['Phobius', 'ProSitePatterns'])
-    ips.output_select('json')
-    ips.parameter_select({'goterms':True, 'pathways':True})
+    ips.output_select('gff')
+    ips.parameter_select({'goterms':True, 'pathways':False})
 
     print('submitting')
     if not ips.submit():
@@ -1048,16 +1050,19 @@ AAGG
     # parse and print the result, comment out the above and ncomment the next line to test parsing
     # the result without running a query
     # ips.content = json_test()
-    parsed_result = ips.parse_json()
+    if ips.output.startswith('json'):
+        parsed_result = ips.parse_json()
 
-    for eachmotif in parsed_result['motifs']:
-        print('{ipr_accession}\t{src_accession}\t{description}'.format(**eachmotif))
-    for goterm in parsed_result['go']:
-        go = parsed_result['go'][goterm]
-        print('{}\t{}\t{}'.format(goterm, go['name'], go['source']))
-    for path in parsed_result['pathway']:
-        pathway = parsed_result['pathway'][path]
-        print('{}\t{}\t{}'.format(path, pathway['name'], pathway['source']))
+        for eachmotif in parsed_result['motifs']:
+            print('{ipr_accession}\t{src_accession}\t{description}'.format(**eachmotif))
+        for goterm in parsed_result['go']:
+            go = parsed_result['go'][goterm]
+            print('{}\t{}\t{}'.format(goterm, go['name'], go['source']))
+        for path in parsed_result['pathway']:
+            pathway = parsed_result['pathway'][path]
+            print('{}\t{}\t{}'.format(path, pathway['name'], pathway['source']))
+    else:
+        print(f'{ips.content}')
 
     print('done')
 
