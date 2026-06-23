@@ -10,30 +10,23 @@ class InterproscanAPI(JobManagerAPI):
     Container for the methods that must be provided to JobManagerAPI
     ============================================================================================="""
 
-    def submit(self, show_query=False):
+    def submit(self, query, show_query=False):
         """-----------------------------------------------------------------------------------------
         Construct a REST command and dispatch the job to the server
         Any previously existing jobID is overwritten
 
-        :param show_query: boolean, print query if true
-        :return: logical, True = success, False = failure
+        :param query: InterproscanQuery     query object
+        :param show_query: boolean          print query if true
+        :return: logical                    True = success, False = failure
         -----------------------------------------------------------------------------------------"""
         is_success = False
 
-        # general fields for all queries
-        param = {u'program': 'iprscan6', u'email': self.email, u'title': self.title, u'sequence': self.sequence,
-                 u'output' : self.output, u'stype': 'p'}
+        query_fields = ['email', 'title', 'goterms', 'pathways', 'stype', 'appl', 'sequence']
+        param = {}
+        for q in query_fields:
+            param[q] = query.parameters[q]
 
-        if self.applications:
-            # add selected applications
-            param['appl'] = ','.join(self.applications)
-
-        if self.parameters:
-            # add the goterms and pathways parameters
-            for para in self.parameters:
-                param[para] = self.parameters[para]
-
-        command = self.url + 'run'
+        command = query.parameters['url'] + 'run'
         self.response = requests.post(command, files=param, headers={'User-Agent': 'ips-client'})
 
         if show_query:
@@ -47,8 +40,8 @@ class InterproscanAPI(JobManagerAPI):
             # success
             self.jobid = self.response.text
             self.jobstatus = 'submitted'
-            self.message = {'type'    : 'submitted',
-                            'text'    : f'job_name={self.title};job_id={self.jobid}',
+            self.message = {'type': 'submitted',
+                            'text': f'job_name={self.title};job_id={self.jobid}',
                             'loglevel': 1}
 
             is_success = True
@@ -68,16 +61,16 @@ class InterproscanAPI(JobManagerAPI):
 
         if 'RUNNING' in self.response.text:
             self.jobstatus = 'running'
-            self.message = {'type'    : 'polling',
-                            'text'    : f'job_id={self.jobid};response={response_text}',
+            self.message = {'type': 'polling',
+                            'text': f'job_id={self.jobid};response={response_text}',
                             'loglevel': 2}
 
         elif 'FINISHED' in self.response.text:
             if self.jobstatus != 'finished':
                 # only print finished message once
                 self.jobstatus = 'finished'
-                self.message = {'type'    : 'finished',
-                                'text'    : f'job_id={self.jobid}',
+                self.message = {'type': 'finished',
+                                'text': f'job_id={self.jobid}',
                                 'loglevel': 1}
 
         return self.jobstatus
@@ -94,12 +87,35 @@ class InterproscanAPI(JobManagerAPI):
         if not self.response_is_error('retrieving result'):
             # success
             self.content = self.response.text
-            self.message = {'type'    : 'retrieved',
-                            'text'    : f'job_id={self.jobid};output_len={len(self.output)}',
+            self.message = {'type': 'retrieved',
+                            'text': f'job_id={self.jobid};output_len={len(self.output)}',
                             'loglevel': 1}
             return 'retrieved'
 
         return ''
+
+    def response_is_error(self, task):
+        """-----------------------------------------------------------------------------------------
+        Return true if the response code is other than 200. Write error message to stderr if
+        loglevel > 1. Task is a string describing the task that failed for inclusion in the error
+        message.  The most recent response is stored in self.response
+
+        :param task: string, text description of response being tested for error message
+        :return: logical True = error, False = no error
+        -----------------------------------------------------------------------------------------"""
+        if self.response.status_code == 200:
+            # success
+            is_error = False
+
+        else:
+            # error
+            is_error = True
+            self.jobstatus = 'error'
+            self.message = {'type': task,
+                            'text': f'job_id={self.jobid};status={self.response.status_code}',
+                            'loglevel': 1}
+
+        return is_error
 
 
 class InterproscanQuery():
@@ -109,114 +125,85 @@ class InterproscanQuery():
     This class holds the information needed to run interproscan via the iprscan6 API. Management of
     job quest is in the JobManagerAPI. The Interpro object corresponds to one query.
 
+    available options/parameters taken from https://www.ebi.ac.uk/jdispatcher/docs/webservices/
+
+    available outputs
+    from https://www.ebi.ac.uk/Tools/services/rest/iprscan5/resulttypes
+    log - The output from the tool itself
+    out - The results of the job (XML format)
+    tsv - The results of the job in text format, tab separated values
+    xml - The results of the job in XML
+    gff - The results of the job in GFF3 format (gff3 is a synonym)
+    json - The results of the job in JSON format
+    jsonl - JSON format intended for streaming
+    sequence - Input sequence as seen by the tool
+    submission - The submission details which were submitted as a job
+    zip - full result zipped
+
     25 December 2018    Michael Gribskov
     ============================================================================================="""
-    # available options/parameters taken from
-    # https://www.ebi.ac.uk/jdispatcher/docs/webservices/
-
-    # available outputs
-    # from https://www.ebi.ac.uk/Tools/services/rest/iprscan5/resulttypes
-    # log - The output from the tool itself
-    # out - The results of the job (XML format)
-    # tsv - The results of the job in text format, tab separated values
-    # xml - The results of the job in XML
-    # gff - The results of the job in GFF3 format (gff3 is a synonym)
-    # json - The results of the job in JSON format
-    # jsonl - JSON format intended for streaming
-    # sequence - Input sequence as seen by the tool
-    # submission - The submission details which were submitted as a job
-    # zip - full result zipped
-    available = {'applications': ['AntiFam', 'CATH-Gene3D', 'CATH-FunFam', 'CDD', 'COILS', 'HAMAP',
-                                  'MobiDB-lite', 'NCBIFAM', 'PANTHER', 'Pfam', 'Phobius', 'PIRSF',
-                                  'PRINTS', 'PROSITE-patterns', 'PROSITE-profiles', 'SFLD', 'SMART',
-                                  'SUPERFAMILY', 'SignalP-Euk', 'SignalP-Prok'],
-                 'commands'    : ['run', 'status', 'result'],
-                 'outputs'     : ['out', 'log', 'tsv', 'xml', 'gff', 'gff3', 'error', 'json', 'jsonl',
-                                  'submission', 'zip']
+    # the keywords agree with the Interpro definition of query fields
+    available = {'appl': ['AntiFam', 'CATH-Gene3D', 'CATH-FunFam', 'CDD', 'COILS', 'HAMAP',
+                          'MobiDB-lite', 'NCBIFAM', 'PANTHER', 'Pfam', 'Phobius', 'PIRSF',
+                          'PRINTS', 'PROSITE-patterns', 'PROSITE-profiles', 'SFLD', 'SMART',
+                          'SUPERFAMILY', 'SignalP-Euk', 'SignalP-Prok'],
+                 'command': ['run', 'status', 'result'],
+                 'resultType': ['out', 'log', 'tsv', 'xml', 'gff', 'gff3', 'error', 'json', 'jsonl',
+                                'submission', 'zip']
                  }
 
-    def __init__(self, log_level=1):
-        """-----------------------------------------------------------------------------------------
-        interpro query/response constructor
+    def __init__(self, query_fields):
+        """ - --------------------------------------------------------------------------------------
+        variables needed for interproscan query
+        email
+        title
+        sequence
+        stype
+        output
 
-        loglevel   0 no log, 1 job submission/completion, 2 all
+        loglevel
+            0 no log,
+            1 job submission / completion
+            2 all
         -----------------------------------------------------------------------------------------"""
+        self.parameters = query_fields
 
-        self.email = ''  # user email (optional)
-        self.title = ''  # title for job (optional)
-        self.sequence = ''
-        self.applications = []
-        self.output = 'json'
-        self.parameters = {}
-        self.log_level = log_level
-
-        self.url = u'https://www.ebi.ac.uk/Tools/services/rest/iprscan6/'
         self.jobid = ''
-        self.jobname = ''
         self.jobstatus = ''
-
-        self.response = None
+        self.response = ''
         self.content = ''
 
-    def application_select(self, selected, keep=False):
+    def validate(self, keys):
         """-----------------------------------------------------------------------------------------
-        Add a list of applications to be run.  Each application in the list is compared to the
-        available applications and if not present a warning is issued.  The default is to run all
-        applications so an empty selected list signifies the default.
+        Validate query information vs the list of available options. Only implemented for
+        'applications' and 'output'
 
-        :param selected: list of strings, selected applications to run
-        :param keep: Boolean, retain current applications, just add new ones
-        :return: int, number of selected applications
+        :param keys: list       list of option keys to validate (keys in available)
+        :return: str            description of actions
         -----------------------------------------------------------------------------------------"""
-        if not keep:
-            self.applications = []
+        errstr = ''
+        resulttype_default = 'gff3'
+        for key in keys:
+            if key == 'appl':
+                valid_appl = []
+                for k in self.parameters['appl']:
+                    if k in self.available['appl']:
+                        valid_appl.append(k)
+                    else:
+                        errstr += f'application {k} invalid\n'
+                self.parameters['appl'] = valid_appl
 
-        for app in selected:
-            # if app == 'Pfam':
-            #     app = 'PfamA'
-            if app in InterproscanQuery.available['applications']:
-                self.applications.append(app)
-            else:
-                self.message = {'type'    : 'not_available',
-                                'text'    : f'application={app}',
-                                'loglevel': 2}
+            elif key == 'resultType':
+                if self.parameters['resultType'] not in InterproscanQuery.available['resultType']:
+                    self.parameters['resultType'] = resulttype_default
+                    errstr += f'resultType {self.parameters['resultType']} not supported, '
+                    errstr += f'resultType set to {resulttype_default}\n'
 
-        return len(self.applications)
-
-    def output_select(self, selected):
-        """-----------------------------------------------------------------------------------------
-        select the output format.  Only one is allowed
-
-        :param selected: string, one of the formats in self.output_avail
-        :return: True if format is available
-        -----------------------------------------------------------------------------------------"""
-        # self.output = ''
-        if selected in InterproscanQuery.available['outputs']:
-            self.output = selected
-        else:
-            self.message = {'type'    : 'not_available',
-                            'text'    : f'output={selected}',
-                            'loglevel': 2}
-
-            return False
-
-        return True
-
-    def parameter_select(self, select):
-        """-----------------------------------------------------------------------------------------
-        Select additional tag value pairs to add to parameters.  There is no checking so be correct
-
-        :param select: dict
-        :return: int number of parameters in dictionary
-        -----------------------------------------------------------------------------------------"""
-        for key in select:
-            self.parameters[key] = select[key]
-
-        return len(self.parameters)
+        return errstr
 
     def parse_json(self):
         """-----------------------------------------------------------------------------------------
-        Parse the contented returned from the server in JSON format. Three outputs are produced
+        Parse the content returned from the server in JSON format. Three outputs are produced
             A list of dictionaries for each hit in the sequence
             A list of dictionaries listing  GO terms and what entries they were drawn from
                 keys: 'name': gene ontology ID
@@ -232,8 +219,8 @@ class InterproscanQuery():
 
         This is fairly specific for my purpose
 
-        :return:
-        -----------------------------------------------------------------------------------------"""
+:return:
+-----------------------------------------------------------------------------------------"""
         pjson = json.loads(self.content)
 
         matches = pjson['results'][0]['matches']
@@ -259,7 +246,7 @@ class InterproscanQuery():
             # parse an entry, en entry is a hit vs a specific entry in a database
             motifs.append({'ipr_accession': entry['accession'],
                            'src_accession': source_accession,
-                           'description'  : entry['description'] or ''})
+                           'description': entry['description'] or ''})
 
             # name = entry['name']
             # type = entry['type']
@@ -271,7 +258,7 @@ class InterproscanQuery():
                     if go['id'] in go_all:
                         go_all[go['id']]['source'].append(source_accession)
                     else:
-                        go_all[go['id']] = {'name'  : go['name'], 'category': go['category'],
+                        go_all[go['id']] = {'name': go['name'], 'category': go['category'],
                                             'source': [source_accession]}
 
             if 'pathwayXRefs' in entry:
@@ -293,33 +280,12 @@ class InterproscanQuery():
                         if source_accession not in path_all[id]['source']:
                             path_all[id]['source'].append(source_accession)
                     else:
-                        path_all[id] = {'name'  : path['name'],
+                        path_all[id] = {'name': path['name'],
                                         'source': [source_accession]}
 
         return {'jobname': self.jobname, 'motifs': motifs, 'go': go_all, 'pathway': path_all}
 
-    def response_is_error(self, task):
-        """-----------------------------------------------------------------------------------------
-        Return true if the response code is other than 200. Write error message to stderr if
-        loglevel > 1. Task is a string describing the task that failed for inclusion in the error
-        message.  The most recent response is stored in self.response
 
-        :param task: string, text description of response being tested for error message
-        :return: logical True = error, False = no error
-        -----------------------------------------------------------------------------------------"""
-        if self.response.status_code == 200:
-            # success
-            is_error = False
-
-        else:
-            # error
-            is_error = True
-            self.jobstatus = 'error'
-            self.message = {'type'    : task,
-                            'text'    : f'job_id={self.jobid};status={self.response.status_code}',
-                            'loglevel': 1}
-
-        return is_error
 
 
 # ==================================================================================================

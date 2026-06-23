@@ -5,7 +5,13 @@ format with all sequences in the OG in a single file
 Usage
     intropro_orthofinder.py <OG_directory>
 
-26 December 2018    Michael Gribskov
+jobmanager_api:JobManager defines the general interface and submitting/polling/retrieving jobs
+interpro:InterproscanAPI provides the required functions defined as abstract methods in
+    JobManager
+interpro:InterproscanQuery holds the information required for queries and methods needed for
+    processing results
+
+22 June 2026    Michael Gribskov
 ================================================================================================="""
 import sys
 import time
@@ -17,18 +23,18 @@ import textwrap as _textwrap
 
 
 class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter):
-    '''=============================================================================================
+    """=============================================================================================
     Custom formatter for command line argument help
-    ============================================================================================='''
+    ============================================================================================="""
 
     def _split_lines(self, text, width=60):
-        '''-----------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
         Gracefully split lines in command line help. lines are split at 60 characters by default
 
         :param text: str, text to split
         :param width: int, width to split at
         :return:
-        -----------------------------------------------------------------------------------------'''
+        -----------------------------------------------------------------------------------------"""
         text = self._whitespace_matcher.sub(' ', text).strip()
         self._max_help_position = 30
         return _textwrap.wrap(text, width)
@@ -38,17 +44,18 @@ class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter):
 
 
 def arguments_get():
-    '''---------------------------------------------------------------------------------------------
+    """---------------------------------------------------------------------------------------------
     Set up command line arguments, read from command line, and store in argparse.ArgumentParser
     object, cl
 
     :return: argparse.ArgumentParser object
-    ---------------------------------------------------------------------------------------------'''
+    ---------------------------------------------------------------------------------------------"""
     minlen_default = 50  # not implemented
     log_level_default = 1
     sequences_per_query_default = 30
     poll_delay = 60
     simultaneous_jobs_default = 1
+    ogdir_default = './data'
     cl = argparse.ArgumentParser(description='Interproscan of ORF sequences',
                                  formatter_class=CustomFormatter)
     cl.add_argument('--logfile', type=argparse.FileType('w'), default=sys.stderr,
@@ -63,7 +70,8 @@ def arguments_get():
                     help='Seconds to wait between polling jobs')
     cl.add_argument('--log_level', type=int, default=log_level_default,
                     help='detail for reporting REST queries')
-    cl.add_argument('--og_dir', type=str)
+    cl.add_argument('--ogdir', type=str, default=ogdir_default,
+                    help='directory to store orthogroup FastA files')
 
     return cl.parse_args()  # parse_args  reads the command line
 
@@ -76,7 +84,7 @@ def reformat(job):
     :param job: interpro object, should be a finished job
     :return: string
     ---------------------------------------------------------------------------------------------"""
-    str = ''
+    outstr = ''
 
     parsed = job.parse_json()
     motifs = parsed['motifs']
@@ -84,16 +92,16 @@ def reformat(job):
     path = parsed['pathway']
 
     for m in motifs:
-        str += '{}\t{}\t{}\n'.format(m['ipr_accession'],
-                                     m['src_accession'],
-                                     m['description'])
+        outstr += '{}\t{}\t{}\n'.format(m['ipr_accession'],
+                                        m['src_accession'],
+                                        m['description'])
     for g in go:
-        str += '{}\t{}\t{}\t{}\n'.format(g, go[g]['name'], go[g]['category'], go[g]['source'])
+        outstr += '{}\t{}\t{}\t{}\n'.format(g, go[g]['name'], go[g]['category'], go[g]['source'])
 
     for p in path:
-        str += '{}\t{}\t{}\n'.format(p, path[p]['name'], path[p]['source'])
+        outstr += '{}\t{}\t{}\n'.format(p, path[p]['name'], path[p]['source'])
 
-    return str
+    return outstr
 
 
 def save_finished(joblist, reformat=None, fh=None, remove=True):
@@ -110,6 +118,7 @@ def save_finished(joblist, reformat=None, fh=None, remove=True):
     :return: string, text of job content
     ---------------------------------------------------------------------------------------------"""
     delete_list = []
+    text = None
     for job in joblist:
         if joblist[job] != 'finished':
             # skip unfinished jobs
@@ -146,6 +155,7 @@ def fasta_read(fh, doc=''):
     :return: dict           FastA sequence strings
     ---------------------------------------------------------------------------------------------"""
     og_seqs = {}
+    sid = ''
     for line in fh:
         if line.startswith('>'):
             # for orthofinder input, we expect just a sequence id
@@ -171,8 +181,8 @@ def fasta_to_batch(fasta, seq_per_batch):
     set_n = (len(fasta) + 1) // 2
     nseq = 0
     seq = []
-    for id in fasta:
-        s = fasta[id]
+    for sid in fasta:
+        s = fasta[sid]
         if nseq % set_n == 0:
             seq.append('')
 
@@ -185,10 +195,9 @@ def fasta_to_batch(fasta, seq_per_batch):
 # ==================================================================================================
 # Main
 # ==================================================================================================
-
 args = arguments_get()
 args.logfile.write('\ninterpro_orthofinder - interproscan of Orthofinder OGs\n')
-args.logfile.write('\tOG directory: {}\n'.format(args.og_dir))
+args.logfile.write('\tOG directory: {}\n'.format(args.ogdir))
 args.logfile.write('\tminimum ORF length: {}\n\n'.format(args.minlen))
 
 # fasta = Fasta(fh=args.fasta_in)
@@ -200,15 +209,23 @@ joblist = {}
 # manager handles the specifics of submitting jobs, polling, and retrieving results. Manager
 # is reused for each query (which is an InterproscanQuery object)
 manager = InterproscanAPI()
-query = InterproscanQuery(log_level=1)
-# query.log_fh = args.logfile
-query.email = 'gribskov@purdue.edu'
-query.application_select(['Pfam', 'Panther', 'SignalP-Euk'])
-query.output_select = 'gff'
 
-ogfiles = [f.name for f in Path(args.og_dir).iterdir() if f.is_file()]
+# query values that do not change for each query
+# TODO validate applications and output
+constants = {'url': u'https://www.ebi.ac.uk/Tools/services/rest/iprscan6/',
+             'program': 'iprscan6',
+             'email': 'gribskov@purdue.edu',
+             'appl': ['Pfam', 'Panther', 'SignalP-Euk'],
+             'resultType': 'gff3',
+             'goterms': True,
+             'pathways': False,
+             'sequence': '',
+             'stype': 'p',
+             'title': '' }
+
+ogfiles = [f.name for f in Path(args.ogdir).iterdir() if f.is_file()]
 for f in ogfiles:
-    og_f = f'{args.og_dir}/{f}'
+    og_f = f'{args.ogdir}/{f}'
     print(f'og file: {og_f}')
     og = open(og_f, 'r')
 
@@ -220,17 +237,19 @@ for f in ogfiles:
 
     for seq in batch_seq:
         # copy the template and add the sequence information
-        query.sequence = seq
-        query.jobname = "{f.replace('.fa', '')}"
-        query.title = "{f.replace('.fa', '')}"
+        query = InterproscanQuery(constants)
+        query.parameters['sequence'] = seq
+        query.parameters['jobname'] = f"{f.replace('.fa', '')}"
+        query.parameters['title'] = f"{f.replace('.fa', '')}"
+        query.validate(['appl', 'resultType'])
 
-        # Iprscan service says to wait for the job to finish before submitting
-        # another
+        # Iprscan service says to wait for the job to finish before submitting another
         manager.submit(query)
-        manager.poll(manager.poll_delay, manager.poll_maxcount)
+        manager.poll()
 
         # all jobs should be done or failed
         save_finished(query, reformat, sys.stdout, True)
+        # TODO remove debugging line below
         exit(1)
 
     # end of loop over sequence batches

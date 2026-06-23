@@ -22,7 +22,11 @@ class JobManagerAPI(ABC):
 
     Michael Gribskov     19 April 2021
     ============================================================================================="""
-
+    # class variables shared between all instances
+    poll_delay = 10
+    poll_maxcount = 25
+    simultaneous_jobs = 1
+    joblist = []
     # ----------------------------------------------------------------------------------------------
     # concrete methods available to all subclasses
     # ----------------------------------------------------------------------------------------------
@@ -44,10 +48,11 @@ class JobManagerAPI(ABC):
         cls.jobname = ''
         cls.message = []
         cls.content = ''
-        cls.poll_delay = 10
-        cls.poll_maxcount = 25
-        cls.simultaneous_jobs = 1
-        cls.joblist = []
+        # cls.poll_delay = 10
+        # cls.poll_maxcount = 25
+        # cls.simultaneous_jobs = 1
+        # cls.joblist = []
+        pass
 
     def clone(self):
         """-----------------------------------------------------------------------------------------
