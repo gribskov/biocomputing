@@ -38,29 +38,29 @@ class InterproscanAPI(JobManagerAPI):
             self.jobstatus = 'failed'
         else:
             # success
-            self.jobid = self.response.text
-            self.jobstatus = 'submitted'
-            self.message = {'type': 'submitted',
-                            'text': f'job_name={self.title};job_id={self.jobid}',
+            query.jobid = self.response.text
+            query.jobstatus = 'submitted'
+            query.message = {'type': 'submitted',
+                            'text': f'job_name={query.parameters['title']};job_id={query.jobid}',
                             'loglevel': 1}
 
             is_success = True
 
         return is_success
 
-    def status(self, log=True):
+    def status(self, query, log=True):
         """-----------------------------------------------------------------------------------------
         Poll job status at the server. The job is polled only once so if you want to poll
         multiple times call this method in a loop
 
         :return: string, status of job at server
         -----------------------------------------------------------------------------------------"""
-        command = self.url + 'status/' + self.jobid
+        command = query.parameters['url'] + 'status/' + query.jobid
         self.response = requests.get(command)
-        response_text = self.response.text.rstrip()
+        response_text = query.response.text.rstrip()
 
-        if 'RUNNING' in self.response.text:
-            self.jobstatus = 'running'
+        if 'RUNNING' in query.response.text:
+            query.jobstatus = 'running'
             self.message = {'type': 'polling',
                             'text': f'job_id={self.jobid};response={response_text}',
                             'loglevel': 2}
@@ -172,6 +172,7 @@ class InterproscanQuery():
         self.jobstatus = ''
         self.response = ''
         self.content = ''
+        self.message = []
 
     def validate(self, keys):
         """-----------------------------------------------------------------------------------------

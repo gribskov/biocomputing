@@ -245,7 +245,8 @@ for f in ogfiles:
 
         # Iprscan service says to wait for the job to finish before submitting another
         manager.submit(query)
-        manager.poll()
+        manager.joblist.append(query)
+        manager.poll_all()
 
         # all jobs should be done or failed
         save_finished(query, reformat, sys.stdout, True)

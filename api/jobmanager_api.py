@@ -23,6 +23,7 @@ class JobManagerAPI(ABC):
     Michael Gribskov     19 April 2021
     ============================================================================================="""
     # class variables shared between all instances
+    # TODO change to longer delay for production
     poll_delay = 10
     poll_maxcount = 25
     simultaneous_jobs = 1
@@ -113,9 +114,9 @@ class JobManagerAPI(ABC):
     # high level methods built on the methods supplied by the subclass
     # ----------------------------------------------------------------------------------------------
 
-    def poll(self):
+    def poll_all(self):
         """-----------------------------------------------------------------------------------------
-        Poll the jobs in the jobs_pending list until all have finished. Finished can be
+        Poll the jobs in the jobs_pending list repeatedly until all have finished. Finished can be
             1) reached maximum number of polling attempts
             2) returned a status other than success or waiting
             3) success
@@ -134,13 +135,15 @@ class JobManagerAPI(ABC):
             jobs_running = False
             time.sleep(self.poll_delay)
 
-            for job in self.joblist:
-                if joblist[job] != 'finished':
-                    status = self.status()
-                    self.joblist[job] = status
+            # the jobs in joblist are InterproscanQuery objects
+            for job in joblist:
+                if job.jobstatus != 'finished':
+                    status = self.status(job)
+                    job.jobstatus = status
                     if status == 'running':
                         jobs_running = True
                         # no need to keep checking after one running job is found
+                        # return to while jobs_running
                         break
 
         return ntries
