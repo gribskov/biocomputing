@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import time
+import sys
 
 
 class JobManagerAPI(ABC):
@@ -23,11 +24,11 @@ class JobManagerAPI(ABC):
     Michael Gribskov     19 April 2021
     ============================================================================================="""
     # class variables shared between all instances
-    # TODO change to longer delay for production
-    poll_delay = 10
+    poll_delay = 60
     poll_maxcount = 25
     simultaneous_jobs = 1
     joblist = []
+
     # ----------------------------------------------------------------------------------------------
     # concrete methods available to all subclasses
     # ----------------------------------------------------------------------------------------------
@@ -139,7 +140,7 @@ class JobManagerAPI(ABC):
             for job in joblist:
                 if job.jobstatus != 'finished':
                     status = self.status(job)
-                    job.jobstatus = status
+                    # job.jobstatus = status
                     if status == 'running':
                         jobs_running = True
                         # no need to keep checking after one running job is found
@@ -147,6 +148,48 @@ class JobManagerAPI(ABC):
                         break
 
         return ntries
+
+    def result_all(self):
+        """-----------------------------------------------------------------------------------------
+        Retrieve results for all queries marked as finished using the result() method provided by
+        the concrete subclass.
+
+        uses class variables:
+            joblist: list of interproscan objects that have been submitted
+        uses subclass result() method
+        -----------------------------------------------------------------------------------------"""
+        joblist = self.joblist
+        # the jobs in joblist are InterproscanQuery objects
+        for job in joblist:
+            if job.jobstatus == 'finished':
+                status = self.result(job)
+
+        return status
+
+    def save_all(self):
+        """-----------------------------------------------------------------------------------------
+        Retrieve results for all queries marked as finished. Output file name is based on the query
+        jobname
+
+        uses class variables:
+            joblist: list of interproscan objects that have been submitted
+        uses subclass result() method
+        -----------------------------------------------------------------------------------------"""
+        joblist = self.joblist
+        # the jobs in joblist are InterproscanQuery objects
+        nwritten = 0
+        for job in joblist:
+            if job.jobstatus == 'finished':
+                if job.parameters['jobname'] == 'stdout':
+                    outfile = sys.stdout
+                else:
+                    outfile = open(f'{job.parameters['jobname']}.out', 'w')
+
+                outfile.write(job.content)
+                outfile.close()
+                nwritten += 1
+
+        return nwritten
 
 
 # --------------------------------------------------------------------------------------------------

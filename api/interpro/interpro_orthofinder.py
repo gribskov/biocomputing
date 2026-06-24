@@ -200,11 +200,6 @@ args.logfile.write('\ninterpro_orthofinder - interproscan of Orthofinder OGs\n')
 args.logfile.write('\tOG directory: {}\n'.format(args.ogdir))
 args.logfile.write('\tminimum ORF length: {}\n\n'.format(args.minlen))
 
-# fasta = Fasta(fh=args.fasta_in)
-
-# The job list keeps track of the ips object that have been created and their current status
-# the joblist is a dictionary where the ips object is the key and the value is a status string
-joblist = {}
 
 # manager handles the specifics of submitting jobs, polling, and retrieving results. Manager
 # is reused for each query (which is an InterproscanQuery object)
@@ -215,7 +210,7 @@ manager = InterproscanAPI()
 constants = {'url': u'https://www.ebi.ac.uk/Tools/services/rest/iprscan6/',
              'program': 'iprscan6',
              'email': 'gribskov@purdue.edu',
-             'appl': ['Pfam', 'Panther', 'SignalP-Euk'],
+             'appl': ['SUPERFAMILY', 'Pfam', 'Panther', 'SignalP-Euk'],
              'resultType': 'gff3',
              'goterms': True,
              'pathways': False,
@@ -234,23 +229,29 @@ for f in ogfiles:
     og.close()
 
     batch_seq = fasta_to_batch(fasta, args.sequences_per_query)
+    batches = len(batch_seq)
 
+    batch_num = 0
     for seq in batch_seq:
-        # copy the template and add the sequence information
+        batch_num += 1
         query = InterproscanQuery(constants)
         query.parameters['sequence'] = seq
         query.parameters['jobname'] = f"{f.replace('.fa', '')}"
+        if batches > 1:
+            query.parameters['jobname'] += f'_{batch_num}'
         query.parameters['title'] = f"{f.replace('.fa', '')}"
         query.validate(['appl', 'resultType'])
 
         # Iprscan service says to wait for the job to finish before submitting another
-        manager.submit(query)
+        print(f'\nsubmitting {query.parameters["jobname"]}')
+        manager.submit(query, show_query=True)
         manager.joblist.append(query)
         manager.poll_all()
-
-        # all jobs should be done or failed
-        save_finished(query, reformat, sys.stdout, True)
-        # TODO remove debugging line below
+        print(f'finished {query.parameters["jobname"]}')
+        manager.result_all()
+        manager.save_all()
+        print(f'writing {query.parameters["jobname"]}')
+        manager.joblist.remove(query)
         exit(1)
 
     # end of loop over sequence batches

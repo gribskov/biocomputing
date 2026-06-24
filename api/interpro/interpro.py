@@ -57,38 +57,38 @@ class InterproscanAPI(JobManagerAPI):
         -----------------------------------------------------------------------------------------"""
         command = query.parameters['url'] + 'status/' + query.jobid
         self.response = requests.get(command)
-        response_text = query.response.text.rstrip()
+        response_text = self.response.text
 
-        if 'RUNNING' in query.response.text:
+        if 'RUNNING' in response_text:
             query.jobstatus = 'running'
-            self.message = {'type': 'polling',
-                            'text': f'job_id={self.jobid};response={response_text}',
+            query.message = {'type': 'polling',
+                            'text': f'job_id={query.jobid};response={response_text}',
                             'loglevel': 2}
 
-        elif 'FINISHED' in self.response.text:
-            if self.jobstatus != 'finished':
+        elif 'FINISHED' in response_text:
+            if query.jobstatus != 'finished':
                 # only print finished message once
-                self.jobstatus = 'finished'
-                self.message = {'type': 'finished',
-                                'text': f'job_id={self.jobid}',
+                query.jobstatus = 'finished'
+                query.message = {'type': 'finished',
+                                'text': f'job_id={query.jobid}',
                                 'loglevel': 1}
 
-        return self.jobstatus
+        return query.jobstatus
 
-    def result(self):
+    def result(self, query):
         """-----------------------------------------------------------------------------------------
-        Retrieve the result
+        Retrieve the result of all finished jobs and store in jobs
 
         :return: string, 'retrieved' if successful, '' if unsuccessful (False)
         -----------------------------------------------------------------------------------------"""
         # get the final result
-        command = self.url + 'result/' + self.jobid + '/' + self.output
+        command = query.parameters['url'] + f"result/{query.jobid}/{query.parameters['resultType']}"
         self.response = requests.get(command)
         if not self.response_is_error('retrieving result'):
             # success
-            self.content = self.response.text
-            self.message = {'type': 'retrieved',
-                            'text': f'job_id={self.jobid};output_len={len(self.output)}',
+            query.content = self.response.text
+            query.message = {'type': 'retrieved',
+                            'text': f'job_id={query.jobid};output_len={len(query.content)}',
                             'loglevel': 1}
             return 'retrieved'
 
@@ -286,7 +286,12 @@ class InterproscanQuery():
 
         return {'jobname': self.jobname, 'motifs': motifs, 'go': go_all, 'pathway': path_all}
 
+    def save(self):
+        """-----------------------------------------------------------------------------------------
+        Save the results of finished jobs to files without further processing
 
+        :return:
+        -----------------------------------------------------------------------------------------"""
 
 
 # ==================================================================================================
