@@ -57,8 +57,8 @@ class Alignment(Score):
         -----------------------------------------------------------------------------------------"""
         a2i = self.a2i
 
-        self.i1 = [a2i[c] for c in self.s1.seq]
-        self.i2 = [a2i[c] for c in self.s2.seq]
+        self.i1 = [a2i[c] for c in self.s1]
+        self.i2 = [a2i[c] for c in self.s2]
 
         return len(self.i1), len(self.i2)
 
@@ -189,9 +189,26 @@ class Alignment(Score):
         edge = Cell()  # a dummy cell for the edges
         edge.score = self.min + open
 
+        # set up scoring matrix size l2 * l1, and create x,y position labels
+        score = [Cell() for i in range(l2 * l1)]
+        x = y = 0
+        score[0].xy = [0,0]
+        for i in range(1,len(score)):
+            c = score[i]
+            if i % l1:
+                x += 1
+            else:
+                y += 1
+                x = 0
+
+            c.xy = [x, y]
+            if x==0 or y==0:
+                # set up previous cells for edges
+                c.p = [edge]
+
         scoremax = 0
         posmax = [0, 0]
-        score = [[Cell(i, j) for i in range(len(i1))] for j in range(len(i2))]
+
         self.score = score
         bestrow = Cell()
         # bestrow.p = edge
@@ -457,7 +474,8 @@ class Alignment(Score):
     @staticmethod
     def n2pos(l1, n):
         """-----------------------------------------------------------------------------------------
-        return the row and col corresponding to cell n
+        return the row and col corresponding to cell n. Assumes the matrix is stored in row major
+        order with l2 rows (y) and l1 columns (x)
 
         :param l1: int, length of sequence 1 (col)
         :param n: int, cell n
@@ -509,8 +527,8 @@ if __name__ == '__main__':
 
     # sequences
     align = Alignment()
-    align.s1 = Fasta(test_sequence[6])
-    align.s2 = Fasta(test_sequence[7])
+    align.s1 = test_sequence[6]
+    align.s2 = test_sequence[7]
 
     # scoring table
     # align.alphabet = 'ACGT'
