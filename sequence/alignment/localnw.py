@@ -8,6 +8,7 @@ import sys
 from math import log10
 import random
 from scipy import stats
+import matplotlib.pyplot as plt
 from sequence.fasta import Fasta
 from sequence.score import Score
 
@@ -464,14 +465,46 @@ class Alignment(Score):
         -----------------------------------------------------------------------------------------"""
         return (n - 1) // l1, (n - 1) % l1
 
+    def draw_grid_lines(self):
+        fig, ax = plt.subplots(figsize=(6, 6))
+        i_size = len(self.i2)
+        j_size = len(self.i1)
+
+        # Draw grid lines
+        for x in range(i_size + 1):
+            ax.axvline(x, color='lightgray', linestyle='--')
+        for y in range(j_size + 1):
+            ax.axhline(y, color='lightgray', linestyle='--')
+
+        # Draw connections from cell center to target centers
+        for x in range(i_size):
+            for y in range(j_size):
+                cell = self.score[x][y]
+                if cell.xy:
+                    start_x = cell.xy[0] + 0.5
+                    start_y = cell.xy[1] + 0.5
+                else:
+                    continue
+
+            for end in cell.p:
+                end_x = end.xy[0] + 0.5
+                end_y = end.xy[1] + 0.5
+                ax.plot([start_x, end_x], [start_y, end_y], color='blue', marker='o')
+
+        ax.set_xlim(0, i_size)
+        ax.set_ylim(0, j_size)
+        ax.set_aspect('equal')
+        plt.show()
+
+        return
+
+
 
 # --------------------------------------------------------------------------------------------------
 # testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     align = Alignment()
-
-
     align.s1 = Fasta()
     align.s2 = Fasta()
 
@@ -537,5 +570,14 @@ if __name__ == '__main__':
     # align.s1 = Fasta(filename=sys.argv[1])
     # align.s2 = Fasta(filename=sys.argv[2])
     # align.readNCBI('../../dotplot/table/BLOSUM62.matrix')
+
+    # Example usage: Grid size 3x3
+    # Format: (source_x, source_y): [(target_x1, target_y1), (target_x2, target_y2)]
+    connections_map = {
+        (0, 0): [(1, 1), (2, 2)],
+        (1, 1): [(0, 2), (2, 0)]
+    }
+
+    align.draw_grid_lines()
 
     exit(0)
