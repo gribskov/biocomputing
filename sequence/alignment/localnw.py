@@ -29,7 +29,7 @@ class Cell:
         self.p = []
         self.xy = []
         if x and y:
-            self.xy = [x,y]
+            self.xy = [x, y]
 
 
 class Alignment(Score):
@@ -81,7 +81,7 @@ class Alignment(Score):
         edge = Cell()  # a dummy cell for edges
         edge.score = self.min + open + l1 * extend
 
-        score = [[Cell(i,j) for i in i1] for j in i2]
+        score = [[Cell(i, j) for i in i1] for j in i2]
         self.score = score
         bestrow = Cell()
         bestcol = [Cell() for i in i1]
@@ -191,7 +191,7 @@ class Alignment(Score):
 
         scoremax = 0
         posmax = [0, 0]
-        score = [[Cell(i,j) for i in range(len(i1))] for j in range(len(i2))]
+        score = [[Cell(i, j) for i in range(len(i1))] for j in range(len(i2))]
         self.score = score
         bestrow = Cell()
         # bestrow.p = edge
@@ -499,85 +499,33 @@ class Alignment(Score):
         return
 
 
-
 # --------------------------------------------------------------------------------------------------
 # testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    align = Alignment()
-    align.s1 = Fasta()
-    align.s2 = Fasta()
+    test_sequence = ['ACTTATCTTAT', 'TATTCTATTCA', 'TGGTATACTAT', 'GATACTATCTA',
+                     'AGTATCATATT', 'TTATACTATGG', 'TACTATTTAGAT', 'TTATACTATGA',
+                     'TAGATTTATCAT', 'TGGTATACTAT', 'BORROW', 'BORABORA']
 
+    # sequences
+    align = Alignment()
+    align.s1 = Fasta(test_sequence[6])
+    align.s2 = Fasta(test_sequence[7])
+
+    # scoring table
     # align.alphabet = 'ACGT'
     # align.identity(pos=3, neg=-3)
-
-    # align.s1.seq = 'ACTTATCTTAT'
-    # align.s1.seq = 'TATTCTATTCA'
-    # align.s1.seq = 'TGGTATACTAT'
-    # align.s1.seq = 'GATACTATCTA'
-
-    # align.s2.seq = 'AGTATCATATT'
-    # align.s2.seq = 'TTATACTATGG'
-    # align.s2.seq = 'TACTATTTAGAT'
-    # align.s2.seq = 'TTATACTATGA'
-
-
-    # align.seqToInt()
-    # bestscore, bestpos = align.globalBrute(-1, -1, nogap=False)
-    # bestscore, bestpos = align.localBrute(-1, -1)
-    # print('score: {} at {}\n'.format(bestscore, bestpos))
-    # align.writeScoreMatrix(sys.stdout, reverse=True, space=3)
-    # alignments = align.traceAll(bestpos)
-    # for a in alignments:
-    #     m = align.matchString( a[0], a[1])
-    #     print('{}\n{}\n{}\n\n'.format(a[0], m, a[1]))
-
     # align.readNCBI('..//tables/alphabet.matrix')
-    # align.s1.seq = 'BORROW'
-    # align.s2.seq = 'BORABORA'
+    # align.readNCBI('../../dotplot/table/NUC4.4.matrix')
     align.readNCBI('..//tables/dna4-2.matrix')
-    # align.s1.seq = "TAGATTTATCAT"
-    align.s2.seq = "TAGATTTATCAT"
-    # align.s2.seq = "TACTATTTAGAT"
-    align.s1.seq = "TGGTATACTAT"
 
+    # random.shuffle(align.i1)          # uncomment to test scores for random alignments
     align.seqToInt()
     # bestscore, bestpos = align.globalBrute(-1, -1, nogap=False)
     bestscore, bestpos = align.localBrute(-1, -1)
     print('score: {} at {}\n'.format(bestscore, bestpos))
     align.writeScoreMatrix(sys.stdout, reverse=False, space=1)
-
-    # testing
-    # align.s1 = Fasta()
-    # align.s1.seq = 'ACTGCCTTGATC'
-    # align.s2 = Fasta()
-    # align.s2.seq = 'ATGCCAAAGATC'
-    # align.readNCBI('../../dotplot/table/NUC4.4.matrix')
-
-    # align.seqToInt()
-    # # random.shuffle(align.i1)          # uncomment to test scores for random alignments
-    # original_score, bestpos = align.localBrute(-1, -1)
-    # print('original score: {} at {}\n'.format(original_score, bestpos))
-    # align.writeScoreMatrix(sys.stdout)
-    # a1, a2, m = align.trace1(bestpos)
-    # print('\n{}\n{}\n{}'.format(a1, m, a2))
     alignments = align.traceAll(bestpos)
-    # for a in alignments:
-    #     m = align.matchString( a[0], a[1])
-    #     print('{}\n{}\n{}\n\n'.format(a[0], m, a[1]))
-
-    #
-    # align.s1 = Fasta(filename=sys.argv[1])
-    # align.s2 = Fasta(filename=sys.argv[2])
-    # align.readNCBI('../../dotplot/table/BLOSUM62.matrix')
-
-    # Example usage: Grid size 3x3
-    # Format: (source_x, source_y): [(target_x1, target_y1), (target_x2, target_y2)]
-    connections_map = {
-        (0, 0): [(1, 1), (2, 2)],
-        (1, 1): [(0, 2), (2, 0)]
-    }
-
     align.draw_grid_lines()
 
     exit(0)
