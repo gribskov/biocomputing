@@ -18,7 +18,7 @@ class Cell:
     ============================================================================================="""
     count = 0
 
-    def __init__(self):
+    def __init__(self, x=None, y=None):
         """-----------------------------------------------------------------------------------------
 
         -----------------------------------------------------------------------------------------"""
@@ -26,6 +26,9 @@ class Cell:
         Cell.count += 1
         self.score = 0
         self.p = []
+        self.xy = []
+        if x and y:
+            self.xy = [x,y]
 
 
 class Alignment(Score):
@@ -77,7 +80,7 @@ class Alignment(Score):
         edge = Cell()  # a dummy cell for edges
         edge.score = self.min + open + l1 * extend
 
-        score = [[Cell() for i in i1] for j in i2]
+        score = [[Cell(i,j) for i in i1] for j in i2]
         self.score = score
         bestrow = Cell()
         bestcol = [Cell() for i in i1]
@@ -187,7 +190,7 @@ class Alignment(Score):
 
         scoremax = 0
         posmax = [0, 0]
-        score = [[Cell() for i in i1] for j in i2]
+        score = [[Cell(i,j) for i in range(len(i1))] for j in range(len(i2))]
         self.score = score
         bestrow = Cell()
         # bestrow.p = edge
@@ -397,6 +400,7 @@ class Alignment(Score):
                 file.write(smt.format(s2[j]))
                 i = i0
                 while i >= 0:
+                    s = score[i][j]
                     file.write(fmt.format(score[j][i].score))
                     i += step
                 j += step
@@ -524,7 +528,7 @@ if __name__ == '__main__':
     # align.writeScoreMatrix(sys.stdout)
     # a1, a2, m = align.trace1(bestpos)
     # print('\n{}\n{}\n{}'.format(a1, m, a2))
-    # alignments = align.traceAll(bestpos)
+    alignments = align.traceAll(bestpos)
     # for a in alignments:
     #     m = align.matchString( a[0], a[1])
     #     print('{}\n{}\n{}\n\n'.format(a[0], m, a[1]))
