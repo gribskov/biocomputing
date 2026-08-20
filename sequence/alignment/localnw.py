@@ -187,24 +187,26 @@ class Alignment(Score):
         l2 = len(i2)
 
         edge = Cell()  # a dummy cell for the edges
-        edge.score = self.min + open
+        edge.score = 0
 
         # set up scoring matrix size l2 * l1, and create x,y position labels
         score = [Cell() for i in range(l2 * l1)]
+        # first row, previous is edge
+        for i in range(l1):
+            score[i].xy = [i,0]
+            score[i].p = [edge]
+
         x = y = 0
-        score[0].xy = [0,0]
-        for i in range(1,len(score)):
+        for i in range(l1,len(score)):
             c = score[i]
             if i % l1:
                 x += 1
             else:
+                # first cell in row
                 y += 1
                 x = 0
-
-            c.xy = [x, y]
-            if x==0 or y==0:
-                # set up previous cells for edges
                 c.p = [edge]
+            c.xy = [x, y]
 
         scoremax = 0
         posmax = [0, 0]
