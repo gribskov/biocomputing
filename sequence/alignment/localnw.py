@@ -19,7 +19,7 @@ class Cell:
     ============================================================================================="""
     count = 0
 
-    def __init__(self, x=None, y=None):
+    def __init__(self, x=None, y=None, p=None):
         """-----------------------------------------------------------------------------------------
 
         -----------------------------------------------------------------------------------------"""
@@ -30,6 +30,8 @@ class Cell:
         self.xy = []
         if x and y:
             self.xy = [x, y]
+        if p:
+            self.p = p
 
 
 class Alignment(Score):
@@ -191,13 +193,14 @@ class Alignment(Score):
 
         # set up scoring matrix size l2 * l1, and create x,y position labels
         score = [Cell() for i in range(l2 * l1)]
+        self.score = score
         # first row, previous is edge
         for i in range(l1):
-            score[i].xy = [i,0]
+            score[i].xy = [i, 0]
             score[i].p = [edge]
 
         x = y = 0
-        for i in range(l1,len(score)):
+        for i in range(l1, len(score)):
             c = score[i]
             if i % l1:
                 x += 1
@@ -209,73 +212,80 @@ class Alignment(Score):
             c.xy = [x, y]
 
         scoremax = 0
-        posmax = [0, 0]
+        posmax = []
 
-        self.score = score
-        bestrow = Cell()
-        # bestrow.p = edge
-        # bestrow.score = edge.score
-        bestcol = []
-        for _ in i1:
-            c = Cell()
-            c.p = [edge]
-            c.score = edge.score
-            bestcol.append(c)
+        # auxiliary storage: 1 pointer for the best gapped value in the previous row (y-1, x:0..-1)
+        # 1 pointer for the best gapped value in each column. use a cell object for the pointers
+        xgap = Cell()
+        ygap = [Cell() for i in range(l1)]
 
-        for ipos in range(l1):
-            score[0][ipos].score = edge.score
-            # score[0][ipos].p = [edge]
-
-        diag = Cell()
-
-        jpos = 0
-        for j in i2:
-            bestrow.p = [edge]
-            bestrow.score = edge.score + extend
-            diag.p = [edge]
-            diag.score = edge.score
-
-            ipos = 0
-            for i in i1:
-                previous = max(diag.score, bestcol[ipos].score, bestrow.score, 0.0)
-                cell = max(cmp[j][i] + previous, 0.0)
-                if cell > 0:
-                    # score[jpos][ipos].score = cell
-                    if cell > scoremax:
-                        scoremax = cell
-                        posmax = [jpos, ipos]
-
-                    if previous > 0:
-                        # only set pointers if cell score > zero and there is a non-zero best
-                        # previous score
-                        for dir in (diag, bestrow, bestcol[ipos]):
-                            if dir.score == previous:
-                                # set pointers for all directions
-                                score[jpos][ipos].p.append(dir.p)
-
-                # update best row and column values
-                if diag.score + open > bestrow.score + extend:
-                    # what if scores are equal? some paths missed
-                    bestrow.p = diag.p
-                    bestrow.score = diag.score + open
+        # first row
+        x = y = 0
+        for c in self.score[0:l1]:
+            c.score = max(0, cmp[i1[x]][i2[y]])
+            if c.score >= scoremax:
+                scoremax = c.score
+                if c.score == scoremax:
+                    posmax += [c]
                 else:
-                    bestrow.score += extend
+                    posmax = [c]
+            # if c.score + open > 0:
+            ygap[x].p = [edge]
+            ygap[x].score = 0
+            x += 1
 
-                if diag.score + open > bestcol[ipos].score + extend:
-                    bestcol[ipos].p = diag.p
-                    bestcol[ipos].score = diag.score + open
+        for c in self.score[l1:]:
+            x = c.xy[0]
+            y = c.xy[1]
+            if x == 0:
+                # left edge cell, diag, xgap, and ygap[x-1] undefined
+                bestscore = max(0, cmp[i1[0]][i2[y]])
+                xgap.score = 0
+                xgap.p = [edge]
+
+            else:
+                # internal cell
+                diag = score[c.n - l1 - 2]
+                bestprevscore = max(diag.score, xgap.score, ygap[x-1].score)
+                if diag.score == bestprevscore:
+                    c.p += [diag]
+                if xgap.score == bestprevscore:
+                    c.p += xgap.p
+                if ygap[x-1].score == bestprevscore:
+                    c.p += ygap[x-1].p
+
+                c.score = bestprevscore + cmp[i1[x]][i2[y]]
+                if c.score >= scoremax:
+                    if c.score == scoremax:
+                        posmax += [c]
+                    else:
+                        posmax = [c]
+                    scoremax = c.score
+
+                # update gap pointers
+                testdiag = diag.score + open
+                testx = xgap.score + extend
+                if  testdiag > testx:
+                    xgap.score = testdiag
+                    xgap.p = [diag]
+                elif testdiag == testx:
+                    xgap.score = testx
+                    xgap.p += [diag]
                 else:
-                    bestcol[ipos].score += extend
+                    xgap.score = testx
 
-                # diagonal score for next cell
-                if jpos > 0:
-                    diag.p = score[jpos - 1][ipos]
-                    diag.score = score[jpos - 1][ipos].score
+                testy =  ygap[x-1].score + extend
+                if testdiag > testy:
+                    ygap[x - 1].score = testdiag
+                    ygap[x - 1].p = [diag]
+                elif testdiag == testy:
+                    ygap[x - 1].score = testy
+                    ygap[x - 1].p += [diag]
+                else:
+                    ygap[x-1].score = testy
 
-                score[jpos][ipos].score = cell
-                ipos += 1
+                x += 1
 
-            jpos += 1
 
         return scoremax, posmax
 
