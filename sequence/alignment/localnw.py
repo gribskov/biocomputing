@@ -209,6 +209,7 @@ class Alignment(Score):
                 y += 1
                 x = 0
                 c.p = [edge]
+                c.score = max(0, cmp[i1[x]][i2[y]])
             c.xy = [x, y]
 
         scoremax = 0
@@ -521,7 +522,7 @@ class Alignment(Score):
         for y in range(len(self.i2)):
             cy = y + 0.25
             cx = -0.5
-            ax.text(cx, cy + 0.1, self.s1[x], fontsize=10, fontweight='bold', ha='center', va='bottom', color='blue')
+            ax.text(cx, cy + 0.1, self.s2[y], fontsize=10, fontweight='bold', ha='center', va='bottom', color='blue')
 
 
         score = self.score
