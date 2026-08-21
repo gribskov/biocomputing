@@ -197,7 +197,7 @@ class Alignment(Score):
         # first row, previous is edge
         for i in range(l1):
             score[i].xy = [i, 0]
-            score[i].p = [edge]
+            # score[i].p = [edge]
 
         x = y = 0
         for i in range(l1, len(score)):
@@ -231,7 +231,7 @@ class Alignment(Score):
                 else:
                     posmax = [c]
             # if c.score + open > 0:
-            ygap[x].p = [edge]
+            # ygap[x].p = [edge]
             ygap[x].score = 0
             x += 1
 
@@ -242,7 +242,7 @@ class Alignment(Score):
                 # left edge cell, diag, xgap, and ygap[x-1] undefined
                 bestscore = max(0, cmp[i1[0]][i2[y]])
                 xgap.score = 0
-                xgap.p = [edge]
+                # xgap.p = [edge]
 
             else:
                 # internal cell
@@ -336,6 +336,48 @@ class Alignment(Score):
         m = self.matchString(a1, a2)
 
         return a1[::-1], a2[::-1], m[::-1]
+
+    def traceAllPtr(self, endpts):
+        """----------------------------------------------------------------------------------------
+
+        ----------------------------------------------------------------------------------------"""
+        s1 = align.s1
+        s2 = align.s2
+        stack = []
+        for c in endpts:
+            a1 = s1[c.xy[0]]
+            a2 = s2[c.xy[1]]
+            stack =[ [c, a1, a2]]
+
+        while stack:
+            (c, a1, a2) = stack.pop()
+            # cn = val[0]
+            # a1 = val[1]
+            # a2 = val[2]
+            if c.p:
+
+                for cn in c.p:
+                    if not cn.xy:
+                        print(f'{a1}\n{a2}\n')
+                        continue
+                        # print('oops')
+
+                    na1 = a1
+                    na2 = a2
+                    for x in range(cn.xy[0],c.xy[0]-1):
+                        na1 += s1[x]
+                        na2 += '.'
+                    for y in range(cn.xy[1], c.xy[1] - 1):
+                        na1 += '.'
+                        na2 += s2[y]
+
+                    if cn.xy:
+                        stack.append([cn, na1, na2])
+
+            else:
+                print(f'{a1}\n{a2}\n')
+
+        return
 
     def traceAll(self, pos):
         """-----------------------------------------------------------------------------------------
@@ -551,7 +593,6 @@ class Alignment(Score):
 
         return
 
-
 # --------------------------------------------------------------------------------------------------
 # testing
 # --------------------------------------------------------------------------------------------------
@@ -576,7 +617,9 @@ if __name__ == '__main__':
     align.seqToInt()
     # bestscore, bestpos = align.globalBrute(-1, -1, nogap=False)
     bestscore, bestpos = align.localBrute(-1, -1)
-    print('score: {} at {}\n'.format(bestscore, bestpos))
+    align.traceAllPtr(bestpos)
+    for c in bestpos:
+        print(f'score: {bestscore} at {c.xy}\n')
     # align.writeScoreMatrix(sys.stdout, reverse=False, space=1)
     # alignments = align.traceAll(bestpos)
     align.draw_grid_lines()
