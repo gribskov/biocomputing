@@ -254,7 +254,9 @@ class Alignment(Score):
                 if ygap[x-1].score == bestprevscore:
                     c.p += ygap[x-1].p
 
-                c.score = bestprevscore + cmp[i1[x]][i2[y]]
+                c.score = max(0, bestprevscore + cmp[i1[x]][i2[y]])
+                if c.score == 0: continue
+
                 if c.score >= scoremax:
                     if c.score == scoremax:
                         posmax += [c]
@@ -496,6 +498,10 @@ class Alignment(Score):
         return (n - 1) // l1, (n - 1) % l1
 
     def draw_grid_lines(self):
+        """-----------------------------------------------------------------------------------------
+
+        :return:
+        -----------------------------------------------------------------------------------------"""
         fig, ax = plt.subplots(figsize=(6, 6))
         i_size = len(self.i2)
         j_size = len(self.i1)
@@ -507,23 +513,39 @@ class Alignment(Score):
             ax.axhline(y, color='lightgray', linestyle='--')
 
         # Draw connections from cell center to target centers
-        for x in range(i_size):
-            for y in range(j_size):
-                cell = self.score[x][y]
-                if cell.xy:
-                    start_x = cell.xy[0] + 0.5
-                    start_y = cell.xy[1] + 0.5
-                else:
-                    continue
+        for x in range(len(self.i1)):
+            cy = -0.75
+            cx = x + 0.5
+            ax.text(cx, cy + 0.1, self.s1[x], fontsize=10, fontweight='bold', ha='center', va='bottom', color='blue')
 
-            for end in cell.p:
-                end_x = end.xy[0] + 0.5
-                end_y = end.xy[1] + 0.5
-                ax.plot([start_x, end_x], [start_y, end_y], color='blue', marker='o')
+        for y in range(len(self.i2)):
+            cy = y + 0.25
+            cx = -0.5
+            ax.text(cx, cy + 0.1, self.s1[x], fontsize=10, fontweight='bold', ha='center', va='bottom', color='blue')
 
-        ax.set_xlim(0, i_size)
-        ax.set_ylim(0, j_size)
-        ax.set_aspect('equal')
+
+        score = self.score
+        for c in score:
+            start_x = c.xy[0] + 0.5
+            start_y = c.xy[1] + 0.5
+            ax.text(start_x, start_y, str(c.score), fontsize=10, fontweight='bold',
+                    ha='center', va='center', color='black', zorder=2)
+            if c.p:
+                for p in c.p:
+                    if p.xy:
+                        end_x = p.xy[0] + 0.5
+                        end_y = p.xy[1] + 0.5
+                        # ax.plot([start_x, end_x], [start_y, end_y], color='blue', marker='o')
+                        ax.plot([start_x, end_x], [start_y, end_y], color='red', linewidth=0.75)
+
+
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_xlim(0, len(self.s1))
+        ax.set_ylim(0, len(self.s2))
+        cell_label = f"[{self.s2},{self.s1}]"
+        # ax.text(cx, cy + 0.1, cell_label, fontsize=8, ha='center', va='bottom', color='blue')
+        # ax.set_aspect('equal')
         plt.show()
 
         return
@@ -554,8 +576,8 @@ if __name__ == '__main__':
     # bestscore, bestpos = align.globalBrute(-1, -1, nogap=False)
     bestscore, bestpos = align.localBrute(-1, -1)
     print('score: {} at {}\n'.format(bestscore, bestpos))
-    align.writeScoreMatrix(sys.stdout, reverse=False, space=1)
-    alignments = align.traceAll(bestpos)
+    # align.writeScoreMatrix(sys.stdout, reverse=False, space=1)
+    # alignments = align.traceAll(bestpos)
     align.draw_grid_lines()
 
     exit(0)

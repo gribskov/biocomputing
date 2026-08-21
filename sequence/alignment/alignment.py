@@ -12,6 +12,17 @@ class Alignment:
     ============================================================================================="""
 
     def __init__(self):
+        """-----------------------------------------------------------------------------------------
+        1 always indicates the x or horizontal sequence
+        2 always indicates the y or vertical sequence
+
+        s1, s2      sequences as Fasta objects, self.s1.seq is the sequence
+        i1, i2      sequences as integer indices into scoring table
+        score       scoring table object, class Score
+        smat
+        pmat
+        gi, gd      length independent and length dependent gap penalies
+        -----------------------------------------------------------------------------------------"""
         self.s1 = Fasta()
         self.s2 = Fasta()
         self.i1 = []
