@@ -341,6 +341,7 @@ class Alignment(Score):
         """----------------------------------------------------------------------------------------
 
         ----------------------------------------------------------------------------------------"""
+        print(f'starting traceback')
         s1 = align.s1
         s2 = align.s2
         stack = []
@@ -351,6 +352,7 @@ class Alignment(Score):
 
         while stack:
             (c, a1, a2) = stack.pop()
+            print(f'pop [{c.xy[0]}, {c.xy[1]}]')
             # cn = val[0]
             # a1 = val[1]
             # a2 = val[2]
@@ -358,24 +360,25 @@ class Alignment(Score):
 
                 for cn in c.p:
                     if not cn.xy:
-                        print(f'{a1}\n{a2}\n')
+                        print(f'not xy\n{a1[::-1]}\n{a2[::-1]}\n')
                         continue
-                        # print('oops')
 
                     na1 = a1
                     na2 = a2
-                    for x in range(cn.xy[0],c.xy[0]-1):
+                    for x in range(c.xy[0] - 1, cn.xy[0], -1):
                         na1 += s1[x]
                         na2 += '.'
-                    for y in range(cn.xy[1], c.xy[1] - 1):
+                    for y in range(c.xy[1] - 1, cn.xy[1], -1):
                         na1 += '.'
                         na2 += s2[y]
 
+                    na1 += s1[cn.xy[0]]
+                    na2 += s2[cn.xy[1]]
                     if cn.xy:
                         stack.append([cn, na1, na2])
 
             else:
-                print(f'{a1}\n{a2}\n')
+                print(f'not p \n{a1[::-1]}\n{a2[::-1]}\n')
 
         return
 
