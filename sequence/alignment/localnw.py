@@ -256,7 +256,7 @@ class Alignment(Score):
                     c.p += ygap[x-1].p
 
                 c.score = max(0, bestprevscore + cmp[i1[x]][i2[y]])
-                if c.score == 0: continue
+                # if c.score == 0: continue
 
                 if c.score >= scoremax:
                     if c.score == scoremax:
@@ -548,7 +548,9 @@ class Alignment(Score):
 
         :return:
         -----------------------------------------------------------------------------------------"""
-        fig, ax = plt.subplots(figsize=(6, 6))
+        fig, ax = plt.subplots(figsize=(3, 3), layout="constrained")
+        fontsize = 18
+        prevweight = 1.0
         i_size = len(self.i2)
         j_size = len(self.i1)
 
@@ -560,30 +562,33 @@ class Alignment(Score):
 
         # Draw connections from cell center to target centers
         for x in range(len(self.i1)):
-            cy = -0.75
+            cy = -fontsize/24 - 0.1
             cx = x + 0.5
-            ax.text(cx, cy + 0.1, self.s1[x], fontsize=10, fontweight='bold', ha='center', va='bottom', color='blue')
+            ax.text(cx, cy + 0.1, self.s1[x], fontsize=fontsize, fontweight='bold', ha='center', va='bottom', color='blue')
 
         for y in range(len(self.i2)):
-            cy = y + 0.25
-            cx = -0.5
-            ax.text(cx, cy + 0.1, self.s2[y], fontsize=10, fontweight='bold', ha='center', va='bottom', color='blue')
+            cy = y + 0.5 - fontsize/36
+            cx = -fontsize/36
+            ax.text(cx, cy + 0.1, self.s2[y], fontsize=fontsize, fontweight='bold', ha='center', va='bottom', color='blue')
 
 
         score = self.score
         for c in score:
             start_x = c.xy[0] + 0.5
             start_y = c.xy[1] + 0.5
-            ax.text(start_x, start_y, str(c.score), fontsize=10, fontweight='bold',
-                    ha='center', va='center', color='black', zorder=2)
+
             if c.p:
                 for p in c.p:
                     if p.xy:
                         end_x = p.xy[0] + 0.5
                         end_y = p.xy[1] + 0.5
                         # ax.plot([start_x, end_x], [start_y, end_y], color='blue', marker='o')
-                        ax.plot([start_x, end_x], [start_y, end_y], color='red', linewidth=0.75)
+                        ax.plot([start_x, end_x], [start_y, end_y], color='red', linewidth=prevweight)
 
+            ax.text(start_x, start_y, str(c.score), fontsize=10, fontweight='bold',
+                    ha='center', va='center', color='black',
+                    bbox=dict(boxstyle='round', facecolor='white', edgecolor='white', pad=0.1),
+                    )
 
         ax.set_xticks([])
         ax.set_yticks([])
@@ -591,7 +596,8 @@ class Alignment(Score):
         ax.set_ylim(0, len(self.s2))
         cell_label = f"[{self.s2},{self.s1}]"
         # ax.text(cx, cy + 0.1, cell_label, fontsize=8, ha='center', va='bottom', color='blue')
-        # ax.set_aspect('equal')
+        ax.set_aspect('equal')
+        plt.tight_layout(pad=2.0)
         plt.show()
 
         return
@@ -600,26 +606,26 @@ class Alignment(Score):
 # testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    test_sequence = ['ACTTATCTTAT', 'TATTCTATTCA', 'TGGTATACTAT', 'GATACTATCTA',
+    test_sequence = ['AATGC', 'AGGC', 'ACTTATCTTAT', 'TATTCTATTCA', 'TGGTATACTAT', 'GATACTATCTA',
                      'AGTATCATATT', 'TTATACTATGG', 'TACTATTTAGAT', 'TTATACTATGA',
                      'TAGATTTATCAT', 'TGGTATACTAT', 'BORROW', 'BORABORA']
 
     # sequences
     align = Alignment()
-    align.s1 = test_sequence[6]
-    align.s2 = test_sequence[7]
+    align.s1 = test_sequence[0]
+    align.s2 = test_sequence[1]
 
     # scoring table
     # align.alphabet = 'ACGT'
     # align.identity(pos=3, neg=-3)
     # align.readNCBI('..//tables/alphabet.matrix')
     # align.readNCBI('../../dotplot/table/NUC4.4.matrix')
-    align.readNCBI('..//tables/dna4-2.matrix')
+    align.readNCBI('..//tables/dna1-0.matrix')
 
     # random.shuffle(align.i1)          # uncomment to test scores for random alignments
     align.seqToInt()
     # bestscore, bestpos = align.globalBrute(-1, -1, nogap=False)
-    bestscore, bestpos = align.localBrute(-1, -1)
+    bestscore, bestpos = align.localBrute(0, 0)
     align.traceAllPtr(bestpos)
     for c in bestpos:
         print(f'score: {bestscore} at {c.xy}\n')
