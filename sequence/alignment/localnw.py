@@ -25,7 +25,7 @@ class Cell:
         -----------------------------------------------------------------------------------------"""
         self.n = Cell.count
         Cell.count += 1
-        self.score = ''
+        self.score = 0.0
         self.p = []
         self.xy = []
         if x and y:
@@ -249,6 +249,8 @@ class Alignment(Score):
         # all other rows
         for c in score[l1:stoppos]:
             if c.n >= stoppos: break
+            if c.n==15:
+                print('check')
 
             x, y = c.xy
             if x == 0:
@@ -256,6 +258,7 @@ class Alignment(Score):
                 c.score = max(0, cmp[i1[0]][i2[y]])
                 scoremax, scorepos = self.update_scoremax(c, scoremax, scorepos)
                 xgap.p = []
+                xgap.score = 0.0
                 continue
 
             else:
@@ -270,14 +273,7 @@ class Alignment(Score):
                     c.p += ygap[x - 1].p
 
                 c.score = max(0, bestprevscore + cmp[i1[x]][i2[y]])
-                # if c.score == 0: continue
-
-                if c.score >= scoremax:
-                    if c.score == scoremax:
-                        posmax += [c]
-                    else:
-                        posmax = [c]
-                    scoremax = c.score
+                scoremax, scorepos = self.update_scoremax(c, scoremax, scorepos)
 
                 # update gap pointers
                 testdiag = diag.score + open
@@ -304,51 +300,6 @@ class Alignment(Score):
                 x += 1
 
         return scoremax, posmax
-
-    def trace1(self, pos):
-        """-----------------------------------------------------------------------------------------
-        Trace back one alignment using the first pointer for each cell
-
-        :param pos: list of 2 int, traceback start position
-        :return:
-        -----------------------------------------------------------------------------------------"""
-        s1 = self.s1.seq
-        s2 = self.s2.seq
-        l1 = len(s1)
-        l2 = len(s2)
-        cmp = self.table
-        a2i = self.a2i
-
-        score = self.score
-        current = score[pos[0]][pos[1]]
-
-        a1 = ''
-        a2 = ''
-        rowold = pos[0]
-        colold = pos[1]
-        while len(current.p) > 0:
-            row, col = Alignment.n2pos(l1, current.n)
-
-            for c in range(colold - 1, col, -1):
-                a1 += s1[c]
-                a2 += '.'
-
-            for r in range(rowold - 1, row, -1):
-                a1 += '.'
-                a2 += s2[r]
-
-            a1 += s1[col]
-            a2 += s2[row]
-
-            if len(current.p):
-                current = current.p[0]
-
-            rowold = row
-            colold = col
-
-        m = self.matchString(a1, a2)
-
-        return a1[::-1], a2[::-1], m[::-1]
 
     def traceAllPtr(self, endpts):
         """----------------------------------------------------------------------------------------
@@ -394,63 +345,6 @@ class Alignment(Score):
                 print(f'not p \n{a1[::-1]}\n{a2[::-1]}\n')
 
         return
-
-    def traceAll(self, pos):
-        """-----------------------------------------------------------------------------------------
-        Trace back one alignment using the first pointer for each cell
-
-        :param pos: list of 2 int, traceback start position
-        :return:
-        -----------------------------------------------------------------------------------------"""
-        s1 = self.s1.seq
-        s2 = self.s2.seq
-        l1 = len(s1)
-        l2 = len(s2)
-        cmp = self.table
-        a2i = self.a2i
-
-        score = self.score
-        stack = []
-        a1 = ' ' * (l1 * l2)
-        a2 = ' ' * (l1 * l2)
-        n = score[pos[0]][pos[1]].n
-        nold = score[pos[0]][pos[1]].n
-        alen = 0
-        stack.append([n, nold, alen])
-
-        save = []
-        while stack:
-            n, nold, alen = stack.pop()
-            row, col = Alignment.n2pos(l1, n)
-            rowold, colold = Alignment.n2pos(l1, nold)
-            a1 = a1[:alen]
-            a2 = a2[:alen]
-
-            for c in range(colold - 1, col, -1):
-                a1 += s1[c]
-                a2 += '.'
-                alen += 1
-
-            for r in range(rowold - 1, row, -1):
-                a1 += '.'
-                a2 += s2[r]
-                alen += 1
-
-            a1 += s1[col]
-            a2 += s2[row]
-            alen += 1
-
-            # for each path in the pointers of the current cell push on stack
-            ptrs = score[row][col].p
-            if len(ptrs):
-                for p in ptrs:
-                    stack.append([p.n, n, alen])
-
-            else:
-                # if there are no pointers, it is the end of a path
-                save.append([a1[:alen], a2[:alen]])
-
-        return save
 
     def writeScoreMatrix(self, file, decimal=0, reverse=False, space=2):
         """-----------------------------------------------------------------------------------------
@@ -599,7 +493,7 @@ class Alignment(Score):
                         # ax.plot([start_x, end_x], [start_y, end_y], color='blue', marker='o')
                         ax.plot([start_x, end_x], [start_y, end_y], color='red', linewidth=prevweight)
 
-            ax.text(start_x, start_y, str(c.score), fontsize=10, fontweight='bold',
+            ax.text(start_x, start_y, f'{c.score:.1f}', fontsize=10, fontweight='bold',
                     ha='center', va='center', color='black',
                     bbox=dict(boxstyle='round', facecolor='white', edgecolor='white', pad=0.1),
                     )
@@ -640,7 +534,7 @@ if __name__ == '__main__':
     # random.shuffle(align.i1)          # uncomment to test scores for random alignments
     align.seqToInt()
     # bestscore, bestpos = align.globalBrute(-1, -1, nogap=False)
-    bestscore, bestpos = align.localBrute(0, 0, 7)
+    bestscore, bestpos = align.localBrute(0, 0)
     align.traceAllPtr(bestpos)
     for c in bestpos:
         print(f'score: {bestscore} at {c.xy}\n')
