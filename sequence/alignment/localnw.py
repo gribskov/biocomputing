@@ -25,7 +25,7 @@ class Cell:
         -----------------------------------------------------------------------------------------"""
         self.n = Cell.count
         Cell.count += 1
-        self.score = 0
+        self.score = 0.0
         self.p = []
         self.xy = []
         if x and y:
@@ -83,12 +83,18 @@ class Alignment(Score):
         edge = Cell()  # a dummy cell for edges
         edge.score = self.min + open + l1 * extend
 
+        # score is a list of all the cells in the score matrix, allocated as a single list
         score = [[Cell(i, j) for i in i1] for j in i2]
         self.score = score
+
+        # bestrow and bestcol[] are auxiliary variables that hold the best possible gap position in
+        # the previous row (xgap) and in each previous column (ygap)
         bestrow = Cell()
         bestcol = [Cell() for i in i1]
 
-        score[0][0].score = cmp[i2[0]][i1[0]]
+        # initialize lower left corner
+        score[0].score = cmp[i2[0]][i1[0]]
+
         gap = open
         for ipos in range(l1):
             bestcol[ipos].score = edge.score
@@ -172,45 +178,49 @@ class Alignment(Score):
         posmax = [1, 1]
         return scoremax, posmax
 
-    def localBrute(self, open, extend):
+    @staticmethod
+    def update_scoremax(c, scoremax, scorepos):
+        """-----------------------------------------------------------------------------------------
+        update the value and postion(s) of the maximum score
+
+        :param score: Cell              current cell
+        :param scoremax: int            maximum score
+        :param scorepos: list of Cell   cells with the maximum score
+        :return: list                   [scoremax, scorepos]
+        -----------------------------------------------------------------------------------------"""
+        if c.score == scoremax:
+            scorepos += [c]
+        elif c.score > scoremax:
+            scorepos = [c]
+
+        return [scoremax, scorepos]
+
+    def localBrute(self, open, extend, stop=0):
         """-----------------------------------------------------------------------------------------
         Local alignment score only.
         s1 is the horizontal sequence and s2 is the vertical sequence.  this makes s2 the row
         index and s1 the column index.
 
-        :param open: float, gap opening penalty
-        :param extend: float, gap extension penalty
+        :param open: float      gap opening penalty
+        :param extend: float    gap extension penalty
+        :param stop: int        position in score matrix to stop calculation
         :return:
         -----------------------------------------------------------------------------------------"""
-        cmp = self.table
         i1 = self.i1
         i2 = self.i2
         l1 = len(i1)
         l2 = len(i2)
-
-        edge = Cell()  # a dummy cell for the edges
-        edge.score = 0
+        if not stop: stop = l1 * l2
+        cmp = self.table
 
         # set up scoring matrix size l2 * l1, and create x,y position labels
         score = [Cell() for i in range(l2 * l1)]
         self.score = score
-        # first row, previous is edge
-        for i in range(l1):
-            score[i].xy = [i, 0]
-            # score[i].p = [edge]
-
         x = y = 0
-        for i in range(l1, len(score)):
-            c = score[i]
-            if i % l1:
-                x += 1
-            else:
-                # first cell in row
-                y += 1
-                x = 0
-                c.p = [edge]
-                c.score = max(0, cmp[i1[x]][i2[y]])
-            c.xy = [x, y]
+        for i in range(len(score)):
+            y = i // l1
+            x = i % l1
+            score[i].xy = [x, y]
 
         scoremax = 0
         posmax = []
@@ -220,55 +230,55 @@ class Alignment(Score):
         xgap = Cell()
         ygap = [Cell() for i in range(l1)]
 
-        # first row
         x = y = 0
-        for c in self.score[0:l1]:
-            c.score = max(0, cmp[i1[x]][i2[y]])
-            if c.score >= scoremax:
-                scoremax = c.score
-                if c.score == scoremax:
-                    posmax += [c]
-                else:
-                    posmax = [c]
-            # if c.score + open > 0:
-            # ygap[x].p = [edge]
-            ygap[x].score = 0
-            x += 1
+        stoppos = min(stop, len(score))
 
-        for c in self.score[l1:]:
-            x = c.xy[0]
-            y = c.xy[1]
+        # origin, there are no previous best scores
+        c = score[0]
+        c.score = max(0, cmp[i1[0]][i2[0]])
+        scoremax = c.score
+        scorepos = [c]
+
+        # bottom row
+        for c in score[1:l1]:
+            if c.n >= stoppos: break
+
+            c.score = max(0, cmp[i1[x]][i2[y]])
+            scoremax, scorepos = self.update_scoremax(c, scoremax, scorepos)
+
+        # all other rows
+        for c in score[l1:stoppos]:
+            if c.n >= stoppos: break
+            if c.n==15:
+                print('check')
+
+            x, y = c.xy
             if x == 0:
                 # left edge cell, diag, xgap, and ygap[x-1] undefined
-                bestscore = max(0, cmp[i1[0]][i2[y]])
-                xgap.score = 0
-                # xgap.p = [edge]
+                c.score = max(0, cmp[i1[0]][i2[y]])
+                scoremax, scorepos = self.update_scoremax(c, scoremax, scorepos)
+                xgap.p = []
+                xgap.score = 0.0
+                continue
 
             else:
                 # internal cell
-                diag = score[c.n - l1 - 2]
-                bestprevscore = max(diag.score, xgap.score, ygap[x-1].score)
+                diag = score[c.n - l1 - 1]
+                bestprevscore = max(diag.score, xgap.score, ygap[x - 1].score)
                 if diag.score == bestprevscore:
                     c.p += [diag]
                 if xgap.score == bestprevscore:
                     c.p += xgap.p
-                if ygap[x-1].score == bestprevscore:
-                    c.p += ygap[x-1].p
+                if ygap[x - 1].score == bestprevscore:
+                    c.p += ygap[x - 1].p
 
                 c.score = max(0, bestprevscore + cmp[i1[x]][i2[y]])
-                if c.score == 0: continue
-
-                if c.score >= scoremax:
-                    if c.score == scoremax:
-                        posmax += [c]
-                    else:
-                        posmax = [c]
-                    scoremax = c.score
+                scoremax, scorepos = self.update_scoremax(c, scoremax, scorepos)
 
                 # update gap pointers
                 testdiag = diag.score + open
                 testx = xgap.score + extend
-                if  testdiag > testx:
+                if testdiag > testx:
                     xgap.score = testdiag
                     xgap.p = [diag]
                 elif testdiag == testx:
@@ -277,7 +287,7 @@ class Alignment(Score):
                 else:
                     xgap.score = testx
 
-                testy =  ygap[x-1].score + extend
+                testy = ygap[x - 1].score + extend
                 if testdiag > testy:
                     ygap[x - 1].score = testdiag
                     ygap[x - 1].p = [diag]
@@ -285,57 +295,11 @@ class Alignment(Score):
                     ygap[x - 1].score = testy
                     ygap[x - 1].p += [diag]
                 else:
-                    ygap[x-1].score = testy
+                    ygap[x - 1].score = testy
 
                 x += 1
 
-
         return scoremax, posmax
-
-    def trace1(self, pos):
-        """-----------------------------------------------------------------------------------------
-        Trace back one alignment using the first pointer for each cell
-
-        :param pos: list of 2 int, traceback start position
-        :return:
-        -----------------------------------------------------------------------------------------"""
-        s1 = self.s1.seq
-        s2 = self.s2.seq
-        l1 = len(s1)
-        l2 = len(s2)
-        cmp = self.table
-        a2i = self.a2i
-
-        score = self.score
-        current = score[pos[0]][pos[1]]
-
-        a1 = ''
-        a2 = ''
-        rowold = pos[0]
-        colold = pos[1]
-        while len(current.p) > 0:
-            row, col = Alignment.n2pos(l1, current.n)
-
-            for c in range(colold - 1, col, -1):
-                a1 += s1[c]
-                a2 += '.'
-
-            for r in range(rowold - 1, row, -1):
-                a1 += '.'
-                a2 += s2[r]
-
-            a1 += s1[col]
-            a2 += s2[row]
-
-            if len(current.p):
-                current = current.p[0]
-
-            rowold = row
-            colold = col
-
-        m = self.matchString(a1, a2)
-
-        return a1[::-1], a2[::-1], m[::-1]
 
     def traceAllPtr(self, endpts):
         """----------------------------------------------------------------------------------------
@@ -348,7 +312,7 @@ class Alignment(Score):
         for c in endpts:
             a1 = s1[c.xy[0]]
             a2 = s2[c.xy[1]]
-            stack =[ [c, a1, a2]]
+            stack = [[c, a1, a2]]
 
         while stack:
             (c, a1, a2) = stack.pop()
@@ -381,63 +345,6 @@ class Alignment(Score):
                 print(f'not p \n{a1[::-1]}\n{a2[::-1]}\n')
 
         return
-
-    def traceAll(self, pos):
-        """-----------------------------------------------------------------------------------------
-        Trace back one alignment using the first pointer for each cell
-
-        :param pos: list of 2 int, traceback start position
-        :return:
-        -----------------------------------------------------------------------------------------"""
-        s1 = self.s1.seq
-        s2 = self.s2.seq
-        l1 = len(s1)
-        l2 = len(s2)
-        cmp = self.table
-        a2i = self.a2i
-
-        score = self.score
-        stack = []
-        a1 = ' ' * (l1 * l2)
-        a2 = ' ' * (l1 * l2)
-        n = score[pos[0]][pos[1]].n
-        nold = score[pos[0]][pos[1]].n
-        alen = 0
-        stack.append([n, nold, alen])
-
-        save = []
-        while stack:
-            n, nold, alen = stack.pop()
-            row, col = Alignment.n2pos(l1, n)
-            rowold, colold = Alignment.n2pos(l1, nold)
-            a1 = a1[:alen]
-            a2 = a2[:alen]
-
-            for c in range(colold - 1, col, -1):
-                a1 += s1[c]
-                a2 += '.'
-                alen += 1
-
-            for r in range(rowold - 1, row, -1):
-                a1 += '.'
-                a2 += s2[r]
-                alen += 1
-
-            a1 += s1[col]
-            a2 += s2[row]
-            alen += 1
-
-            # for each path in the pointers of the current cell push on stack
-            ptrs = score[row][col].p
-            if len(ptrs):
-                for p in ptrs:
-                    stack.append([p.n, n, alen])
-
-            else:
-                # if there are no pointers, it is the end of a path
-                save.append([a1[:alen], a2[:alen]])
-
-        return save
 
     def writeScoreMatrix(self, file, decimal=0, reverse=False, space=2):
         """-----------------------------------------------------------------------------------------
@@ -548,7 +455,9 @@ class Alignment(Score):
 
         :return:
         -----------------------------------------------------------------------------------------"""
-        fig, ax = plt.subplots(figsize=(6, 6))
+        fig, ax = plt.subplots(figsize=(3, 3), layout="constrained")
+        fontsize = 18
+        prevweight = 1.0
         i_size = len(self.i2)
         j_size = len(self.i1)
 
@@ -560,30 +469,34 @@ class Alignment(Score):
 
         # Draw connections from cell center to target centers
         for x in range(len(self.i1)):
-            cy = -0.75
+            cy = -fontsize / 24 - 0.1
             cx = x + 0.5
-            ax.text(cx, cy + 0.1, self.s1[x], fontsize=10, fontweight='bold', ha='center', va='bottom', color='blue')
+            ax.text(cx, cy + 0.1, self.s1[x], fontsize=fontsize, fontweight='bold', ha='center', va='bottom',
+                    color='blue')
 
         for y in range(len(self.i2)):
-            cy = y + 0.25
-            cx = -0.5
-            ax.text(cx, cy + 0.1, self.s2[y], fontsize=10, fontweight='bold', ha='center', va='bottom', color='blue')
-
+            cy = y + 0.5 - fontsize / 36
+            cx = -fontsize / 36
+            ax.text(cx, cy + 0.1, self.s2[y], fontsize=fontsize, fontweight='bold', ha='center', va='bottom',
+                    color='blue')
 
         score = self.score
         for c in score:
             start_x = c.xy[0] + 0.5
             start_y = c.xy[1] + 0.5
-            ax.text(start_x, start_y, str(c.score), fontsize=10, fontweight='bold',
-                    ha='center', va='center', color='black', zorder=2)
+
             if c.p:
                 for p in c.p:
                     if p.xy:
                         end_x = p.xy[0] + 0.5
                         end_y = p.xy[1] + 0.5
                         # ax.plot([start_x, end_x], [start_y, end_y], color='blue', marker='o')
-                        ax.plot([start_x, end_x], [start_y, end_y], color='red', linewidth=0.75)
+                        ax.plot([start_x, end_x], [start_y, end_y], color='red', linewidth=prevweight)
 
+            ax.text(start_x, start_y, f'{c.score:.1f}', fontsize=10, fontweight='bold',
+                    ha='center', va='center', color='black',
+                    bbox=dict(boxstyle='round', facecolor='white', edgecolor='white', pad=0.1),
+                    )
 
         ax.set_xticks([])
         ax.set_yticks([])
@@ -591,35 +504,37 @@ class Alignment(Score):
         ax.set_ylim(0, len(self.s2))
         cell_label = f"[{self.s2},{self.s1}]"
         # ax.text(cx, cy + 0.1, cell_label, fontsize=8, ha='center', va='bottom', color='blue')
-        # ax.set_aspect('equal')
+        ax.set_aspect('equal')
+        plt.tight_layout(pad=2.0)
         plt.show()
 
         return
+
 
 # --------------------------------------------------------------------------------------------------
 # testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    test_sequence = ['ACTTATCTTAT', 'TATTCTATTCA', 'TGGTATACTAT', 'GATACTATCTA',
+    test_sequence = ['AATGC', 'AGGC', 'ACTTATCTTAT', 'TATTCTATTCA', 'TGGTATACTAT', 'GATACTATCTA',
                      'AGTATCATATT', 'TTATACTATGG', 'TACTATTTAGAT', 'TTATACTATGA',
                      'TAGATTTATCAT', 'TGGTATACTAT', 'BORROW', 'BORABORA']
 
     # sequences
     align = Alignment()
-    align.s1 = test_sequence[6]
-    align.s2 = test_sequence[7]
+    align.s1 = test_sequence[0]
+    align.s2 = test_sequence[1]
 
     # scoring table
     # align.alphabet = 'ACGT'
     # align.identity(pos=3, neg=-3)
     # align.readNCBI('..//tables/alphabet.matrix')
     # align.readNCBI('../../dotplot/table/NUC4.4.matrix')
-    align.readNCBI('..//tables/dna4-2.matrix')
+    align.readNCBI('..//tables/dna1-0.matrix')
 
     # random.shuffle(align.i1)          # uncomment to test scores for random alignments
     align.seqToInt()
     # bestscore, bestpos = align.globalBrute(-1, -1, nogap=False)
-    bestscore, bestpos = align.localBrute(-2, -1)
+    bestscore, bestpos = align.localBrute(0, 0)
     align.traceAllPtr(bestpos)
     for c in bestpos:
         print(f'score: {bestscore} at {c.xy}\n')
