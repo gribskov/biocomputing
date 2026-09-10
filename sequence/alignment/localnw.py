@@ -619,7 +619,7 @@ if __name__ == '__main__':
     # random.shuffle(align.i1)          # uncomment to test scores for random alignments
     align.seqToInt()
     # bestscore, bestpos = align.globalBrute(-1, -1, nogap=False)
-    bestscore, bestpos = align.localBrute(-1, -1)
+    bestscore, bestpos = align.localBrute(-2, -1)
     align.traceAllPtr(bestpos)
     for c in bestpos:
         print(f'score: {bestscore} at {c.xy}\n')
