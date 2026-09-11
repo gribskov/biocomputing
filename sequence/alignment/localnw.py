@@ -21,13 +21,15 @@ class Cell:
 
     def __init__(self, x=None, y=None, p=None):
         """-----------------------------------------------------------------------------------------
-
+        p       pointer to previous cell (traceback path), can be more than one
+        show    display in score matrix plot
         -----------------------------------------------------------------------------------------"""
         self.n = Cell.count
         Cell.count += 1
         self.score = 0.0
         self.p = []
         self.xy = []
+        self.show = 0
         if x and y:
             self.xy = [x, y]
         if p:
@@ -224,7 +226,7 @@ class Alignment(Score):
             score[i].xy = [x, y]
 
         scoremax = 0
-        scorepos = []       # may be more than one equally good cell
+        scorepos = []  # may be more than one equally good cell
 
         # auxiliary storage: 1 pointer for the best gapped value in the previous row (y-1, x:0..-1)
         # 1 pointer for the best gapped value in each column. use a cell object for the pointers
@@ -304,20 +306,23 @@ class Alignment(Score):
         return scoremax, scorepos
 
     def traceAllPtr(self, endpts):
-        """----------------------------------------------------------------------------------------
+        """-----------------------------------------------------------------------------------------
+        trace back all alignments from the cells in endpts
 
+        :param endpts: list     elements are Cell objects, normall the end of optimal alignments
         ----------------------------------------------------------------------------------------"""
-        print(f'starting traceback')
+        # print(f'starting traceback')
         s1 = align.s1
         s2 = align.s2
         stack = []
         for c in endpts:
             a1 = s1[c.xy[0]]
             a2 = s2[c.xy[1]]
-            stack = [[c, a1, a2]]
+            stack.append([c, a1, a2])
 
         while stack:
             (c, a1, a2) = stack.pop()
+            c.show = 1
             print(f'pop [{c.xy[0]}, {c.xy[1]}]')
             # cn = val[0]
             # a1 = val[1]
@@ -460,7 +465,7 @@ class Alignment(Score):
         -----------------------------------------------------------------------------------------"""
         if not stop: stop = len(self.score)
 
-        fig, ax = plt.subplots(figsize=(6,6), layout="constrained")
+        fig, ax = plt.subplots(figsize=(6, 6), layout="constrained")
         fontsize = 18
         prevweight = 1.0
         i_size = len(self.i2)
@@ -492,7 +497,7 @@ class Alignment(Score):
             start_x = c.xy[0] + 0.5
             start_y = c.xy[1] + 0.5
 
-            if c.p:
+            if c.show:
                 for p in c.p:
                     if p.xy:
                         end_x = p.xy[0] + 0.5
@@ -530,16 +535,16 @@ if __name__ == '__main__':
 
     # sequences
     align = Alignment()
-    align.s1 = test_sequence[5]
-    align.s2 = test_sequence[6]
+    align.s1 = test_sequence[0]
+    align.s2 = test_sequence[1]
 
     # scoring table
     # align.alphabet = 'ACGT'
     # align.identity(pos=3, neg=-3)
     # align.readNCBI('..//tables/alphabet.matrix')
-    align.readNCBI('..//tables/alphabet0.matrix')
+    # align.readNCBI('..//tables/alphabet0.matrix')
     # align.readNCBI('../../dotplot/table/NUC4.4.matrix')
-    # align.readNCBI('..//tables/dna1-0.matrix')
+    align.readNCBI('..//tables/dna1-0.matrix')
 
     # random.shuffle(align.i1)          # uncomment to test scores for random alignments
     align.seqToInt()
