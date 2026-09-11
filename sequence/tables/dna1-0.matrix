@@ -1,0 +1,11 @@
+#Title dna1-0.matrix
+#Scoring table for alignment examples
+#range 1, 2
+#comment identities = 2
+#comment mismatch = 1
+#comment for lecture examples
+   A  C  G  T
+A  1  0  0  0
+C  0  1  0  0
+G  0  0  1  0
+T  0  0  0  1
