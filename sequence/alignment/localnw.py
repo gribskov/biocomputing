@@ -191,6 +191,7 @@ class Alignment(Score):
         if c.score == scoremax:
             scorepos += [c]
         elif c.score > scoremax:
+            scoremax = c.score
             scorepos = [c]
 
         return [scoremax, scorepos]
@@ -522,21 +523,23 @@ class Alignment(Score):
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     test_sequence = ['ATGCC', 'AGGC', 'AATGC', 'CCGTA', 'CGGA',
+                     'AWCNDRQCLCRP', 'ADCDNRCKCRWP',
                      'ACTTATCTTAT', 'TATTCTATTCA', 'TGGTATACTAT', 'GATACTATCTA',
                      'AGTATCATATT', 'TTATACTATGG', 'TACTATTTAGAT', 'TTATACTATGA',
                      'TAGATTTATCAT', 'TGGTATACTAT', 'BORROW', 'BORABORA']
 
     # sequences
     align = Alignment()
-    align.s1 = test_sequence[3]
-    align.s2 = test_sequence[4]
+    align.s1 = test_sequence[5]
+    align.s2 = test_sequence[6]
 
     # scoring table
     # align.alphabet = 'ACGT'
     # align.identity(pos=3, neg=-3)
     # align.readNCBI('..//tables/alphabet.matrix')
+    align.readNCBI('..//tables/alphabet0.matrix')
     # align.readNCBI('../../dotplot/table/NUC4.4.matrix')
-    align.readNCBI('..//tables/dna1-0.matrix')
+    # align.readNCBI('..//tables/dna1-0.matrix')
 
     # random.shuffle(align.i1)          # uncomment to test scores for random alignments
     align.seqToInt()
@@ -547,7 +550,8 @@ if __name__ == '__main__':
         print(f'score: {bestscore} at {c.xy}\n')
     # align.writeScoreMatrix(sys.stdout, reverse=False, space=1)
     # alignments = align.traceAll(bestpos)
-    for end in [2,8,12,15,19]:
-        align.draw_grid_lines(end)
+    align.draw_grid_lines()
+    # for end in [2,8,12,15,19]:
+    #     align.draw_grid_lines(end)
 
     exit(0)
