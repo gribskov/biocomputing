@@ -64,126 +64,126 @@ class Alignment(Score):
 
         return len(self.i1), len(self.i2)
 
-    def globalBrute(self, open, extend, nogap=False):
-        """-----------------------------------------------------------------------------------------
-        Local alignment score only.
-        s1 is the horizontal sequence and s2 is the vertical sequence.  this makes s2 the row
-        index and s1 the column index.
-
-        :param open: float, gap opening penalty
-        :param extend: float, gap extension penalty
-        :return:
-        -----------------------------------------------------------------------------------------"""
-        cmp = self.table
-        i1 = self.i1
-        i2 = self.i2
-        l1 = len(i1)
-        l2 = len(i2)
-
-        edge = Cell()  # a dummy cell for edges
-        edge.score = self.min + open + l1 * extend
-
-        # score is a list of all the cells in the score matrix, allocated as a single list
-        score = [[Cell(i, j) for i in i1] for j in i2]
-        self.score = score
-
-        # bestrow and bestcol[] are auxiliary variables that hold the best possible gap position in
-        # the previous row (xgap) and in each previous column (ygap)
-        bestrow = Cell()
-        bestcol = [Cell() for i in i1]
-
-        # initialize lower left corner
-        score[0].score = cmp[i2[0]][i1[0]]
-
-        gap = open
-        for ipos in range(l1):
-            bestcol[ipos].score = edge.score
-            bestcol[ipos].p = []
-            gap += extend
-
-        diag = Cell()
-
-        jpos = 0
-        vgap = 0
-        diag.score = 0
-        for j in i2:
-            bestrow.p = []
-            bestrow.score = edge.score
-
-            ipos = 0
-            for i in i1:
-                previous = max(diag.score, bestcol[ipos].score, bestrow.score)
-                cell = cmp[j][i] + previous
-
-                for dir in (diag, bestrow, bestcol[ipos]):
-                    if dir.score == previous:
-                        # set pointers for all directions
-                        score[jpos][ipos].p.append(dir)
-
-                # update best row and column values
-                if diag.score + open > bestrow.score + extend:
-                    # what if scores are equal? some paths missed
-                    bestrow.p = diag.p
-                    bestrow.score = diag.score + open
-                else:
-                    bestrow.score += extend
-
-                if diag.score + open > bestcol[ipos].score + extend:
-                    bestcol[ipos].p = diag.p
-                    bestcol[ipos].score = diag.score + open
-                else:
-                    bestcol[ipos].score += extend
-
-                # diagonal score for next cell
-                if jpos > 0:
-                    diag.p = score[jpos - 1][ipos]
-                    diag.score = score[jpos - 1][ipos].score
-                else:
-                    diag.score = edge.score
-
-                score[jpos][ipos].score = cell
-                ipos += 1
-
-            # end of loop over columns
-
-            # special case for first cell in each row, best previous is always a column gap
-            if jpos:
-                vgap += extend
-            else:
-                vgap = open
-            bestcol[0].score = vgap
-
-            diag.score = edge.score
-            diag.p = []
-
-            jpos += 1
-
-            # end of loop over rows
-
-        # add the end gap penalties
-        if not nogap:
-            gap = open
-            jpos = len(i2) - 1
-            for ipos in range(len(i1) - 2, -1, -1):
-                score[jpos][ipos].score += gap
-                gap += extend
-
-            gap = open
-            ipos = len(i1) - 1
-            for jpos in range(len(i2) - 2, -1, -1):
-                score[jpos][ipos].score += gap
-                gap += extend
-
-        scoremax = 1
-        posmax = [1, 1]
-        return scoremax, posmax
+    # def globalBrute(self, open, extend, nogap=False):
+    #     """-----------------------------------------------------------------------------------------
+    #     Local alignment score only.
+    #     s1 is the horizontal sequence and s2 is the vertical sequence.  this makes s2 the row
+    #     index and s1 the column index.
+    #
+    #     :param open: float, gap opening penalty
+    #     :param extend: float, gap extension penalty
+    #     :return:
+    #     -----------------------------------------------------------------------------------------"""
+    #     cmp = self.table
+    #     i1 = self.i1
+    #     i2 = self.i2
+    #     l1 = len(i1)
+    #     l2 = len(i2)
+    #
+    #     edge = Cell()  # a dummy cell for edges
+    #     edge.score = self.min + open + l1 * extend
+    #
+    #     # score is a list of all the cells in the score matrix, allocated as a single list
+    #     score = [[Cell(i, j) for i in i1] for j in i2]
+    #     self.score = score
+    #
+    #     # bestrow and bestcol[] are auxiliary variables that hold the best possible gap position in
+    #     # the previous row (xgap) and in each previous column (ygap)
+    #     bestrow = Cell()
+    #     bestcol = [Cell() for i in i1]
+    #
+    #     # initialize lower left corner
+    #     score[0].score = cmp[i2[0]][i1[0]]
+    #
+    #     gap = open
+    #     for ipos in range(l1):
+    #         bestcol[ipos].score = edge.score
+    #         bestcol[ipos].p = []
+    #         gap += extend
+    #
+    #     diag = Cell()
+    #
+    #     jpos = 0
+    #     vgap = 0
+    #     diag.score = 0
+    #     for j in i2:
+    #         bestrow.p = []
+    #         bestrow.score = edge.score
+    #
+    #         ipos = 0
+    #         for i in i1:
+    #             previous = max(diag.score, bestcol[ipos].score, bestrow.score)
+    #             cell = cmp[j][i] + previous
+    #
+    #             for dir in (diag, bestrow, bestcol[ipos]):
+    #                 if dir.score == previous:
+    #                     # set pointers for all directions
+    #                     score[jpos][ipos].p.append(dir)
+    #
+    #             # update best row and column values
+    #             if diag.score + open > bestrow.score + extend:
+    #                 # what if scores are equal? some paths missed
+    #                 bestrow.p = diag.p
+    #                 bestrow.score = diag.score + open
+    #             else:
+    #                 bestrow.score += extend
+    #
+    #             if diag.score + open > bestcol[ipos].score + extend:
+    #                 bestcol[ipos].p = diag.p
+    #                 bestcol[ipos].score = diag.score + open
+    #             else:
+    #                 bestcol[ipos].score += extend
+    #
+    #             # diagonal score for next cell
+    #             if jpos > 0:
+    #                 diag.p = score[jpos - 1][ipos]
+    #                 diag.score = score[jpos - 1][ipos].score
+    #             else:
+    #                 diag.score = edge.score
+    #
+    #             score[jpos][ipos].score = cell
+    #             ipos += 1
+    #
+    #         # end of loop over columns
+    #
+    #         # special case for first cell in each row, best previous is always a column gap
+    #         if jpos:
+    #             vgap += extend
+    #         else:
+    #             vgap = open
+    #         bestcol[0].score = vgap
+    #
+    #         diag.score = edge.score
+    #         diag.p = []
+    #
+    #         jpos += 1
+    #
+    #         # end of loop over rows
+    #
+    #     # add the end gap penalties
+    #     if not nogap:
+    #         gap = open
+    #         jpos = len(i2) - 1
+    #         for ipos in range(len(i1) - 2, -1, -1):
+    #             score[jpos][ipos].score += gap
+    #             gap += extend
+    #
+    #         gap = open
+    #         ipos = len(i1) - 1
+    #         for jpos in range(len(i2) - 2, -1, -1):
+    #             score[jpos][ipos].score += gap
+    #             gap += extend
+    #
+    #     scoremax = 1
+    #     posmax = [1, 1]
+    #     return scoremax, posmax
 
     @staticmethod
     def update_scoremax(c, scoremax, scorepos):
         """-----------------------------------------------------------------------------------------
         update the value and postion(s) of the maximum score
 
-        :param score: Cell              current cell
+        :param c: Cell                  current cell
         :param scoremax: int            maximum score
         :param scorepos: list of Cell   cells with the maximum score
         :return: list                   [scoremax, scorepos]
@@ -214,7 +214,7 @@ class Alignment(Score):
         cmp = self.table
 
         # set up scoring matrix size l2 * l1, and create x,y position labels
-        score = [Cell() for i in range(l2 * l1)]
+        score = [Cell() for _ in range(l2 * l1)]
         self.score = score
         x = y = 0
         for i in range(len(score)):
