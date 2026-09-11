@@ -223,7 +223,7 @@ class Alignment(Score):
             score[i].xy = [x, y]
 
         scoremax = 0
-        posmax = []
+        scorepos = []       # may be more than one equally good cell
 
         # auxiliary storage: 1 pointer for the best gapped value in the previous row (y-1, x:0..-1)
         # 1 pointer for the best gapped value in each column. use a cell object for the pointers
@@ -241,16 +241,17 @@ class Alignment(Score):
 
         # bottom row
         for c in score[1:l1]:
-            if c.n >= stoppos: break
+            # if c.n >= stoppos: break
 
+            x, y = c.xy
             c.score = max(0, cmp[i1[x]][i2[y]])
             scoremax, scorepos = self.update_scoremax(c, scoremax, scorepos)
 
         # all other rows
         for c in score[l1:stoppos]:
-            if c.n >= stoppos: break
-            if c.n==15:
-                print('check')
+            # if c.n >= stoppos: break
+            # if c.n==15:
+            #     print('check')
 
             x, y = c.xy
             if x == 0:
@@ -299,7 +300,7 @@ class Alignment(Score):
 
                 x += 1
 
-        return scoremax, posmax
+        return scoremax, scorepos
 
     def traceAllPtr(self, endpts):
         """----------------------------------------------------------------------------------------
@@ -450,12 +451,15 @@ class Alignment(Score):
         -----------------------------------------------------------------------------------------"""
         return (n - 1) // l1, (n - 1) % l1
 
-    def draw_grid_lines(self):
+    def draw_grid_lines(self, stop=None):
         """-----------------------------------------------------------------------------------------
 
+        :param stop: int    cell number to stop at
         :return:
         -----------------------------------------------------------------------------------------"""
-        fig, ax = plt.subplots(figsize=(3, 3), layout="constrained")
+        if not stop: stop = len(self.score)
+
+        fig, ax = plt.subplots(figsize=(6,6), layout="constrained")
         fontsize = 18
         prevweight = 1.0
         i_size = len(self.i2)
@@ -467,7 +471,7 @@ class Alignment(Score):
         for y in range(j_size + 1):
             ax.axhline(y, color='lightgray', linestyle='--')
 
-        # Draw connections from cell center to target centers
+        # Add sequence on x and y axes
         for x in range(len(self.i1)):
             cy = -fontsize / 24 - 0.1
             cx = x + 0.5
@@ -482,6 +486,8 @@ class Alignment(Score):
 
         score = self.score
         for c in score:
+            if c.n > stop: break
+
             start_x = c.xy[0] + 0.5
             start_y = c.xy[1] + 0.5
 
@@ -505,7 +511,7 @@ class Alignment(Score):
         cell_label = f"[{self.s2},{self.s1}]"
         # ax.text(cx, cy + 0.1, cell_label, fontsize=8, ha='center', va='bottom', color='blue')
         ax.set_aspect('equal')
-        plt.tight_layout(pad=2.0)
+        plt.tight_layout(pad=1.5)
         plt.show()
 
         return
@@ -515,14 +521,15 @@ class Alignment(Score):
 # testing
 # --------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    test_sequence = ['AATGC', 'AGGC', 'ACTTATCTTAT', 'TATTCTATTCA', 'TGGTATACTAT', 'GATACTATCTA',
+    test_sequence = ['ATGCC', 'AGGC', 'AATGC', 'CCGTA', 'CGGA',
+                     'ACTTATCTTAT', 'TATTCTATTCA', 'TGGTATACTAT', 'GATACTATCTA',
                      'AGTATCATATT', 'TTATACTATGG', 'TACTATTTAGAT', 'TTATACTATGA',
                      'TAGATTTATCAT', 'TGGTATACTAT', 'BORROW', 'BORABORA']
 
     # sequences
     align = Alignment()
-    align.s1 = test_sequence[0]
-    align.s2 = test_sequence[1]
+    align.s1 = test_sequence[3]
+    align.s2 = test_sequence[4]
 
     # scoring table
     # align.alphabet = 'ACGT'
@@ -540,6 +547,7 @@ if __name__ == '__main__':
         print(f'score: {bestscore} at {c.xy}\n')
     # align.writeScoreMatrix(sys.stdout, reverse=False, space=1)
     # alignments = align.traceAll(bestpos)
-    align.draw_grid_lines()
+    for end in [2,8,12,15,19]:
+        align.draw_grid_lines(end)
 
     exit(0)
